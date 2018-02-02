@@ -67,17 +67,20 @@ class CsvOutCommaSep(Export):
         self.filename_out = filename_out
         
     def execute(self):
-        ungrouped_list = [['Protein','Score','Number_of_Peptides','GroupID','Other_Potential_Identifiers','Identifier_Type']]
+        ungrouped_list = [['Protein','Score','Number_of_Peptides','Identifier_Type','GroupID','Other_Potential_Identifiers']]
         for groups in self.data_to_write:
             for prots in groups:
                 if prots==groups[0]:
-                    ungrouped_list.append([prots[0]])
-                    ungrouped_list[-1].append(prots[1])
-                    ungrouped_list[-1].append(prots[2])                
-                    ungrouped_list[-1].append(prots[3])
-                    ungrouped_list[-1].append(prots[4])
+                    ungrouped_list.append([prots.identifier])
+                    ungrouped_list[-1].append(prots.score)
+                    ungrouped_list[-1].append(prots.num_peptides)
+                    if prots.reviewed == True:
+                        ungrouped_list[-1].append('Reviewed')
+                    else:
+                        ungrouped_list[-1].append('Unreviewed')
+                    ungrouped_list[-1].append(prots.group_identification)
                 else:
-                    ungrouped_list[-1].append(prots[0])
+                    ungrouped_list[-1].append(prots.identifier)
         with open(self.filename_out, "wb") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)

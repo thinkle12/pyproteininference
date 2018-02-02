@@ -12,10 +12,10 @@ import time
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy
 
-qvalue_restriction = [.1]
+qvalue_restriction = [.2]
 pepvalue_restriction = [.9]
 
-list_of_searchids = ['134316']
+list_of_searchids = ['130915']
 
 
 
@@ -26,7 +26,7 @@ scoring_methods = ['dwml']
 
 large_list_of_results = [['SearchID','Scoring_Methods','Scoring_Type','Picker','Qvr','Pvr','Proteins_Passing_1_Percent_FDR']]
 
-with PdfPages('plots/'+list_of_searchids[0]+'_plot_ml.pdf') as pdf:
+with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') as pdf:
     for k in range(len(scoring_methods)):
         for i in range(len(list_of_searchids)):
             for pnp in pick_nopick:
@@ -35,8 +35,8 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_ml.pdf') as pdf:
                         start_time = time.time()
                         #Initiate the reader...
                         #Input for now is a target percolator output and a decoy percolator output
-                        pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='data/'+list_of_searchids[i]+'_percolator_target_psm.txt',
-                                                                                  decoy_file='data/'+list_of_searchids[i]+'_percolator_decoy_psm.txt')
+                        pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='data/target_psm_130915_Bioplex_q6858_QLPALL_ZDHHC19.txt',
+                                                                                  decoy_file='data/decoy_psm_130915_Bioplex_q6858_QLPALL_ZDHHC19.txt')
 
                         #Execeute the reader instance, this loads the data into the reader class
                         pep_and_prot_data.execute()
@@ -46,11 +46,11 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_ml.pdf') as pdf:
                         data = ProteinInference.datastore.DataStore(pep_and_prot_data)
 
                         #Here restrict the data to having peptides with length 7 or greater and a pep of less than .9
-                        restrict = ProteinInference.datastore.RestrictMainData(data, peptide_length=7, posterior_error_prob_threshold=.9)
+                        restrict = ProteinInference.datastore.RestrictMainData(data, peptide_length=7, posterior_error_prob_threshold=pvr,q_value_threshold=qvr)
                         restrict.execute()
 
                         #Here generate the pre score data using 'PEP' values
-                        score_setup = ProteinInference.datastore.PreScorePepValue(data)
+                        score_setup = ProteinInference.datastore.PreScoreQValue(data)
                         score_setup.execute()
 
                         #Here we do scoring
@@ -80,11 +80,11 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_ml.pdf') as pdf:
                         #
                         #Run GLPK to generate the minimal list of proteins that account for the peptides
                         #Running GLPK consists of 3 classes, setup, runner, and grouper which need to be run in succession
-                        glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkout09_k562_134316.mod')
+                        glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkout09_ZDHHC19.mod')
                         glpksetup.execute()
-                        runglpk = ProteinInference.grouping.GlpkRunner(path_to_glpsol = 'glpsol',glpkin = 'glpkinout/glpkout09_k562_134316.mod',glpkout = 'glpkinout/glpkout09_k562_134316.sol',file_override = False)
+                        runglpk = ProteinInference.grouping.GlpkRunner(path_to_glpsol = 'glpsol',glpkin = 'glpkinout/glpkout09_ZDHHC19.mod',glpkout = 'glpkinout/glpkout09_ZDHHC19.sol',file_override = False)
                         runglpk.execute()
-                        group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout09_k562_134316.sol')
+                        group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout09_ZDHHC19.sol')
                         group.execute()
 
                         #Next run fdrcalc on the data....
@@ -99,11 +99,14 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_ml.pdf') as pdf:
                         #print restricted
 
                         #Write the output to a csv...
-                        #output = ProteinInference.export.CsvOutAll(data_class=data, filename_out='output/hard_sp_override.csv')
-                        #output.execute()
+                        output = ProteinInference.export.CsvOutAll(data_class=data, filename_out='output/all_ZDHHC19.csv')
+                        output.execute()
 
-                        output_leads = ProteinInference.export.CsvOutLeads(data_class=data, filename_out='output/protein_lead_export_ml_k562_134316.csv')
+                        output_leads = ProteinInference.export.CsvOutLeads(data_class=data, filename_out='output/leads_ZDHHC19.csv')
                         output_leads.execute()
+
+                        output_csep = ProteinInference.export.CsvOutCommaSep(data_class=data,filename_out='output/csep_ZDHHC19.csv')
+                        output_csep.execute()
 
                         # qval_out_leads = ProteinInference.export.CsvOutLeadsQValues(data_class=data, filename_out='output/soft_override_leads_qvalue_restrict_pep09.csv')
                         # qval_out_leads.execute()
@@ -118,7 +121,7 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_ml.pdf') as pdf:
 
                         large_list_of_results.append([list_of_searchids[i]])
                         large_list_of_results[-1].append(scoring_methods[k])
-                        large_list_of_results[-1].append('PepValue')
+                        large_list_of_results[-1].append('QValue')
                         if pnp:
                             large_list_of_results[-1].append('Yes Picker')
                         else:

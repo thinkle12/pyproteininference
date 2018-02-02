@@ -399,9 +399,8 @@ class GlpkGrouper(Grouper):
                         # The following loop assigns group_id's, reviewed/unreviewed status, and number of peptides...
                         pindex = protein_finder.index(prots.identifier)
                         cur_protein = scored_proteins[pindex]
-
-                        cur_protein.group_identification.append(group_id)
-                        sub_groups.append(cur_protein)
+                        if group_id not in cur_protein.group_identification:
+                            cur_protein.group_identification.append(group_id)
                         if prots.identifier in sp_protein_set:
                             cur_protein.reviewed = True
                         else:
@@ -438,8 +437,8 @@ class GlpkGrouper(Grouper):
                         # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
                         pindex = protein_finder.index(prots.identifier)
                         cur_protein = scored_proteins[pindex]
-                        cur_protein.group_identification.append(group_id)
-                        sub_groups.append(cur_protein)
+                        if group_id not in cur_protein.group_identification:
+                            cur_protein.group_identification.append(group_id)
                         if prots.identifier in sp_protein_set:
                             cur_protein.reviewed = True
                         else:
@@ -455,7 +454,8 @@ class GlpkGrouper(Grouper):
                         #Here we pass if the protein does not have a score...
                         #Potentially it got 'picked' (removed) by protein picker...
                         pass
-                    
+
+
                 #Sort the groups based on higher or lower indication, secondarily sort the groups based on number of unique peptides
                 #We use the index [1:] as we do not wish to sort the lead protein... from GLPK
                 if higher_or_lower=='lower':
@@ -517,12 +517,13 @@ class GlpkGrouper(Grouper):
                 pg = ProteinGroup(group_id)
                 print str(group_id)
                 for prots in groups:
+                    print prots.identifier
                     try:
                         # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
                         pindex = protein_finder.index(prots.identifier)
                         cur_protein = scored_proteins[pindex]
-                        cur_protein.group_identification.append(group_id)
-                        sub_groups.append(cur_protein)
+                        if group_id not in cur_protein.group_identification:
+                            cur_protein.group_identification.append(group_id)
                         if prots.identifier in sp_protein_set:
                             cur_protein.reviewed = True
                         else:
@@ -538,6 +539,7 @@ class GlpkGrouper(Grouper):
                         # Here we pass if the protein does not have a score...
                         # Potentially it got 'picked' (removed) by protein picker...
                         pass
+
 
                 # Sort the groups based on higher or lower indication, secondarily sort the groups based on number of unique peptides
                 # We use the index [1:] as we do not wish to sort the lead protein... from GLPK

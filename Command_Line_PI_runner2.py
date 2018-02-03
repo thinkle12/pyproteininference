@@ -43,7 +43,7 @@ parser.add_argument("-fdr","--fdrcalc", dest="fdrcalc", required=True,
 parser.add_argument("-roc","--roc_curve_filename", dest="roc_curve", required=False,
                     help="Provide the a filename with .pdf extension for roc curve output", metavar="FILE")
 parser.add_argument("-ex","--export_type", dest="export_type", required=True,
-                    help="select 'all', 'leads', 'comma_sep', 'q_value': for q_value output you must run q value fdr calculation", metavar="TYPE")
+                    help="select 'all', 'leads', 'comma_sep', 'q_value': for q_value output not yet supported", metavar="TYPE")
 args = parser.parse_args()
 
 
@@ -124,7 +124,7 @@ if args.group=='simple_subsetting':
     group = ProteinInference.grouping.SimpleSubsetting(data_class=data)
     group.execute()
 if args.group=='glpk':
-    glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkin.mod')
+    glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkin_'+tag+'.mod')
     glpksetup.execute()
     glpkrun = ProteinInference.grouping.GlpkRunner(path_to_glpsol = '/gne/research/apps/protchem/glpk/bin/glpsol',glpkin='glpkinout/glpkin_'+tag+'.mod',glpkout='glpkinout/glpkout_'+tag+'.sol',file_override=False)
     glpkrun.execute()

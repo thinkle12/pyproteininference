@@ -32,7 +32,7 @@ parser.add_argument("-pep","--posterior_error_probability", dest="posterior_erro
 parser.add_argument("-qv","--q_value", dest="q_value", required=False,
                     help="Provide the q value to restrict by...", metavar="FLOAT")
 parser.add_argument("-sm","--score_method", dest="score_method", required=True,
-                    help="Select one of the following 'best_peptide_per_protein','fishers_method','multiplicative_log','downweighted_multiplicative_log','downweighted_version2','top_two_combined','geometric_mean'", metavar="TYPE")
+                    help="Select one of the following 'best_peptide_per_protein','iterative_downweighted_log','multiplicative_log','downweighted_multiplicative_log','downweighted_version2','top_two_combined','geometric_mean'", metavar="TYPE")
 parser.add_argument("-st","--score_type", dest="score_type", required=True,
                     help="Select either 'pep_value' or 'q_value'", metavar="TYPE")
 parser.add_argument("-ppk","--picker", dest="picker", action="store_true")
@@ -43,7 +43,7 @@ parser.add_argument("-fdr","--fdrcalc", dest="fdrcalc", required=True,
 parser.add_argument("-roc","--roc_curve_filename", dest="roc_curve", required=False,
                     help="Provide the a filename with .pdf extension for roc curve output", metavar="FILE")
 parser.add_argument("-ex","--export_type", dest="export_type", required=True,
-                    help="select 'all', 'leads', 'comma_sep', 'q_value'", metavar="TYPE")
+                    help="select 'all', 'leads', 'comma_sep', 'q_value': for q_value output you must run q value fdr calculation", metavar="TYPE")
 args = parser.parse_args()
 
 
@@ -92,8 +92,8 @@ score_setup.execute()
 #Here use multiplicative log scoring
 if args.score_method=='best_peptide_per_protein':
     score = ProteinInference.scoring.BestPeptidePerProtein(data_class=data)
-if args.score_method=='fishers_method':
-    score = ProteinInference.scoring.FishersMethod(data_class=data)
+if args.score_method=='iterative_downweighted_log':
+    score = ProteinInference.scoring.IterativeDownweightedLog(data_class=data)
 if args.score_method=='multiplicative_log':
     score = ProteinInference.scoring.MultiplicativeLog(data_class=data)
 if args.score_method=='downweighted_multiplicative_log':
@@ -148,15 +148,15 @@ print 'Number of Proteins passing an FDR of'+str(args.fdrcalc)+' = '+str(len(res
 
 
 #Write the output to a csv...
-# if args.export_type=='leads':
-#     export = ProteinInference.export.CsvOutLeads(data_class=data,filename_out=args.write_file)
-# if args.export_type=='all':
-#     export = ProteinInference.export.CsvOutAll(data_class=data,filename_out=args.write_file)
-# if args.export_type == 'comma_sep':
-#     export = ProteinInference.export.CsvOutCommaSep(data_class=data, filename_out=args.write_file)
-# if args.export_type=='q_value':
-#     export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out=args.write_file)
-# export.execute()
+if args.export_type=='leads':
+    export = ProteinInference.export.CsvOutLeads(data_class=data,filename_out=args.write_file)
+if args.export_type=='all':
+    export = ProteinInference.export.CsvOutAll(data_class=data,filename_out=args.write_file)
+if args.export_type == 'comma_sep':
+    export = ProteinInference.export.CsvOutCommaSep(data_class=data, filename_out=args.write_file)
+if args.export_type=='q_value':
+    export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out=args.write_file)
+export.execute()
 
 # if args.roc_curve:
 #     roc = ProteinInference.benchmark.RocPlot(data_class=data)

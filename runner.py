@@ -15,14 +15,21 @@ import numpy
 qvalue_restriction = [.2]
 pepvalue_restriction = [.9]
 
-list_of_searchids = ['130915']
+from Digest import insilicodigest
 
+digest = insilicodigest.InSilicoDigest(database_path='data/UniprotKBConcat1708_HUMAN.fasta',
+                                       num_miss_cleavs=2,
+                                       digest_type='trypsin')
+digest.execute()
 
+list_of_searchids = ['130929']
+
+score_type = 'pep'
 
 pick_nopick = [True]
 
 
-scoring_methods = ['dwml']
+scoring_methods = ['idwl']
 
 large_list_of_results = [['SearchID','Scoring_Methods','Scoring_Type','Picker','Qvr','Pvr','Proteins_Passing_1_Percent_FDR']]
 
@@ -35,8 +42,8 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
                         start_time = time.time()
                         #Initiate the reader...
                         #Input for now is a target percolator output and a decoy percolator output
-                        pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='data/target_psm_130915_Bioplex_q6858_QLPALL_ZDHHC19.txt',
-                                                                                  decoy_file='data/decoy_psm_130915_Bioplex_q6858_QLPALL_ZDHHC19.txt')
+                        pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='data/target_psm_130929_Bioplex_q6836_QLPALL_TMEM180.txt',
+                                                                                  decoy_file='data/decoy_psm_130929_Bioplex_q6836_QLPALL_TMEM180.txt')
 
                         #Execeute the reader instance, this loads the data into the reader class
                         pep_and_prot_data.execute()
@@ -50,12 +57,16 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
                         restrict.execute()
 
                         #Here generate the pre score data using 'PEP' values
-                        score_setup = ProteinInference.datastore.PreScoreQValue(data)
+                        if score_type == 'pep':
+                            score_setup = ProteinInference.datastore.PreScorePepValue(data)
+                        if score_type == 'q':
+                            score_setup = ProteinInference.datastore.PreScoreQValue(data)
+
                         score_setup.execute()
 
                         #Here we do scoring
 
-                        score = ProteinInference.scoring.DownweightedMultiplicativeLog(data_class=data)
+                        score = ProteinInference.scoring.IterativeDownweightedLog(data_class=data)
                         score.execute()
 
                         #This variable becomes the scored proteins as a real variable
@@ -70,12 +81,7 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
                         #group.execute()
 
                         #Do in silico trypsin digestion
-                        from Digest import insilicodigest
 
-                        digest = insilicodigest.InSilicoDigest(database_path='data/UniprotKBConcat1708_HUMAN.fasta',
-                                                               num_miss_cleavs=2,
-                                                               digest_type='trypsin')
-                        digest.execute()
 
                         #
                         #Run GLPK to generate the minimal list of proteins that account for the peptides
@@ -99,13 +105,13 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
                         #print restricted
 
                         #Write the output to a csv...
-                        output = ProteinInference.export.CsvOutAll(data_class=data, filename_out='output/all_ZDHHC19.csv')
+                        output = ProteinInference.export.CsvOutAll(data_class=data, filename_out='output/all_'+scoring_methods[k]+'_'+list_of_searchids[i]+'.csv')
                         output.execute()
 
-                        output_leads = ProteinInference.export.CsvOutLeads(data_class=data, filename_out='output/leads_ZDHHC19.csv')
+                        output_leads = ProteinInference.export.CsvOutLeads(data_class=data, filename_out='output/leads_'+scoring_methods[k]+'_'+list_of_searchids[i]+'.csv')
                         output_leads.execute()
 
-                        output_csep = ProteinInference.export.CsvOutCommaSep(data_class=data,filename_out='output/csep_ZDHHC19.csv')
+                        output_csep = ProteinInference.export.CsvOutCommaSep(data_class=data,filename_out='output/csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'.csv')
                         output_csep.execute()
 
                         # qval_out_leads = ProteinInference.export.CsvOutLeadsQValues(data_class=data, filename_out='output/soft_override_leads_qvalue_restrict_pep09.csv')

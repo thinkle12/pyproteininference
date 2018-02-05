@@ -44,7 +44,7 @@ parser.add_argument("-fdr","--fdrcalc", dest="fdrcalc", required=True,
 parser.add_argument("-roc","--roc_curve_filename", dest="roc_curve", required=False,
                     help="Provide the a filename with .pdf extension for roc curve output", metavar="FILE")
 parser.add_argument("-ex","--export_type", dest="export_type", required=False,
-                    help="select 'all', 'leads', 'comma_sep', 'q_value': q_value output not yet supported", metavar="TYPE")
+                    help="select 'all', 'leads', 'comma_sep', 'q_value': q_value output not yet supported", metavar="LIST")
 args = parser.parse_args()
 
 
@@ -155,13 +155,13 @@ print 'Number of Proteins passing an FDR of'+str(args.fdrcalc)+' = '+str(len(res
 
 
 #Write the output to a csv...
-if args.export_type=='leads':
-    export = ProteinInference.export.CsvOutLeads(data_class=data,filename_out=args.write_file)
-if args.export_type=='all':
-    export = ProteinInference.export.CsvOutAll(data_class=data,filename_out=args.write_file)
-if args.export_type == 'comma_sep':
-    export = ProteinInference.export.CsvOutCommaSep(data_class=data, filename_out=args.write_file)
-if args.export_type=='q_value':
+if 'leads' in args.export_type:
+    export = ProteinInference.export.CsvOutLeads(data_class=data,filename_out='leads_'+args.write_file)
+if 'all' in args.export_type:
+    export = ProteinInference.export.CsvOutAll(data_class=data,filename_out='all_'+args.write_file)
+if 'comma_sep' in args.export_type:
+    export = ProteinInference.export.CsvOutCommaSep(data_class=data, filename_out='comma_sep_'+args.write_file)
+if 'q_value' in args.export_type:
     export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out=args.write_file)
 export.execute()
 

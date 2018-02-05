@@ -122,7 +122,7 @@ digest.execute()
 
 try:
     os.mkdir('glpkinout/')
-except IOError:
+except OSError:
     pass
 
 #Run simple group subsetting

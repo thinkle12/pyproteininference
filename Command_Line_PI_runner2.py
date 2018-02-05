@@ -156,11 +156,11 @@ print 'Number of Proteins passing an FDR of'+str(args.fdrcalc)+' = '+str(len(res
 
 #Write the output to a csv...
 if 'leads' in args.export_type:
-    export = ProteinInference.export.CsvOutLeads(data_class=data,filename_out='leads_'+args.write_file)
+    export = ProteinInference.export.CsvOutLeads(data_class=data,filename_out='/leads_'.join(args.write_file.split('/')))
 if 'all' in args.export_type:
-    export = ProteinInference.export.CsvOutAll(data_class=data,filename_out='all_'+args.write_file)
+    export = ProteinInference.export.CsvOutAll(data_class=data,filename_out='/all_'.join(args.write_file.split('/')))
 if 'comma_sep' in args.export_type:
-    export = ProteinInference.export.CsvOutCommaSep(data_class=data, filename_out='comma_sep_'+args.write_file)
+    export = ProteinInference.export.CsvOutCommaSep(data_class=data, filename_out='/comma_sep_'.join(args.write_file.split('/')))
 if 'q_value' in args.export_type:
     export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out=args.write_file)
 export.execute()

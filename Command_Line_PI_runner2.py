@@ -10,6 +10,7 @@ Created on Tue Dec  5 16:16:17 2017
 import ProteinInference
 import argparse
 from Digest import insilicodigest
+import os
 
 
 parser = argparse.ArgumentParser(description='Protein Inference')
@@ -42,8 +43,8 @@ parser.add_argument("-fdr","--fdrcalc", dest="fdrcalc", required=True,
                     help="Input a number for fdr calculation ie .01 for a 1 percent fdr", metavar="FLOAT")
 parser.add_argument("-roc","--roc_curve_filename", dest="roc_curve", required=False,
                     help="Provide the a filename with .pdf extension for roc curve output", metavar="FILE")
-parser.add_argument("-ex","--export_type", dest="export_type", required=True,
-                    help="select 'all', 'leads', 'comma_sep', 'q_value': for q_value output not yet supported", metavar="TYPE")
+parser.add_argument("-ex","--export_type", dest="export_type", required=False,
+                    help="select 'all', 'leads', 'comma_sep', 'q_value': q_value output not yet supported", metavar="TYPE")
 args = parser.parse_args()
 
 
@@ -80,7 +81,7 @@ print 'restricting data'
 restrict = ProteinInference.datastore.RestrictMainData(data,peptide_length=pl_restrict,posterior_error_prob_threshold=pep_restrict,q_value_threshold=q_restrict)
 restrict.execute()
 
-#Here generate the pre score data using 'PEP' values
+#Here generate the pre score data using 'PEP' or 'Q' values
 if args.score_type=='pep_value':
     score_setup = ProteinInference.datastore.PreScorePepValue(data)
 if args.score_type=='q_value':
@@ -89,7 +90,7 @@ if args.score_type=='q_value':
 #Execute score setup...
 score_setup.execute()
 
-#Here use multiplicative log scoring
+#Here select scoring
 if args.score_method=='best_peptide_per_protein':
     score = ProteinInference.scoring.BestPeptidePerProtein(data_class=data)
 if args.score_method=='iterative_downweighted_log':
@@ -119,12 +120,19 @@ else:
 digest = insilicodigest.InSilicoDigest(database_path=args.database, num_miss_cleavs=int(args.missed_cleavages), digest_type=args.digestion_type)
 digest.execute()
 
+try:
+    os.mkdir('glpkinout/')
+except IOError:
+    pass
+
 #Run simple group subsetting
 if args.group=='simple_subsetting':
     group = ProteinInference.grouping.SimpleSubsetting(data_class=data)
     group.execute()
+
+#Run GLPK setup, runner, grouper...
 if args.group=='glpk':
-    glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkin_'+tag+'.mod')
+    glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkin_'+tag+'.mod')
     glpksetup.execute()
     glpkrun = ProteinInference.grouping.GlpkRunner(path_to_glpsol = '/gne/research/apps/protchem/glpk/bin/glpsol',glpkin='glpkinout/glpkin_'+tag+'.mod',glpkout='glpkinout/glpkout_'+tag+'.sol',file_override=False)
     glpkrun.execute()
@@ -141,8 +149,7 @@ fdr = ProteinInference.fdrcalc.SetBasedFdr(data_class=data,false_discovery_rate=
 fdr.execute()
 #Finally we have our output restricted data...
 restricted = data.fdr_restricted_grouped_scored_proteins
-#print it as well as the len...
-#print restricted
+#Print the len of restricted data... which is how many protein groups pass FDR threshold
 print 'Number of Proteins passing an FDR of'+str(args.fdrcalc)+' = '+str(len(restricted))
 
 

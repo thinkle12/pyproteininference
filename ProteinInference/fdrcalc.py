@@ -40,7 +40,7 @@ class SetBasedFdr(Fdr):
             decoys = sum(binary_decoy_target_list)
             #Calculate FDR at every step starting with the entire list...
             #Delete first entry (worst score) every time we go through a cycle
-            fdr = (decoys)/(float(total))
+            fdr = (2*decoys)/(float(total))
             fdr_list.append(fdr)
             print fdr
             if fdr<self.false_discovery_rate:
@@ -63,7 +63,7 @@ class SetBasedFdr(Fdr):
         print 'Protein Group leads that pass with more than 1 PSM with a ' + str(self.false_discovery_rate) + ' FDR = ' + str(len(fdr_restricted_set)-len(onehitwonders))
         print 'Protein Group lead One hit Wonders that pass '+str(self.false_discovery_rate)+' FDR = '+str(len(onehitwonders))
 
-        print 'Number of Protein groups that pass a '+str(self.false_discovery_rate*100)+' FDR: '+str(len(fdr_restricted_set))
+        print 'Number of Protein groups that pass a '+str(self.false_discovery_rate*100)+' percent FDR: '+str(len(fdr_restricted_set))
         self.data_class.fdr_restricted_grouped_scored_proteins = fdr_restricted_set
 
 

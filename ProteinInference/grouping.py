@@ -517,7 +517,6 @@ class GlpkGrouper(Grouper):
                 pg = ProteinGroup(group_id)
                 print str(group_id)
                 for prots in groups:
-                    print prots.identifier
                     try:
                         # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
                         pindex = protein_finder.index(prots.identifier)

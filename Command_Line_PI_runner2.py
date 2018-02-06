@@ -45,6 +45,8 @@ parser.add_argument("-roc","--roc_curve_filename", dest="roc_curve", required=Fa
                     help="Provide the a filename with .pdf extension for roc curve output", metavar="FILE")
 parser.add_argument("-ex","--export_type", dest="export_type", required=False,
                     help="select 'all', 'leads', 'comma_sep', 'q_value': q_value output not yet supported", metavar="LIST")
+parser.add_argument("-fdrt","--fdr_type", dest="fdr_type", required=False,
+                    help="'set' or 'q_value'", metavar="LIST")
 args = parser.parse_args()
 
 
@@ -147,6 +149,8 @@ if args.group=='multi_subsetting':
 #Next run fdrcalc on the data....
 fdr = ProteinInference.fdrcalc.SetBasedFdr(data_class=data,false_discovery_rate=float(args.fdrcalc))
 fdr.execute()
+q = ProteinInference.fdrcalc.QValueCalculation(data_class=data)
+q.execute()
 #Finally we have our output restricted data...
 restricted = data.fdr_restricted_grouped_scored_proteins
 #Print the len of restricted data... which is how many protein groups pass FDR threshold
@@ -157,13 +161,23 @@ print 'Number of Proteins passing an FDR of'+str(args.fdrcalc)+' = '+str(len(res
 #Write the output to a csv...
 if 'leads' in args.export_type:
     export = ProteinInference.export.CsvOutLeads(data_class=data,filename_out='/leads_'.join(args.write_file.split('/')))
+    export.execute()
 if 'all' in args.export_type:
     export = ProteinInference.export.CsvOutAll(data_class=data,filename_out='/all_'.join(args.write_file.split('/')))
+    export.execute()
 if 'comma_sep' in args.export_type:
     export = ProteinInference.export.CsvOutCommaSep(data_class=data, filename_out='/comma_sep_'.join(args.write_file.split('/')))
-if 'q_value' in args.export_type:
-    export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out=args.write_file)
-export.execute()
+    export.execute()
+if 'q_value_comma_sep' in args.export_type:
+    export = ProteinInference.export.CsvOutCommaSepQValues(data_class=data,filename_out='/q_value_comma_sep'.join(args.write_file.split('/')))
+    export.execute()
+if 'q_value_leads' in args.export_type:
+    export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out='/q_value_leads'.join(args.write_file.split('/')))
+    export.execute()
+if 'q_value_all' in args.export_type:
+    export = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out='/q_value_all'.join(args.write_file.split('/')))
+    export.execute()
+
 
 # if args.roc_curve:
 #     roc = ProteinInference.benchmark.RocPlot(data_class=data)

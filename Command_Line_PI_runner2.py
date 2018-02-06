@@ -45,8 +45,6 @@ parser.add_argument("-roc","--roc_curve_filename", dest="roc_curve", required=Fa
                     help="Provide the a filename with .pdf extension for roc curve output", metavar="FILE")
 parser.add_argument("-ex","--export_type", dest="export_type", required=False,
                     help="select 'all', 'leads', 'comma_sep', 'q_value': q_value output not yet supported", metavar="LIST")
-parser.add_argument("-fdrt","--fdr_type", dest="fdr_type", required=False,
-                    help="'set' or 'q_value'", metavar="LIST")
 args = parser.parse_args()
 
 

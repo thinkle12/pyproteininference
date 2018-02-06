@@ -22,7 +22,7 @@ digest = insilicodigest.InSilicoDigest(database_path='data/UniprotKBConcat1708_H
                                        digest_type='trypsin')
 digest.execute()
 
-list_of_searchids = ['130929']
+list_of_searchids = ['134316']
 
 score_type = 'pep'
 
@@ -42,8 +42,8 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
                         start_time = time.time()
                         #Initiate the reader...
                         #Input for now is a target percolator output and a decoy percolator output
-                        pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='data/target_psm_130929_Bioplex_q6836_QLPALL_TMEM180.txt',
-                                                                                  decoy_file='data/decoy_psm_130929_Bioplex_q6836_QLPALL_TMEM180.txt')
+                        pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='data/'+list_of_searchids[i]+'_percolator_target_psm.txt',
+                                                                                  decoy_file='data/'+list_of_searchids[i]+'_percolator_decoy_psm.txt')
 
                         #Execeute the reader instance, this loads the data into the reader class
                         pep_and_prot_data.execute()
@@ -66,14 +66,30 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
 
                         #Here we do scoring
 
-                        score = ProteinInference.scoring.IterativeDownweightedLog(data_class=data)
+                        if scoring_methods[k]=='bppp':
+                            score = ProteinInference.scoring.BestPeptidePerProtein(data_class=data)
+                        if scoring_methods[k] == 'ttc':
+                            score = ProteinInference.scoring.TopTwoCombined(data_class=data)
+                        if scoring_methods[k] == 'ml':
+                            score = ProteinInference.scoring.MultiplicativeLog(data_class=data)
+                        if scoring_methods[k] == 'dwml':
+                            score = ProteinInference.scoring.DownweightedMultiplicativeLog(data_class=data)
+                        if scoring_methods[k] == 'dw2':
+                            score = ProteinInference.scoring.DownweightedVersion2(data_class=data)
+                        if scoring_methods[k] == 'fm':
+                            score = ProteinInference.scoring.FishersMethod(data_class=data)
+                        if scoring_methods[k] == 'gm':
+                            score = ProteinInference.scoring.GeometricMeanLog(data_class=data)
+                        if scoring_methods[k] == 'idwl':
+                            score = ProteinInference.scoring.IterativeDownweightedLog(data_class=data)
                         score.execute()
 
                         #This variable becomes the scored proteins as a real variable
                         scored_prots = data.scored_proteins
                         #Run protein picker on the data
-                        picker = ProteinInference.picker.StandardPicker(data_class=data)
-                        picker.execute()
+                        if pnp:
+                            picker = ProteinInference.picker.StandardPicker(data_class=data)
+                            picker.execute()
 
 
                         #Run simple group subsetting
@@ -86,17 +102,19 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
                         #
                         #Run GLPK to generate the minimal list of proteins that account for the peptides
                         #Running GLPK consists of 3 classes, setup, runner, and grouper which need to be run in succession
-                        glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkout09_ZDHHC19.mod')
+                        glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkout09_'+list_of_searchids[i]+'.mod')
                         glpksetup.execute()
-                        runglpk = ProteinInference.grouping.GlpkRunner(path_to_glpsol = 'glpsol',glpkin = 'glpkinout/glpkout09_ZDHHC19.mod',glpkout = 'glpkinout/glpkout09_ZDHHC19.sol',file_override = False)
+                        runglpk = ProteinInference.grouping.GlpkRunner(path_to_glpsol = 'glpsol',glpkin = 'glpkinout/glpkout09_'+list_of_searchids[i]+'.mod',glpkout = 'glpkinout/glpkout09_'+list_of_searchids[i]+'.sol',file_override = False)
                         runglpk.execute()
-                        group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout09_ZDHHC19.sol')
+                        group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout09_'+list_of_searchids[i]+'.sol')
                         group.execute()
 
                         #Next run fdrcalc on the data....
                         fdr = ProteinInference.fdrcalc.SetBasedFdr(data_class=data,false_discovery_rate=.01)
                         fdr.execute()
 
+                        q = ProteinInference.fdrcalc.QValueCalculation(data_class=data)
+                        q.execute()
 
 
                         #Finally we have our output restricted data...
@@ -105,17 +123,17 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
                         #print restricted
 
                         #Write the output to a csv...
-                        output = ProteinInference.export.CsvOutAll(data_class=data, filename_out='output/all_'+scoring_methods[k]+'_'+list_of_searchids[i]+'.csv')
+                        output = ProteinInference.export.CsvOutAll(data_class=data, filename_out='output/all_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
                         output.execute()
 
-                        output_leads = ProteinInference.export.CsvOutLeads(data_class=data, filename_out='output/leads_'+scoring_methods[k]+'_'+list_of_searchids[i]+'.csv')
+                        output_leads = ProteinInference.export.CsvOutLeads(data_class=data, filename_out='output/leads_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
                         output_leads.execute()
 
-                        output_csep = ProteinInference.export.CsvOutCommaSep(data_class=data,filename_out='output/csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'.csv')
+                        output_csep = ProteinInference.export.CsvOutCommaSep(data_class=data,filename_out='output/csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
                         output_csep.execute()
 
-                        # qval_out_leads = ProteinInference.export.CsvOutLeadsQValues(data_class=data, filename_out='output/soft_override_leads_qvalue_restrict_pep09.csv')
-                        # qval_out_leads.execute()
+                        qval_out_leads = ProteinInference.export.CsvOutCommaSepQValues(data_class=data, filename_out='output/qvalues_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
+                        qval_out_leads.execute()
 
                         roc = ProteinInference.benchmark.RocPlot(data_class=data)
                         roc.execute(pdf=pdf)

@@ -31,7 +31,8 @@ class CsvOutAll(Export):
                 else:
                     ungrouped_list[-1].append('Unreviewed')
                 ungrouped_list[-1].append(prots.group_identification)
-                ungrouped_list[-1].append(prots.peptides)
+                for peps in prots.peptides:
+                    ungrouped_list[-1].append(peps)
         
         with open(self.filename_out, "wb") as f:
             writer = csv.writer(f)
@@ -54,7 +55,8 @@ class CsvOutLeads(Export):
             else:
                 ungrouped_list[-1].append('Unreviewed')
             ungrouped_list[-1].append(groups[0].group_identification)
-            ungrouped_list[-1].append(groups[0].peptides)
+            for peps in groups[0].peptides:
+                ungrouped_list[-1].append(peps)
         
         with open(self.filename_out, "wb") as f:
             writer = csv.writer(f)
@@ -105,7 +107,60 @@ class CsvOutLeadsQValues(Export):
             else:
                 ungrouped_list[-1].append('Unreviewed')
             ungrouped_list[-1].append(groups.number_id)
-            ungrouped_list[-1].append(lead_protein.peptides)
+            for peps in lead_protein.peptides:
+                ungrouped_list[-1].append(peps)
+
+        with open(self.filename_out, "wb") as f:
+            writer = csv.writer(f)
+            writer.writerows(ungrouped_list)
+
+class CsvOutCommaSepQValues(Export):
+
+    def __init__(self,data_class,filename_out):
+        self.data_to_write = data_class.protein_group_objects
+        self.filename_out = filename_out
+
+    def execute(self):
+        ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Other_Potential_Identifiers']]
+        for groups in self.data_to_write:
+            lead_protein = groups.proteins[0]
+            ungrouped_list.append([lead_protein.identifier])
+            ungrouped_list[-1].append(lead_protein.score)
+            ungrouped_list[-1].append(groups.q_value)
+            ungrouped_list[-1].append(lead_protein.num_peptides)
+            if lead_protein.reviewed == True:
+                ungrouped_list[-1].append('Reviewed')
+            else:
+                ungrouped_list[-1].append('Unreviewed')
+            ungrouped_list[-1].append(groups.number_id)
+            for other_prots in groups.proteins[1:]:
+                ungrouped_list[-1].append(other_prots.identifier)
+
+        with open(self.filename_out, "wb") as f:
+            writer = csv.writer(f)
+            writer.writerows(ungrouped_list)
+
+class CsvOutAllQValues(Export):
+
+    def __init__(self,data_class,filename_out):
+        self.data_to_write = data_class.protein_group_objects
+        self.filename_out = filename_out
+
+    def execute(self):
+        ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
+        for groups in self.data_to_write:
+            for proteins in groups.proteins:
+                ungrouped_list.append([proteins.identifier])
+                ungrouped_list[-1].append(proteins.score)
+                ungrouped_list[-1].append(groups.q_value)
+                ungrouped_list[-1].append(proteins.num_peptides)
+                if proteins.reviewed == True:
+                    ungrouped_list[-1].append('Reviewed')
+                else:
+                    ungrouped_list[-1].append('Unreviewed')
+                ungrouped_list[-1].append(groups.number_id)
+                for peps in proteins.peptides:
+                    ungrouped_list[-1].append(peps)
 
         with open(self.filename_out, "wb") as f:
             writer = csv.writer(f)

@@ -167,13 +167,13 @@ if 'comma_sep' in args.export_type:
     export = ProteinInference.export.CsvOutCommaSep(data_class=data, filename_out='/comma_sep_'.join(args.write_file.split('/')))
     export.execute()
 if 'q_value_comma_sep' in args.export_type:
-    export = ProteinInference.export.CsvOutCommaSepQValues(data_class=data,filename_out='/q_value_comma_sep'.join(args.write_file.split('/')))
+    export = ProteinInference.export.CsvOutCommaSepQValues(data_class=data,filename_out='/q_value_comma_sep_'.join(args.write_file.split('/')))
     export.execute()
 if 'q_value_leads' in args.export_type:
-    export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out='/q_value_leads'.join(args.write_file.split('/')))
+    export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out='/q_value_leads_'.join(args.write_file.split('/')))
     export.execute()
 if 'q_value_all' in args.export_type:
-    export = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out='/q_value_all'.join(args.write_file.split('/')))
+    export = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out='/q_value_all_'.join(args.write_file.split('/')))
     export.execute()
 
 

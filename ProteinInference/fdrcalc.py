@@ -182,3 +182,58 @@ class EntrapFdr(Fdr):
         self.restricted_proteins = fdr_restricted_set
 
         self.entrapment_proteins = entrapment_proteins
+
+
+class PureDecoyFdr(Fdr):
+    ###Here we calculate set based FDR on the lead protein in the group
+    ###Input is as follows [[protein,protein_inferene_score,groud_id_number]]
+    def __init__(self, data_class, false_discovery_rate=.01):
+        self.grouped_scored_data = data_class.grouped_scored_proteins
+        self.false_discovery_rate = false_discovery_rate
+        self.data_class = data_class
+
+    def execute(self):
+
+        # pick out the lead scoring protein for each group... lead score is at 0 position
+        lead_score = [x[0] for x in self.grouped_scored_data]
+        # Now pick out only the lead protein identifiers
+        lead_proteins = [x.identifier for x in lead_score]
+
+        # Reverse the list (best to worst) -> (worst to best)
+        lead_proteins.reverse()
+
+        fdr_list = []
+        for i in range(len(lead_proteins)):
+            binary_decoy_target_list = [1 if '#' in elem else 0 for elem in lead_proteins]
+            total = len(lead_proteins)
+            decoys = sum(binary_decoy_target_list)
+            # Calculate FDR at every step starting with the entire list...
+            # Delete first entry (worst score) every time we go through a cycle
+            fdr = (decoys) / (float(total))
+            fdr_list.append(fdr)
+            print fdr
+            if fdr < self.false_discovery_rate:
+                break
+            else:
+                # Here we delete the worst score every time... thus making our list smaller and smaller
+                del lead_proteins[0]
+
+        lead_proteins.reverse()
+
+        self.fdr_list = fdr_list
+
+        fdr_restricted_set = [self.grouped_scored_data[x] for x in range(len(lead_proteins))]
+
+        onehitwonders = []
+        for groups in fdr_restricted_set:
+            if int(groups[0].num_peptides) == 1:
+                onehitwonders.append(groups[0])
+
+        print 'Protein Group leads that pass with more than 1 PSM with a ' + str(
+            self.false_discovery_rate) + ' FDR = ' + str(len(fdr_restricted_set) - len(onehitwonders))
+        print 'Protein Group lead One hit Wonders that pass ' + str(self.false_discovery_rate) + ' FDR = ' + str(
+            len(onehitwonders))
+
+        print 'Number of Protein groups that pass a ' + str(self.false_discovery_rate * 100) + ' percent FDR: ' + str(
+            len(fdr_restricted_set))
+        self.data_class.fdr_restricted_grouped_scored_proteins = fdr_restricted_set

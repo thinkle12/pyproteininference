@@ -42,7 +42,7 @@ class GeneratePlot(Entrapment):
         self.average_decoy_fdr = None
         self.pdf = pdf
 
-        fdr1 = ProteinInference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=0)
+        fdr1 = ProteinInference.fdrcalc.PureDecoyFdr(data_class=data_class, false_discovery_rate=0)
         fdr1.execute()
         self.decoy_fdr_calc_list = fdr1.fdr_list
         efdr1 = ProteinInference.fdrcalc.EntrapFdr(data_class=data_class, entrapment_database=self.entrapment_db, other_database=self.other_database, false_discovery_rate=0)

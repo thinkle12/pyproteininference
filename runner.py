@@ -22,14 +22,14 @@ digest = insilicodigest.InSilicoDigest(database_path='data/UniprotKBConcat1708_H
                                        digest_type='trypsin')
 digest.execute()
 
-list_of_searchids = ['159260_Bioplex2_b10090']
+list_of_searchids = ['154786','154787','154788','154789']
 
 score_type = 'q'
 
 pick_nopick = [True]
 
 
-scoring_methods = ['idwl']
+scoring_methods = ['bppp','ttc','ml','dwml','idwl','gm','dw2']
 
 large_list_of_results = [['SearchID','Scoring_Methods','Scoring_Type','Picker','Qvr','Pvr','Proteins_Passing_1_Percent_FDR']]
 
@@ -42,8 +42,8 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
                         start_time = time.time()
                         #Initiate the reader...
                         #Input for now is a target percolator output and a decoy percolator output
-                        pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='data/'+list_of_searchids[i]+'_percolator_target_psm.txt',
-                                                                                  decoy_file='data/'+list_of_searchids[i]+'_percolator_decoy_psm.txt')
+                        pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='/Users/hinklet/random_analysis/k562_analysis/percolator_output/'+list_of_searchids[i]+'_percolator_target_psm.txt',
+                                                                                  decoy_file='/Users/hinklet/random_analysis/k562_analysis/percolator_output/'+list_of_searchids[i]+'_percolator_decoy_psm.txt')
 
                         #Execeute the reader instance, this loads the data into the reader class
                         pep_and_prot_data.execute()
@@ -123,22 +123,22 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
                         #print restricted
 
                         #Write the output to a csv...
-                        output = ProteinInference.export.CsvOutAll(data_class=data, filename_out='output/all_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
+                        output = ProteinInference.export.CsvOutAll(data_class=data, filename_out='/Users/hinklet/random_analysis/k562_analysis/pi_output/all_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
                         output.execute()
 
-                        output_leads = ProteinInference.export.CsvOutLeads(data_class=data, filename_out='output/leads_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
+                        output_leads = ProteinInference.export.CsvOutLeads(data_class=data, filename_out='/Users/hinklet/random_analysis/k562_analysis/pi_output/leads_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
                         output_leads.execute()
 
-                        output_csep = ProteinInference.export.CsvOutCommaSep(data_class=data,filename_out='output/csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
+                        output_csep = ProteinInference.export.CsvOutCommaSep(data_class=data,filename_out='/Users/hinklet/random_analysis/k562_analysis/pi_output/csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
                         output_csep.execute()
 
-                        qval_out_csep = ProteinInference.export.CsvOutCommaSepQValues(data_class=data, filename_out='output/qvalues_csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
+                        qval_out_csep = ProteinInference.export.CsvOutCommaSepQValues(data_class=data, filename_out='/Users/hinklet/random_analysis/k562_analysis/pi_output/qvalues_csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
                         qval_out_csep.execute()
 
-                        qval_out_all = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out='output/qvalues_all_' +scoring_methods[k] + '_' +list_of_searchids[i] + '_' + score_type + '.csv')
+                        qval_out_all = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out='/Users/hinklet/random_analysis/k562_analysis/pi_output/qvalues_all_' +scoring_methods[k] + '_' +list_of_searchids[i] + '_' + score_type + '.csv')
                         qval_out_all.execute()
 
-                        qval_out_leads = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out='output/qvalues_leads_' +scoring_methods[k] + '_' +list_of_searchids[i] + '_' + score_type + '.csv')
+                        qval_out_leads = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out='/Users/hinklet/random_analysis/k562_analysis/pi_output/qvalues_leads_' +scoring_methods[k] + '_' +list_of_searchids[i] + '_' + score_type + '.csv')
                         qval_out_leads.execute()
 
                         roc = ProteinInference.benchmark.RocPlot(data_class=data)
@@ -151,7 +151,7 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
 
                         large_list_of_results.append([list_of_searchids[i]])
                         large_list_of_results[-1].append(scoring_methods[k])
-                        large_list_of_results[-1].append('QValue')
+                        large_list_of_results[-1].append(data.score_type)
                         if pnp:
                             large_list_of_results[-1].append('Yes Picker')
                         else:
@@ -168,8 +168,8 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
                         print str(end_time/60)+' minutes'
                         print str(end_time/(60*60))+' hours'
 
-# import csv
-#
-# with open('test.csv', "wb") as f:
-#     writer = csv.writer(f)
-#     writer.writerows(large_list_of_results)
+import csv
+
+with open('/Users/hinklet/random_analysis/k562_analysis/k562_stats_q.csv', "wb") as f:
+    writer = csv.writer(f)
+    writer.writerows(large_list_of_results)

@@ -18,8 +18,8 @@ parser.add_argument("-t","--target", dest="target", required=True,
                     help="Input target psm output from percolator", metavar="FILE")
 parser.add_argument("-d","--decoy", dest="decoy", required=True,
                     help="Input decoy psm output from percolator", metavar="FILE")
-parser.add_argument("-o","--output", dest="write_file", required=True,
-                    help="ProteinInference Result File to Write", metavar="FILE")
+parser.add_argument("-o","--output", dest="dir_name", required=True,
+                    help="ProteinInference Result Directory to write to - Name of file will be determined by parameters selected and searchID", metavar="FILE")
 parser.add_argument("-db","--database", dest="database", required=True,
                     help="Provide the database used in the MS search", metavar="FILE")
 parser.add_argument("-mc","--missed_cleavages", dest="missed_cleavages", required=True,
@@ -47,8 +47,12 @@ parser.add_argument("-ex","--export_type", dest="export_type", required=False,
                     help="select 'all', 'leads', 'comma_sep', 'q_value': q_value output not yet supported", metavar="LIST")
 args = parser.parse_args()
 
-
-tag = args.target.split('_percolator_')[0].split('/')[-1]
+if "Bioplex" in args.target:
+    tag = '_'.join(args.target.split('/')[-1].split('_')[:3])
+    print tag
+if "Bioplex" not in args.target:
+    tag = args.target.split('/')[-1].split('_')[0]
+    print tag
 
 #Initiate the reader...
 #Input for now is a target percolator output and a decoy percolator output
@@ -158,22 +162,22 @@ print 'Number of Proteins passing an FDR of'+str(args.fdrcalc)+' = '+str(len(res
 
 #Write the output to a csv...
 if 'leads' in args.export_type:
-    export = ProteinInference.export.CsvOutLeads(data_class=data,filename_out='/leads_'.join(args.write_file.split('/')))
+    export = ProteinInference.export.CsvOutLeads(data_class=data,filename_out=args.dir_name+tag+'_'+'leads'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'all' in args.export_type:
-    export = ProteinInference.export.CsvOutAll(data_class=data,filename_out='/all_'.join(args.write_file.split('/')))
+    export = ProteinInference.export.CsvOutAll(data_class=data,filename_out=args.dir_name+tag+'_'+'all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'comma_sep' in args.export_type:
-    export = ProteinInference.export.CsvOutCommaSep(data_class=data, filename_out='/comma_sep_'.join(args.write_file.split('/')))
+    export = ProteinInference.export.CsvOutCommaSep(data_class=data, filename_out=args.dir_name+tag+'_'+'comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'q_value_comma_sep' in args.export_type:
-    export = ProteinInference.export.CsvOutCommaSepQValues(data_class=data,filename_out='/q_value_comma_sep_'.join(args.write_file.split('/')))
+    export = ProteinInference.export.CsvOutCommaSepQValues(data_class=data,filename_out=args.dir_name+tag+'_'+'q_value_comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'q_value_leads' in args.export_type:
-    export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out='/q_value_leads_'.join(args.write_file.split('/')))
+    export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out=args.dir_name+tag+'_'+'q_value_leads'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'q_value_all' in args.export_type:
-    export = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out='/q_value_all_'.join(args.write_file.split('/')))
+    export = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out=args.dir_name+tag+'_'+'q_value_all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 
 

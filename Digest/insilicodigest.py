@@ -12,6 +12,16 @@ import os
 import cPickle as pickle
 
 class InSilicoDigest(object):
+    """
+    The following class creates protein to peptide, peptide to protein, and swissprot protein mappings.
+    These mappings are essential for GlpkGrouper as an InSilicoDigest object is input for GlpkGrouper
+
+    The input is a fasta database, number of missed cleavages, as well as a digestion type ("trypsin").
+
+    Further digestion types need to be added in the future other than just trypsin
+
+    Exmample: Digest.insilicodigest.InSilicoDigest(database_path = "example_human_db.fasta", num_miss_cleavs=2, digest_type='trypsin')
+    """
     
     def __init__(self,database_path,num_miss_cleavs=2,digest_type='trypsin'):
         self.peptide_to_protein_dictionary = None

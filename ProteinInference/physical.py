@@ -9,6 +9,13 @@ Created on Fri Dec 15 09:43:35 2017
 
 
 class Protein(object):
+    """
+    The following class is a physical Protein class that stores characteristics of a protein for the entire analysis.
+    We use __slots__ to predefine the attributes the Protein Object can have
+    This is done to speed up runtime of the PI algorithm
+
+    Example: ProteinInference.physical.Protein(dentifier = "PRKDC_HUMAN|P78527")
+    """
     __slots__ = ['identifier','score', 'group_identification', 'reviewed', 'unreviewed', 'peptides', 'peptide_scores', 'picked', 'psm_score_dictionary',
                  'num_peptides','unique_peptides','num_unique_peptides','raw_peptides']
     
@@ -29,6 +36,13 @@ class Protein(object):
         
         
 class Psm(object):
+    """
+    The following class is a physical Psm class that stores characteristics of a psm for the entire analysis.
+    We use __slots__ to predefine the attributes the Psm Object can have
+    This is done to speed up runtime of the PI algorithm
+
+    Example: Psm(identifier = "K.DLIDEGHAATQLVNQLHDVVVENNLSDK.Q")
+    """
     __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins']
     
     def __init__(self,identifier):
@@ -40,6 +54,13 @@ class Psm(object):
         
 
 class ProteinGroup(object):
+    """
+    The following class is a physical Protein Group class that stores characteristics of a Protein Group for the entire analysis.
+    We use __slots__ to predefine the attributes the Psm Object can have
+    This is done to speed up runtime of the PI algorithm
+
+    Example: ProteinGroup(number_id = 1)
+    """
     __slots__ = ['proteins','number_id','q_value']
 
     def __init__(self,number_id):

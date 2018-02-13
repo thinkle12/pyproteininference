@@ -11,12 +11,24 @@ import numpy
 import sys
 
 class Score(object):
+    """
+    Parent Score class for all scoring subset classes
+    """
     
     def __init__(self):
         None
         
 class BestPeptidePerProtein(Score):
-     ###Input is DataStore object
+    """
+    Class scores all proteins from data_class.scoring_input.
+    This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
+
+    This class uses a best peptide per protein scoring scheme
+
+    Example: ProteinInference.scoring.BestPeptidePerProtein(data_class = data)
+
+    Where data is a DataStore Object
+     """
      
     def __init__(self,data_class):
         if data_class.scoring_input:
@@ -48,10 +60,20 @@ class BestPeptidePerProtein(Score):
 
 
         self.data_class.score_method = 'best_peptide_per_protein'
+        self.data_class.short_score_method = 'bppp'
         self.data_class.scored_proteins = all_scores
     
 class FishersMethod(Score):
-     ###Input is output from execute in reader class
+    """
+    Class scores all proteins from data_class.scoring_input.
+    This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
+
+    This class uses a Fishers method scoring scheme
+
+    Example: ProteinInference.scoring.FishersMethod(data_class = data)
+
+    Where data is a DataStore Object
+     """
      
     def __init__(self,data_class):
         if data_class.scoring_input:
@@ -80,14 +102,21 @@ class FishersMethod(Score):
         all_scores = sorted(all_scores,key = lambda k: k.score, reverse=True)
             
         self.data_class.score_method = 'fishers_method'
+        self.data_class.short_score_method = 'fm'
         self.data_class.scored_proteins = all_scores
             
 class MultiplicativeLog(Score):
-     ###Input is output from execute in reader class
-     ###This scoring treats a lower q value or lower pep as GOOD
-     ###We multiply all q values or all pep values for 1 protein together
-     ###Then take -log(x) of the multiplied values
-     ###Higher scores are better than lower scores
+    """
+    Class scores all proteins from data_class.scoring_input.
+    This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
+
+    This class uses a Multiplicative Log scoring scheme.
+    All the Qvalues/PepValues from all the peptides per protein are multiplied together and we take -Log(X) of the multiplied Peptide scores
+
+    Example: ProteinInference.scoring.MultiplicativeLog(data_class = data)
+
+    Where data is a DataStore Object
+     """
      
     def __init__(self,data_class):
         if data_class.scoring_input:
@@ -118,18 +147,25 @@ class MultiplicativeLog(Score):
         all_scores = sorted(all_scores,key = lambda k: k.score, reverse=True)
         
         self.data_class.score_method = 'multiplicative_log'
+        self.data_class.short_score_method = 'ml'
         self.data_class.scored_proteins = all_scores
         
 
     
 class DownweightedMultiplicativeLog(Score):
-     ###Input is output from execute in reader class
-     ###This scoring treats a lower q value or lower pep as GOOD
-     ###We multiply all q values or all pep values for 1 protein together
-     ###Then this number is divided by the set q value mean raised to the number of peptides for that protein
-     ###Then take -log(x) of the multiplied values
-     ###Higher scores are better than lower scores
-     
+    """
+    Class scores all proteins from data_class.scoring_input.
+    This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
+
+    This class uses a Multiplicative Log scoring scheme.
+    All the Qvalues/PepValues from all the peptides per protein are multiplied together and
+    then this number is divided by the set QValue/PepValue mean raised to the number of peptides for that protein
+    then we take -Log(X) of the following value
+
+    Example: ProteinInference.scoring.DownweightedMultiplicativeLog(data_class = data)
+
+    Where data is a DataStore Object
+     """
     def __init__(self,data_class):
         if data_class.scoring_input:
             self.pre_score_data = data_class.scoring_input
@@ -169,13 +205,23 @@ class DownweightedMultiplicativeLog(Score):
         all_scores = sorted(all_scores,key = lambda k: k.score, reverse=True)
 
         self.data_class.score_method = 'downweighted_multiplicative_log'
+        self.data_class.short_score_method = 'dwml'
         self.data_class.scored_proteins = all_scores
     
     
 class TopTwoCombined(Score):
-     ###Input is output from execute in reader class
-     ###This scoring treats a lower q value or lower pep as GOOD
-     ###Higher scores are better than lower scores
+    """
+    Class scores all proteins from data_class.scoring_input.
+    This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
+
+    This class uses a Top Two scoring scheme.
+    The top two scores for each protein are multiplied together and we take -Log(X) of the  multiplied value.
+    If a protein only has 1 score/peptide, then we only do -Log(X) of the 1 peptide score
+
+    Example: ProteinInference.scoring.TopTwoCombined(data_class = data)
+
+    Where data is a DataStore Object
+     """
      
     def __init__(self,data_class):
         if data_class.scoring_input:
@@ -210,12 +256,25 @@ class TopTwoCombined(Score):
         all_scores = sorted(all_scores,key = lambda k: k.score, reverse=True)
         
         self.data_class.score_method = 'top_two_combined'
+        self.data_class.short_score_method = 'ttc'
         self.data_class.scored_proteins = all_scores
     
 class DownweightedVersion2(Score):
-     ###Input is output from execute in reader class
-     ###This scoring treats a lower q value or lower pep as GOOD
-     ###Higher scores are better than lower scores
+    """
+    Class scores all proteins from data_class.scoring_input.
+    This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
+
+    This class uses a Downweighted Multiplicative Log scoring scheme.
+    Each peptide is iteratively downweighted by raising the peptide QValue or PepValue to the following power (1/(1+index_number)).
+    Where index_number is the peptide number per protein...
+    Each score for a protein provides less and less weight iteratively
+
+    We also take -Log(X) of the final score here
+
+    Example: ProteinInference.scoring.DownweightedVersion2(data_class = data)
+
+    Where data is a DataStore Object
+     """
      
     def __init__(self,data_class):
         if data_class.scoring_input:
@@ -234,7 +293,7 @@ class DownweightedVersion2(Score):
             val_list = []
             for vals in protein.psm_score_dictionary:
                 val_list.append(float(vals['score']))
-            #Here take each score and raise it to the power of (1/(1+index_number)). 
+            #Here take each score and raise it to the power of (1/(1+index_number)).
             #This downweights each successive score by reducing its weight in a decreasing fashion
             #Basically, each score for a protein will provide less and less weight iteratively
             val_list = [val_list[x]**(1/float(1+x)) for x in range(len(val_list))]
@@ -249,16 +308,26 @@ class DownweightedVersion2(Score):
         all_scores = sorted(all_scores,key = lambda k: k.score, reverse=True)
         
         self.data_class.score_method = 'downweighted_version2'
+        self.data_class.short_score_method = 'dw2'
         self.data_class.scored_proteins = all_scores
 
 
 class IterativeDownweightedLog(Score):
-    ###Input is output from execute in reader class
-    ###This scoring treats a lower q value or lower pep as GOOD
-    ###We multiply all q values or all pep values for 1 protein together
-    ###Then this number is divided by the set q value mean raised to the number of peptides for that protein
-    ###Then take -log(x) of the multiplied values
-    ###Higher scores are better than lower scores
+    """
+    Class scores all proteins from data_class.scoring_input.
+    This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
+
+    This class uses a Downweighted Multiplicative Log scoring scheme.
+    Each peptide is iteratively downweighted by multiplying the peptide QValue or PepValue to the following  (1+index_number).
+    Where index_number is the peptide number per protein...
+    Each score for a protein provides less and less weight iteratively
+
+    We also take -Log(X) of the final score here
+
+    Example: ProteinInference.scoring.IterativeDownweightedLog(data_class = data)
+
+    Where data is a DataStore Object
+     """
 
     def __init__(self, data_class):
         if data_class.scoring_input:
@@ -277,7 +346,7 @@ class IterativeDownweightedLog(Score):
             for vals in protein.psm_score_dictionary:
                 val_list.append(float(vals['score']))
             mean = numpy.mean(val_list)
-            # Here take each score and raise it to the power of (1/(1+index_number)).
+            # Here take each score and multiply it by its index number).
             # This downweights each successive score by reducing its weight in a decreasing fashion
             # Basically, each score for a protein will provide less and less weight iteratively
             val_list = [val_list[x] * (float(1 + x)) for x in range(len(val_list))]
@@ -295,16 +364,24 @@ class IterativeDownweightedLog(Score):
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
         self.data_class.score_method = 'iterative_downweighted_log'
+        self.data_class.short_score_method = 'idwl'
         self.data_class.scored_proteins = all_scores
 
 
 class GeometricMeanLog(Score):
-    ###Input is output from execute in reader class
-    ###This scoring treats a lower q value or lower pep as GOOD
-    ###We multiply all q values or all pep values for 1 protein together
-    ###Then this number is then raised to the 1/x where x is the number of values (peptide scores) for the specific protein
-    ###Then take -log(x) of the multiplied values
-    ###Higher scores are better than lower scores
+    """
+    Class scores all proteins from data_class.scoring_input.
+    This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
+
+    This class uses a Geometric Mean scoring scheme.
+
+    We also take -Log(X) of the final score here
+
+    Example: ProteinInference.scoring.GeometricMeanLog(data_class = data)
+
+    Where data is a DataStore Object
+     """
+
 
     def __init__(self, data_class):
         if data_class.scoring_input:
@@ -335,14 +412,14 @@ class GeometricMeanLog(Score):
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
         self.data_class.score_method = 'geometric_mean_log'
+        self.data_class.short_score_method = 'gm'
         self.data_class.scored_proteins = all_scores
 
 
 class IterativeDownweightingV2(Score):
-    ###Input is output from execute in reader class
-    ###This scoring treats a lower q value or lower pep as GOOD
-    ###Higher scores are better than lower scores
-
+    """
+    The following class is an experimental class essentially used for future development of potential scoring schemes
+    """
     def __init__(self, data_class):
         if data_class.scoring_input:
             self.pre_score_data = data_class.scoring_input
@@ -372,5 +449,6 @@ class IterativeDownweightingV2(Score):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = 'iterative_downweighting'
+        self.data_class.score_method = 'iterative_downweighting2'
+        self.data_class.short_score_method = 'idw2'
         self.data_class.scored_proteins = all_scores

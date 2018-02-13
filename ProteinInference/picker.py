@@ -9,11 +9,29 @@ Created on Thu Nov 30 16:14:28 2017
 import datastore
 
 class Picker(object):
+    """
+    Main Parent Picker class
+    """
     
     def __init__(self):
         None
         
 class StandardPicker(Picker):
+    """
+    The following class executes Protein Picker.
+
+    Protein picker compares scores of target and decoy protein pairs, IE:
+    PRKDC_HUMAN|P78527 vs ##PRKDC_HUMAN|##P78527.
+
+    Scores of the Target and Decoy are compared and the Protein with the worse score of the two is completely removed from further analysis.
+
+    This sort of analysis is built into other protein inference tools such as Percolator Built in Inference.
+    It seems to be a good way of dealing with the TITIN problem as for a lot of searches we will see TITIN as well as Decoy ##TITIN
+
+    Example: ProteinInference.picker.StandardPicker(data_class = data)
+
+    Where data is a DataStore Object.
+    """
     
     def __init__(self,data_class):
         self.scored_data = data_class.scored_proteins

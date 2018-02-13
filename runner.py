@@ -22,9 +22,9 @@ digest = insilicodigest.InSilicoDigest(database_path='data/UniprotKBConcat1708_H
                                        digest_type='trypsin')
 digest.execute()
 
-list_of_searchids = ['134316']
+list_of_searchids = ['159260_Bioplex2_b10090']
 
-score_type = 'pep'
+score_type = 'q'
 
 pick_nopick = [True]
 
@@ -102,11 +102,11 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
                         #
                         #Run GLPK to generate the minimal list of proteins that account for the peptides
                         #Running GLPK consists of 3 classes, setup, runner, and grouper which need to be run in succession
-                        glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkout09_'+list_of_searchids[i]+'.mod')
+                        glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkout_'+list_of_searchids[i]+'.mod')
                         glpksetup.execute()
-                        runglpk = ProteinInference.grouping.GlpkRunner(path_to_glpsol = 'glpsol',glpkin = 'glpkinout/glpkout09_'+list_of_searchids[i]+'.mod',glpkout = 'glpkinout/glpkout09_'+list_of_searchids[i]+'.sol',file_override = False)
+                        runglpk = ProteinInference.grouping.GlpkRunner(path_to_glpsol = 'glpsol',glpkin = 'glpkinout/glpkout_'+list_of_searchids[i]+'.mod',glpkout = 'glpkinout/glpkout_'+list_of_searchids[i]+'.sol',file_override = False)
                         runglpk.execute()
-                        group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout09_'+list_of_searchids[i]+'.sol')
+                        group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout_'+list_of_searchids[i]+'.sol')
                         group.execute()
 
                         #Next run fdrcalc on the data....
@@ -132,7 +132,13 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
                         output_csep = ProteinInference.export.CsvOutCommaSep(data_class=data,filename_out='output/csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
                         output_csep.execute()
 
-                        qval_out_leads = ProteinInference.export.CsvOutCommaSepQValues(data_class=data, filename_out='output/qvalues_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
+                        qval_out_csep = ProteinInference.export.CsvOutCommaSepQValues(data_class=data, filename_out='output/qvalues_csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
+                        qval_out_csep.execute()
+
+                        qval_out_all = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out='output/qvalues_all_' +scoring_methods[k] + '_' +list_of_searchids[i] + '_' + score_type + '.csv')
+                        qval_out_all.execute()
+
+                        qval_out_leads = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out='output/qvalues_leads_' +scoring_methods[k] + '_' +list_of_searchids[i] + '_' + score_type + '.csv')
                         qval_out_leads.execute()
 
                         roc = ProteinInference.benchmark.RocPlot(data_class=data)

@@ -11,16 +11,26 @@ from physical import Psm
 ##The reader class creates a list of psm objects with various attributes...
 
 class Reader(object):
+    """
+    Main Reader Class which is parent to all reader subclasses
+    """
     
     def __init__(self):
         None 
         
 class PercolatorRead(Reader):
-    ###Percolator Output is formatted as follows:
-    ###with each entry being tabbed delimited
-    ###PSMId	 score	q-value	posterior_error_prob	peptide	proteinIds
-    ###116108.15139.15139.6.dta	 3.44016	 0.000479928	7.60258e-10	K.MVVSMTLGLHPWIANIDDTQYLAAK.R	CNDP1_HUMAN|Q96KN2	B4E180_HUMAN|B4E180	A8K1K1_HUMAN|A8K1K1	J3KRP0_HUMAN|J3KRP0 
-    
+    """
+    The following class takes a percolator target file and a percolator decoy file and creates standard ProteinInference.physical.Psm() objects.
+    This reader class is used as input for the DataStore class which is used in all further ProteinInference Classes
+
+    Example: ProteinInference.reader.PercolatorRead(target_file = "example_target.txt", decoy_file = "example_decoy.txt")
+
+    Percolator Output is formatted as follows:
+    with each entry being tabbed delimited
+    PSMId	 score	q-value	posterior_error_prob	peptide	proteinIds
+    116108.15139.15139.6.dta	 3.44016	 0.000479928	7.60258e-10	K.MVVSMTLGLHPWIANIDDTQYLAAK.R	CNDP1_HUMAN|Q96KN2	B4E180_HUMAN|B4E180	A8K1K1_HUMAN|A8K1K1	J3KRP0_HUMAN|J3KRP0
+
+    """
     def __init__(self,target_file,decoy_file):
         self.target_file = target_file
         self.decoy_file = decoy_file
@@ -77,6 +87,10 @@ class PercolatorRead(Reader):
         #return perc
         
 class OtherMethod(Reader):
+    """
+    Potential Future class to read in from another source.
+    Potentially from a database, another Psm scoring source, or potentially from Percolator XML source.
+    """
     
     def __init__(self,something_else):
         self.something_else=something_else

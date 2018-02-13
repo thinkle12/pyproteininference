@@ -15,11 +15,24 @@ import math
 from matplotlib.backends.backend_pdf import PdfPages
 
 class Benchmark(object):
+    """
+    Generic Benchmark parent class
+    """
 
     def __init__(self):
         None
 
 class RocPlot(Benchmark):
+    """
+    Class for producing a Roc plot.
+    Requires a DataStore object
+
+    Example: rp = ProteinInference.benchmark.RocPlot(data_class = data)
+             rp.execute(pdf=True)
+
+
+    Where data is a DataStore Object
+    """
 
     def __init__(self,data_class):
         fdr01 = ProteinInference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=.01)

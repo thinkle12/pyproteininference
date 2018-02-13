@@ -15,8 +15,14 @@ class Fdr(object):
         None
         
 class SetBasedFdr(Fdr):
-    ###Here we calculate set based FDR on the lead protein in the group
-    ###Input is as follows [[protein,protein_inferene_score,groud_id_number]]
+    """
+    Class calculates set based FDR on the lead protein in the group
+    Input is a DataStore object as well as an integer false discovery rate
+
+    Example: ProteinInference.fdrcalc.SetBasedFDR(data_class = data,false_discovery_rate=XX))
+
+    FDR is calculated As (2*decoys)/total
+    """
     def __init__(self,data_class,false_discovery_rate=.01):
         self.grouped_scored_data = data_class.grouped_scored_proteins
         self.false_discovery_rate = false_discovery_rate
@@ -68,7 +74,14 @@ class SetBasedFdr(Fdr):
 
 
 class QValueCalculation(Fdr):
+    """
+    Class calculates Q values on the lead protein in the groups
+    Input is a DataStore object
 
+    Example: ProteinInference.fdrcalc.SetBasedFDR(data_class = data)
+
+    Q values are calculated As (2*decoys)/total
+    """
     def __init__(self,data_class):
         self.group_objects = data_class.protein_group_objects
         self.data_class = data_class
@@ -106,8 +119,18 @@ class QValueCalculation(Fdr):
 
 
 class EntrapFdr(Fdr):
-    ###Here we calculate set based FDR on the lead protein in the group
-    ###Input is as follows [[protein,protein_inferene_score,groud_id_number]]
+    """
+    Class calculates Entrapment FDR on the lead protein in the groups.
+    Input is a DataStore object, an entrapment database, and a false discovery rate
+
+    Example: ProteinInference.fdrcalc.EntrapFdr(data_class = data, entrapment_database = "example_entrap.fasta", other_database = None, false_discovery_rate=.05)
+
+    FDR values are calculated As (entrapped proteins)/total
+
+    This class is useful for calculating an entrapment FDR IF using a benchmark dataset with KNOWN protein content.
+    Entrapment DB would be target proteins known to NOT be in the sample. However, these entrapped proteins should be in the main database that
+    the search was searched against via comet/mascot
+    """
     def __init__(self, data_class, entrapment_database, other_database = None, false_discovery_rate=.05):
         self.grouped_scored_data = data_class.grouped_scored_proteins
         self.false_discovery_rate = false_discovery_rate
@@ -185,8 +208,17 @@ class EntrapFdr(Fdr):
 
 
 class PureDecoyFdr(Fdr):
-    ###Here we calculate set based FDR on the lead protein in the group
-    ###Input is as follows [[protein,protein_inferene_score,groud_id_number]]
+    """
+    Class calculates set based Decoy FDR on the lead protein in the group
+    Input is a DataStore object as well as an integer false discovery rate
+
+    Example: ProteinInference.fdrcalc.PureDecoyFdr(data_class = data,false_discovery_rate=XX))
+
+    FDR is calculated As (decoys)/total
+
+    This class is used with ProteinInference.fdrcalc.EntrapFdr in ProteinInference.entrapment.GeneratePlot()
+    The prior mentioned class generates plots of Decoy FDR vs Entrapment FDR to test accuracy of PI methods
+    """
     def __init__(self, data_class, false_discovery_rate=.01):
         self.grouped_scored_data = data_class.grouped_scored_proteins
         self.false_discovery_rate = false_discovery_rate

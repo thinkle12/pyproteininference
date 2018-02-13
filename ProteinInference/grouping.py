@@ -12,16 +12,27 @@ import datastore
 from physical import ProteinGroup
 
 class Grouper(object):
+    """
+    Parent Grouper class for all grouper subset classes
+    """
     
     def __init__(self):
         None
         
 class SimpleSubsetting(Grouper):
-    ###Here we only do simple subset grouping
-    ###If we have two proteins A and B, and protein B's peptides are a complete subset of protein A's peptides
-    ###Then we create a protein group between the two proteins with protein A leading the group.
-    ###scored_data is scored data from PI_picker class or from PI_scoring class
+    """
+    Class that performs simple subset grouping of Protein objects from ProteinInference.physical.Protein()
+
+    If we have two proteins A and B, and protein B's peptides are a COMPLETE subset of protein A's peptides.
+    Then we create a protein group between the two proteins with protein A leading the group.
+
+    Example: ProteinInference.grouping.SimpleSubsetting(data_class = data)
+
+    Where data is a DataStore object
+
+    """
     def __init__(self,data_class):
+        #scored_data is scored data from PI_picker class or from PI_scoring class
         if data_class.picked_proteins_scored:
             self.scored_data = data_class.picked_proteins_scored
         else:
@@ -140,8 +151,19 @@ class SimpleSubsetting(Grouper):
 
         
 class GlpkSetup(Grouper):
+    """
+    This class is used to setup the glpk file for analysis.
 
-    #This class is used to setup the glpk file for analysis...
+    Example: ProteinInference.grouping.GlpkSetup(data_class = data ,glpkin_filename='glpkin_example.mod'))
+
+    Class will use attributes from DataStore object data.
+    Class will also write the glpkin filename to be used in ProteinInference.grouping.GlpkRunner()
+
+    The Bulk of the glpk input file looks as follows:
+    s.t. c1: y[5658] >=1;
+    s.t. c2: y[14145]+y[4857]+y[4858]+y[10143]+y[2966] >=1;
+    s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1
+    """
     def __init__(self,data_class,glpkin_filename='glpkin.mod'):
         self.data_class = data_class
         self.glpkin_filename = glpkin_filename
@@ -175,7 +197,7 @@ class GlpkSetup(Grouper):
             dd_prot_nums[p].append(unique_prots[p])
         
         #Store this data as glpk_protein_number_dictionary and glpk_number_protein_dictionary
-        #The numbers are important as they are used in the GLPK input and we need to know what number in the GLPK output corresponds with which protein
+        #The numbers are important as they are used in the GLPK input and we need to know what number in the GLPK output corresponds with which protein from the search
         self.data_class.glpk_protein_number_dictionary = dd_num        
         self.data_class.glpk_number_protein_dictionary = dd_prot_nums
                 
@@ -212,6 +234,17 @@ class GlpkSetup(Grouper):
         fileout.close()
             
 class GlpkRunner(Grouper):
+    """
+    The GlpkRunner class takes a path to glpsol, the glpk input file from ProteinInference.grouping.GlpkSetup(), a glpkout filename as well as a file_override option
+
+    Example: ProteinInference.grouping.GlpkRunner(path_to_glpsol = '/glpsol',glpkin='glpkin_example.mod',glpkout='glpkout_example.sol',file_override=False)
+
+    path to glpsol on rescomp3 is: '/gne/research/apps/protchem/glpk/bin/glpsol'
+
+    Typically set file_override to false unless you know what you are doing (IE you have a specific glpk solution file you want to use)
+
+    Important output of this class is the glpk output solution file to be used in ProteinInference.grouping.GlpkGrouper
+    """
     
     def __init__(self,path_to_glpsol = '/glpsol',glpkin='glpkin.mod',glpkout='glpkout.sol',file_override=False):
         self.path_to_glpsol = path_to_glpsol
@@ -243,10 +276,36 @@ class GlpkRunner(Grouper):
 
         
 class GlpkGrouper(Grouper):
+    """
+    This class takes a digest class object, a glpk solution file, as well as an option for swissprot override (protein naming convention).
+
+    Example: ProteinInference.grouping.GlpkGrouper(data_class = data,digest_class = digest,swissprot_override="soft",glpksolution_filename='glpkout_example.sol')
+
+    Where data is a DataStore object, digest is a Digest.insilicodigest.InSilicoDigest() class object and glpksolution_filename is a glpk solution file.
+
+    Finally, swissprot_override is a lead protein override for naming convention which can have 3 options: False, "soft", or "hard".
+    selecting False skips the override.
+
+    selecting "soft" will cycle through all protein leads and groups. If a protein lead is an unreviewed hit (trembl) then all proteins in the lead proteins group are inspected.
+    If any of these intra group proteins are a reviewed hit (swissprot) and the lead trembl proteins peptides are a complete subset of the swissprot proteins peptides, then we select
+    to swap the trembl and swissprot hits so that the swissprot is now the new lead protein.
+
+    We opt to use this soft override scheme as default because given the redundancy of our databases. Out of GLPK we see a lot of unreviewed hits being called lead proteins.
+    If proteins share the same peptides or share a very similar set of peptides we are unsure how GLPK selects which protein to supply as the lead.
+    As such, we get many reviewed and unreviewed proteins as lead proteins.
+    Performing this "soft" override switches many of these lead trembl hits to reviewed swissprot hits.
+    This is important as group members are used to seeing swissprot identifiers as opposed to trembl identifiers
+
+    selecting "hard" will perform the same swapping as the "soft" override. However,
+    the "hard" override will swap a trembl lead with the swissprot protein with the highest number of peptides in its group (so long as its already not a lead protein itself)
+    even if the unreviewed has a unique peptide relative to the peptides of all proteins in its group.
+    This setting is not recommended given that you can potentially lose out on Unique peptides
+
+    """
     ###Define indicies better and make this code more readable...
     ###Define indicies in init and show commented examples of how the data looks...
     
-    def __init__(self,data_class,digest_class,swissprot_override=False,glpksolution_filename='glpkout.sol'):
+    def __init__(self,data_class,digest_class,swissprot_override="soft",glpksolution_filename='glpkout.sol'):
         self.data_class = data_class
         self.digest_class = digest_class
         self.swissprot_override = swissprot_override

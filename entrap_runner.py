@@ -20,7 +20,7 @@ list_of_searchids = ['AB']
 list_of_databases = ['complete_and_reversed_AB.fasta']
 list_of_true_db = ['prest_pool_ab.fasta']
 
-# other_db = ['entrapment_data/prest_pool_b.fasta']
+# other_db = ['all_benchmark_entrapment_data/entrapment_data/prest_pool_b.fasta']
 other_db = [None]
 
 
@@ -98,7 +98,7 @@ with PdfPages('plots/'+list_of_searchids[0]+'_entrap_plots_pep.pdf') as pdf:
 
                         #Do in silico trypsin digestion
                         from Digest import insilicodigest
-                        digest = insilicodigest.InSilicoDigest(database_path='entrapment_data/'+list_of_databases[i], num_miss_cleavs=2, digest_type='trypsin')
+                        digest = insilicodigest.InSilicoDigest(database_path='all_benchmark_entrapment_data/entrapment_data/'+list_of_databases[i], num_miss_cleavs=2, digest_type='trypsin')
                         digest.execute()
                         #
                         #Run GLPK to generate the minimal list of proteins that account for the peptides
@@ -111,7 +111,7 @@ with PdfPages('plots/'+list_of_searchids[0]+'_entrap_plots_pep.pdf') as pdf:
                         group.execute()
 
                         #Next run fdrcalc on the data....
-                        fdr = ProteinInference.fdrcalc.EntrapFdr(data_class=data,entrapment_database='entrapment_data/prest_1000_random.fasta',other_database=other_db[0],false_discovery_rate=.05)
+                        fdr = ProteinInference.fdrcalc.EntrapFdr(data_class=data,entrapment_database='all_benchmark_entrapment_data/entrapment_data/prest_1000_random.fasta',other_database=other_db[0],false_discovery_rate=.05)
                         fdr.execute()
 
 
@@ -136,7 +136,7 @@ with PdfPages('plots/'+list_of_searchids[0]+'_entrap_plots_pep.pdf') as pdf:
                         # roc = ProteinInference.benchmark.RocPlot(data_class=data)
                         # roc.execute(pdf='output/k562_134285_dwml.pdf')
 
-                        entrap = ProteinInference.entrapment.GeneratePlot(data_class = data, entrapment_db= 'entrapment_data/prest_1000_random.fasta', true_db='entrapment_data/'+list_of_true_db[i], search_id=list_of_searchids[i], pdf=pdf, picked=pnp, qvr=qvr, pvr=pvr, other_database=other_db[0])
+                        entrap = ProteinInference.entrapment.GeneratePlot(data_class = data, entrapment_db= 'all_benchmark_entrapment_data/entrapment_data/prest_1000_random.fasta', true_db='all_benchmark_entrapment_data/entrapment_data/'+list_of_true_db[i], search_id=list_of_searchids[i], pdf=pdf, picked=pnp, qvr=qvr, pvr=pvr, other_database=other_db[0])
                         entrap.execute()
 
 

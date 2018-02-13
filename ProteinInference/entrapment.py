@@ -17,6 +17,19 @@ class Entrapment(object):
 
 
 class GeneratePlot(Entrapment):
+    """
+    This class is for experienced users only. The purpose of this class is to generate plots of Entrapment FDR vs Decoy FDR
+    in an attempt to test to see if entrapment vs decoy fdr is 1 to 1.
+
+    The class requires a DataStore object, an entrapment database (proteins known not to be in the sample),
+    a True database (proteins known to be in the sample), a search_id for tagging purposes, a pdf option to save the file as a pdf,
+    a picked/non picked boolean, q value restriction, and p value restriction (for labeling the plot),
+    and finally an "other_database" if neccessary to add to the entrapment database
+
+    This class produces plots of Entrapment FDR vs Decoy FDR for the purpose of benchmarking the Protein Inference tool
+
+    This class requires the search being used to be from a benchmark dataset of KNOWN protein content.
+    """
 
     def __init__(self, data_class, entrapment_db, true_db, search_id, pdf=None, picked=None, qvr=None, pvr=None, other_database = None):
         self.data_class = data_class

@@ -9,11 +9,25 @@ Created on Fri Dec  1 10:49:47 2017
 import csv
 
 class Export(object):
+    """
+    Main Class for exporting sorted protein lists to CSV
+    """
     
     def __init__(self):
         None
         
 class CsvOutAll(Export):
+    """
+    Class that outputs a subset of the passing proteins based on FDR.
+    Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
+    Only Proteins that pass FDR will be output and ALL proteins
+    will be output not just leads
+
+    Example: ProteinInference.export.CsvOutAll(data_class = data, filename_out = "example.csv")
+
+    if we assume data = datastore.Datastore(reader_class = reader)
+    and if we assume reader is a class object from reader.Reader()
+    """
     
     def __init__(self,data_class,filename_out):
         self.data_to_write = data_class.fdr_restricted_grouped_scored_proteins
@@ -39,6 +53,16 @@ class CsvOutAll(Export):
             writer.writerows(ungrouped_list)
             
 class CsvOutLeads(Export):
+    """
+    Class that outputs a subset of the passing proteins based on FDR.
+    Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
+    Only Proteins that pass FDR will be output and only Lead proteins will be output
+
+    Example: ProteinInference.export.CsvOutLeads(data_class = data, filename_out = "example.csv")
+
+    if we assume data = datastore.Datastore(reader_class = reader)
+    and if we assume reader is a class object from reader.Reader()
+    """
     
     def __init__(self,data_class,filename_out):
         self.data_to_write = data_class.fdr_restricted_grouped_scored_proteins
@@ -63,6 +87,17 @@ class CsvOutLeads(Export):
             writer.writerows(ungrouped_list)
             
 class CsvOutCommaSep(Export):
+    """
+    Class that outputs a subset of the passing proteins based on FDR.
+    Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
+    Only Proteins that pass FDR will be output and only Lead proteins will be output.
+    Proteins in the groups of lead proteins will also be output in the same row as the lead
+
+    Example: ProteinInference.export.CsvOutCommaSep(data_class = data, filename_out = "example.csv")
+
+    if we assume data = datastore.Datastore(reader_class = reader)
+    and if we assume reader is a class object from reader.Reader()
+    """
     
     def __init__(self,data_class,filename_out):
         self.data_to_write = data_class.fdr_restricted_grouped_scored_proteins
@@ -89,6 +124,14 @@ class CsvOutCommaSep(Export):
 
 
 class CsvOutLeadsQValues(Export):
+    """
+    Class that outputs all lead proteins with Q values.
+
+    Example: ProteinInference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
+    if we assume data = datastore.Datastore(reader_class = reader)
+
+    and if we assume reader is a class object from reader.Reader()
+    """
 
     def __init__(self,data_class,filename_out):
         self.data_to_write = data_class.protein_group_objects
@@ -115,6 +158,15 @@ class CsvOutLeadsQValues(Export):
             writer.writerows(ungrouped_list)
 
 class CsvOutCommaSepQValues(Export):
+    """
+    Class that outputs all lead proteins with Q values.
+    Proteins in the groups of lead proteins will also be output in the same row as the lead
+
+    Example: ProteinInference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
+    if we assume data = datastore.Datastore(reader_class = reader)
+
+    and if we assume reader is a class object from reader.Reader()
+    """
 
     def __init__(self,data_class,filename_out):
         self.data_to_write = data_class.protein_group_objects
@@ -141,6 +193,16 @@ class CsvOutCommaSepQValues(Export):
             writer.writerows(ungrouped_list)
 
 class CsvOutAllQValues(Export):
+    """
+    Class that outputs all proteins with Q values.
+    Non Lead proteins are also output - entire group gets output
+    Proteins in the groups of lead proteins will also be output in the same row as the lead
+
+    Example: ProteinInference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
+
+    if we assume data = datastore.Datastore(reader_class = reader)
+    and if we assume reader is a class object from reader.Reader()
+    """
 
     def __init__(self,data_class,filename_out):
         self.data_to_write = data_class.protein_group_objects

@@ -1,13 +1,14 @@
-# in silico trypsin digestion
+# in silico digestion
 
-Usage: python trypsin.py --input input_filename --output output_filename --miss 1
+Main Usage: As a secondary module in ProteinInference
+Usage: python Digest_Commandline_Runner.py --input input_filename --output output_filename --miss 1
+
 
 Note:
 
 1. The script is written under Python 2.7
 2. Biopython is prerequisite
 3. The trypsin digestion script shared here follows proline rule, which means it does not cut lysine (K) or arginine (R) if they are followed by proline (P).
-4. The program outputs a text format file which contains protein ID in the first column and corresponding tryptic peptides in the second column.
 
 How to use:
 

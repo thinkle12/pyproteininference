@@ -181,7 +181,7 @@ class RocPlot(Benchmark):
             plt.show()
         if pdf:
             pdf.savefig()
-            # pp.close()
+            plt.close()
 
 
         youden_data = [self.all_data[x] for x in range(youind)]

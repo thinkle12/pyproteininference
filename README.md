@@ -13,11 +13,15 @@ __Note:__
 6. FDR and Q value calculation is also based on the lead proteins of the groups.
 7. Naming conventions are biased towards outputting Swissprot (reviewed) over Trembl (unreviewed)
 
-__How to use:__
+__Command Line Usage:__
 
 1. Download the ProteinInference package into a specific folder
 2. Open a command terminal and cd to this folder.
-3. Type: python Command_Line_PI_runner.py  -t example_percolator_target_psm.txt -d example_percolator_decoy_psm.txt -o example_output.csv -db example_db.fasta -mc 2 -dt trypsin -pl 7 -pep .9 -sm "multiplicative_log" -st "q_value" -ppk -gp "glpk" -fdr .01 -ex ["q_value_comma_sep"]
+3. Type: 
+```bash
+python Command_Line_PI_runner.py  -t example_percolator_target_psm.txt -d example_percolator_decoy_psm.txt -o example_output.csv -db example_db.fasta -mc 2 -dt trypsin -pl 7 -pep .9 -sm "multiplicative_log" -st "q_value" -ppk -gp "glpk" -fdr .01 -ex ["q_value_comma_sep"]
+```
+
 
 __The 16 arguments are:__
 
@@ -56,3 +60,73 @@ __-ex:__ a list of export types that are wanted i.e.: ["q_value_comma_sep‚Äù, ‚Ä
 __Speed__
 
 Running the full PI pipeline on a large K562 run from Lumos 1 finishes in about 5 minutes. Most of the time is spent doing the in silicon tryptic digestion of the search database.
+
+
+##Example Python Runner
+```python
+import ProteinInference
+
+
+from Digest import insilicodigest
+#Do in silico trypsin digestion
+digest = insilicodigest.InSilicoDigest(database_path='data/UniprotKBConcat1708_HUMAN.fasta',
+                                       num_miss_cleavs=2,
+                                       digest_type='trypsin')
+digest.execute()
+
+
+
+#Initiate the reader...
+#Input for now is a target percolator output and a decoy percolator output
+pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='data/159260_Bioplex2_b10090_percolator_target_psm.txt',
+                                                          decoy_file='/data/159260_Bioplex2_b10090_percolator_decoy_psm.txt')
+#Execeute the reader instance, this loads the data into the reader class
+pep_and_prot_data.execute()
+
+#Next create a data store which is a class that stores all data for all steps of the PI process
+#Each method and each class calls from this data class to gather information for analyses
+data = ProteinInference.datastore.DataStore(pep_and_prot_data)
+
+#Here restrict the data to having peptides with length 7 or greater and a pep of less than .9
+restrict = ProteinInference.datastore.RestrictMainData(data, peptide_length=7, posterior_error_prob_threshold=.9,q_value_threshold=None)
+restrict.execute()
+
+#Here generate the pre score data using 'Q' values
+score_setup = ProteinInference.datastore.PreScoreQValue(data)
+score_setup.execute()
+
+#Here we do scoring
+score = ProteinInference.scoring.DownweightedMultiplicativeLog(data_class=data)
+score.execute()
+
+#Here we run protein picker
+picker = ProteinInference.picker.StandardPicker(data_class=data)
+picker.execute()
+
+#Run GLPK to generate the minimal list of proteins that account for the peptides
+#Running GLPK consists of 3 classes, setup, runner, and grouper which need to be run in succession
+glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkout_example.mod')
+glpksetup.execute()
+runglpk = ProteinInference.grouping.GlpkRunner(path_to_glpsol = '/gne/research/apps/protchem/glpk/bin/glpsol',glpkin = 'glpkinout/glpkout_example.mod',glpkout = 'glpkinout/glpkout_example.sol',file_override = False)
+runglpk.execute()
+group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout_example.sol')
+group.execute()
+
+#Next run fdrcalc on the data....
+fdr = ProteinInference.fdrcalc.SetBasedFdr(data_class=data,false_discovery_rate=.01)
+fdr.execute()
+
+#Also run Q value calculation
+q = ProteinInference.fdrcalc.QValueCalculation(data_class=data)
+q.execute()
+
+
+#Write the output to a csv...
+qval_out_csep = ProteinInference.export.CsvOutCommaSepQValues(data_class=data, filename_out='output/qvalues_csep_dwml_159260_Bioplex2_b10090_q_value.csv')
+qval_out_csep.execute()
+
+
+roc = ProteinInference.benchmark.RocPlot(data_class=data)
+roc.execute(pdf='plots/dwml_159260_Bioplex2_b10090_q_value.pdf')
+
+```

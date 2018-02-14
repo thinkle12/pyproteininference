@@ -27,14 +27,14 @@ list_of_searchids = ['154787']
 
 score_type = 'q'
 
-pick_nopick = [True]
+pick_nopick = [True,False]
 
 
 scoring_methods = ['bppp','ttc','ml','dwml','idwl','gm','dw2']
 
 large_list_of_results = [['SearchID','Scoring_Methods','Scoring_Type','Picker','Qvr','Pvr','Proteins_Passing_1_Percent_FDR']]
 
-with PdfPages('/Users/hinklet/random_analysis/k562_analysis/plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'_q.pdf') as pdf:
+with PdfPages('/gne/home/hinklet/k562_analysis/plots/'+list_of_searchids[0]+'_plot_'+score_type+'.pdf') as pdf:
     for k in range(len(scoring_methods)):
         for i in range(len(list_of_searchids)):
             for pnp in pick_nopick:
@@ -43,8 +43,8 @@ with PdfPages('/Users/hinklet/random_analysis/k562_analysis/plots/'+list_of_sear
                         start_time = time.time()
                         #Initiate the reader...
                         #Input for now is a target percolator output and a decoy percolator output
-                        pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='/Users/hinklet/random_analysis/k562_analysis/percolator_output/'+list_of_searchids[i]+'_percolator_target_psm.txt',
-                                                                                  decoy_file='/Users/hinklet/random_analysis/k562_analysis/percolator_output/'+list_of_searchids[i]+'_percolator_decoy_psm.txt')
+                        pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='/gne/home/hinklet/k562_analysis/percolator_output/'+list_of_searchids[i]+'_percolator_target_psm.txt',
+                                                                                  decoy_file='/gne/home/hinklet/k562_analysis/percolator_output/'+list_of_searchids[i]+'_percolator_decoy_psm.txt')
 
                         #Execeute the reader instance, this loads the data into the reader class
                         pep_and_prot_data.execute()
@@ -105,7 +105,7 @@ with PdfPages('/Users/hinklet/random_analysis/k562_analysis/plots/'+list_of_sear
                         #Running GLPK consists of 3 classes, setup, runner, and grouper which need to be run in succession
                         glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkout_'+list_of_searchids[i]+'.mod')
                         glpksetup.execute()
-                        runglpk = ProteinInference.grouping.GlpkRunner(path_to_glpsol = 'glpsol',glpkin = 'glpkinout/glpkout_'+list_of_searchids[i]+'.mod',glpkout = 'glpkinout/glpkout_'+list_of_searchids[i]+'.sol',file_override = False)
+                        runglpk = ProteinInference.grouping.GlpkRunner(path_to_glpsol = '/gne/research/apps/protchem/glpk/bin/glpsol',glpkin = 'glpkinout/glpkout_'+list_of_searchids[i]+'.mod',glpkout = 'glpkinout/glpkout_'+list_of_searchids[i]+'.sol',file_override = False)
                         runglpk.execute()
                         group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout_'+list_of_searchids[i]+'.sol')
                         group.execute()
@@ -124,22 +124,22 @@ with PdfPages('/Users/hinklet/random_analysis/k562_analysis/plots/'+list_of_sear
                         #print restricted
 
                         #Write the output to a csv...
-                        output = ProteinInference.export.CsvOutAll(data_class=data, filename_out='/Users/hinklet/random_analysis/k562_analysis/pi_output/all_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
+                        output = ProteinInference.export.CsvOutAll(data_class=data, filename_out='/gne/home/hinklet/k562_analysis/pi_output/all_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
                         output.execute()
 
-                        output_leads = ProteinInference.export.CsvOutLeads(data_class=data, filename_out='/Users/hinklet/random_analysis/k562_analysis/pi_output/leads_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
+                        output_leads = ProteinInference.export.CsvOutLeads(data_class=data, filename_out='/gne/home/hinklet/k562_analysis/pi_output/leads_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
                         output_leads.execute()
 
-                        output_csep = ProteinInference.export.CsvOutCommaSep(data_class=data,filename_out='/Users/hinklet/random_analysis/k562_analysis/pi_output/csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
+                        output_csep = ProteinInference.export.CsvOutCommaSep(data_class=data,filename_out='/gne/home/hinklet/k562_analysis/pi_output/csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
                         output_csep.execute()
 
-                        qval_out_csep = ProteinInference.export.CsvOutCommaSepQValues(data_class=data, filename_out='/Users/hinklet/random_analysis/k562_analysis/pi_output/qvalues_csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
+                        qval_out_csep = ProteinInference.export.CsvOutCommaSepQValues(data_class=data, filename_out='/gne/home/hinklet/k562_analysis/pi_output/qvalues_csep_'+scoring_methods[k]+'_'+list_of_searchids[i]+'_'+score_type+'.csv')
                         qval_out_csep.execute()
 
-                        qval_out_all = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out='/Users/hinklet/random_analysis/k562_analysis/pi_output/qvalues_all_' +scoring_methods[k] + '_' +list_of_searchids[i] + '_' + score_type + '.csv')
+                        qval_out_all = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out='/gne/home/hinklet/k562_analysis/pi_output/qvalues_all_' +scoring_methods[k] + '_' +list_of_searchids[i] + '_' + score_type + '.csv')
                         qval_out_all.execute()
 
-                        qval_out_leads = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out='/Users/hinklet/random_analysis/k562_analysis/pi_output/qvalues_leads_' +scoring_methods[k] + '_' +list_of_searchids[i] + '_' + score_type + '.csv')
+                        qval_out_leads = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out='/gne/home/hinklet/k562_analysis/pi_output/qvalues_leads_' +scoring_methods[k] + '_' +list_of_searchids[i] + '_' + score_type + '.csv')
                         qval_out_leads.execute()
 
                         roc = ProteinInference.benchmark.RocPlot(data_class=data)
@@ -171,6 +171,6 @@ with PdfPages('/Users/hinklet/random_analysis/k562_analysis/plots/'+list_of_sear
 
 import csv
 
-with open('/Users/hinklet/random_analysis/k562_analysis/k562_154787_stats_q.csv', "wb") as f:
+with open('/gne/home/hinklet/k562_analysis/k562_154787_stats_q.csv', "wb") as f:
     writer = csv.writer(f)
     writer.writerows(large_list_of_results)

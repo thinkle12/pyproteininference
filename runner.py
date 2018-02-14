@@ -22,7 +22,8 @@ digest = insilicodigest.InSilicoDigest(database_path='data/UniprotKBConcat1708_H
                                        digest_type='trypsin')
 digest.execute()
 
-list_of_searchids = ['154786','154787','154788','154789']
+# list_of_searchids = ['154786','154787','154788','154789']
+list_of_searchids = ['154787']
 
 score_type = 'q'
 
@@ -33,7 +34,7 @@ scoring_methods = ['bppp','ttc','ml','dwml','idwl','gm','dw2']
 
 large_list_of_results = [['SearchID','Scoring_Methods','Scoring_Type','Picker','Qvr','Pvr','Proteins_Passing_1_Percent_FDR']]
 
-with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') as pdf:
+with PdfPages('/Users/hinklet/random_analysis/k562_analysis/plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'_q.pdf') as pdf:
     for k in range(len(scoring_methods)):
         for i in range(len(list_of_searchids)):
             for pnp in pick_nopick:
@@ -170,6 +171,6 @@ with PdfPages('plots/'+list_of_searchids[0]+'_plot_'+scoring_methods[0]+'.pdf') 
 
 import csv
 
-with open('/Users/hinklet/random_analysis/k562_analysis/k562_stats_q.csv', "wb") as f:
+with open('/Users/hinklet/random_analysis/k562_analysis/k562_154787_stats_q.csv', "wb") as f:
     writer = csv.writer(f)
     writer.writerows(large_list_of_results)

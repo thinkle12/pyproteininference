@@ -62,19 +62,17 @@ __Speed__
 Running the full PI pipeline on a large K562 run from Lumos 1 finishes in about 5 minutes. Most of the time is spent doing the in silicon tryptic digestion of the search database.
 
 
-##Example Python Runner
+#Example Python Runner
+
 ```python
 import ProteinInference
-
-
 from Digest import insilicodigest
+
 #Do in silico trypsin digestion
 digest = insilicodigest.InSilicoDigest(database_path='data/UniprotKBConcat1708_HUMAN.fasta',
                                        num_miss_cleavs=2,
                                        digest_type='trypsin')
 digest.execute()
-
-
 
 #Initiate the reader...
 #Input for now is a target percolator output and a decoy percolator output
@@ -120,12 +118,11 @@ fdr.execute()
 q = ProteinInference.fdrcalc.QValueCalculation(data_class=data)
 q.execute()
 
-
 #Write the output to a csv...
 qval_out_csep = ProteinInference.export.CsvOutCommaSepQValues(data_class=data, filename_out='output/qvalues_csep_dwml_159260_Bioplex2_b10090_q_value.csv')
 qval_out_csep.execute()
 
-
+#Generate a Roc Plot
 roc = ProteinInference.benchmark.RocPlot(data_class=data)
 roc.execute(pdf='plots/dwml_159260_Bioplex2_b10090_q_value.pdf')
 

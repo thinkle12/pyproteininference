@@ -8,7 +8,8 @@ Note:
 2. Biopython is prerequisite
 3. The trypsin digestion script shared here follows proline rule, which means it does not cut lysine (K) or arginine (R) if they are followed by proline (P).
 
-##Example Python Runner
+#Example Python Runner
+
 ```python
 from Digest import insilicodigest
 

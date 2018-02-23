@@ -527,7 +527,21 @@ class GlpkGrouper(Grouper):
                 #If the lead is reviewed append it to leads and do nothing else...
 
                 if sub_groups[0].reviewed:
-                    leads.add(sub_groups[0].identifier)
+                    if '-' in sub_groups[0].identifier:
+                        pure_id = sub_groups[0].identifier.split('-')[0]
+                        # Start to loop through sub_groups which is the current group...
+                        for potential_replacement in sub_groups[1:]:
+                            isoform_override = potential_replacement
+                            if isoform_override.identifier==pure_id and isoform_override.identifier not in leads and set(sub_groups[0].peptides).issubset(set(isoform_override.peptides)):
+                                isoform_override_index = scores_grouped[-1].index(isoform_override)
+                                cur_iso_lead = scores_grouped[-1][0]
+                                print cur_iso_lead.identifier
+                                scores_grouped[-1][0], scores_grouped[-1][isoform_override_index] = scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
+                                scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
+                                new_iso_lead = scores_grouped[-1][0]
+                                print new_iso_lead.identifier
+                                lead_replaced_prot_pairs.append([cur_iso_lead, new_iso_lead])
+                                leads.add(sub_groups[0].identifier)
                 #If the lead is unreviewed then try to replace it with the best reviewed hit
                 if not sub_groups[0].reviewed:
                     #If the lead is unreviewed attempt to replace it...
@@ -612,8 +626,23 @@ class GlpkGrouper(Grouper):
                 scores_grouped.append(sub_groups)
                 # If the lead is reviewed append it to leads and do nothing else...
 
+                ###NEW ISOFORM OVERRIDE
                 if sub_groups[0].reviewed:
-                    leads.add(sub_groups[0].identifier)
+                    if '-' in sub_groups[0].identifier:
+                        pure_id = sub_groups[0].identifier.split('-')[0]
+                        # Start to loop through sub_groups which is the current group...
+                        for potential_replacement in sub_groups[1:]:
+                            isoform_override = potential_replacement
+                            if isoform_override.identifier==pure_id and isoform_override.identifier not in leads and set(sub_groups[0].peptides).issubset(set(isoform_override.peptides)):
+                                isoform_override_index = scores_grouped[-1].index(isoform_override)
+                                cur_iso_lead = scores_grouped[-1][0]
+                                print cur_iso_lead.identifier
+                                scores_grouped[-1][0], scores_grouped[-1][isoform_override_index] = scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
+                                scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
+                                new_iso_lead = scores_grouped[-1][0]
+                                print new_iso_lead.identifier
+                                lead_replaced_prot_pairs.append([cur_iso_lead, new_iso_lead])
+                                leads.add(sub_groups[0].identifier)
                 # If the lead is unreviewed then try to replace it with the best reviewed hit
                 if not sub_groups[0].reviewed:
                     # If the lead is unreviewed attempt to replace it...

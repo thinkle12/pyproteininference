@@ -162,7 +162,7 @@ class ProteinInformationDictionary(DataStore):
         for psms in self.data_to_use:
             #Loop through all proteins
             for prots in psms.possible_proteins:
-                protein_psm_score_dictionary[prots].append({'peptide':psms.identifier.split('.')[1],'Qvalue':psms.qvalue,'PosteriorErrorProbability':psms.pepvalue,'Percscore':psms.percscore})
+                protein_psm_score_dictionary[prots].append({'peptide':psms.identifier,'Qvalue':psms.qvalue,'PosteriorErrorProbability':psms.pepvalue,'Percscore':psms.percscore})
         
         self.data_class.protein_info_dict = protein_psm_score_dictionary
         

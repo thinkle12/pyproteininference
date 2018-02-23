@@ -53,11 +53,13 @@ class InSilicoDigest(object):
         
         if cut_sites[-1]!=len(proseq):
             cut_sites.append(len(proseq))
-    
+
+
         if len(cut_sites)>2:
-            if  miss_cleavage==0:
+            if miss_cleavage==0:
                 for j in range(0,len(cut_sites)-1):
                     peptides.append(proseq[cut_sites[j]:cut_sites[j+1]])
+
     
             elif miss_cleavage==1:
                 for j in range(0,len(cut_sites)-2):
@@ -68,10 +70,13 @@ class InSilicoDigest(object):
     
             elif miss_cleavage==2:
                 for j in range(0,len(cut_sites)-3):
+
                     peptides.append(proseq[cut_sites[j]:cut_sites[j+1]])
                     peptides.append(proseq[cut_sites[j]:cut_sites[j+2]])
                     peptides.append(proseq[cut_sites[j]:cut_sites[j+3]])
-                
+
+
+
                 peptides.append(proseq[cut_sites[-3]:cut_sites[-2]])
                 peptides.append(proseq[cut_sites[-3]:cut_sites[-1]])
                 peptides.append(proseq[cut_sites[-2]:cut_sites[-1]])

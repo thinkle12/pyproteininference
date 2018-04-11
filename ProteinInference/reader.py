@@ -69,18 +69,24 @@ class PercolatorRead(Reader):
         
         #Combine the lists
         perc_all = ptarg+pdec
+        perc_all = sorted(perc_all, key=lambda x: float(x[1]), reverse = True)
         list_of_psm_objects = []
+        peptide_tracker = []
+        #We only want to get unique peptides... using all messes up scoring...
         #Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
         for psm_info in perc_all:
+            current_peptide = psm_info[self.peptide_index]
             #Define the Psm...
-            p = Psm(identifier = psm_info[self.peptide_index])
-            #Add all the attributes
-            p.percscore = float(psm_info[self.perc_score_index])
-            p.qvalue = float(psm_info[self.q_value_index])
-            p.pepvalue = float(psm_info[self.posterior_error_prob_index])
-            p.possible_proteins = psm_info[self.proteinIDs_index:]
-            list_of_psm_objects.append(p)
-               
+            if current_peptide not in peptide_tracker:
+                p = Psm(identifier = current_peptide)
+                #Add all the attributes
+                p.percscore = float(psm_info[self.perc_score_index])
+                p.qvalue = float(psm_info[self.q_value_index])
+                p.pepvalue = float(psm_info[self.posterior_error_prob_index])
+                p.possible_proteins = psm_info[self.proteinIDs_index:]
+                list_of_psm_objects.append(p)
+                peptide_tracker.append(current_peptide)
+
         self.psms = list_of_psm_objects
 
         
@@ -90,6 +96,8 @@ class OtherMethod(Reader):
     """
     Potential Future class to read in from another source.
     Potentially from a database, another Psm scoring source, or potentially from Percolator XML source.
+    This Method will be used to read from post processing proteologic logical object... which can either be LDA or Percolator Results...
+    Essentially it will just be a searchID and an LDA/Percolator ID
     """
     
     def __init__(self,something_else):

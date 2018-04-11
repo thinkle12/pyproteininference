@@ -36,8 +36,8 @@ class DataStore(object):
         if self.yaml_param_file:
             with open(self.yaml_param_file, 'r') as stream:
                 yaml_params = yaml.load(stream)
-            #Read param file..... write params to be used to list...
-            #We will then have a bunch of... if param in param_list.... do... if not pass....
+            #Read param file..... params read in as dict...
+            #We will then have a bunch of... if param in param_dict.... do... if not pass....
         else:
             #Default params to be used if no Yaml file is provided...
             yaml_params = {'Parameters': {'Picker': True,
@@ -52,6 +52,9 @@ class DataStore(object):
                                           'Missed_Cleavages': 2,
                                           'Digest_Type': "trypsin",
                                           'GLPK_Path':'glpsol'}}
+
+            #This is bad because default GLPK_Path is glpsol... on rescomp this will not work...
+
         self.yaml_params = yaml_params
         self.protein_info_dict = None
         self.potential_proteins = None

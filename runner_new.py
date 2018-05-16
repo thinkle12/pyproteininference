@@ -10,26 +10,38 @@ Created on Tue Dec  5 16:16:17 2017
 import ProteinInference
 from Digest import insilicodigest
 import os
+import tempfile
 
 # target_file = "data/159260_Bioplex2_b10090_percolator_target_psm.txt"
 # decoy_file = "data/159260_Bioplex2_b10090_percolator_decoy_psm.txt"
-target_file = '/Users/hinklet/PythonPackages/PercolatorAnalysis/percolator_output/002402_percolator_target_psm_all_psms.txt'
-decoy_file = '/Users/hinklet/PythonPackages/PercolatorAnalysis/percolator_output/002402_percolator_decoy_psm_all_psms.txt'
-yaml_params = "parameters/Protein_Inference_Params.yaml"
-database = "data/UniprotKBConcat1708_HUMAN.fasta"
-output_dir = "output/"
+# target_file = '/Users/hinklet/PythonPackages/PercolatorAnalysis/percolator_output/002402_percolator_target_psm_all_psms.txt'
+# decoy_file = '/Users/hinklet/PythonPackages/PercolatorAnalysis/percolator_output/002402_percolator_decoy_psm_all_psms.txt'
 
-if "Bioplex" in target_file:
-    tag = '_'.join(target_file.split('/')[-1].split('_')[:3])
-    print tag
-if "Bioplex" not in target_file:
-    tag = target_file.split('/')[-1].split('_')[0]
-    print tag
+data_dir = '/Users/hinklet/random_analysis/shigella_GP_p1/percolator_output/'
+
+data_files = os.listdir(data_dir)
+
+target_files = [os.path.join(data_dir,x) for x in data_files if 'target' in x]
+decoy_files = [os.path.join(data_dir,x) for x in data_files if 'decoy' in x]
+
+yaml_params = "parameters/Protein_Inference_Params.yaml"
+database = "/Users/hinklet/random_analysis/shigella_GP_p1/Mouse_Shigella_up17_18_properformat.fasta"
+output_dir = "/Users/hinklet/random_analysis/shigella_GP_p1/protein_inference_output/"
+
+# if "Bioplex" in target_file:
+#     tag = '_'.join(target_file.split('/')[-1].split('_')[:3])
+#     print tag
+# if "Bioplex" not in target_file:
+#     tag = target_file.split('/')[-1].split('_')[0]
+#     print tag
+
+temp_dir = tempfile.gettempdir()
+write_dir_input = temp_dir
 
 #Initiate the reader...
 #Input for now is a target percolator output and a decoy percolator output
-pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file=target_file,
-                                                          decoy_file=decoy_file)
+pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file=target_files,
+                                                          decoy_file=decoy_files)
 
 #Execeute the reader instance, this loads the data into the reader class
 pep_and_prot_data.execute()
@@ -114,48 +126,57 @@ server_glpk_path = '/gne/research/apps/protchem/glpk/bin/glpsol'
 
 #Run GLPK setup, runner, grouper...
 if grouping_type=='glpk':
-    glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkin_'+tag+'.mod')
-    glpksetup.execute()
-    glpkrun = ProteinInference.grouping.GlpkRunner(path_to_glpsol = data.yaml_params['Parameters']['GLPK_Path'],glpkin='glpkinout/glpkin_'+tag+'.mod',glpkout='glpkinout/glpkout_'+tag+'.sol',file_override=False)
-    glpkrun.execute()
-    group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout_'+tag+'.sol')
-    group.execute()
+    if grouping_type == 'glpk':
+        glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data, glpkin_filename=os.path.join(write_dir_input,
+                                                                                                      'glpkin_' + data.search_id + '.mod'))
+        glpksetup.execute()
+        glpkrun = ProteinInference.grouping.GlpkRunner(path_to_glpsol=data.yaml_params['Parameters']['GLPK_Path'],
+                                                       glpkin=os.path.join(write_dir_input,
+                                                                           'glpkin_' + data.search_id + '.mod'),
+                                                       glpkout=os.path.join(write_dir_input,
+                                                                            'glpkin_' + data.search_id + '.sol'),
+                                                       file_override=False)
+        glpkrun.execute()
+        group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft',
+                                                      glpksolution_filename=os.path.join(write_dir_input,
+                                                                                         'glpkin_' + data.search_id + '.sol'))
+        group.execute()
 
 if grouping_type=='multi_subsetting':
     group = ProteinInference.grouping.MultiSubsetting(data_class=data)
     group.execute()
 
 
-#Next run fdrcalc on the data....
-fdr = ProteinInference.fdrcalc.SetBasedFdr(data_class=data,false_discovery_rate=float(data.yaml_params['Parameters']['FDR']))
-fdr.execute()
+# #Next run fdrcalc on the data....
+# fdr = ProteinInference.fdrcalc.SetBasedFdr(data_class=data,false_discovery_rate=float(data.yaml_params['Parameters']['FDR']))
+# fdr.execute()
 q = ProteinInference.fdrcalc.QValueCalculation(data_class=data)
 q.execute()
 #Finally we have our output restricted data...
-restricted = data.fdr_restricted_grouped_scored_proteins
+# restricted = data.fdr_restricted_grouped_scored_proteins
 #Print the len of restricted data... which is how many protein groups pass FDR threshold
-print 'Number of Proteins passing an FDR of'+str(data.yaml_params['Parameters']['FDR'])+' = '+str(len(restricted))
+# print 'Number of Proteins passing an FDR of'+str(data.yaml_params['Parameters']['FDR'])+' = '+str(len(restricted))
 
 export_type = data.yaml_params['Parameters']['Export']
 
 #Write the output to a csv...
 if 'leads' in export_type:
-    export = ProteinInference.export.CsvOutLeads(data_class=data,filename_out=output_dir+tag+'_'+'leads'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export = ProteinInference.export.CsvOutLeads(data_class=data,filename_out=output_dir+'Custom'+'_'+'leads'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'all' in export_type:
-    export = ProteinInference.export.CsvOutAll(data_class=data,filename_out=output_dir+tag+'_'+'all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export = ProteinInference.export.CsvOutAll(data_class=data,filename_out=output_dir+'Custom'+'_'+'all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'comma_sep' in export_type:
-    export = ProteinInference.export.CsvOutCommaSep(data_class=data, filename_out=output_dir+tag+'_'+'comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export = ProteinInference.export.CsvOutCommaSep(data_class=data, filename_out=output_dir+'Custom'+'_'+'comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'q_value_comma_sep' in export_type:
-    export = ProteinInference.export.CsvOutCommaSepQValues(data_class=data,filename_out=output_dir+tag+'_'+'q_value_comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export = ProteinInference.export.CsvOutCommaSepQValues(data_class=data,filename_out=output_dir+'Custom'+'_'+'q_value_comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
-if 'q_value_leads' in export_type:
-    export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out=output_dir+tag+'_'+'q_value_leads_other'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+if 'q_value' in export_type:
+    export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out=output_dir+'GP_p1'+'_'+'q_value_leads_other'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
-if 'q_value_all' in export_type:
-    export = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out=output_dir+tag+'_'+'q_value_all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+if 'q_value' in export_type:
+    export = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out=output_dir+'GP_p1'+'_'+'q_value_all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 
 

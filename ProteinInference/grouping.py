@@ -315,6 +315,7 @@ class GlpkGrouper(Grouper):
             self.scored_data = data_class.scored_proteins
         self.data_class = data_class
         self.glpksolution_filename = glpksolution_filename
+        self.lead_protein_set = None
         
     def execute(self):
         import os
@@ -355,6 +356,7 @@ class GlpkGrouper(Grouper):
                 lead_proteins.append(dd_prot_nums[passing_protein_number][0])
 
         lead_protein_set = set(lead_proteins)
+        self.lead_protein_set = lead_protein_set
 
         print 'Number of lead proteins = '+str(len(lead_proteins))
 
@@ -373,7 +375,7 @@ class GlpkGrouper(Grouper):
                 lead_protein_objects.append(protein_object)
                 lead_protein_identifiers.append(protein_object.identifier)
 
-                
+        self.lead_protein_objects = lead_protein_objects
         #Delete input and output files...
         #os.remove('glpkin.mod')
         #os.remove(self.glpksolution_filename)
@@ -405,6 +407,8 @@ class GlpkGrouper(Grouper):
         #And seeing if the length of the dictionary value (which are proteins) is equal to 1...
         #If its equal to 1 then that peptide (key) has only 1 protein it maps to potentially...
 
+        list_of_prots_not_in_db = []
+        list_of_peps_not_in_db = []
         print 'Grouping Proteins...'
         in_silico_peptides_to_proteins = self.digest_class.peptide_to_protein_dictionary
         grouped = []
@@ -412,13 +416,25 @@ class GlpkGrouper(Grouper):
             protein_objects.peptides = list(prot_pep_dict[protein_objects.identifier])
             sub_group = [protein_objects]
             cur_peptides = list(prot_pep_dict[protein_objects.identifier])
-            #Use a default dict set here for automatic union
+            # Use a default dict set here for automatic union
             all_potential_proteins = collections.defaultdict(set)
             all_potential_proteins['current'] = set([])
             for peptides in cur_peptides:  #Probably put an if here... if peptides is in the list of peptides after being restricted by datastore.RestrictMainData
                 if peptides in self.data_class.restricted_peptides:
-                    #Get the proteins that map to the current peptide using in_silico_peptides_to_proteins
+                    # Get the proteins that map to the current peptide using in_silico_peptides_to_proteins
+                    # First make sure our peptide is formatted properly...
+                    if not peptides.isupper() or not peptides.isalpha():
+                        # If the peptide is not all upper case or if its not all alphabetical...
+                        rm = datastore.RemoveMods(peptides)
+                        # Then run remove mods on it...
+                        rm.execute()
+                        # Redefine the peptide as the stripped version below...
+                        peptides = rm.stripped_peptide
                     potential_protein_list = list(in_silico_peptides_to_proteins[peptides])
+                    if len(potential_protein_list) == 0:
+                        list_of_prots_not_in_db.append(peptides)
+                        list_of_peps_not_in_db.append(protein_objects.identifier)
+                        print 'Protein '+str(protein_objects.identifier)+' and Peptide '+str(peptides)+' is not in database...'
                     #If these proteins are not a lead add them to all potential protein default dict
                     for prots in potential_protein_list:
                         if prots not in lead_protein_set:
@@ -430,12 +446,22 @@ class GlpkGrouper(Grouper):
                                 current_protein_object.peptides = other_peptides
                                 all_potential_proteins['current'].add(current_protein_object)
                             except ValueError:
+                                # Put a print statement here showing which proteins werent found... Meaning they dont have a protein object
+                                # I think this could be due to the protein having only 1 peptide and it gets filtered out...
+                                # Check to see though...
                                 pass
             #Next append them to the current sub group... (Which is just the lead protein object)
             sub_group = sub_group+list(all_potential_proteins['current'])
+            # sub_group at first is just the lead protein object...
+            # We then try apply grouping by looking at all peptides from the lead...
+            # For all of these peptides look at all other non lead proteins and try to assign them to the group...
+            # We assign the entire protein object as well... in the above try/except
             #Then append this sub group to the main list
             #The variable grouped is now a list of lists which each element being a Protein object and each list of protein objects corresponding to a group
             grouped.append(sub_group)
+
+        self.list_of_prots_not_in_db = list_of_prots_not_in_db
+        self.list_of_peps_not_in_db = list_of_peps_not_in_db
 
         #Here are the proteins from the database that are reviewed (swissprot)
         sp_protein_set = set(self.digest_class.swiss_prot_protein_dictionary['swiss-prot'])
@@ -625,24 +651,6 @@ class GlpkGrouper(Grouper):
                 # scores_grouped is the MAIN list of lists with grouped protein objects
                 scores_grouped.append(sub_groups)
                 # If the lead is reviewed append it to leads and do nothing else...
-
-                ###NEW ISOFORM OVERRIDE
-                if sub_groups[0].reviewed:
-                    if '-' in sub_groups[0].identifier:
-                        pure_id = sub_groups[0].identifier.split('-')[0]
-                        # Start to loop through sub_groups which is the current group...
-                        for potential_replacement in sub_groups[1:]:
-                            isoform_override = potential_replacement
-                            if isoform_override.identifier==pure_id and isoform_override.identifier not in leads and set(sub_groups[0].peptides).issubset(set(isoform_override.peptides)):
-                                isoform_override_index = scores_grouped[-1].index(isoform_override)
-                                cur_iso_lead = scores_grouped[-1][0]
-                                print cur_iso_lead.identifier
-                                scores_grouped[-1][0], scores_grouped[-1][isoform_override_index] = scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
-                                scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
-                                new_iso_lead = scores_grouped[-1][0]
-                                print new_iso_lead.identifier
-                                lead_replaced_prot_pairs.append([cur_iso_lead, new_iso_lead])
-                                leads.add(sub_groups[0].identifier)
                 # If the lead is unreviewed then try to replace it with the best reviewed hit
                 if not sub_groups[0].reviewed:
                     # If the lead is unreviewed attempt to replace it...
@@ -672,6 +680,24 @@ class GlpkGrouper(Grouper):
                                 pass
                         else:
                             pass
+                ###NEW ISOFORM OVERRIDE
+                if sub_groups[0].reviewed:
+                    if '-' in sub_groups[0].identifier:
+                        pure_id = sub_groups[0].identifier.split('-')[0]
+                        # Start to loop through sub_groups which is the current group...
+                        for potential_replacement in sub_groups[1:]:
+                            isoform_override = potential_replacement
+                            if isoform_override.identifier==pure_id and isoform_override.identifier not in leads and set(sub_groups[0].peptides).issubset(set(isoform_override.peptides)):
+                                isoform_override_index = scores_grouped[-1].index(isoform_override)
+                                cur_iso_lead = scores_grouped[-1][0]
+                                print cur_iso_lead.identifier
+                                scores_grouped[-1][0], scores_grouped[-1][isoform_override_index] = scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
+                                scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
+                                new_iso_lead = scores_grouped[-1][0]
+                                print new_iso_lead.identifier
+                                lead_replaced_prot_pairs.append([cur_iso_lead, new_iso_lead])
+                                leads.add(sub_groups[0].identifier)
+
                 pg.proteins = sub_groups
                 list_of_group_objects.append(pg)
             self.data_class.lead_replaced_proteins = lead_replaced_prot_pairs

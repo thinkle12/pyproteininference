@@ -42,33 +42,69 @@ class PercolatorRead(Reader):
         self.peptide_index = 4
         self.proteinIDs_index = 5
         self.psms = None
+        self.search_id = None
         
     def execute(self):
         #Read in and split by line
-        t = open(self.target_file)
-        t = t.read()
-        lines = t.split('\n')
-        
-        #Split each line by tab
-        ptarg = [x.split('\t') for x in lines]
-        #Remove empty ending line in file
-        del ptarg[-1]
-        #Remove header
-        del ptarg[0]
+        # If target_file is a list... read them all in and concatenate...
+        if isinstance(self.target_file, (list,)):
+            all_target = []
+            for t_files in self.target_file:
+                t = open(t_files)
+                t = t.read()
+                lines = t.split('\n')
+
+                #Split each line by tab
+                ptarg = [x.split('\t') for x in lines]
+                #Remove empty ending line in file
+                del ptarg[-1]
+                #Remove header
+                del ptarg[0]
+                all_target = all_target + ptarg
+        else:
+            # If not just read the file...
+            t = open(self.target_file,)
+            t = t.read()
+            lines = t.split('\n')
+
+            # Split each line by tab
+            ptarg = [x.split('\t') for x in lines]
+            # Remove empty ending line in file
+            del ptarg[-1]
+            # Remove header
+            del ptarg[0]
+            all_target = ptarg
+
         
         #Repeat for decoy file
-        d = open(self.decoy_file)
-        d = d.read()
-        dlines = d.split('\n')
-        
-        pdec = [x.split('\t') for x in dlines]
-        #Remove empty ending in file
-        del pdec[-1]
-        #Remove header
-        del pdec[0]
+        if isinstance(self.decoy_file, (list,)):
+            all_decoy = []
+            for d_files in self.decoy_file:
+                d = open(d_files)
+                d = d.read()
+                dlines = d.split('\n')
+
+                pdec = [x.split('\t') for x in dlines]
+                #Remove empty ending in file
+                del pdec[-1]
+                #Remove header
+                del pdec[0]
+                all_decoy = all_decoy + pdec
+        else:
+            d = open(self.decoy_file)
+            d = d.read()
+            dlines = d.split('\n')
+
+            pdec = [x.split('\t') for x in dlines]
+            # Remove empty ending in file
+            del pdec[-1]
+            # Remove header
+            del pdec[0]
+            all_decoy = pdec
+
         
         #Combine the lists
-        perc_all = ptarg+pdec
+        perc_all = all_target+all_decoy
         perc_all = sorted(perc_all, key=lambda x: float(x[1]), reverse = True)
         list_of_psm_objects = []
         peptide_tracker = []
@@ -84,6 +120,7 @@ class PercolatorRead(Reader):
                 p.qvalue = float(psm_info[self.q_value_index])
                 p.pepvalue = float(psm_info[self.posterior_error_prob_index])
                 p.possible_proteins = psm_info[self.proteinIDs_index:]
+                p.psm_id = psm_info[self.psmid_index]
                 list_of_psm_objects.append(p)
                 peptide_tracker.append(current_peptide)
 
@@ -92,7 +129,7 @@ class PercolatorRead(Reader):
         
         #return perc
         
-class OtherMethod(Reader):
+class ProteologicPostSearch(Reader):
     """
     Potential Future class to read in from another source.
     Potentially from a database, another Psm scoring source, or potentially from Percolator XML source.
@@ -100,8 +137,43 @@ class OtherMethod(Reader):
     Essentially it will just be a searchID and an LDA/Percolator ID
     """
     
-    def __init__(self,something_else):
-        self.something_else=something_else
-        
-    def print_stuff(self):
-        print self.something_else
+    def __init__(self,proteologic_object,search_id,percolator_id=None):
+        self.proteologic_object=proteologic_object
+        self.search_id = search_id
+        self.percolator_id = percolator_id
+
+        self.psms = None
+
+    def execute(self):
+        #I want this to be logical object but it doesnt work... weird...
+        list_of_psms = self.proteologic_object.physical_object.psm_sets
+        #Sort this by posterior error prob...
+
+
+        list_of_psm_objects = []
+        peptide_tracker = []
+        #Peptide tracker is used because we only want UNIQUE peptides...
+        #The data is sorted by percolator score... or at least it should be...
+        #Or sorted by posterior error probability
+        for peps in list_of_psms:
+            self.peps = peps
+            current_peptide = peps.peptide.sequence
+            # Define the Psm...
+            if current_peptide not in peptide_tracker:
+                p = Psm(identifier=current_peptide)
+                # Add all the attributes
+                p.percscore = float(0) # Will be stored in table in future I think...
+                p.qvalue = float(peps.psm_filter.q_value)
+                p.pepvalue = float(peps.psm_filter.pepvalue)
+                if peps.peptide.protein not in peps.alternative_proteins:
+                    p.possible_proteins = [peps.peptide.protein] + peps.alternative_proteins
+                else:
+                    p.possible_proteins = peps.alternative_proteins
+
+                p.possible_proteins = list(filter(None, p.possible_proteins))
+                p.psm_id = peps.spectrum.spectrum_identifier
+                list_of_psm_objects.append(p)
+                peptide_tracker.append(current_peptide)
+
+        self.psms = list_of_psm_objects
+

@@ -9,6 +9,7 @@ Created on Mon Dec  4 14:15:15 2017
 import collections 
 from physical import Protein
 import yaml
+import re
 
 class DataStore(object):
     """
@@ -27,10 +28,16 @@ class DataStore(object):
         if reader_class.psms:
             self.main_data_form = reader_class.psms
             self.restricted_peptides = [x.identifier.split('.')[1] for x in self.main_data_form]
-            if "Bioplex" in reader_class.target_file:
-                self.search_id = reader_class.target_file.split('_')[0]
-            if "Bioplex" not in reader_class.target_file:
-                self.search_id = reader_class.target_file.split('_')[0]
+            if not reader_class.search_id:
+                if "Bioplex" in reader_class.target_file:
+                    self.search_id = reader_class.target_file.split('_')[0]
+                if "Bioplex" not in reader_class.target_file:
+                    try:
+                        self.search_id = reader_class.target_file.split('_')[0]
+                    except AttributeError:
+                        self.search_id = 'Custom'
+            else:
+                self.search_id = reader_class.search_id
 
         self.yaml_param_file = yaml_param_file
         if self.yaml_param_file:
@@ -306,6 +313,8 @@ class PreScoreQValue(DataStore):
 
         protein_psm_score_dictionary = collections.defaultdict(list)
         raw_peptide_dictionary = collections.defaultdict(list)
+        psmid_peptide_dictionary = collections.defaultdict(list)
+
 
         #Loop through all Psms
         for psms in self.data_to_use:
@@ -314,10 +323,12 @@ class PreScoreQValue(DataStore):
                 #Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
                 protein_psm_score_dictionary[prots].append({'peptide':psms.identifier.split('.')[1],'score':psms.qvalue})
                 raw_peptide_dictionary[prots].append({'complete_peptide':psms.identifier})
+                psmid_peptide_dictionary[prots].append({'peptide':psms.identifier.split('.')[1],'psm_id':psms.psm_id})
         protein_list = []
         for pkeys in protein_psm_score_dictionary.keys():
             p = Protein(identifier = pkeys)
             p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
+            p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
             p.raw_peptides = [x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]
             protein_list.append(p)
 
@@ -346,6 +357,7 @@ class PreScorePepValue(DataStore):
             
         protein_psm_score_dictionary = collections.defaultdict(list)
         raw_peptide_dictionary = collections.defaultdict(list)
+        psmid_peptide_dictionary = collections.defaultdict(list)
 
 
         #Loop through all Psms
@@ -355,10 +367,12 @@ class PreScorePepValue(DataStore):
                 #Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
                 protein_psm_score_dictionary[prots].append({'peptide':psms.identifier.split('.')[1],'score':psms.pepvalue})
                 raw_peptide_dictionary[prots].append({'complete_peptide': psms.identifier})
+                psmid_peptide_dictionary[prots].append({'peptide': psms.identifier.split('.')[1], 'psm_id': psms.psm_id})
         protein_list = []
         for pkeys in protein_psm_score_dictionary.keys():
             p = Protein(identifier = pkeys)
             p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
+            p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
             p.raw_peptides = [x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]
             protein_list.append(p)
 
@@ -565,8 +579,17 @@ class GetProteinInformation(DataStore):
 
         return list_structure
 
+class RemoveMods(DataStore):
+    """
+    This class simply removes modifications from peptide strings
             
-            
-            
-            
-        
+    """
+    def __init__(self,peptide_string):
+        self.peptide_string = peptide_string.upper()
+        self.regex = re.compile('[^a-zA-Z]')
+
+    def execute(self):
+
+        # First parameter is the replacement, second parameter is your input string
+        stripped_peptide = self.regex.sub('', self.peptide_string)
+        self.stripped_peptide = stripped_peptide

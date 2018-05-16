@@ -4,7 +4,7 @@ import collections
 
 start_time = time.time()
 
-digest = insilicodigest.InSilicoDigest(database_path='all_benchmark_entrapment_data/entrapment_data/prest_pool_ab.fasta', num_miss_cleavs=2, digest_type='trypsin')
+digest = insilicodigest.InSilicoDigest(database_path='/Users/hinklet/random_analysis/shigella_kgg_p2/small_mouse.fasta', num_miss_cleavs=3, digest_type='trypsin')
 digest.execute()
 
 elapsed_time = time.time() - start_time

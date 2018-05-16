@@ -255,3 +255,38 @@ class ProteologicAllQValues(Export):
         with open(self.filename_out, "wb") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
+
+
+class CsvOutLeadsQValuesLong(Export):
+    """
+    Class that outputs all lead proteins with Q values.
+
+    Example: ProteinInference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
+    if we assume data = datastore.Datastore(reader_class = reader)
+
+    and if we assume reader is a class object from reader.Reader()
+    """
+
+    def __init__(self,data_class,filename_out):
+        self.data_to_write = data_class.protein_group_objects
+        self.filename_out = filename_out
+
+    def execute(self):
+        ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
+        for groups in self.data_to_write:
+            lead_protein = groups.proteins[0]
+            for peps in lead_protein.peptides:
+                ungrouped_list.append([lead_protein.identifier])
+                ungrouped_list[-1].append(lead_protein.score)
+                ungrouped_list[-1].append(groups.q_value)
+                ungrouped_list[-1].append(lead_protein.num_peptides)
+                if lead_protein.reviewed == True:
+                    ungrouped_list[-1].append('Reviewed')
+                else:
+                    ungrouped_list[-1].append('Unreviewed')
+                ungrouped_list[-1].append(groups.number_id)
+                ungrouped_list[-1].append(peps)
+
+        with open(self.filename_out, "wb") as f:
+            writer = csv.writer(f)
+            writer.writerows(ungrouped_list)

@@ -17,6 +17,8 @@ import tempfile
 # target_file = '/Users/hinklet/PythonPackages/PercolatorAnalysis/percolator_output/002402_percolator_target_psm_all_psms.txt'
 # decoy_file = '/Users/hinklet/PythonPackages/PercolatorAnalysis/percolator_output/002402_percolator_decoy_psm_all_psms.txt'
 
+tag = 'GP_P1'
+
 data_dir = '/Users/hinklet/random_analysis/shigella_GP_p1/percolator_output/'
 
 data_files = os.listdir(data_dir)
@@ -173,10 +175,13 @@ if 'q_value_comma_sep' in export_type:
     export = ProteinInference.export.CsvOutCommaSepQValues(data_class=data,filename_out=output_dir+'Custom'+'_'+'q_value_comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'q_value' in export_type:
-    export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out=output_dir+'GP_p1'+'_'+'q_value_leads_other'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out=output_dir+tag+'_'+'q_value_leads_other'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'q_value' in export_type:
-    export = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out=output_dir+'GP_p1'+'_'+'q_value_all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export = ProteinInference.export.CsvOutAllQValues(data_class=data,filename_out=output_dir+tag+'_'+'q_value_all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export.execute()
+if 'q_value' in export_type:
+    export = ProteinInference.export.CsvOutLeadsQValuesLong(data_class=data,filename_out=output_dir + tag + '_long_' + 'q_value_all' + '_' + data.short_score_method + '_' + data.score_type + '.csv')
     export.execute()
 
 

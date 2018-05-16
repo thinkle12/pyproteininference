@@ -31,6 +31,7 @@ class InSilicoDigest(object):
         self.database_path = database_path
         self.num_miss_cleavs = num_miss_cleavs
         self.list_of_digest_types = ['trypsin']
+        self.aa_list = ['A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V']
         if digest_type in self.list_of_digest_types:
             self.digest_type = digest_type
         else:
@@ -39,13 +40,14 @@ class InSilicoDigest(object):
         
     def digest(self,proseq,miss_cleavage):
         peptides=[]
-        cut_sites=[0]
+        cut_sites = [0]
         if self.digest_type == 'trypsin':
             for i in range(0,len(proseq)-1):
                 if proseq[i]=='K' and proseq[i+1]!='P':
                     cut_sites.append(i+1)
                 elif proseq[i]=='R' and proseq[i+1]!='P':
                     cut_sites.append(i+1)
+
 
         if self.digest_type=='other_type':
             pass
@@ -54,34 +56,109 @@ class InSilicoDigest(object):
         if cut_sites[-1]!=len(proseq):
             cut_sites.append(len(proseq))
 
-
         if len(cut_sites)>2:
             if miss_cleavage==0:
                 for j in range(0,len(cut_sites)-1):
-                    peptides.append(proseq[cut_sites[j]:cut_sites[j+1]])
+                    no_miss_cleave_pep = proseq[cut_sites[j]:cut_sites[j + 1]]
+                    peptides.append(no_miss_cleave_pep)
+                    #Account for N terminal Methionine Potential Cleavage
+                    if j == 0 and proseq[cut_sites[0]] == 'M':
+                        peptides.append(no_miss_cleave_pep[1:])
+                    else:
+                        pass
+
+
 
     
             elif miss_cleavage==1:
                 for j in range(0,len(cut_sites)-2):
                     peptides.append(proseq[cut_sites[j]:cut_sites[j+1]])
                     peptides.append(proseq[cut_sites[j]:cut_sites[j+2]])
-                
+                    #Account for N terminal Methionine Potential Cleavage
+                    if j == 0 and proseq[cut_sites[0]] == 'M':
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 1]][1:])
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 2]][1:])
+
+                #Account for N terminal Methionine Potential Cleavage
+                if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == 'M':
+                    peptides.append(proseq[cut_sites[-2]:cut_sites[-1]][1:])
+
                 peptides.append(proseq[cut_sites[-2]:cut_sites[-1]])
     
             elif miss_cleavage==2:
                 for j in range(0,len(cut_sites)-3):
-
                     peptides.append(proseq[cut_sites[j]:cut_sites[j+1]])
                     peptides.append(proseq[cut_sites[j]:cut_sites[j+2]])
                     peptides.append(proseq[cut_sites[j]:cut_sites[j+3]])
+                    #Account for N terminal Methionine Potential Cleavage
+                    if j == 0 and proseq[cut_sites[0]] == 'M':
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 1]][1:])
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 2]][1:])
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 3]][1:])
+
+                #Account for N terminal Methionine Potential Cleavage
+                if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == 'M':
+                    peptides.append(proseq[cut_sites[-3]:cut_sites[-2]][1:])
+                    peptides.append(proseq[cut_sites[-3]:cut_sites[-1]][1:])
+                if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == 'M':
+                    peptides.append(proseq[cut_sites[-2]:cut_sites[-1]][1:])
+
+                peptides.append(proseq[cut_sites[-3]:cut_sites[-2]])
+                peptides.append(proseq[cut_sites[-3]:cut_sites[-1]])
+                peptides.append(proseq[cut_sites[-2]:cut_sites[-1]])
+
+            elif miss_cleavage==3:
+                for j in range(0,len(cut_sites)-4):
+                    peptides.append(proseq[cut_sites[j]:cut_sites[j+1]])
+                    peptides.append(proseq[cut_sites[j]:cut_sites[j+2]])
+                    peptides.append(proseq[cut_sites[j]:cut_sites[j+3]])
+                    peptides.append(proseq[cut_sites[j]:cut_sites[j+4]])
+                    #Account for N terminal Methionine Potential Cleavage
+                    if j == 0 and proseq[cut_sites[0]] == 'M':
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 1]][1:])
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 2]][1:])
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 3]][1:])
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 4]][1:])
+
+                #Account for N terminal Methionine Potential Cleavage
+                if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == 'M':
+                    peptides.append(proseq[cut_sites[-3]:cut_sites[-2]][1:])
+                    peptides.append(proseq[cut_sites[-3]:cut_sites[-1]][1:])
+                if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == 'M':
+                    peptides.append(proseq[cut_sites[-2]:cut_sites[-1]][1:])
+                if cut_sites[-4] == 0 and proseq[cut_sites[-4]] == 'M':
+                    peptides.append(proseq[cut_sites[-4]:cut_sites[-3]][1:])
+                    peptides.append(proseq[cut_sites[-4]:cut_sites[-2]][1:])
+                    peptides.append(proseq[cut_sites[-4]:cut_sites[-1]][1:])
 
 
 
                 peptides.append(proseq[cut_sites[-3]:cut_sites[-2]])
                 peptides.append(proseq[cut_sites[-3]:cut_sites[-1]])
                 peptides.append(proseq[cut_sites[-2]:cut_sites[-1]])
+                peptides.append(proseq[cut_sites[-4]:cut_sites[-1]])
+                peptides.append(proseq[cut_sites[-4]:cut_sites[-2]])
+                peptides.append(proseq[cut_sites[-4]:cut_sites[-3]])
+
+
         else: #there is no tryptic site in the protein sequence
             peptides.append(proseq)
+            if proseq[0] == 'M':
+                peptides.append(proseq[1:])
+
+        self.peptides = peptides
+        new_peptides = []
+        if any('X' in x for x in peptides):
+            for peps in peptides:
+                if 'X' in peps:
+                    x_index = peps.index('X')
+                    for aa in self.aa_list:
+                        peptide_list = list(peps)
+                        peptide_list[x_index] = aa
+                        new_pep = ''.join(peptide_list)
+                        new_peptides.append(new_pep)
+
+        peptides = peptides + new_peptides
         return peptides
 
 

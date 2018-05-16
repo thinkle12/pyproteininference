@@ -4,7 +4,7 @@ Parameters:
   FDR: 0.01
   Group: glpk
   GLPK_Path: glpsol
-  Missed_Cleavages: 2
+  Missed_Cleavages: 3
   Picker: true
   Restrict_Pep: false
   Restrict_Peptide_Length: 7

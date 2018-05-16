@@ -17,7 +17,7 @@ class Protein(object):
     Example: ProteinInference.physical.Protein(dentifier = "PRKDC_HUMAN|P78527")
     """
     __slots__ = ['identifier','score', 'group_identification', 'reviewed', 'unreviewed', 'peptides', 'peptide_scores', 'picked', 'psm_score_dictionary',
-                 'num_peptides','unique_peptides','num_unique_peptides','raw_peptides']
+                 'num_peptides','unique_peptides','num_unique_peptides','raw_peptides','psmid_peptide_dictionary']
     
     def __init__(self,identifier):
         self.identifier = identifier
@@ -33,6 +33,7 @@ class Protein(object):
         self.unique_peptides = None
         self.num_unique_peptides = None
         self.raw_peptides = None
+        self.psmid_peptide_dictionary = None
         
         
 class Psm(object):
@@ -43,7 +44,7 @@ class Psm(object):
 
     Example: Psm(identifier = "K.DLIDEGHAATQLVNQLHDVVVENNLSDK.Q")
     """
-    __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins']
+    __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins','psm_id']
     
     def __init__(self,identifier):
         self.identifier = identifier
@@ -51,6 +52,7 @@ class Psm(object):
         self.qvalue = None
         self.pepvalue = None
         self.possible_proteins = None
+        self.psm_id = None
         
 
 class ProteinGroup(object):

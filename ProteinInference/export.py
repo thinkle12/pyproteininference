@@ -7,6 +7,8 @@ Created on Fri Dec  1 10:49:47 2017
 """
 
 import csv
+from bluecopper_gfy.orm.core import Search, SearchAlgorithm, SearchDatabase, ScansConnector, SearchPerscanBuilder, \
+    SearchPerhitBuilder, Ms2Builder
 
 class Export(object):
     """
@@ -203,6 +205,32 @@ class CsvOutAllQValues(Export):
     if we assume data = datastore.Datastore(reader_class = reader)
     and if we assume reader is a class object from reader.Reader()
     """
+
+    def __init__(self,data_class,filename_out):
+        self.data_to_write = data_class.protein_group_objects
+        self.filename_out = filename_out
+
+    def execute(self):
+        ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
+        for groups in self.data_to_write:
+            for proteins in groups.proteins:
+                ungrouped_list.append([proteins.identifier])
+                ungrouped_list[-1].append(proteins.score)
+                ungrouped_list[-1].append(groups.q_value)
+                ungrouped_list[-1].append(proteins.num_peptides)
+                if proteins.reviewed == True:
+                    ungrouped_list[-1].append('Reviewed')
+                else:
+                    ungrouped_list[-1].append('Unreviewed')
+                ungrouped_list[-1].append(groups.number_id)
+                for peps in proteins.peptides:
+                    ungrouped_list[-1].append(peps)
+
+        with open(self.filename_out, "wb") as f:
+            writer = csv.writer(f)
+            writer.writerows(ungrouped_list)
+
+class ProteologicAllQValues(Export):
 
     def __init__(self,data_class,filename_out):
         self.data_to_write = data_class.protein_group_objects

@@ -108,37 +108,62 @@ class InSilicoDigest(object):
                 peptides.append(proseq[cut_sites[-2]:cut_sites[-1]])
 
             elif miss_cleavage==3:
-                for j in range(0,len(cut_sites)-4):
-                    peptides.append(proseq[cut_sites[j]:cut_sites[j+1]])
-                    peptides.append(proseq[cut_sites[j]:cut_sites[j+2]])
-                    peptides.append(proseq[cut_sites[j]:cut_sites[j+3]])
-                    peptides.append(proseq[cut_sites[j]:cut_sites[j+4]])
+                #If len cut sites is greater than 3... then we can do 3 missed cleavages
+                if len(cut_sites)>3:
+                    for j in range(0,len(cut_sites)-4):
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j+1]])
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j+2]])
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j+3]])
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j+4]])
+                        #Account for N terminal Methionine Potential Cleavage
+                        if j == 0 and proseq[cut_sites[0]] == 'M':
+                            peptides.append(proseq[cut_sites[j]:cut_sites[j + 1]][1:])
+                            peptides.append(proseq[cut_sites[j]:cut_sites[j + 2]][1:])
+                            peptides.append(proseq[cut_sites[j]:cut_sites[j + 3]][1:])
+                            peptides.append(proseq[cut_sites[j]:cut_sites[j + 4]][1:])
+
                     #Account for N terminal Methionine Potential Cleavage
-                    if j == 0 and proseq[cut_sites[0]] == 'M':
-                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 1]][1:])
-                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 2]][1:])
-                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 3]][1:])
-                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 4]][1:])
-
-                #Account for N terminal Methionine Potential Cleavage
-                if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == 'M':
-                    peptides.append(proseq[cut_sites[-3]:cut_sites[-2]][1:])
-                    peptides.append(proseq[cut_sites[-3]:cut_sites[-1]][1:])
-                if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == 'M':
-                    peptides.append(proseq[cut_sites[-2]:cut_sites[-1]][1:])
-                if cut_sites[-4] == 0 and proseq[cut_sites[-4]] == 'M':
-                    peptides.append(proseq[cut_sites[-4]:cut_sites[-3]][1:])
-                    peptides.append(proseq[cut_sites[-4]:cut_sites[-2]][1:])
-                    peptides.append(proseq[cut_sites[-4]:cut_sites[-1]][1:])
+                    if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == 'M':
+                        peptides.append(proseq[cut_sites[-3]:cut_sites[-2]][1:])
+                        peptides.append(proseq[cut_sites[-3]:cut_sites[-1]][1:])
+                    if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == 'M':
+                        peptides.append(proseq[cut_sites[-2]:cut_sites[-1]][1:])
+                    if cut_sites[-4] == 0 and proseq[cut_sites[-4]] == 'M':
+                        peptides.append(proseq[cut_sites[-4]:cut_sites[-3]][1:])
+                        peptides.append(proseq[cut_sites[-4]:cut_sites[-2]][1:])
+                        peptides.append(proseq[cut_sites[-4]:cut_sites[-1]][1:])
 
 
 
-                peptides.append(proseq[cut_sites[-3]:cut_sites[-2]])
-                peptides.append(proseq[cut_sites[-3]:cut_sites[-1]])
-                peptides.append(proseq[cut_sites[-2]:cut_sites[-1]])
-                peptides.append(proseq[cut_sites[-4]:cut_sites[-1]])
-                peptides.append(proseq[cut_sites[-4]:cut_sites[-2]])
-                peptides.append(proseq[cut_sites[-4]:cut_sites[-3]])
+                    peptides.append(proseq[cut_sites[-3]:cut_sites[-2]])
+                    peptides.append(proseq[cut_sites[-3]:cut_sites[-1]])
+                    peptides.append(proseq[cut_sites[-2]:cut_sites[-1]])
+                    peptides.append(proseq[cut_sites[-4]:cut_sites[-1]])
+                    peptides.append(proseq[cut_sites[-4]:cut_sites[-2]])
+                    peptides.append(proseq[cut_sites[-4]:cut_sites[-3]])
+
+                else:
+                    # If len cut sites not greater than 3... then we do 2 MC
+                    for j in range(0, len(cut_sites) - 3):
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 1]])
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 2]])
+                        peptides.append(proseq[cut_sites[j]:cut_sites[j + 3]])
+                        # Account for N terminal Methionine Potential Cleavage
+                        if j == 0 and proseq[cut_sites[0]] == 'M':
+                            peptides.append(proseq[cut_sites[j]:cut_sites[j + 1]][1:])
+                            peptides.append(proseq[cut_sites[j]:cut_sites[j + 2]][1:])
+                            peptides.append(proseq[cut_sites[j]:cut_sites[j + 3]][1:])
+
+                    # Account for N terminal Methionine Potential Cleavage
+                    if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == 'M':
+                        peptides.append(proseq[cut_sites[-3]:cut_sites[-2]][1:])
+                        peptides.append(proseq[cut_sites[-3]:cut_sites[-1]][1:])
+                    if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == 'M':
+                        peptides.append(proseq[cut_sites[-2]:cut_sites[-1]][1:])
+
+                    peptides.append(proseq[cut_sites[-3]:cut_sites[-2]])
+                    peptides.append(proseq[cut_sites[-3]:cut_sites[-1]])
+                    peptides.append(proseq[cut_sites[-2]:cut_sites[-1]])
 
 
         else: #there is no tryptic site in the protein sequence

@@ -7,8 +7,6 @@ Created on Fri Dec  1 10:49:47 2017
 """
 
 import csv
-from bluecopper_gfy.orm.core import Search, SearchAlgorithm, SearchDatabase, ScansConnector, SearchPerscanBuilder, \
-    SearchPerhitBuilder, Ms2Builder
 
 class Export(object):
     """

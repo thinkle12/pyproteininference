@@ -11,24 +11,31 @@ import ProteinInference
 from Digest import insilicodigest
 import os
 import tempfile
+import yaml
 
 # target_file = "data/159260_Bioplex2_b10090_percolator_target_psm.txt"
 # decoy_file = "data/159260_Bioplex2_b10090_percolator_decoy_psm.txt"
 # target_file = '/Users/hinklet/PythonPackages/PercolatorAnalysis/percolator_output/002402_percolator_target_psm_all_psms.txt'
 # decoy_file = '/Users/hinklet/PythonPackages/PercolatorAnalysis/percolator_output/002402_percolator_decoy_psm_all_psms.txt'
 
-tag = 'GP_P1'
+tag = 'newtag'
 
 data_dir = '/Users/hinklet/random_analysis/shigella_GP_p1/percolator_output/'
 
 data_files = os.listdir(data_dir)
 
-target_files = [os.path.join(data_dir,x) for x in data_files if 'target' in x]
-decoy_files = [os.path.join(data_dir,x) for x in data_files if 'decoy' in x]
+#target_files = [os.path.join(data_dir,x) for x in data_files if 'target' in x]
+#decoy_files = [os.path.join(data_dir,x) for x in data_files if 'decoy' in x]
+
+target_files = '159260_Bioplex2_b10090_percolator_target_psm.txt'
+decoy_files = '159260_Bioplex2_b10090_percolator_decoy_psm.txt'
 
 yaml_params = "parameters/Protein_Inference_Params.yaml"
-database = "/Users/hinklet/random_analysis/shigella_GP_p1/Mouse_Shigella_up17_18_properformat.fasta"
-output_dir = "/Users/hinklet/random_analysis/shigella_GP_p1/protein_inference_output/"
+#database = "/Users/hinklet/random_analysis/shigella_GP_p1/Mouse_Shigella_up17_18_properformat.fasta"
+#output_dir = "/Users/hinklet/random_analysis/shigella_GP_p1/protein_inference_output/"
+
+database = 'data/UniprotKBConcat1708_HUMAN.fasta'
+output_dir = 'output/'
 
 # if "Bioplex" in target_file:
 #     tag = '_'.join(target_file.split('/')[-1].split('_')[:3])
@@ -40,16 +47,30 @@ output_dir = "/Users/hinklet/random_analysis/shigella_GP_p1/protein_inference_ou
 temp_dir = tempfile.gettempdir()
 write_dir_input = temp_dir
 
+# Have to load the params here...
+# Because we have to pass to in silico digest first...
+# I really dont like this... but its essential given
+# That we are going to start not storing all possible protein column...
+with open(yaml_params, 'r') as stream:
+    yaml_parameteres_for_digest = yaml.load(stream)
+
+# Do in silico digest....
+# Need digest before reader... ugh
+digest = insilicodigest.InSilicoDigest(database_path=database, num_miss_cleavs=int(yaml_parameteres_for_digest['Parameters']['Missed_Cleavages']), digest_type=yaml_parameteres_for_digest['Parameters']['Digest_Type'])
+digest.execute()
+
 #Initiate the reader...
 #Input for now is a target percolator output and a decoy percolator output
 pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file=target_files,
-                                                          decoy_file=decoy_files)
+                                                          decoy_file=decoy_files,
+                                                           digest_class=digest,
+                                                           yaml_param_file=yaml_params)
 
 #Execeute the reader instance, this loads the data into the reader class
 pep_and_prot_data.execute()
 #Next create a data store which is a class that stores all data for all steps of the PI process
 #Each method and each class calls from this data class to gather information for analyses
-data = ProteinInference.datastore.DataStore(pep_and_prot_data,yaml_param_file=yaml_params)
+data = ProteinInference.datastore.DataStore(pep_and_prot_data)
 
 #Here restrict the data to having peptides with length 7 or greater
 if data.yaml_params['Parameters']['Restrict_Pep']:
@@ -107,10 +128,6 @@ if data.yaml_params['Parameters']['Picker']:
     picker.execute()
 else:
     pass
-
-#Do in silico digest....
-digest = insilicodigest.InSilicoDigest(database_path=database, num_miss_cleavs=int(data.yaml_params['Parameters']['Missed_Cleavages']), digest_type=data.yaml_params['Parameters']['Digest_Type'])
-digest.execute()
 
 try:
     os.mkdir('glpkinout/')

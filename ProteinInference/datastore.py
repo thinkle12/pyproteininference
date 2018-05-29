@@ -22,7 +22,7 @@ class DataStore(object):
     """
 
     #Feed data_store instance the reader class...
-    def __init__(self,reader_class,yaml_param_file=None):
+    def __init__(self,reader_class):
         #If the reader class is from a percolator.psms then define main_data_form as reader_class.psms
         #main_data_form is the starting point for all other analyses
         if reader_class.psms:
@@ -39,30 +39,11 @@ class DataStore(object):
             else:
                 self.search_id = reader_class.search_id
 
-        self.yaml_param_file = yaml_param_file
-        if self.yaml_param_file:
-            with open(self.yaml_param_file, 'r') as stream:
-                yaml_params = yaml.load(stream)
-            #Read param file..... params read in as dict...
-            #We will then have a bunch of... if param in param_dict.... do... if not pass....
-        else:
-            #Default params to be used if no Yaml file is provided...
-            yaml_params = {'Parameters': {'Picker': True,
-                                      'Restrict_Q': False,
-                                      'Restrict_Pep': False,
-                                      'Restrict_Peptide_Length': 7,
-                                          'Group': "glpk",
-                                          'Export': "q_value_leads",
-                                          'FDR': .01,
-                                          'Score_Type': "q_value",
-                                          'Score_Method': "downweighted_multiplicative_log",
-                                          'Missed_Cleavages': 2,
-                                          'Digest_Type': "trypsin",
-                                          'GLPK_Path':'glpsol'}}
+
 
             #This is bad because default GLPK_Path is glpsol... on rescomp this will not work...
 
-        self.yaml_params = yaml_params
+        self.yaml_params = reader_class.yaml_params
         self.protein_info_dict = None
         self.potential_proteins = None
         self.main_data_restricted = None

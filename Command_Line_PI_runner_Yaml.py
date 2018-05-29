@@ -11,6 +11,7 @@ import ProteinInference
 import argparse
 from Digest import insilicodigest
 import os
+import yaml
 
 
 parser = argparse.ArgumentParser(description='Protein Inference')
@@ -35,16 +36,29 @@ if "Bioplex" not in args.target:
     tag = args.target.split('/')[-1].split('_')[0]
     print tag
 
+
+with open(args.yaml_params, 'r') as stream:
+    yaml_parameteres_for_digest = yaml.load(stream)
+
+
+# Do in silico digest....
+digest = insilicodigest.InSilicoDigest(database_path=args.database,
+                                       num_miss_cleavs=int(yaml_parameteres_for_digest['Parameters']['Missed_Cleavages']),
+                                       digest_type=yaml_parameteres_for_digest['Parameters']['Digest_Type'])
+digest.execute()
+
 #Initiate the reader...
 #Input for now is a target percolator output and a decoy percolator output
 pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file=args.target,
-                                                          decoy_file=args.decoy)
+                                                          decoy_file=args.decoy,
+                                                           yaml_param_file=args.yaml_params,
+                                                           digest_class=digest)
 
 #Execeute the reader instance, this loads the data into the reader class
 pep_and_prot_data.execute()
 #Next create a data store which is a class that stores all data for all steps of the PI process
 #Each method and each class calls from this data class to gather information for analyses
-data = ProteinInference.datastore.DataStore(pep_and_prot_data,yaml_param_file=args.yaml_params)
+data = ProteinInference.datastore.DataStore(pep_and_prot_data)
 
 #Here restrict the data to having peptides with length 7 or greater
 if data.yaml_params['Parameters']['Restrict_Pep']:
@@ -102,10 +116,6 @@ if data.yaml_params['Parameters']['Picker']:
     picker.execute()
 else:
     pass
-
-#Do in silico digest....
-digest = insilicodigest.InSilicoDigest(database_path=args.database, num_miss_cleavs=int(data.yaml_params['Parameters']['Missed_Cleavages']), digest_type=data.yaml_params['Parameters']['Digest_Type'])
-digest.execute()
 
 try:
     os.mkdir('glpkinout/')

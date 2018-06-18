@@ -18,24 +18,24 @@ import yaml
 # target_file = '/Users/hinklet/PythonPackages/PercolatorAnalysis/percolator_output/002402_percolator_target_psm_all_psms.txt'
 # decoy_file = '/Users/hinklet/PythonPackages/PercolatorAnalysis/percolator_output/002402_percolator_decoy_psm_all_psms.txt'
 
-tag = 'newtag'
+tag = 'brd_combined'
 
-data_dir = '/Users/hinklet/random_analysis/shigella_GP_p1/percolator_output/'
+data_dir = '/Users/hinklet/random_analysis/brd_analysis/percolator_output/'
 
 data_files = os.listdir(data_dir)
 
-#target_files = [os.path.join(data_dir,x) for x in data_files if 'target' in x]
-#decoy_files = [os.path.join(data_dir,x) for x in data_files if 'decoy' in x]
+target_files = [os.path.join(data_dir,x) for x in data_files if 'target' in x]
+decoy_files = [os.path.join(data_dir,x) for x in data_files if 'decoy' in x]
 
-target_files = '159260_Bioplex2_b10090_percolator_target_psm.txt'
-decoy_files = '159260_Bioplex2_b10090_percolator_decoy_psm.txt'
+# target_files = '159260_Bioplex2_b10090_percolator_target_psm.txt'
+# decoy_files = '159260_Bioplex2_b10090_percolator_decoy_psm.txt'
 
 yaml_params = "parameters/Protein_Inference_Params.yaml"
 #database = "/Users/hinklet/random_analysis/shigella_GP_p1/Mouse_Shigella_up17_18_properformat.fasta"
 #output_dir = "/Users/hinklet/random_analysis/shigella_GP_p1/protein_inference_output/"
 
 database = 'data/UniprotKBConcat1708_HUMAN.fasta'
-output_dir = 'output/'
+output_dir = '/Users/hinklet/random_analysis/brd_analysis/pi_output/'
 
 # if "Bioplex" in target_file:
 #     tag = '_'.join(target_file.split('/')[-1].split('_')[:3])

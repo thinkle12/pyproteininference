@@ -37,6 +37,10 @@ if "Bioplex" not in args.target:
     print tag
 
 
+# Need to read in yaml params here for digest...
+# Digest needs to be done first to determine alternative proteins
+# Need to determine all potentially possible proteins because comet loader
+# Now does not load all possible proteins
 with open(args.yaml_params, 'r') as stream:
     yaml_parameteres_for_digest = yaml.load(stream)
 
@@ -57,7 +61,7 @@ pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file=args.targ
 #Execeute the reader instance, this loads the data into the reader class
 pep_and_prot_data.execute()
 #Next create a data store which is a class that stores all data for all steps of the PI process
-#Each method and each class calls from this data class to gather information for analyses
+#Each method and each class calls from this data class to gather information and store data for analyses
 data = ProteinInference.datastore.DataStore(pep_and_prot_data)
 
 #Here restrict the data to having peptides with length 7 or greater

@@ -17,45 +17,28 @@ __Command Line Usage:__
 
 1. Download the ProteinInference package into a specific folder
 2. Open a command terminal and cd to this folder.
-3. Type: 
+3. Have the following files in current working directory: example_percolator_target_psm.txt, example_percolator_decoy_psm.txt, example_db.fasta, Protein_Inference_Params.yaml
+4. The percolator files need to be generated from percolator - PercolatorAnalysis package will generate properly formatted files, fasta file should be from uniprot - fasta file needs to be the same or highly similar to the fasta file used to search the data via mascot/comet, yaml parameter file must be formatted properly like the example params.
+5. Type: 
 ```bash
-python Command_Line_PI_runner.py  -t example_percolator_target_psm.txt -d example_percolator_decoy_psm.txt -o example_output.csv -db example_db.fasta -mc 2 -dt trypsin -pl 7 -pep .9 -sm "multiplicative_log" -st "q_value" -ppk -gp "glpk" -fdr .01 -ex ["q_value_comma_sep"]
+python Command_Line_PI_runner.py  -t example_percolator_target_psm.txt -d example_percolator_decoy_psm.txt -o output_dir/ -db example_db.fasta -ym Protein_Inference_Params.yaml
 ```
 
 
-__The 16 arguments are:__
+__The 6 arguments are:__
 
 __-t:__ name of the target percolator file which contains results from the search of interest
 
 __-d:__ name of the decoy percolator file which contains results from the search of interest
 
-__-d:__ name of your fasta file which contains protein sequences to be digested
+__-db:__ name of your fasta file which contains protein sequences to be digested
 
-__-o:__ base name for the output file - name will be changed based on what parameters are chosen
-
-__-mc:__ number of missed cleavages that were allowed on the search from mascot or comet
-
-__-dt:__ the digestion type for the search i.e.: trypsin
-
-__-pl:__ the peptide length to restrict by i.e.: 7, meaning peptides of length less than 7 will not be used in PI
-
-__-pep:__ the posterior error probability value to restrict by i.e.: .9, meaning pep values greater than .9 will not be used in PI
-
-__-qv:__ the q value to restrict value by i.e.: .2, meaning q values greater than .2 will not be used in PI
-
-__-sm:__ the score method to choose, one of the following: 'best_peptide_per_protein', 'iterative_downweighted_log', 'multiplicative_log',' downweighted_multiplicative_log', 'downweighted_version2', 'top_two_combined','geometric_mean'
-
-__-st:__ the score type to use, can be either ‘q_value’ or ‘pep_value’
-
-__-ppk:__ whether or not to run protein picker, which is a target-decoy analysis used for removing lower scoring targets/decoys between pairs of like targets-decoys
-
-__-gp:__ how to do grouping can be one of the following: ‘simple_subsetting’, ‘glpk’; recommended to use ‘glpk’
-
-__-fdr:__ fdr value to use as a cutoff, only useful if export type is not a q value export type
+__-o:__ ProteinInference Result Directory to write to - Name of file will be determined by parameters selected in yaml file and searchID
 
 __-roc:__ filename of pdf if wanting to output a rock curve
 
-__-ex:__ a list of export types that are wanted i.e.: ["q_value_comma_sep”, “q_value_leads”, ”all”]
+__-yaml:__ filename of the Protein Inference Yaml Parameter
+
 
 __Speed__
 
@@ -67,63 +50,140 @@ Running the full PI pipeline on a large K562 run from Lumos 1 finishes in about 
 ```python
 import ProteinInference
 from Digest import insilicodigest
+import os
+import tempfile
+import yaml
 
-#Do in silico trypsin digestion
-digest = insilicodigest.InSilicoDigest(database_path='data/UniprotKBConcat1708_HUMAN.fasta',
-                                       num_miss_cleavs=2,
-                                       digest_type='trypsin')
+
+tag = 'yourtag'
+
+target_files = 'percolator_target_output.txt'
+decoy_files = 'percolator_decoy_output.txt'
+
+yaml_params = "parameters/Protein_Inference_Params.yaml"
+
+database = 'data/UniprotKBConcat1708_HUMAN.fasta'
+output_dir = 'output/'
+
+# Intermediate files writen to tmp
+temp_dir = tempfile.gettempdir()
+write_dir_input = temp_dir
+
+with open(yaml_params, 'r') as stream:
+    yaml_parameteres_for_digest = yaml.load(stream)
+
+# Do in silico digest....
+digest = insilicodigest.InSilicoDigest(database_path=database, num_miss_cleavs=int(yaml_parameteres_for_digest['Parameters']['Missed_Cleavages']), digest_type=yaml_parameteres_for_digest['Parameters']['Digest_Type'])
 digest.execute()
 
 #Initiate the reader...
 #Input for now is a target percolator output and a decoy percolator output
-pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='data/159260_Bioplex2_b10090_percolator_target_psm.txt',
-                                                          decoy_file='/data/159260_Bioplex2_b10090_percolator_decoy_psm.txt')
+pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file=target_files,
+                                                          decoy_file=decoy_files,
+                                                           digest_class=digest,
+                                                           yaml_param_file=yaml_params)
+
 #Execeute the reader instance, this loads the data into the reader class
 pep_and_prot_data.execute()
-
 #Next create a data store which is a class that stores all data for all steps of the PI process
 #Each method and each class calls from this data class to gather information for analyses
 data = ProteinInference.datastore.DataStore(pep_and_prot_data)
 
-#Here restrict the data to having peptides with length 7 or greater and a pep of less than .9
-restrict = ProteinInference.datastore.RestrictMainData(data, peptide_length=7, posterior_error_prob_threshold=.9,q_value_threshold=None)
+#Here restrict the data to having peptides with length 7 or greater
+if data.yaml_params['Parameters']['Restrict_Pep']:
+    pep_restrict = float(data.yaml_params['Parameters']['Restrict_Pep'])
+else:
+    pep_restrict = None
+if data.yaml_params['Parameters']['Restrict_Q']:
+    q_restrict = float(data.yaml_params['Parameters']['Restrict_Q'])
+else:
+    q_restrict = None
+
+if data.yaml_params['Parameters']['Restrict_Peptide_Length']:
+    pl_restrict = int(data.yaml_params['Parameters']['Restrict_Peptide_Length'])
+else:
+    pl_restrict = None
+
+
+print 'restricting data'
+restrict = ProteinInference.datastore.RestrictMainData(data,peptide_length=pl_restrict,posterior_error_prob_threshold=pep_restrict,q_value_threshold=q_restrict)
 restrict.execute()
 
-#Here generate the pre score data using 'Q' values
-score_setup = ProteinInference.datastore.PreScoreQValue(data)
+#Here generate the pre score data using 'PEP' or 'Q' values
+if data.yaml_params['Parameters']['Score_Type'] == 'pep_value':
+    score_setup = ProteinInference.datastore.PreScorePepValue(data)
+if data.yaml_params['Parameters']['Score_Type'] == 'q_value':
+    score_setup = ProteinInference.datastore.PreScoreQValue(data)
+
+#Execute score setup...
 score_setup.execute()
 
-#Here we do scoring
-score = ProteinInference.scoring.DownweightedMultiplicativeLog(data_class=data)
+score_method = data.yaml_params['Parameters']['Score_Method']
+
+#Here select scoring
+if score_method=='best_peptide_per_protein':
+    score = ProteinInference.scoring.BestPeptidePerProtein(data_class=data)
+if score_method=='iterative_downweighted_log':
+    score = ProteinInference.scoring.IterativeDownweightedLog(data_class=data)
+if score_method=='multiplicative_log':
+    score = ProteinInference.scoring.MultiplicativeLog(data_class=data)
+if score_method=='downweighted_multiplicative_log':
+    score = ProteinInference.scoring.DownweightedMultiplicativeLog(data_class=data)
+if score_method=='downweighted_version2':
+    score = ProteinInference.scoring.DownweightedVersion2(data_class=data)
+if score_method=='top_two_combined':
+    score = ProteinInference.scoring.TopTwoCombined(data_class=data)
+if score_method=='geometric_mean':
+    score = ProteinInference.scoring.GeometricMeanLog(data_class=data)
+
+#Execute scoring...
 score.execute()
 
-#Here we run protein picker
-picker = ProteinInference.picker.StandardPicker(data_class=data)
-picker.execute()
+#Run protein picker on the data
+if data.yaml_params['Parameters']['Picker']:
+    picker = ProteinInference.picker.StandardPicker(data_class=data)
+    picker.execute()
+else:
+    pass
 
-#Run GLPK to generate the minimal list of proteins that account for the peptides
-#Running GLPK consists of 3 classes, setup, runner, and grouper which need to be run in succession
-glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkout_example.mod')
-glpksetup.execute()
-runglpk = ProteinInference.grouping.GlpkRunner(path_to_glpsol = '/gne/research/apps/protchem/glpk/bin/glpsol',glpkin = 'glpkinout/glpkout_example.mod',glpkout = 'glpkinout/glpkout_example.sol',file_override = False)
-runglpk.execute()
-group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout_example.sol')
-group.execute()
+grouping_type = data.yaml_params['Parameters']['Group']
 
-#Next run fdrcalc on the data....
-fdr = ProteinInference.fdrcalc.SetBasedFdr(data_class=data,false_discovery_rate=.01)
-fdr.execute()
+#Run simple group subsetting
+if grouping_type=='simple_subsetting':
+    group = ProteinInference.grouping.SimpleSubsetting(data_class=data)
+    group.execute()
 
-#Also run Q value calculation
+#Run GLPK setup, runner, grouper...
+if grouping_type=='glpk':
+    if grouping_type == 'glpk':
+        glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data, glpkin_filename=os.path.join(write_dir_input,
+                                                                                                      'glpkin_' + data.search_id + '.mod'))
+        glpksetup.execute()
+        glpkrun = ProteinInference.grouping.GlpkRunner(path_to_glpsol=data.yaml_params['Parameters']['GLPK_Path'],
+                                                       glpkin=os.path.join(write_dir_input,
+                                                                           'glpkin_' + data.search_id + '.mod'),
+                                                       glpkout=os.path.join(write_dir_input,
+                                                                            'glpkin_' + data.search_id + '.sol'),
+                                                       file_override=False)
+        glpkrun.execute()
+        group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft',
+                                                      glpksolution_filename=os.path.join(write_dir_input,
+                                                                                         'glpkin_' + data.search_id + '.sol'))
+        group.execute()
+
+if grouping_type=='multi_subsetting':
+    group = ProteinInference.grouping.MultiSubsetting(data_class=data)
+    group.execute()
+
+
+# fdr.execute()
 q = ProteinInference.fdrcalc.QValueCalculation(data_class=data)
 q.execute()
 
+export_type = data.yaml_params['Parameters']['Export']
+
 #Write the output to a csv...
-qval_out_csep = ProteinInference.export.CsvOutCommaSepQValues(data_class=data, filename_out='output/qvalues_csep_dwml_159260_Bioplex2_b10090_q_value.csv')
-qval_out_csep.execute()
-
-#Generate a Roc Plot
-roc = ProteinInference.benchmark.RocPlot(data_class=data)
-roc.execute(pdf='plots/dwml_159260_Bioplex2_b10090_q_value.pdf')
-
+if 'q_value' in export_type:
+    export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,filename_out=output_dir+tag+'_'+'q_value_leads_'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export.execute()
 ```

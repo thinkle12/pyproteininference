@@ -31,7 +31,7 @@ class GeneratePlot(Entrapment):
     This class requires the search being used to be from a benchmark dataset of KNOWN protein content.
     """
 
-    def __init__(self, data_class, entrapment_db, true_db, search_id, pdf=None, picked=None, qvr=None, pvr=None, other_database = None):
+    def __init__(self, data_class, entrapment_db, true_db, search_id, pdf=None, picked=None, qvr=None, pvr=None, other_database = None, search_database = None):
         self.data_class = data_class
         self.entrapment_db = entrapment_db
         self.true_db = true_db
@@ -51,6 +51,13 @@ class GeneratePlot(Entrapment):
             self.other_database = None
 
 
+        if search_database:
+            self.search_database = self.search_database
+
+        if not search_database:
+            self.search_database = None
+
+
         self.average_entrapment_fdr = None
         self.average_decoy_fdr = None
         self.pdf = pdf
@@ -66,43 +73,53 @@ class GeneratePlot(Entrapment):
 
 
 
-
-
-
         true_handle = SeqIO.parse(self.true_db, 'fasta')
 
+        # Get the true proteins minus the decoys...
         true_proteins = []
         for records in true_handle:
-            true_proteins.append(records.id)
+            if '#' not in records.id:
+                true_proteins.append(records.id)
+
+        # search_handle = SeqIO.parse(self.search_database, 'fasta')
+        #
+        # search_proteins = []
+        # for records in search_handle:
+        #     search_proteins.append(records.id)
+        #
+        # decoy_search_proteins = [x for x in search_proteins if "#" in x]
 
         entrapment_handle = SeqIO.parse(self.entrapment_db, 'fasta')
 
+        # Get the entrapment proteins minus the decoys...
         entrapment_proteins = []
         for records in entrapment_handle:
             if '#' not in records.id:
                 entrapment_proteins.append(records.id)
 
+        # Get the proteins from the search...
         protein_data = [x[0].identifier for x in self.grouped_scored_data]
+
+        # Add in proteins found in the search that arent decoys and arent already in entrapment proteins...
+        for prots in protein_data:
+            if '#' not in prots and prots not in entrapment_proteins:
+                entrapment_proteins.append(prots)
 
         print 'Number of Grouped Proteins = '+str(len(protein_data))
 
-        target_protein_data = [x[0].identifier for x in self.grouped_scored_data if '#' not in x[0].identifier]
 
-        # protein_data = []
-        # for groups in self.grouped_scored_data:
-        #     temp_group = []
-        #     for prots in groups:
-        #         temp_group.append(prots.identifier)
-        #     protein_data.append(temp_group)
-
-        decoy_to_entrap_ratio = float(len(true_proteins)+1000)/float(len(entrapment_proteins))
-        print str(decoy_to_entrap_ratio)
+        # This is with NO Decoys...
+        true_to_entrap_ratio = float(len(true_proteins)+1000)/float(len(entrapment_proteins))
+        # decoy_to_entrap_ratio = float(len(entrapment_proteins))/float(len(decoy_search_proteins))
+        print str(true_to_entrap_ratio)
+        # print str(decoy_to_entrap_ratio)
 
         false_true_positives = []
         decoys = []
         decoy_fdr = []
         entrapment_fdr = []
         for i in range(len(protein_data)):
+            # Get a list of false true positives from the protein data... basically if its not a decoy and if its not in true_proteins
             if '#' not in protein_data[i] and protein_data[i] not in true_proteins:
                 false_true_positives.append(protein_data[i])
             if '#' in protein_data[i]:
@@ -114,8 +131,8 @@ class GeneratePlot(Entrapment):
             decoy_fdr.append(dfdr)
             entrapment_fdr.append(efdr)
 
-        db = self.true_db.split('.')[0].split('_')[-1]
-
+        self.decoy_fdr = decoy_fdr
+        self.entrapment_fdr = entrapment_fdr
 
 
         # self.decoy_fdr_list.append(decoy_fdr)
@@ -150,8 +167,8 @@ class GeneratePlot(Entrapment):
         plt.plot([0, 0.6666666666666666], '--')
         plt.plot([0, 1.5], '--')
         plt.plot(self.decoy_fdr_calc_list, self.entrapment_fdr_calc_list,'-o')
-        plt.xlim([0, .1])
-        plt.ylim([0, .1])
+        plt.xlim([0.00001, .5])
+        plt.ylim([0.00001, .5])
         plt.xlabel('Decoy FDR')
         plt.ylabel('Entrapment FDR')
         plt.title(self.data_class.score_method + ' with '+str(len(efdr05.restricted_proteins))+' passing proteins' + '\n' + 'SearchID: ' + self.search_id + ', ' +self.pick + ', qvr = '+str(self.qvr)+ ', pvr = '+str(self.pvr))

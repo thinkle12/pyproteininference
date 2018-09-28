@@ -347,13 +347,18 @@ class GlpkGrouper(Grouper):
         #3 is the location of the binary (which indicates whether or not the protein number has a unique peptide making it a lead protein)
         numbers = [x[1].split(']')[0].split('[')[-1] for x in newlist]
         binary = [x[3] for x in newlist]
+
+        self.numbers = numbers
         
         #Here we extract out the lead proteins...
         lead_proteins = []
         for k in range(len(numbers)):
             if binary[k]=='1':
-                passing_protein_number = int(numbers[k])
-                lead_proteins.append(dd_prot_nums[passing_protein_number][0])
+                try:
+                    passing_protein_number = int(numbers[k])
+                    lead_proteins.append(dd_prot_nums[passing_protein_number][0])
+                except IndexError:
+                    print("No Protein for Protein Number"+str(passing_protein_number))
 
         lead_protein_set = set(lead_proteins)
         self.lead_protein_set = lead_protein_set
@@ -413,7 +418,7 @@ class GlpkGrouper(Grouper):
         in_silico_peptides_to_proteins = self.digest_class.peptide_to_protein_dictionary
         grouped = []
         for protein_objects in lead_protein_objects:
-            protein_objects.peptides = list(prot_pep_dict[protein_objects.identifier])
+            protein_objects.peptides = [x for x in list(prot_pep_dict[protein_objects.identifier]) if x in self.data_class.restricted_peptides]
             sub_group = [protein_objects]
             cur_peptides = list(prot_pep_dict[protein_objects.identifier])
             # Use a default dict set here for automatic union
@@ -443,7 +448,8 @@ class GlpkGrouper(Grouper):
                                 cur_index = protein_finder.index(prots)
                                 current_protein_object = scored_proteins[cur_index]
                                 other_peptides = list(prot_pep_dict[current_protein_object.identifier])
-                                current_protein_object.peptides = other_peptides
+                                # Assign the peptides only if they are in restricted_peptides....
+                                current_protein_object.peptides = [x for x in other_peptides if x in self.data_class.restricted_peptides]
                                 all_potential_proteins['current'].add(current_protein_object)
                             except ValueError:
                                 # Put a print statement here showing which proteins werent found... Meaning they dont have a protein object

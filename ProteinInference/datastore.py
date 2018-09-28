@@ -385,7 +385,9 @@ class ProteinToPeptideDictionary(DataStore):
         dd_prots = collections.defaultdict(set)
         for peptide_objects in self.data_to_use:
             for prots in peptide_objects.possible_proteins:
-                dd_prots[prots].add(peptide_objects.identifier.split('.')[1])
+                cur_peptide = peptide_objects.identifier.split('.')[1]
+                if cur_peptide in self.data_class.restricted_peptides:
+                    dd_prots[prots].add(cur_peptide)
         
         self.data_class.protein_peptide_dictionary = dd_prots
         
@@ -414,7 +416,11 @@ class PeptideToProteinDictionary(DataStore):
         dd_peps = collections.defaultdict(set)
         for peptide_objects in self.data_to_use:
             for prots in peptide_objects.possible_proteins:
-                dd_peps[peptide_objects.identifier.split('.')[1]].add(prots)
+                cur_peptide = peptide_objects.identifier.split('.')[1]
+                if cur_peptide in self.data_class.restricted_peptides:
+                    dd_peps[cur_peptide].add(prots)
+                else:
+                    pass
                 
         self.data_class.peptide_protein_dictionary = dd_peps
         
@@ -574,3 +580,70 @@ class RemoveMods(DataStore):
         # First parameter is the replacement, second parameter is your input string
         stripped_peptide = self.regex.sub('', self.peptide_string)
         self.stripped_peptide = stripped_peptide
+
+
+class RemoveNonUniquePeptides(DataStore):
+    """
+    This class removes non unique peptides from adding to a proteins score...
+    However, if the peptides from two proteins are identical, we keep all peptides
+    """
+
+    def __init__(self,data_class):
+        self.data_class = data_class
+
+    def execute(self):
+        print('Removing Non Unique Peptides before scoring')
+        print(str(len(self.data_class.scoring_input)) + ' Total Proteins to Parse')
+        dict_of_matches = collections.defaultdict(list)
+        dict_of_protein_matches = collections.defaultdict(list)
+        j = 0
+        for prots in self.data_class.scoring_input:
+            j = j + 1
+            print(j)
+            for prots2 in self.data_class.scoring_input:
+                if prots != prots2:
+                    peptides_1 = prots.raw_peptides
+                    peptides_2 = prots2.raw_peptides
+                    if peptides_1 != peptides_2:
+                        matching = [x.split('.')[1] for x in peptides_1 if x in peptides_2]
+                        if matching:
+                            dict_of_matches[prots.identifier].append(matching)
+                            dict_of_protein_matches[prots.identifier].append(prots2.identifier)
+
+
+        new_score_dict = collections.defaultdict(list)
+        new_raw_peptides = collections.defaultdict(list)
+        jj = 0
+        for more_prots in self.data_class.scoring_input:
+            jj = jj + 1
+            print(jj)
+            pep_scores = more_prots.psm_score_dictionary
+            raw_peps = more_prots.raw_peptides
+
+            protein_list = [item for sublist in dict_of_matches[more_prots.identifier] for item in sublist]
+            for k in range(len(pep_scores)):
+                if pep_scores[k]['peptide'] in protein_list:
+                    pass
+                else:
+                    new_score_dict[more_prots.identifier].append(pep_scores[k])
+                    new_raw_peptides[more_prots.identifier].append(raw_peps[k])
+
+            if more_prots.identifier not in new_score_dict.keys():
+                print("Protein "+ more_prots.identifier + ' Has been Completely removed')
+
+
+        all_peptides_flat = []
+        for i in range(len(self.data_class.scoring_input)):
+            self.data_class.scoring_input[i].psm_score_dictionary = new_score_dict[self.data_class.scoring_input[i].identifier]
+            raw_peps = new_raw_peptides[self.data_class.scoring_input[i].identifier]
+            self.data_class.scoring_input[i].raw_peptides = raw_peps
+            all_peptides_flat.append(raw_peps)
+
+        all_peptides_flat = [item for sublist in all_peptides_flat for item in sublist]
+        all_peptides_flat = [x.split('.')[1] for x in all_peptides_flat]
+
+        self.data_class.scoring_input = [x for x in self.data_class.scoring_input if x.psm_score_dictionary]
+
+
+
+        self.data_class.restricted_peptides = [x for x in self.data_class.restricted_peptides if x in all_peptides_flat]

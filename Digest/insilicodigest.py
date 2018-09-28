@@ -23,7 +23,7 @@ class InSilicoDigest(object):
     Exmample: Digest.insilicodigest.InSilicoDigest(database_path = "example_human_db.fasta", num_miss_cleavs=2, digest_type='trypsin')
     """
     
-    def __init__(self,database_path,num_miss_cleavs=2,digest_type='trypsin'):
+    def __init__(self,database_path,num_miss_cleavs=2,digest_type='trypsin',id_splitting=True):
         self.peptide_to_protein_dictionary = None
         self.protein_to_peptide_dictionary = None
         self.protein_peptide_complete_set = None
@@ -31,6 +31,7 @@ class InSilicoDigest(object):
         self.database_path = database_path
         self.num_miss_cleavs = num_miss_cleavs
         self.list_of_digest_types = ['trypsin']
+        self.id_splitting = id_splitting
         self.aa_list = ['A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V']
         if digest_type in self.list_of_digest_types:
             self.digest_type = digest_type
@@ -206,7 +207,11 @@ class InSilicoDigest(object):
             # We use [:2] because that is the first two letters of the protein identifier
             # We use [3:] below also because we need to remove "sp|" or "tr|" to match what the search results show....
             for record in handle:
-                identifier_stripped = record.id[3:]
+                if self.id_splitting == True:
+                    identifier_stripped = record.id[3:]
+                if self.id_splitting == False:
+                    identifier_stripped = record.id
+
 
                 if record.id[:2] == 'sp':
                     sp_dict['swiss-prot'].append(identifier_stripped)

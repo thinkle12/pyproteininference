@@ -28,11 +28,15 @@ from matplotlib.backends.backend_pdf import PdfPages
 # This will map the runs to use... to the db letter and the rep number...
 # Make if more automated....
 
-runs_to_use = 'A_rep1'
+runs_to_use = 'A_rep'
+true_database = 'prest_pool_a.fasta'
 
 list_of_search_filenames = os.listdir('/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/')
 
 list_of_search_filenames = [x for x in list_of_search_filenames if runs_to_use in x and 'target' in x ]
+
+list_of_search_filenames = sorted(list_of_search_filenames)
+list_of_search_ids = [x.split('_')[3] for x in list_of_search_filenames]
 list_of_true_db = ['prest_pool_a.fasta' for x in range(len(list_of_search_filenames))]
 
 list_of_searchids = [x.split('/')[-1].split('_percolator_')[0] for x in list_of_search_filenames]
@@ -44,6 +48,13 @@ list_of_databases = ['complete_random_entrap_dbs_new/complete_random_entrap_db_A
 entrap_list = [None]
 entrap_list2 = [None]
 
+for i in range(100):
+    targets = ['/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use+'_db_'+[i]+'_new_percolator_target_psm.txt',
+               '/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use + +'_db_' + [i]+'_new_percolator_target_psm.txt',
+               '/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use + +'_db_' + [i]+'_new_percolator_target_psm.txt']
+    decoys =['/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use+'_db_'+[i]+'_new_percolator_decoy_psm.txt',
+               '/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use +'_db_' + [i]+'_new_percolator_decoy_psm.txt',
+               '/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use +'_db_' + [i]+'_new_percolator_decoy_psm.txt']
 
 dir_name = "/Users/hinklet/PI_output_benchmark/"
 yaml_params = "/Users/hinklet/PythonPackages/ProteinInference/parameters/Protein_Inference_Params.yaml"
@@ -53,8 +64,10 @@ import time
 
 with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
     for i in range(len(list_of_search_filenames)):
-        target = '/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+list_of_search_filenames[i]
-        decoy ='/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+'_decoy_'.join(list_of_search_filenames[i].split('_target_'))
+        target = targets[i]
+        decoy = decoys[i]
+        true_db = true_database
+        search_db = '/gne/research/data/protchem/gfy/working/random_entrapment_databases_new/complete_random_entrap_db_AB_'+[i]+'_new.fasta'
         tag = list_of_searchids[i]
         start_time = time.time()
         with open(yaml_params, 'r') as stream:
@@ -196,8 +209,8 @@ with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
 
 
 
-        entrap = ProteinInference.entrapment.GeneratePlot(data_class = data, entrapment_db= 'random_entrap_dbs_new/random_entrap_db_new_'+str(list_of_db_numbers[i])+'.fasta',
-                                                          true_db='entrapment_data/'+list_of_true_db[i], search_id=list_of_searchids[i],pdf=pdf,
+        entrap = ProteinInference.entrapment.GeneratePlot(data_class = data, entrapment_db= 'random_entrap_dbs_new/random_entrap_db_new_'+[i]+'.fasta',
+                                                          true_db='entrapment_data/'+true_db, search_id=runs_to_use,pdf=pdf,
                                                           picked=data.yaml_params['Parameters']['Picker'],qvr=data.yaml_params['Parameters']['Restrict_Q'],
                                                           pvr=data.yaml_params['Parameters']['Restrict_Pep'])
         entrap.execute()

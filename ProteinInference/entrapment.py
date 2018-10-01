@@ -154,7 +154,8 @@ class GeneratePlot(Entrapment):
         # plt.show()
         # plt.close()
 
-        efdr05 = ProteinInference.fdrcalc.EntrapFdr(data_class=self.data_class, entrapment_database=self.entrapment_db, other_database=self.other_database,
+        efdr05 = ProteinInference.fdrcalc.EntrapFdr(data_class=self.data_class, entrapment_database=self.entrapment_db,
+                                                    true_database=self.true_db,other_database=self.other_database,
                                                     false_discovery_rate=.05)
         efdr05.execute()
 

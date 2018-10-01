@@ -162,7 +162,7 @@ class EntrapFdr(Fdr):
             if '#' not in records.id:
                 true_proteins.append(records.id)
 
-        protein_data = [x[0].identifier for x in self.data_class.grouped_scored_data]
+        protein_data = [x[0].identifier for x in self.grouped_scored_data]
         false_true_positives = []
         decoys = []
         decoy_fdr = []

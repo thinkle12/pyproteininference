@@ -174,7 +174,7 @@ class EntrapFdr(Fdr):
             if '#' in protein_data[i]:
                 decoys.append(protein_data[i])
 
-        entrapment_proteins_set = set(entrapment_proteins)
+        entrapment_proteins_set = set(entrapment_proteins) + set(false_true_positives)
 
         # pick out the lead scoring protein for each group... lead score is at 0 position
         lead_score = [x[0] for x in self.grouped_scored_data]

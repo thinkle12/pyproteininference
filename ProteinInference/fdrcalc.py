@@ -131,23 +131,23 @@ class EntrapFdr(Fdr):
     Entrapment DB would be target proteins known to NOT be in the sample. However, these entrapped proteins should be in the main database that
     the search was searched against via comet/mascot
     """
-    def __init__(self, data_class, entrapment_database, true_database, other_database = None, false_discovery_rate=.05):
+    def __init__(self, data_class, true_database, other_database = None, false_discovery_rate=.05):
         self.grouped_scored_data = data_class.grouped_scored_proteins
         self.false_discovery_rate = false_discovery_rate
         self.data_class = data_class
-        self.entrapment_database = entrapment_database
         self.other_database = other_database
         self.true_database = true_database
 
     def execute(self):
 
-        entrapment_handle = SeqIO.parse(self.entrapment_database, 'fasta')
+        # entrapment_handle = SeqIO.parse(self.entrapment_database, 'fasta')
+        #
+        # entrapment_proteins = []
+        # for records in entrapment_handle:
+        #     if '#' not in records.id:
+        #         entrapment_proteins.append(records.id)
 
         entrapment_proteins = []
-        for records in entrapment_handle:
-            if '#' not in records.id:
-                entrapment_proteins.append(records.id)
-
         if self.other_database:
             other_handle = SeqIO.parse(self.other_database, 'fasta')
             other_proteins = []
@@ -174,7 +174,8 @@ class EntrapFdr(Fdr):
             if '#' in protein_data[i]:
                 decoys.append(protein_data[i])
 
-        entrapment_proteins_set = list(entrapment_proteins) + list(false_true_positives)
+
+        entrapment_proteins_set = list(false_true_positives)
         entrapment_proteins_set = set(entrapment_proteins_set)
 
         # pick out the lead scoring protein for each group... lead score is at 0 position

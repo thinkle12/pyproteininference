@@ -6,7 +6,7 @@ Created on Thu Dec  7 10:15:19 2017
 @author: hinklet
 """
 
-import ProteinInference
+import py_protein_inference
 import matplotlib
 matplotlib.use('Agg')
 # import matplotlib.pyplot as plt
@@ -35,11 +35,11 @@ class RocPlot(Benchmark):
     """
 
     def __init__(self,data_class):
-        fdr01 = ProteinInference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=.01)
+        fdr01 = py_protein_inference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=.01)
         fdr01.execute()
         one_percent_data = data_class.fdr_restricted_grouped_scored_proteins
         self.one_percent_length = len(one_percent_data)
-        fdr1 = ProteinInference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=1)
+        fdr1 = py_protein_inference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=1)
         fdr1.execute()
         self.all_data = data_class.fdr_restricted_grouped_scored_proteins
         self.data_class = data_class

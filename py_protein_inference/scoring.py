@@ -187,7 +187,7 @@ class DownweightedMultiplicativeLog(Score):
         all_scores = []
         print 'Scoring Proteins...'
         for protein in self.pre_score_data:
-            val_list = (x['score'] for x in protein.psm_score_dictionary)
+            val_list = [x['score'] for x in protein.psm_score_dictionary]
             #Divide by the score mean raised to the length of the number of unique peptides for the protein
             #This is an attempt to normalize for number of peptides per protein
             combine = reduce(lambda x, y: x*y, val_list)

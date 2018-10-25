@@ -391,12 +391,13 @@ class ProteinToPeptideDictionary(DataStore):
         self.data_class = data_class
             
     def execute(self):
-            
+
+        res_pep_set = set(self.data_class.restricted_peptides)
         dd_prots = collections.defaultdict(set)
         for peptide_objects in self.data_to_use:
             for prots in peptide_objects.possible_proteins:
                 cur_peptide = peptide_objects.identifier.split('.')[1]
-                if cur_peptide in self.data_class.restricted_peptides:
+                if cur_peptide in res_pep_set:
                     dd_prots[prots].add(cur_peptide)
         
         self.data_class.protein_peptide_dictionary = dd_prots
@@ -422,12 +423,14 @@ class PeptideToProteinDictionary(DataStore):
         self.data_class = data_class
         
     def execute(self):
-            
+
+
+        res_pep_set = set(self.data_class.restricted_peptides)
         dd_peps = collections.defaultdict(set)
         for peptide_objects in self.data_to_use:
             for prots in peptide_objects.possible_proteins:
                 cur_peptide = peptide_objects.identifier.split('.')[1]
-                if cur_peptide in self.data_class.restricted_peptides:
+                if cur_peptide in res_pep_set:
                     dd_peps[cur_peptide].add(prots)
                 else:
                     pass

@@ -14,7 +14,7 @@ class Protein(object):
     We use __slots__ to predefine the attributes the Protein Object can have
     This is done to speed up runtime of the PI algorithm
 
-    Example: ProteinInference.physical.Protein(dentifier = "PRKDC_HUMAN|P78527")
+    Example: py_protein_inference.physical.Protein(dentifier = "PRKDC_HUMAN|P78527")
     """
     __slots__ = ['identifier','score', 'group_identification', 'reviewed', 'unreviewed', 'peptides', 'peptide_scores', 'picked', 'psm_score_dictionary',
                  'num_peptides','unique_peptides','num_unique_peptides','raw_peptides','psmid_peptide_dictionary']

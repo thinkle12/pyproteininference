@@ -25,7 +25,7 @@ class BestPeptidePerProtein(Score):
 
     This class uses a best peptide per protein scoring scheme
 
-    Example: ProteinInference.scoring.BestPeptidePerProtein(data_class = data)
+    Example: py_protein_inference.scoring.BestPeptidePerProtein(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -70,7 +70,7 @@ class FishersMethod(Score):
 
     This class uses a Fishers method scoring scheme
 
-    Example: ProteinInference.scoring.FishersMethod(data_class = data)
+    Example: py_protein_inference.scoring.FishersMethod(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -111,7 +111,7 @@ class MultiplicativeLog(Score):
     This class uses a Multiplicative Log scoring scheme.
     All the Qvalues/PepValues from all the peptides per protein are multiplied together and we take -Log(X) of the multiplied Peptide scores
 
-    Example: ProteinInference.scoring.MultiplicativeLog(data_class = data)
+    Example: py_protein_inference.scoring.MultiplicativeLog(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -161,7 +161,7 @@ class DownweightedMultiplicativeLog(Score):
     then this number is divided by the set QValue/PepValue mean raised to the number of peptides for that protein
     then we take -Log(X) of the following value
 
-    Example: ProteinInference.scoring.DownweightedMultiplicativeLog(data_class = data)
+    Example: py_protein_inference.scoring.DownweightedMultiplicativeLog(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -215,7 +215,7 @@ class TopTwoCombined(Score):
     The top two scores for each protein are multiplied together and we take -Log(X) of the  multiplied value.
     If a protein only has 1 score/peptide, then we only do -Log(X) of the 1 peptide score
 
-    Example: ProteinInference.scoring.TopTwoCombined(data_class = data)
+    Example: py_protein_inference.scoring.TopTwoCombined(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -268,7 +268,7 @@ class DownweightedVersion2(Score):
 
     We also take -Log(X) of the final score here
 
-    Example: ProteinInference.scoring.DownweightedVersion2(data_class = data)
+    Example: py_protein_inference.scoring.DownweightedVersion2(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -321,7 +321,7 @@ class IterativeDownweightedLog(Score):
 
     We also take -Log(X) of the final score here
 
-    Example: ProteinInference.scoring.IterativeDownweightedLog(data_class = data)
+    Example: py_protein_inference.scoring.IterativeDownweightedLog(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -374,7 +374,7 @@ class GeometricMeanLog(Score):
 
     We also take -Log(X) of the final score here
 
-    Example: ProteinInference.scoring.GeometricMeanLog(data_class = data)
+    Example: py_protein_inference.scoring.GeometricMeanLog(data_class = data)
 
     Where data is a DataStore Object
      """

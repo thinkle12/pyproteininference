@@ -27,7 +27,7 @@ class RocPlot(Benchmark):
     Class for producing a Roc plot.
     Requires a DataStore object
 
-    Example: rp = ProteinInference.benchmark.RocPlot(data_class = data)
+    Example: rp = py_protein_inference.benchmark.RocPlot(data_class = data)
              rp.execute(pdf=True)
 
 
@@ -174,7 +174,7 @@ class RocPlot(Benchmark):
         plt.plot([spec_list[self.one_percent_length]],[sens_list[self.one_percent_length]], marker='o', markersize=9, color="black")
         plt.ylabel('sensitivity')
         plt.xlabel('1-specificity')
-        plt.title('Roc Curve Attempt ProteinInference'+'\n'+self.data_class.score_type+' and '+self.data_class.score_method)
+        plt.title('Roc Curve Attempt py_protein_inference'+'\n'+self.data_class.score_type+' and '+self.data_class.score_method)
         plt.legend(('Random Guess', 'Max Youdens Index', 'Max Concordance Prob', 'Min Index of Union', 'Min Euclidian Dist', 'Min Dist Line','1 Percent FDR','Sens vs 1-Spec'),
            shadow=True, loc=(.6, .05))
         if not pdf:

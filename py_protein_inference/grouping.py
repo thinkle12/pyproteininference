@@ -21,12 +21,12 @@ class Grouper(object):
         
 class SimpleSubsetting(Grouper):
     """
-    Class that performs simple subset grouping of Protein objects from ProteinInference.physical.Protein()
+    Class that performs simple subset grouping of Protein objects from py_protein_inference.physical.Protein()
 
     If we have two proteins A and B, and protein B's peptides are a COMPLETE subset of protein A's peptides.
     Then we create a protein group between the two proteins with protein A leading the group.
 
-    Example: ProteinInference.grouping.SimpleSubsetting(data_class = data)
+    Example: py_protein_inference.grouping.SimpleSubsetting(data_class = data)
 
     Where data is a DataStore object
 
@@ -154,10 +154,10 @@ class GlpkSetup(Grouper):
     """
     This class is used to setup the glpk file for analysis.
 
-    Example: ProteinInference.grouping.GlpkSetup(data_class = data ,glpkin_filename='glpkin_example.mod'))
+    Example: py_protein_inference.grouping.GlpkSetup(data_class = data ,glpkin_filename='glpkin_example.mod'))
 
     Class will use attributes from DataStore object data.
-    Class will also write the glpkin filename to be used in ProteinInference.grouping.GlpkRunner()
+    Class will also write the glpkin filename to be used in py_protein_inference.grouping.GlpkRunner()
 
     The Bulk of the glpk input file looks as follows:
     s.t. c1: y[5658] >=1;
@@ -235,15 +235,15 @@ class GlpkSetup(Grouper):
             
 class GlpkRunner(Grouper):
     """
-    The GlpkRunner class takes a path to glpsol, the glpk input file from ProteinInference.grouping.GlpkSetup(), a glpkout filename as well as a file_override option
+    The GlpkRunner class takes a path to glpsol, the glpk input file from py_protein_inference.grouping.GlpkSetup(), a glpkout filename as well as a file_override option
 
-    Example: ProteinInference.grouping.GlpkRunner(path_to_glpsol = '/glpsol',glpkin='glpkin_example.mod',glpkout='glpkout_example.sol',file_override=False)
+    Example: py_protein_inference.grouping.GlpkRunner(path_to_glpsol = '/glpsol',glpkin='glpkin_example.mod',glpkout='glpkout_example.sol',file_override=False)
 
     path to glpsol on rescomp3 is: '/gne/research/apps/protchem/glpk/bin/glpsol'
 
     Typically set file_override to false unless you know what you are doing (IE you have a specific glpk solution file you want to use)
 
-    Important output of this class is the glpk output solution file to be used in ProteinInference.grouping.GlpkGrouper
+    Important output of this class is the glpk output solution file to be used in py_protein_inference.grouping.GlpkGrouper
     """
     
     def __init__(self,path_to_glpsol = '/glpsol',glpkin='glpkin.mod',glpkout='glpkout.sol',file_override=False):
@@ -279,7 +279,7 @@ class GlpkGrouper(Grouper):
     """
     This class takes a digest class object, a glpk solution file, as well as an option for swissprot override (protein naming convention).
 
-    Example: ProteinInference.grouping.GlpkGrouper(data_class = data,digest_class = digest,swissprot_override="soft",glpksolution_filename='glpkout_example.sol')
+    Example: py_protein_inference.grouping.GlpkGrouper(data_class = data,digest_class = digest,swissprot_override="soft",glpksolution_filename='glpkout_example.sol')
 
     Where data is a DataStore object, digest is a Digest.insilicodigest.InSilicoDigest() class object and glpksolution_filename is a glpk solution file.
 

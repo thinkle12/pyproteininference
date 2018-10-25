@@ -318,6 +318,7 @@ class GlpkGrouper(Grouper):
         self.lead_protein_set = None
         
     def execute(self):
+        print('this is working')
         import os
         glpk_out = open(self.glpksolution_filename,'r')
 

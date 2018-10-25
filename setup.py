@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='ProteinInference',
+    name='py_protein_inference',
     version='1.0.0',
-    packages=['Digest', 'ProteinInference','scripts'],
+    packages=['digest', 'py_protein_inference','scripts'],
     url='',
     license='',
     author='hinklet',

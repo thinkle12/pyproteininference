@@ -49,9 +49,9 @@ class BestPeptidePerProtein(Score):
             for vals in protein.psm_score_dictionary:
                 temp_peps.append(vals['peptide'])
                 val_list.append(float(vals['score']))
-                score = min([float(x) for x in val_list])
+            score = min([float(x) for x in val_list])
 
-                protein.score = score
+            protein.score = score
 
             
             all_scores.append(protein)
@@ -89,9 +89,7 @@ class FishersMethod(Score):
         all_scores = []
         print 'Scoring Proteins...'
         for protein in self.pre_score_data:
-            val_list = []
-            for vals in protein.psm_score_dictionary:
-                val_list.append(float(vals['score']))
+            val_list = (x['score'] for x in protein.psm_score_dictionary)
             score = -2*sum([math.log(x) for x in val_list])
 
             protein.score = score
@@ -126,13 +124,14 @@ class MultiplicativeLog(Score):
                 'scoring input not found in data class - Please run PreScoreQValue of PreScorePepValue from DataStore to run any scoring type')
         self.data_class = data_class
     def execute(self):            
+        # Instead of making all_scores a list... make it a generator??
 
         all_scores = []
         print 'Scoring Proteins...'
+        print 'Using Generators'
         for protein in self.pre_score_data:
-            val_list = []
-            for vals in protein.psm_score_dictionary:
-                val_list.append(float(vals['score']))
+            # We create a generator of val_list...
+            val_list = (x['score'] for x in protein.psm_score_dictionary)
             
             combine = reduce(lambda x, y: x*y, val_list)
             if combine==0:
@@ -188,9 +187,7 @@ class DownweightedMultiplicativeLog(Score):
         all_scores = []
         print 'Scoring Proteins...'
         for protein in self.pre_score_data:
-            val_list = []
-            for vals in protein.psm_score_dictionary:
-                val_list.append(float(vals['score']))
+            val_list = (x['score'] for x in protein.psm_score_dictionary)
             #Divide by the score mean raised to the length of the number of unique peptides for the protein
             #This is an attempt to normalize for number of peptides per protein
             combine = reduce(lambda x, y: x*y, val_list)

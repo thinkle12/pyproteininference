@@ -305,16 +305,26 @@ class PreScoreQValue(DataStore):
                 protein_psm_score_dictionary[prots].append({'peptide':psms.identifier.split('.')[1],'score':psms.qvalue})
                 raw_peptide_dictionary[prots].append({'complete_peptide':psms.identifier})
                 psmid_peptide_dictionary[prots].append({'peptide':psms.identifier.split('.')[1],'psm_id':psms.psm_id})
-        protein_list = []
-        for pkeys in protein_psm_score_dictionary.keys():
-            p = Protein(identifier = pkeys)
-            p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
-            p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
-            p.raw_peptides = [x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]
-            protein_list.append(p)
+
+        print 'Using Generators for Pre Scoring...'
+        def gen():
+            for pkeys in protein_psm_score_dictionary.keys():
+                p = Protein(identifier=pkeys)
+                p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
+                p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
+                p.raw_peptides = [x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]
+                yield p
+
+        # protein_list = []
+        # for pkeys in protein_psm_score_dictionary.keys():
+        #     p = Protein(identifier = pkeys)
+        #     p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
+        #     p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
+        #     p.raw_peptides = [x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]
+        #     protein_list.append(p)
 
         self.data_class.score_type = 'q_value'
-        self.data_class.scoring_input = protein_list
+        self.data_class.scoring_input = gen()
         
         
 class PreScorePepValue(DataStore):

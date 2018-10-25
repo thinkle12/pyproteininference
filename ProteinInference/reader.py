@@ -76,6 +76,7 @@ class PercolatorRead(Reader):
         if isinstance(self.target_file, (list,)):
             all_target = []
             for t_files in self.target_file:
+                print(t_files)
                 t = open(t_files)
                 t = t.read()
                 lines = t.split('\n')
@@ -106,6 +107,7 @@ class PercolatorRead(Reader):
         if isinstance(self.decoy_file, (list,)):
             all_decoy = []
             for d_files in self.decoy_file:
+                print(d_files)
                 d = open(d_files)
                 d = d.read()
                 dlines = d.split('\n')
@@ -132,11 +134,25 @@ class PercolatorRead(Reader):
         #Combine the lists
         perc_all = all_target+all_decoy
         perc_all = sorted(perc_all, key=lambda x: float(x[1]), reverse = True)
+
+        # TODO
+        # TRY TO GET PERC_ALL AS A GENERATOR
+        # Can do this... just give the option to feed a combined file... and loop over all the files...
+        # Hmm... problem is it still needs to be sorted by perc score....
+
         list_of_psm_objects = []
-        peptide_tracker = []
+        peptide_tracker = set()
         #We only want to get unique peptides... using all messes up scoring...
         #Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
+
+        # TODO
+        # make this for loop a generator...
+
+        print(len(perc_all))
+        i = 0
         for psm_info in perc_all:
+            i = i+1
+            print(i)
             current_peptide = psm_info[self.peptide_index]
             #Define the Psm...
             if current_peptide not in peptide_tracker:
@@ -155,7 +171,7 @@ class PercolatorRead(Reader):
                         p.possible_proteins.append(alt_proteins)
 
                 list_of_psm_objects.append(p)
-                peptide_tracker.append(current_peptide)
+                peptide_tracker.add(current_peptide)
 
         self.psms = list_of_psm_objects
 

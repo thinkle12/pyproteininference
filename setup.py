@@ -1,6 +1,10 @@
 from setuptools import setup
+import glob
 
 setup(
+    setup_requires=['pbr>=1.8', 'setuptools>=17.1'],
+    pbr=True,
+    scripts=glob.glob("scripts/*.py"),
     name='py_protein_inference',
     version='1.0.0',
     packages=['digest', 'py_protein_inference','scripts'],

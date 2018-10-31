@@ -1,4 +1,4 @@
-import ProteinInference
+import py_protein_inference
 import matplotlib
 #
 #matplotlib.use('Agg')
@@ -63,10 +63,10 @@ class GeneratePlot(Entrapment):
         self.x = x
         self.y = y
 
-        fdr1 = ProteinInference.fdrcalc.PureDecoyFdr(data_class=data_class, false_discovery_rate=0)
+        fdr1 = py_protein_inference.fdrcalc.PureDecoyFdr(data_class=data_class, false_discovery_rate=0)
         fdr1.execute()
         self.decoy_fdr_calc_list = fdr1.fdr_list
-        efdr1 = ProteinInference.fdrcalc.EntrapFdr(data_class=data_class,
+        efdr1 = py_protein_inference.fdrcalc.EntrapFdr(data_class=data_class,
                                                    true_database=self.true_db,other_database=self.other_database, false_discovery_rate=0)
         efdr1.execute()
         self.entrapment_fdr_calc_list = efdr1.fdr_list
@@ -137,7 +137,7 @@ class GeneratePlot(Entrapment):
         # plt.show()
         # plt.close()
 
-        efdr05 = ProteinInference.fdrcalc.EntrapFdr(data_class=self.data_class,
+        efdr05 = py_protein_inference.fdrcalc.EntrapFdr(data_class=self.data_class,
                                                     true_database=self.true_db,other_database=self.other_database,
                                                     false_discovery_rate=.05)
         efdr05.execute()

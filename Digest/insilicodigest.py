@@ -10,6 +10,8 @@ import collections
 from Bio import SeqIO
 import os
 import cPickle as pickle
+from pyteomics import fasta, parser, mass, achrom, electrochem, auxiliary
+
 
 class InSilicoDigest(object):
     """
@@ -269,7 +271,65 @@ class InSilicoDigest(object):
         self.peptide_to_protein_dictionary = pep_dict
         self.protein_to_peptide_dictionary = prot_dict
 
+class PyteomicsDigest(object):
+    """
+    The following class creates protein to peptide, peptide to protein, and swissprot protein mappings.
+    These mappings are essential for GlpkGrouper as an InSilicoDigest object is input for GlpkGrouper
+
+    The input is a fasta database, number of missed cleavages, as well as a digestion type ("trypsin").
+
+    Further digestion types need to be added in the future other than just trypsin
+
+    """
+
+    def __init__(self, database_path, num_miss_cleavs=2, digest_type='trypsin', id_splitting=True):
+        self.peptide_to_protein_dictionary = None
+        self.protein_to_peptide_dictionary = None
+        self.protein_peptide_complete_set = None
+        self.swiss_prot_protein_dictionary = None
+        self.database_path = database_path
+        self.num_miss_cleavs = num_miss_cleavs
+        self.list_of_digest_types = ['trypsin']
+        self.id_splitting = id_splitting
+        self.aa_list = ['A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T',
+                        'W', 'Y', 'V']
+        if digest_type in self.list_of_digest_types:
+            self.digest_type = digest_type
+        else:
+            raise ValueError('digest_type must be equal to one of the following' + str(
+                self.list_of_digest_types) + ' or... (List more digest types here in the future...)')
 
 
+    def execute(self):
+        print 'Starting Digest...'
+        pep_dict = collections.defaultdict(set)
+        prot_dict = collections.defaultdict(set)
+        sp_dict = collections.defaultdict(list)
 
-                
+        # We use [:2] because that is the first two letters of the protein identifier
+        # We use [3:] below also because we need to remove "sp|" or "tr|" to match what the search results show....
+
+        for description, sequence in fasta.read(self.database_path):
+            new_peptides = parser.cleave(sequence, parser.expasy_rules[self.digest_type])
+
+            # Hopefully this splitting works...
+            # IDK how robust this is...
+            identifier = description.split(' ')[0]
+
+            # Handle ID Splitting...
+            if self.id_splitting == True:
+                identifier_stripped = identifier[3:]
+            if self.id_splitting == False:
+                identifier_stripped = identifier
+
+            # If SP add to
+            if identifier[:2] == 'sp':
+                sp_dict['swiss-prot'].append(identifier_stripped)
+            for peps in list(new_peptides):
+                pep_dict[peps].add(identifier_stripped)
+                prot_dict[identifier_stripped].add(peps)
+
+
+        self.swiss_prot_protein_dictionary = sp_dict
+        self.peptide_to_protein_dictionary = pep_dict
+        self.protein_to_peptide_dictionary = prot_dict

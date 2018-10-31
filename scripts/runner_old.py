@@ -7,7 +7,7 @@ Created on Fri Dec  1 11:04:08 2017
 """
 
 
-import ProteinInference
+import py_protein_inference
 import time
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy
@@ -15,7 +15,7 @@ import numpy
 qvalue_restriction = [.2]
 pepvalue_restriction = [.9]
 
-from Digest import insilicodigest
+from digest import insilicodigest
 
 digest = insilicodigest.InSilicoDigest(database_path='data/UniprotKBConcat1708_HUMAN.fasta',
                                        num_miss_cleavs=2,

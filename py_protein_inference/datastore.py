@@ -16,7 +16,7 @@ class DataStore(object):
     The following Class stores data at every step of the PI analysis.
     The class serves as a central point that is accessed at virtually every PI processing step
 
-    Example: ProteinInference.datastore.DataStore(reader_class = reader)
+    Example: py_protein_inference.datastore.DataStore(reader_class = reader)
 
     Where reader is a Reader class object
     """
@@ -70,7 +70,7 @@ class ProteinIdentifiers(DataStore):
     """
     Class that outputs all Protein Identifiers and stores it as "potential_proteins" in the DataStore object
 
-    Example: ProteinInference.datastore.ProteinIdenfitiers(data_class = data)
+    Example: py_protein_inference.datastore.ProteinIdenfitiers(data_class = data)
 
     Where data is a DataStore Object.
 
@@ -97,7 +97,7 @@ class QValues(DataStore):
     """
     Class that outputs all Qvalues and stores it as "qvalues" in the DataStore object
 
-    Example: ProteinInference.datastore.QValues(data_class = data)
+    Example: py_protein_inference.datastore.QValues(data_class = data)
 
     Where data is a DataStore Object.
 
@@ -123,7 +123,7 @@ class PepValues(DataStore):
     """
     Class that outputs all Qvalues and stores it as "pepvalues" in the DataStore object
 
-    Example: ProteinInference.datastore.PepValues(data_class = data)
+    Example: py_protein_inference.datastore.PepValues(data_class = data)
 
     Where data is a DataStore Object.
 
@@ -149,7 +149,7 @@ class ProteinInformationDictionary(DataStore):
     """
     Class that creates a protein information dictionary and stores it as "protein_info_dict" in the DataStore object
 
-    Example: ProteinInference.datastore.ProteinInformationDictionary(data_class = data)
+    Example: py_protein_inference.datastore.ProteinInformationDictionary(data_class = data)
 
     Where data is a DataStore Object.
 
@@ -193,7 +193,7 @@ class RestrictMainData(DataStore):
     If this is ran, we automatically discared everything that has a PEP of 1
     This means it has a 100% chance of being an incorrect match...
 
-    Example: ProteinInference.datastore.RestrictMainData(data_class = data,peptide_length=7,posterior_error_prob_threshold=None,q_value_threshold=None)
+    Example: py_protein_inference.datastore.RestrictMainData(data_class = data,peptide_length=7,posterior_error_prob_threshold=None,q_value_threshold=None)
 
     Again, data is a DataStore Object
 
@@ -276,7 +276,7 @@ class PreScoreQValue(DataStore):
     This class generates the generic data structure used in protein scoring
     If this class is called, Qvalues are used for scoring...
 
-    Example: ProteinInference.datastore.PreScoreQValue(data_class = data)
+    Example: py_protein_inference.datastore.PreScoreQValue(data_class = data)
 
     Where data is a DataStore Object
     """
@@ -305,16 +305,26 @@ class PreScoreQValue(DataStore):
                 protein_psm_score_dictionary[prots].append({'peptide':psms.identifier.split('.')[1],'score':psms.qvalue})
                 raw_peptide_dictionary[prots].append({'complete_peptide':psms.identifier})
                 psmid_peptide_dictionary[prots].append({'peptide':psms.identifier.split('.')[1],'psm_id':psms.psm_id})
-        protein_list = []
-        for pkeys in protein_psm_score_dictionary.keys():
-            p = Protein(identifier = pkeys)
-            p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
-            p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
-            p.raw_peptides = [x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]
-            protein_list.append(p)
+
+        print 'Using Generators for Pre Scoring...'
+        def gen():
+            for pkeys in protein_psm_score_dictionary.keys():
+                p = Protein(identifier=pkeys)
+                p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
+                p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
+                p.raw_peptides = [x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]
+                yield p
+
+        # protein_list = []
+        # for pkeys in protein_psm_score_dictionary.keys():
+        #     p = Protein(identifier = pkeys)
+        #     p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
+        #     p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
+        #     p.raw_peptides = [x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]
+        #     protein_list.append(p)
 
         self.data_class.score_type = 'q_value'
-        self.data_class.scoring_input = protein_list
+        self.data_class.scoring_input = gen()
         
         
 class PreScorePepValue(DataStore):
@@ -322,7 +332,7 @@ class PreScorePepValue(DataStore):
     This class generates the generic data structure used in protein scoring
     If this class is called, Pepvalues are used for scoring...
 
-    Example: ProteinInference.datastore.PreScorePepValue(data_class = data)
+    Example: py_protein_inference.datastore.PreScorePepValue(data_class = data)
 
     Where data is a DataStore Object
     """
@@ -364,11 +374,11 @@ class ProteinToPeptideDictionary(DataStore):
     """
     This class creates the Protein to Peptide dictionary for peptides from the search results
 
-    Example: ProteinInference.datastore.ProteinToPeptideDictionary(data_class = data)
+    Example: py_protein_inference.datastore.ProteinToPeptideDictionary(data_class = data)
 
     Where data is a DataStore Object
 
-    This class provides a quick and easy map of Proteins to peptides from the search and is used in ProteinInference.grouping
+    This class provides a quick and easy map of Proteins to peptides from the search and is used in py_protein_inference.grouping
     """
     
     def __init__(self,data_class):
@@ -381,12 +391,13 @@ class ProteinToPeptideDictionary(DataStore):
         self.data_class = data_class
             
     def execute(self):
-            
+
+        res_pep_set = set(self.data_class.restricted_peptides)
         dd_prots = collections.defaultdict(set)
         for peptide_objects in self.data_to_use:
             for prots in peptide_objects.possible_proteins:
                 cur_peptide = peptide_objects.identifier.split('.')[1]
-                if cur_peptide in self.data_class.restricted_peptides:
+                if cur_peptide in res_pep_set:
                     dd_prots[prots].add(cur_peptide)
         
         self.data_class.protein_peptide_dictionary = dd_prots
@@ -395,11 +406,11 @@ class PeptideToProteinDictionary(DataStore):
     """
     This class creates the Peptide to Protein dictionary for peptides from the search results
 
-    Example: ProteinInference.datastore.PeptideToProteinDictionary(data_class = data)
+    Example: py_protein_inference.datastore.PeptideToProteinDictionary(data_class = data)
 
     Where data is a DataStore Object
 
-    This class provides a quick and easy map of Peptides to Proteins from the search and is used in ProteinInference.grouping.GlpkSetup
+    This class provides a quick and easy map of Peptides to Proteins from the search and is used in py_protein_inference.grouping.GlpkSetup
     """
     
     def __init__(self,data_class):
@@ -412,12 +423,14 @@ class PeptideToProteinDictionary(DataStore):
         self.data_class = data_class
         
     def execute(self):
-            
+
+
+        res_pep_set = set(self.data_class.restricted_peptides)
         dd_peps = collections.defaultdict(set)
         for peptide_objects in self.data_to_use:
             for prots in peptide_objects.possible_proteins:
                 cur_peptide = peptide_objects.identifier.split('.')[1]
-                if cur_peptide in self.data_class.restricted_peptides:
+                if cur_peptide in res_pep_set:
                     dd_peps[cur_peptide].add(prots)
                 else:
                     pass
@@ -437,7 +450,7 @@ class HigherOrLower(DataStore):
     This is important as whenever results are sorted by score, we need to know whether a higher or a lower score is better.
     Given that a higher score or a lower score can be seen as "better" for different scoring types, we implement this class to determine if higher or lower is better
 
-    Example: ProteinInference.datastore.HigherOrLower(data_class = data)
+    Example: py_protein_inference.datastore.HigherOrLower(data_class = data)
 
     where data is a DataStore Object
     """
@@ -477,7 +490,7 @@ class GetProteinIdentifiers(DataStore):
     One can get all identifiers from ['main', 'restricted', 'picked', 'picked_removed', and 'fdr_restricted']
     This is useful as we can see what proteins are removed from the data at what steps of the algorithm...
 
-    Example: ProteinInference.datastore.GetProteinIdentifiers(data_class = data, data_form = 'restricted')
+    Example: py_protein_inference.datastore.GetProteinIdentifiers(data_class = data, data_form = 'restricted')
 
     data_class is a DataStore object
     data_form can be one of the following = ['main', 'restricted', 'picked', 'picked_removed', and 'fdr_restricted']
@@ -525,7 +538,7 @@ class GetProteinInformation(DataStore):
     we can look at the following attributes of the proteins:
     Score, groups, reviewed/unreviewed, peptides, peptide scores, picked/removed, number of peptides...
 
-    Example: gpi = ProteinInference.datastore.GetProteinInformation(data_class = data)
+    Example: gpi = py_protein_inference.datastore.GetProteinInformation(data_class = data)
 
              gpi.execute(protein_string = PRKDC_HUMAN|P78527)
 

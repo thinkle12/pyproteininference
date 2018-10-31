@@ -28,7 +28,7 @@ class StandardPicker(Picker):
     This sort of analysis is built into other protein inference tools such as Percolator Built in Inference.
     It seems to be a good way of dealing with the TITIN problem as for a lot of searches we will see TITIN as well as Decoy ##TITIN
 
-    Example: ProteinInference.picker.StandardPicker(data_class = data)
+    Example: py_protein_inference.picker.StandardPicker(data_class = data)
 
     Where data is a DataStore Object.
     """

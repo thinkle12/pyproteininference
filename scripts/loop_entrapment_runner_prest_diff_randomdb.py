@@ -24,61 +24,97 @@ from matplotlib.backends.backend_pdf import PdfPages
 # scoring_methods = ['bppp','ttc','ml','dwml','dw2','fm','gm','mdwl']
 # list_of_databases = os.listdir('complete_random_entrap_dbs')
 
-# Put a dictionary mapper in here...
-# This will map the runs to use... to the db letter and the rep number...
-# Make if more automated....
+param_tags = "RNUP_NoPicker_78rdb_standard_new"
+RemoveNonUniquePeptides = True
 
-runs_to_use = 'A_rep'
-true_database = 'prest_pool_a.fasta'
 
-list_of_search_filenames = os.listdir('/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/')
+db_path = "/Users/hinklet/PythonPackages/py_protein_inference/old/all_benchmark_entrapment_data/entrapment_data/"
 
-list_of_search_filenames = [x for x in list_of_search_filenames if runs_to_use in x and 'target' in x ]
 
-list_of_search_filenames = sorted(list_of_search_filenames)
-list_of_search_ids = [x.split('_')[3] for x in list_of_search_filenames]
-list_of_true_db = ['prest_pool_a.fasta' for x in range(len(list_of_search_filenames))]
 
-list_of_searchids = [x.split('/')[-1].split('_percolator_')[0] for x in list_of_search_filenames]
+combined_targets = [['181049_percolator_target_psm_all_psms-3403b50e-f906-4806-a6b7-4eff7daac98f.txt',
+                     '181050_percolator_target_psm_all_psms-dbdc690a-88c2-4662-a200-e6403efdd932.txt',
+                     '181051_percolator_target_psm_all_psms-83d5a11e-5b09-46f9-be04-cc3293ab43dc.txt'],
+                    ['181052_percolator_target_psm_all_psms-b3dacac3-c786-429a-965e-9e978b6e295f.txt',
+                     '181053_percolator_target_psm_all_psms-545ad8f2-f1bd-43f3-b082-eca80c57650f.txt',
+                     '181054_percolator_target_psm_all_psms-6614140f-a997-44d5-b39a-c84d10d0d33b.txt'],
+                    ['181055_percolator_target_psm_all_psms-a1c1a34d-fc80-40c9-ae16-35e9e202576a.txt',
+                     '181056_percolator_target_psm_all_psms-b4b471a2-0fb3-4b52-b687-a559e118a0ec.txt',
+                     '181057_percolator_target_psm_all_psms-9269c0e2-26b8-41d8-b5f5-7005f4378309.txt']
+                    ]
 
-list_of_db_numbers = [x.split('.')[0].split('_')[3] for x in list_of_search_filenames]
 
-list_of_databases = ['complete_random_entrap_dbs_new/complete_random_entrap_db_A_'+x+'_new.fasta' for x in list_of_db_numbers]
+
+
+combined_decoys = [['181049_percolator_decoy_psm_all_psms-3403b50e-f906-4806-a6b7-4eff7daac98f.txt',
+                     '181050_percolator_decoy_psm_all_psms-dbdc690a-88c2-4662-a200-e6403efdd932.txt',
+                     '181051_percolator_decoy_psm_all_psms-83d5a11e-5b09-46f9-be04-cc3293ab43dc.txt'],
+                   ['181052_percolator_decoy_psm_all_psms-b3dacac3-c786-429a-965e-9e978b6e295f.txt',
+                     '181053_percolator_decoy_psm_all_psms-545ad8f2-f1bd-43f3-b082-eca80c57650f.txt',
+                     '181054_percolator_decoy_psm_all_psms-6614140f-a997-44d5-b39a-c84d10d0d33b.txt'],
+                   ['181055_percolator_decoy_psm_all_psms-a1c1a34d-fc80-40c9-ae16-35e9e202576a.txt',
+                     '181056_percolator_decoy_psm_all_psms-b4b471a2-0fb3-4b52-b687-a559e118a0ec.txt',
+                     '181057_percolator_decoy_psm_all_psms-9269c0e2-26b8-41d8-b5f5-7005f4378309.txt']
+                   ]
+
+# mapper2 = {'181055':"prest_1000_random.fasta",
+#           '181056':"prest_1000_random.fasta",
+#           '181057':"prest_1000_random.fasta",
+#           '147863':"random_entrap_B_test.fasta",
+#           '147862':"random_entrap_B_test.fasta",
+#           '147861':"random_entrap_B_test.fasta",
+#           '147860':"random_entrap_A_test.fasta",
+#           '147859':"random_entrap_A_test.fasta",
+#           '147858':"random_entrap_A_test.fasta"}
+
+mapper3 = {'Rep123_A':'random_entrap_db_new_78_withB.fasta',
+           'Rep123_B':'random_entrap_db_new_78_withA.fasta',
+           'Rep123_AB':'random_entrap_db_new_78.fasta'
+}
+
+
+
+
+list_of_tags = ['Rep123_B','Rep123_A','Rep123_AB']
+
+list_of_true_db = ['complete_random_entrap_db_AB_78_new.fasta' for x in range(3)]
+
+list_of_db_numbers = ["B", "A", "AB"]
+
+
+
+list_of_databases = [db_path+'prest_pool_'+x.lower()+".fasta" for x in list_of_db_numbers]
 
 entrap_list = [None]
 entrap_list2 = [None]
 
-for i in range(100):
-    targets = ['/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use+'_db_'+[i]+'_new_percolator_target_psm.txt',
-               '/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use + +'_db_' + [i]+'_new_percolator_target_psm.txt',
-               '/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use + +'_db_' + [i]+'_new_percolator_target_psm.txt']
-    decoys =['/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use+'_db_'+[i]+'_new_percolator_decoy_psm.txt',
-               '/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use +'_db_' + [i]+'_new_percolator_decoy_psm.txt',
-               '/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use +'_db_' + [i]+'_new_percolator_decoy_psm.txt']
-
-dir_name = "/Users/hinklet/PI_output_benchmark/"
-yaml_params = "/Users/hinklet/PythonPackages/py_protein_inference/parameters/Protein_Inference_Params.yaml"
-scoring_methods = ['idwl']
+dir_name = '/Users/hinklet/prest_random_db_benchmark/protein_inference_files/'
+yaml_params = "/Users/hinklet/PythonPackages/py_protein_inference/parameters/Protein_Inference_Params_prest.yaml"
 import py_protein_inference
 import time
 
-with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
-    for i in range(len(list_of_search_filenames)):
-        target = targets[i]
-        decoy = decoys[i]
-        true_db = true_database
-        search_db = '/gne/research/data/protchem/gfy/working/random_entrapment_databases_new/complete_random_entrap_db_AB_'+[i]+'_new.fasta'
-        tag = list_of_searchids[i]
+with open(yaml_params, 'r') as stream:
+    yaml_parameteres_for_digest = yaml.load(stream)
+
+
+# Make this only a 3x for loop not a 9x for loop... waste of time...
+with PdfPages('/Users/hinklet/prest_random_db_benchmark/plots/'+yaml_parameteres_for_digest['Parameters']['Score_Method'] + '_' + yaml_parameteres_for_digest['Parameters']['Score_Type'] +'_' +param_tags + '.pdf') as pdf:
+    for i in range(len(combined_targets)):
+        target = ['/Users/hinklet/prest_random_db_benchmark/percolator_out/' + x for x in combined_targets[i]]
+        decoy =['/Users/hinklet/prest_random_db_benchmark/percolator_out/' + x for x in combined_decoys[i]]
+        tag = list_of_tags[i]
+        entrapdb = mapper3[tag]
         start_time = time.time()
         with open(yaml_params, 'r') as stream:
             yaml_parameteres_for_digest = yaml.load(stream)
 
         # Do in silico digest....
-        digest = insilicodigest.InSilicoDigest(database_path=list_of_databases[i],
+        digest = insilicodigest.InSilicoDigest(database_path=db_path+list_of_true_db[i],
                                                num_miss_cleavs=int(yaml_parameteres_for_digest['Parameters'][
                                                                        'Missed_Cleavages']),
                                                digest_type=yaml_parameteres_for_digest['Parameters'][
-                                                   'Digest_Type'])
+                                                   'Digest_Type'],
+                                               id_splitting=False)
         digest.execute()
 
         # Initiate the reader...
@@ -123,6 +159,10 @@ with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
 
         # Execute score setup...
         score_setup.execute()
+
+        if RemoveNonUniquePeptides:
+            rnup = ProteinInference.datastore.RemoveNonUniquePeptides(data)
+            rnup.execute()
 
         score_method = data.yaml_params['Parameters']['Score_Method']
 
@@ -169,16 +209,16 @@ with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
         # Run GLPK setup, runner, grouper...
         if grouping_type == 'glpk':
             glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,
-                                                            glpkin_filename='glpkinout/glpkin_' + tag + '.mod')
+                                                            glpkin_filename='glpkinout/glpkin_' + tag +'_'+param_tags+ '.mod')
             glpksetup.execute()
             glpkrun = ProteinInference.grouping.GlpkRunner(
                 path_to_glpsol=data.yaml_params['Parameters']['GLPK_Path'],
-                glpkin='glpkinout/glpkin_' + tag + '.mod', glpkout='glpkinout/glpkout_' + tag + '.sol',
+                glpkin='glpkinout/glpkin_' + tag +'_'+param_tags+ '.mod', glpkout='glpkinout/glpkout_' + tag +'_'+param_tags+ '.sol',
                 file_override=False)
             glpkrun.execute()
             group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest,
                                                           swissprot_override='soft',
-                                                          glpksolution_filename='glpkinout/glpkout_' + tag + '.sol')
+                                                          glpksolution_filename='glpkinout/glpkout_' + tag +'_'+param_tags+ '.sol')
             group.execute()
 
         if grouping_type == 'multi_subsetting':
@@ -201,27 +241,38 @@ with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
 
         # Write the output to a csv...
         if 'q_value' in export_type:
-            export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,
-                                                         filename_out=dir_name + tag + '_' + 'leads' + '_' + data.short_score_method + '_' + data.score_type + '.csv')
+            export = ProteinInference.export.CsvOutCommaSepQValues(data_class=data,
+                                                         filename_out=dir_name + param_tags + "_" + tag + '_' + 'CommaSep' + '_' + data.short_score_method + '_' + data.score_type + '.csv')
             export.execute()
+
+            export2 = ProteinInference.export.CsvOutLeadsQValues(data_class=data,
+                                                                   filename_out=dir_name + param_tags + "_" + tag + '_' + 'Leads' + '_' + data.short_score_method + '_' + data.score_type + '.csv')
+            export2.execute()
+
+            export3 = ProteinInference.export.CsvOutAllQValues(data_class=data,
+                                                                 filename_out=dir_name + param_tags + "_" + tag + '_' + 'All' + '_' + data.short_score_method + '_' + data.score_type + '.csv')
+            export3.execute()
+
+            # export4 = ProteinInference.export.CsvOutAll(data_class=data,
+            #                                                    filename_out=dir_name + param_tags + "_" + tag + '_' + 'All' + '_' + data.short_score_method + '_' + data.score_type + '.csv')
+            # export4.execute()
+
 
         print 'Protein Inference Finished'
 
 
 
-        entrap = ProteinInference.entrapment.GeneratePlot(data_class = data, entrapment_db= 'random_entrap_dbs_new/random_entrap_db_new_'+[i]+'.fasta',
-                                                          true_db='entrapment_data/'+true_db, search_id=runs_to_use,pdf=pdf,
-                                                          picked=data.yaml_params['Parameters']['Picker'],qvr=data.yaml_params['Parameters']['Restrict_Q'],
-                                                          pvr=data.yaml_params['Parameters']['Restrict_Pep'])
+        entrap = ProteinInference.entrapment.GeneratePlot(data_class = data, true_db=list_of_databases[i], search_id=tag,pdf=pdf,
+                                                          picked=data.yaml_params['Parameters']['Picker'],qvr=data.yaml_params['Parameters']['Restrict_Q'],pvr=data.yaml_params['Parameters']['Restrict_Pep'])
         entrap.execute()
 
 
         #youden_data = data.max_youdens_data
 
 
-    print 'score type = '+str(data.score_type)
-    print 'score method = '+str(data.score_method)
-    end_time = time.time()-start_time
-    print str(end_time)+' seconds'
-    print str(end_time/60)+' minutes'
-    print str(end_time/(60*60))+' hours'
+print 'score type = '+str(data.score_type)
+print 'score method = '+str(data.score_method)
+end_time = time.time()-start_time
+print str(end_time)+' seconds'
+print str(end_time/60)+' minutes'
+print str(end_time/(60*60))+' hours'

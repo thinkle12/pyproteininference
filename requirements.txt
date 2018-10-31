@@ -1,0 +1,11 @@
+alembic
+bluecopper>=1.1.0.dev196
+bluecopper_web>=1.1.0.dev149
+bluecopper_percolator
+bluecopper_proteininference
+future
+numpy
+pandas
+matplotlib==2.0.2
+pyteomics
+biopython

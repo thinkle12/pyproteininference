@@ -23,7 +23,7 @@ class CsvOutAll(Export):
     Only Proteins that pass FDR will be output and ALL proteins
     will be output not just leads
 
-    Example: ProteinInference.export.CsvOutAll(data_class = data, filename_out = "example.csv")
+    Example: py_protein_inference.export.CsvOutAll(data_class = data, filename_out = "example.csv")
 
     if we assume data = datastore.Datastore(reader_class = reader)
     and if we assume reader is a class object from reader.Reader()
@@ -58,7 +58,7 @@ class CsvOutLeads(Export):
     Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
     Only Proteins that pass FDR will be output and only Lead proteins will be output
 
-    Example: ProteinInference.export.CsvOutLeads(data_class = data, filename_out = "example.csv")
+    Example: py_protein_inference.export.CsvOutLeads(data_class = data, filename_out = "example.csv")
 
     if we assume data = datastore.Datastore(reader_class = reader)
     and if we assume reader is a class object from reader.Reader()
@@ -93,7 +93,7 @@ class CsvOutCommaSep(Export):
     Only Proteins that pass FDR will be output and only Lead proteins will be output.
     Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-    Example: ProteinInference.export.CsvOutCommaSep(data_class = data, filename_out = "example.csv")
+    Example: py_protein_inference.export.CsvOutCommaSep(data_class = data, filename_out = "example.csv")
 
     if we assume data = datastore.Datastore(reader_class = reader)
     and if we assume reader is a class object from reader.Reader()
@@ -127,7 +127,7 @@ class CsvOutLeadsQValues(Export):
     """
     Class that outputs all lead proteins with Q values.
 
-    Example: ProteinInference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
+    Example: py_protein_inference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
     if we assume data = datastore.Datastore(reader_class = reader)
 
     and if we assume reader is a class object from reader.Reader()
@@ -162,7 +162,7 @@ class CsvOutCommaSepQValues(Export):
     Class that outputs all lead proteins with Q values.
     Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-    Example: ProteinInference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
+    Example: py_protein_inference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
     if we assume data = datastore.Datastore(reader_class = reader)
 
     and if we assume reader is a class object from reader.Reader()
@@ -198,7 +198,7 @@ class CsvOutAllQValues(Export):
     Non Lead proteins are also output - entire group gets output
     Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-    Example: ProteinInference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
+    Example: py_protein_inference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
 
     if we assume data = datastore.Datastore(reader_class = reader)
     and if we assume reader is a class object from reader.Reader()
@@ -259,7 +259,7 @@ class CsvOutLeadsQValuesLong(Export):
     """
     Class that outputs all lead proteins with Q values.
 
-    Example: ProteinInference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
+    Example: py_protein_inference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
     if we assume data = datastore.Datastore(reader_class = reader)
 
     and if we assume reader is a class object from reader.Reader()

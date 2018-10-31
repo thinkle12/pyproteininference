@@ -6,7 +6,7 @@ Created on Fri Dec  1 11:04:08 2017
 @author: hinklet
 """
 import matplotlib
-from Digest import insilicodigest
+from digest import insilicodigest
 import yaml
 #
 matplotlib.use('Agg')
@@ -24,11 +24,11 @@ from matplotlib.backends.backend_pdf import PdfPages
 # scoring_methods = ['bppp','ttc','ml','dwml','dw2','fm','gm','mdwl']
 # list_of_databases = os.listdir('complete_random_entrap_dbs')
 
-param_tags = "RNUP_NoPicker"
-RemoveNonUniquePeptides = True
+param_tags = "KEEP_NoPicker_standard_new"
+RemoveNonUniquePeptides = False
 
 
-db_path = "/Users/hinklet/PythonPackages/ProteinInference/old/all_benchmark_entrapment_data/entrapment_data/"
+db_path = "/Users/hinklet/PythonPackages/py_protein_inference/old/all_benchmark_entrapment_data/entrapment_data/"
 
 
 combined_targets = [['147858_percolator_target_psm_all_psms-ae0ab4ec-78ab-4092-a505-1f5434b55a70.txt',
@@ -52,8 +52,8 @@ combined_decoys = [['147858_percolator_decoy_psm_all_psms-ae0ab4ec-78ab-4092-a50
  '147866_percolator_decoy_psm_all_psms-fc39906c-da4d-4bee-8ad7-09d5f2a268d4.txt']]
 
 
-mapper3 = {'Rep123_A':"random_entrap_B_test.fasta",
-           'Rep123_B':"random_entrap_A_test.fasta",
+mapper3 = {'Rep123_A':"1000_random_plus_b.fasta",
+           'Rep123_B':"1000_random_plus_a.fasta",
            'Rep123_AB':"prest_1000_random.fasta"
 }
 
@@ -72,14 +72,14 @@ list_of_searchids = [x.split('/')[-1].split('_percolator_')[0] for x in list_of_
 
 list_of_db_numbers = ["B", "A", "AB"]
 
-list_of_databases = [db_path+"complete_and_reversed_"+x+".fasta" for x in list_of_db_numbers]
+list_of_databases = [db_path+"prest_pool_"+x.lower()+".fasta" for x in list_of_db_numbers]
 
 entrap_list = [None]
 entrap_list2 = [None]
 
 dir_name = "/Users/hinklet/PI_output_benchmark/"
-yaml_params = "/Users/hinklet/PythonPackages/ProteinInference/parameters/Protein_Inference_Params.yaml"
-import ProteinInference
+yaml_params = "/Users/hinklet/PythonPackages/py_protein_inference/parameters/Protein_Inference_Params_prest.yaml"
+import py_protein_inference
 import time
 
 with open(yaml_params, 'r') as stream:
@@ -251,7 +251,7 @@ with PdfPages('plots/'+yaml_parameteres_for_digest['Parameters']['Score_Method']
 
 
 
-        entrap = ProteinInference.entrapment.GeneratePlot(data_class = data, entrapment_db= db_path+entrapdb, true_db=list_of_databases[i], search_id=tag,pdf=pdf,
+        entrap = ProteinInference.entrapment.GeneratePlot(data_class = data, true_db=list_of_databases[i], search_id=tag,pdf=pdf,
                                                           picked=data.yaml_params['Parameters']['Picker'],qvr=data.yaml_params['Parameters']['Restrict_Q'],pvr=data.yaml_params['Parameters']['Restrict_Pep'])
         entrap.execute()
 

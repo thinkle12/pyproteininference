@@ -6,7 +6,7 @@ Created on Thu Dec  7 10:15:19 2017
 @author: hinklet
 """
 
-import ProteinInference
+import py_protein_inference
 import matplotlib
 matplotlib.use('Agg')
 # import matplotlib.pyplot as plt
@@ -27,7 +27,7 @@ class RocPlot(Benchmark):
     Class for producing a Roc plot.
     Requires a DataStore object
 
-    Example: rp = ProteinInference.benchmark.RocPlot(data_class = data)
+    Example: rp = py_protein_inference.benchmark.RocPlot(data_class = data)
              rp.execute(pdf=True)
 
 
@@ -35,11 +35,11 @@ class RocPlot(Benchmark):
     """
 
     def __init__(self,data_class):
-        fdr01 = ProteinInference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=.01)
+        fdr01 = py_protein_inference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=.01)
         fdr01.execute()
         one_percent_data = data_class.fdr_restricted_grouped_scored_proteins
         self.one_percent_length = len(one_percent_data)
-        fdr1 = ProteinInference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=1)
+        fdr1 = py_protein_inference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=1)
         fdr1.execute()
         self.all_data = data_class.fdr_restricted_grouped_scored_proteins
         self.data_class = data_class
@@ -174,7 +174,7 @@ class RocPlot(Benchmark):
         plt.plot([spec_list[self.one_percent_length]],[sens_list[self.one_percent_length]], marker='o', markersize=9, color="black")
         plt.ylabel('sensitivity')
         plt.xlabel('1-specificity')
-        plt.title('Roc Curve Attempt ProteinInference'+'\n'+self.data_class.score_type+' and '+self.data_class.score_method)
+        plt.title('Roc Curve Attempt py_protein_inference'+'\n'+self.data_class.score_type+' and '+self.data_class.score_method)
         plt.legend(('Random Guess', 'Max Youdens Index', 'Max Concordance Prob', 'Min Index of Union', 'Min Euclidian Dist', 'Min Dist Line','1 Percent FDR','Sens vs 1-Spec'),
            shadow=True, loc=(.6, .05))
         if not pdf:

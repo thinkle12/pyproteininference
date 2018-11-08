@@ -57,9 +57,9 @@ for i in range(100):
                '/gne/research/data/protchem/gfy/working/benchmark_comet_directories/perc_bsub/perc_output_files_new/'+runs_to_use +'_db_' + [i]+'_new_percolator_decoy_psm.txt']
 
 dir_name = "/Users/hinklet/PI_output_benchmark/"
-yaml_params = "/Users/hinklet/PythonPackages/py_protein_inference/parameters/Protein_Inference_Params.yaml"
+yaml_params = "/Users/hinklet/PythonPackages/protein_inference/parameters/Protein_Inference_Params.yaml"
 scoring_methods = ['idwl']
-import py_protein_inference
+import protein_inference
 import time
 
 with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
@@ -83,7 +83,7 @@ with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
 
         # Initiate the reader...
         # Input for now is a target percolator output and a decoy percolator output
-        pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file=target,
+        pep_and_prot_data = protein_inference.reader.PercolatorRead(target_file=target,
                                                                    decoy_file=decoy,
                                                                    yaml_param_file=yaml_params,
                                                                    digest_class=digest)
@@ -92,7 +92,7 @@ with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
         pep_and_prot_data.execute()
         # Next create a data store which is a class that stores all data for all steps of the PI process
         # Each method and each class calls from this data class to gather information and store data for analyses
-        data = ProteinInference.datastore.DataStore(pep_and_prot_data)
+        data = protein_inference.datastore.DataStore(pep_and_prot_data)
 
         # Here restrict the data to having peptides with length 7 or greater
         if data.yaml_params['Parameters']['Restrict_Pep']:
@@ -110,16 +110,16 @@ with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
             pl_restrict = None
 
         print 'restricting data'
-        restrict = ProteinInference.datastore.RestrictMainData(data, peptide_length=pl_restrict,
+        restrict = protein_inference.datastore.RestrictMainData(data, peptide_length=pl_restrict,
                                                                posterior_error_prob_threshold=pep_restrict,
                                                                q_value_threshold=q_restrict)
         restrict.execute()
 
         # Here generate the pre score data using 'PEP' or 'Q' values
         if data.yaml_params['Parameters']['Score_Type'] == 'pep_value':
-            score_setup = ProteinInference.datastore.PreScorePepValue(data)
+            score_setup = protein_inference.datastore.PreScorePepValue(data)
         if data.yaml_params['Parameters']['Score_Type'] == 'q_value':
-            score_setup = ProteinInference.datastore.PreScoreQValue(data)
+            score_setup = protein_inference.datastore.PreScoreQValue(data)
 
         # Execute score setup...
         score_setup.execute()
@@ -128,26 +128,26 @@ with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
 
         # Here select scoring
         if score_method == 'best_peptide_per_protein':
-            score = ProteinInference.scoring.BestPeptidePerProtein(data_class=data)
+            score = protein_inference.scoring.BestPeptidePerProtein(data_class=data)
         if score_method == 'iterative_downweighted_log':
-            score = ProteinInference.scoring.IterativeDownweightedLog(data_class=data)
+            score = protein_inference.scoring.IterativeDownweightedLog(data_class=data)
         if score_method == 'multiplicative_log':
-            score = ProteinInference.scoring.MultiplicativeLog(data_class=data)
+            score = protein_inference.scoring.MultiplicativeLog(data_class=data)
         if score_method == 'downweighted_multiplicative_log':
-            score = ProteinInference.scoring.DownweightedMultiplicativeLog(data_class=data)
+            score = protein_inference.scoring.DownweightedMultiplicativeLog(data_class=data)
         if score_method == 'downweighted_version2':
-            score = ProteinInference.scoring.DownweightedVersion2(data_class=data)
+            score = protein_inference.scoring.DownweightedVersion2(data_class=data)
         if score_method == 'top_two_combined':
-            score = ProteinInference.scoring.TopTwoCombined(data_class=data)
+            score = protein_inference.scoring.TopTwoCombined(data_class=data)
         if score_method == 'geometric_mean':
-            score = ProteinInference.scoring.GeometricMeanLog(data_class=data)
+            score = protein_inference.scoring.GeometricMeanLog(data_class=data)
 
         # Execute scoring...
         score.execute()
 
         # Run protein picker on the data
         if data.yaml_params['Parameters']['Picker']:
-            picker = ProteinInference.picker.StandardPicker(data_class=data)
+            picker = protein_inference.picker.StandardPicker(data_class=data)
             picker.execute()
         else:
             pass
@@ -161,35 +161,35 @@ with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
 
         # Run simple group subsetting
         if grouping_type == 'simple_subsetting':
-            group = ProteinInference.grouping.SimpleSubsetting(data_class=data)
+            group = protein_inference.grouping.SimpleSubsetting(data_class=data)
             group.execute()
 
         server_glpk_path = '/gne/research/apps/protchem/glpk/bin/glpsol'
 
         # Run GLPK setup, runner, grouper...
         if grouping_type == 'glpk':
-            glpksetup = ProteinInference.grouping.GlpkSetup(data_class=data,
+            glpksetup = protein_inference.grouping.GlpkSetup(data_class=data,
                                                             glpkin_filename='glpkinout/glpkin_' + tag + '.mod')
             glpksetup.execute()
-            glpkrun = ProteinInference.grouping.GlpkRunner(
+            glpkrun = protein_inference.grouping.GlpkRunner(
                 path_to_glpsol=data.yaml_params['Parameters']['GLPK_Path'],
                 glpkin='glpkinout/glpkin_' + tag + '.mod', glpkout='glpkinout/glpkout_' + tag + '.sol',
                 file_override=False)
             glpkrun.execute()
-            group = ProteinInference.grouping.GlpkGrouper(data_class=data, digest_class=digest,
+            group = protein_inference.grouping.GlpkGrouper(data_class=data, digest_class=digest,
                                                           swissprot_override='soft',
                                                           glpksolution_filename='glpkinout/glpkout_' + tag + '.sol')
             group.execute()
 
         if grouping_type == 'multi_subsetting':
-            group = ProteinInference.grouping.MultiSubsetting(data_class=data)
+            group = protein_inference.grouping.MultiSubsetting(data_class=data)
             group.execute()
 
         # Next run fdrcalc on the data....
-        fdr = ProteinInference.fdrcalc.SetBasedFdr(data_class=data, false_discovery_rate=float(
+        fdr = protein_inference.fdrcalc.SetBasedFdr(data_class=data, false_discovery_rate=float(
             data.yaml_params['Parameters']['FDR']))
         fdr.execute()
-        q = ProteinInference.fdrcalc.QValueCalculation(data_class=data)
+        q = protein_inference.fdrcalc.QValueCalculation(data_class=data)
         q.execute()
         # Finally we have our output restricted data...
         restricted = data.fdr_restricted_grouped_scored_proteins
@@ -201,7 +201,7 @@ with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
 
         # Write the output to a csv...
         if 'q_value' in export_type:
-            export = ProteinInference.export.CsvOutLeadsQValues(data_class=data,
+            export = protein_inference.export.CsvOutLeadsQValues(data_class=data,
                                                          filename_out=dir_name + tag + '_' + 'leads' + '_' + data.short_score_method + '_' + data.score_type + '.csv')
             export.execute()
 
@@ -209,7 +209,7 @@ with PdfPages('plots/'+scoring_methods[0] + '_' + runs_to_use + '.pdf') as pdf:
 
 
 
-        entrap = ProteinInference.entrapment.GeneratePlot(data_class = data, entrapment_db= 'random_entrap_dbs_new/random_entrap_db_new_'+[i]+'.fasta',
+        entrap = protein_inference.entrapment.GeneratePlot(data_class = data, entrapment_db= 'random_entrap_dbs_new/random_entrap_db_new_'+[i]+'.fasta',
                                                           true_db='entrapment_data/'+true_db, search_id=runs_to_use,pdf=pdf,
                                                           picked=data.yaml_params['Parameters']['Picker'],qvr=data.yaml_params['Parameters']['Restrict_Q'],
                                                           pvr=data.yaml_params['Parameters']['Restrict_Pep'])

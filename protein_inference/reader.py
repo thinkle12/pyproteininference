@@ -21,10 +21,10 @@ class Reader(object):
         
 class PercolatorRead(Reader):
     """
-    The following class takes a percolator target file and a percolator decoy file and creates standard py_protein_inference.physical.Psm() objects.
-    This reader class is used as input for the DataStore class which is used in all further py_protein_inference Classes
+    The following class takes a percolator target file and a percolator decoy file and creates standard protein_inference.physical.Psm() objects.
+    This reader class is used as input for the DataStore class which is used in all further protein_inference Classes
 
-    Example: py_protein_inference.reader.PercolatorRead(target_file = "example_target.txt", decoy_file = "example_decoy.txt")
+    Example: protein_inference.reader.PercolatorRead(target_file = "example_target.txt", decoy_file = "example_decoy.txt")
 
     Percolator Output is formatted as follows:
     with each entry being tabbed delimited

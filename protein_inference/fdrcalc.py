@@ -19,7 +19,7 @@ class SetBasedFdr(Fdr):
     Class calculates set based FDR on the lead protein in the group
     Input is a DataStore object as well as an integer false discovery rate
 
-    Example: py_protein_inference.fdrcalc.SetBasedFDR(data_class = data,false_discovery_rate=XX))
+    Example: protein_inference.fdrcalc.SetBasedFDR(data_class = data,false_discovery_rate=XX))
 
     FDR is calculated As (2*decoys)/total
     """
@@ -78,7 +78,7 @@ class QValueCalculation(Fdr):
     Class calculates Q values on the lead protein in the groups
     Input is a DataStore object
 
-    Example: py_protein_inference.fdrcalc.SetBasedFDR(data_class = data)
+    Example: protein_inference.fdrcalc.SetBasedFDR(data_class = data)
 
     Q values are calculated As (2*decoys)/total
     """
@@ -123,7 +123,7 @@ class EntrapFdr(Fdr):
     Class calculates Entrapment FDR on the lead protein in the groups.
     Input is a DataStore object, an entrapment database, and a false discovery rate
 
-    Example: py_protein_inference.fdrcalc.EntrapFdr(data_class = data, entrapment_database = "example_entrap.fasta", other_database = None, false_discovery_rate=.05)
+    Example: protein_inference.fdrcalc.EntrapFdr(data_class = data, entrapment_database = "example_entrap.fasta", other_database = None, false_discovery_rate=.05)
 
     FDR values are calculated As (entrapped proteins)/total
 
@@ -232,11 +232,11 @@ class PureDecoyFdr(Fdr):
     Class calculates set based Decoy FDR on the lead protein in the group
     Input is a DataStore object as well as an integer false discovery rate
 
-    Example: py_protein_inference.fdrcalc.PureDecoyFdr(data_class = data,false_discovery_rate=XX))
+    Example: protein_inference.fdrcalc.PureDecoyFdr(data_class = data,false_discovery_rate=XX))
 
     FDR is calculated As (decoys)/total
 
-    This class is used with py_protein_inference.fdrcalc.EntrapFdr in py_protein_inference.entrapment.GeneratePlot()
+    This class is used with protein_inference.fdrcalc.EntrapFdr in protein_inference.entrapment.GeneratePlot()
     The prior mentioned class generates plots of Decoy FDR vs Entrapment FDR to test accuracy of PI methods
     """
     def __init__(self, data_class, false_discovery_rate=.01):

@@ -5,9 +5,9 @@ Parameters:
   Group: glpk
   GLPK_Path: glpsol
   Missed_Cleavages: 2
-  Picker: false
-  Restrict_Pep: .8
+  Picker: False
+  Restrict_Pep: .9
   Restrict_Peptide_Length: 7
-  Restrict_Q: .2
+  Restrict_Q: .05
   Score_Method: multiplicative_log
   Score_Type: pep_value

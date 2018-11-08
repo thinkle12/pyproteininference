@@ -31,7 +31,7 @@ entrap_list2 = [None]
 
 scoring_methods = ['ml','bppp','ttc','dwml','idwl','dw2','gm']
 # scoring_methods = ['bppp']
-import py_protein_inference
+import protein_inference
 import time
 
 restricted_sets = []
@@ -46,7 +46,7 @@ with PdfPages('plots/'+list_of_searchids[0]+'_entrap_plots_pep.pdf') as pdf:
                         start_time = time.time()
                         #Initiate the reader...
                         #Input for now is a target percolator output and a decoy percolator output
-                        pep_and_prot_data = py_protein_inference.reader.PercolatorRead(target_file='all_benchmark_entrapment_data/combined_perc_output_files/'+str(list_of_searchids[i])+'_percolator_target_psm.txt',
+                        pep_and_prot_data = protein_inference.reader.PercolatorRead(target_file='all_benchmark_entrapment_data/combined_perc_output_files/'+str(list_of_searchids[i])+'_percolator_target_psm.txt',
                                                                                   decoy_file='all_benchmark_entrapment_data/combined_perc_output_files/'+str(list_of_searchids[i])+'_percolator_decoy_psm.txt')
                         # pep_and_prot_data = ProteinInference.reader.PercolatorRead(target_file='data/134285_k562_target_psm.txt',
                         #                                                           decoy_file='data/134285_k562_decoy_psm.txt')
@@ -56,39 +56,39 @@ with PdfPages('plots/'+list_of_searchids[0]+'_entrap_plots_pep.pdf') as pdf:
 
                         #Next create a data store which is a class that stores all data for all steps of the PI process
                         #Each method and each class calls from this data class to gather information for analyses
-                        data = py_protein_inference.datastore.DataStore(pep_and_prot_data)
+                        data = protein_inference.datastore.DataStore(pep_and_prot_data)
 
                         #Here restrict the data to having peptides with length 7 or greater and a pep of less than .9
-                        restrict = py_protein_inference.datastore.RestrictMainData(data, peptide_length=7, posterior_error_prob_threshold=pvr,q_value_threshold=qvr)
+                        restrict = protein_inference.datastore.RestrictMainData(data, peptide_length=7, posterior_error_prob_threshold=pvr,q_value_threshold=qvr)
                         restrict.execute()
 
                         #Here generate the pre score data using 'PEP' values
-                        score_setup = py_protein_inference.datastore.PreScorePepValue(data)
+                        score_setup = protein_inference.datastore.PreScorePepValue(data)
                         score_setup.execute()
 
                         #Here we do scoring
                         if scoring_methods[k]=='bppp':
-                            score = py_protein_inference.scoring.BestPeptidePerProtein(data_class=data)
+                            score = protein_inference.scoring.BestPeptidePerProtein(data_class=data)
                         if scoring_methods[k] == 'ttc':
-                            score = py_protein_inference.scoring.TopTwoCombined(data_class=data)
+                            score = protein_inference.scoring.TopTwoCombined(data_class=data)
                         if scoring_methods[k] == 'ml':
-                            score = py_protein_inference.scoring.MultiplicativeLog(data_class=data)
+                            score = protein_inference.scoring.MultiplicativeLog(data_class=data)
                         if scoring_methods[k] == 'dwml':
-                            score = py_protein_inference.scoring.DownweightedMultiplicativeLog(data_class=data)
+                            score = protein_inference.scoring.DownweightedMultiplicativeLog(data_class=data)
                         if scoring_methods[k] == 'dw2':
-                            score = py_protein_inference.scoring.DownweightedVersion2(data_class=data)
+                            score = protein_inference.scoring.DownweightedVersion2(data_class=data)
                         if scoring_methods[k] == 'fm':
-                            score = py_protein_inference.scoring.FishersMethod(data_class=data)
+                            score = protein_inference.scoring.FishersMethod(data_class=data)
                         if scoring_methods[k] == 'gm':
-                            score = py_protein_inference.scoring.GeometricMeanLog(data_class=data)
+                            score = protein_inference.scoring.GeometricMeanLog(data_class=data)
                         if scoring_methods[k] == 'idwl':
-                            score = py_protein_inference.scoring.IterativeDownweightedLog(data_class=data)
+                            score = protein_inference.scoring.IterativeDownweightedLog(data_class=data)
                         score.execute()
                         #This variable becomes the scored proteins as a real variable
                         scored_prots = data.scored_proteins
                         #Run protein picker on the data
                         if pnp:
-                            picker = py_protein_inference.picker.StandardPicker(data_class=data)
+                            picker = protein_inference.picker.StandardPicker(data_class=data)
                             picker.execute()
 
 
@@ -103,15 +103,15 @@ with PdfPages('plots/'+list_of_searchids[0]+'_entrap_plots_pep.pdf') as pdf:
                         #
                         #Run GLPK to generate the minimal list of proteins that account for the peptides
                         #Running GLPK consists of 3 classes, setup, runner, and grouper which need to be run in succession
-                        glpksetup = py_protein_inference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkout_'+list_of_searchids[i]+'.mod')
+                        glpksetup = protein_inference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkout_'+list_of_searchids[i]+'.mod')
                         glpksetup.execute()
-                        runglpk = py_protein_inference.grouping.GlpkRunner(path_to_glpsol = 'glpsol',glpkin = 'glpkinout/glpkout_'+list_of_searchids[i]+'.mod',glpkout = 'glpkinout/glpkout_'+list_of_searchids[i]+'.sol',file_override = False)
+                        runglpk = protein_inference.grouping.GlpkRunner(path_to_glpsol = 'glpsol',glpkin = 'glpkinout/glpkout_'+list_of_searchids[i]+'.mod',glpkout = 'glpkinout/glpkout_'+list_of_searchids[i]+'.sol',file_override = False)
                         runglpk.execute()
-                        group = py_protein_inference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout_'+list_of_searchids[i]+'.sol')
+                        group = protein_inference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout_'+list_of_searchids[i]+'.sol')
                         group.execute()
 
                         #Next run fdrcalc on the data....
-                        fdr = py_protein_inference.fdrcalc.EntrapFdr(data_class=data,entrapment_database='all_benchmark_entrapment_data/entrapment_data/prest_1000_random.fasta',other_database=other_db[0],false_discovery_rate=.05)
+                        fdr = protein_inference.fdrcalc.EntrapFdr(data_class=data,entrapment_database='all_benchmark_entrapment_data/entrapment_data/prest_1000_random.fasta',other_database=other_db[0],false_discovery_rate=.05)
                         fdr.execute()
 
 
@@ -136,7 +136,7 @@ with PdfPages('plots/'+list_of_searchids[0]+'_entrap_plots_pep.pdf') as pdf:
                         # roc = ProteinInference.benchmark.RocPlot(data_class=data)
                         # roc.execute(pdf='output/k562_134285_dwml.pdf')
 
-                        entrap = py_protein_inference.entrapment.GeneratePlot(data_class = data, entrapment_db= 'all_benchmark_entrapment_data/entrapment_data/prest_1000_random.fasta', true_db='all_benchmark_entrapment_data/entrapment_data/'+list_of_true_db[i], search_id=list_of_searchids[i], pdf=pdf, picked=pnp, qvr=qvr, pvr=pvr, other_database=other_db[0])
+                        entrap = protein_inference.entrapment.GeneratePlot(data_class = data, entrapment_db= 'all_benchmark_entrapment_data/entrapment_data/prest_1000_random.fasta', true_db='all_benchmark_entrapment_data/entrapment_data/'+list_of_true_db[i], search_id=list_of_searchids[i], pdf=pdf, picked=pnp, qvr=qvr, pvr=pvr, other_database=other_db[0])
                         entrap.execute()
 
 

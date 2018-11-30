@@ -149,10 +149,7 @@ class PercolatorRead(Reader):
         # make this for loop a generator...
 
         print(len(perc_all))
-        i = 0
         for psm_info in perc_all:
-            i = i+1
-            print(i)
             current_peptide = psm_info[self.peptide_index]
             #Define the Psm...
             if current_peptide not in peptide_tracker:
@@ -220,14 +217,24 @@ class ProteologicPostSearch(Reader):
 
     def execute(self):
         print('Reading in data...')
-        #I want this to be logical object but it doesnt work... weird...
-        list_of_psms = self.proteologic_object.physical_object.psm_sets
-        #Sort this by posterior error prob...
+        if isinstance(self.proteologic_object, (list,)):
+            list_of_psms = []
+            for p_objs in self.proteologic_object:
+                for psms in p_objs.physical_object.psm_sets:
+                    list_of_psms.append(psms)
+        else:
+            list_of_psms = self.proteologic_object.physical_object.psm_sets
+
+        # Sort this by posterior error prob...
+        list_of_psms = sorted(list_of_psms, key=lambda x: float(x.psm_filter.pepvalue))
+
+
+
 
         peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
 
         list_of_psm_objects = []
-        peptide_tracker = []
+        peptide_tracker = set()
         #Peptide tracker is used because we only want UNIQUE peptides...
         #The data is sorted by percolator score... or at least it should be...
         #Or sorted by posterior error probability
@@ -257,7 +264,7 @@ class ProteologicPostSearch(Reader):
 
 
                 list_of_psm_objects.append(p)
-                peptide_tracker.append(current_peptide)
+                peptide_tracker.add(current_peptide)
 
         self.psms = list_of_psm_objects
         print('Finished reading in data...')

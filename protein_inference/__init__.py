@@ -16,3 +16,4 @@ from protein_inference import datastore
 from protein_inference import benchmark
 from protein_inference import physical
 from protein_inference import entrapment
+from protein_inference import qvality

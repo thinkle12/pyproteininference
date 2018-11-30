@@ -65,6 +65,7 @@ class DataStore(object):
         self.score_method = None
         self.picked_proteins_removed = None
         self.protein_group_objects = None
+        self.qvality_output = None
         
 class ProteinIdentifiers(DataStore):
     """

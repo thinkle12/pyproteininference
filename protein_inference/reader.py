@@ -158,7 +158,7 @@ class PercolatorRead(Reader):
                 p.percscore = float(psm_info[self.perc_score_index])
                 p.qvalue = float(psm_info[self.q_value_index])
                 p.pepvalue = float(psm_info[self.posterior_error_prob_index])
-                p.possible_proteins = psm_info[self.proteinIDs_index:]
+                p.possible_proteins = psm_info[self.proteinIDs_index:self.proteinIDs_index+50] # Restrict to 50 total possible proteins...
                 p.psm_id = psm_info[self.psmid_index]
 
                 # Add the other possible_proteins from insilicodigest here...

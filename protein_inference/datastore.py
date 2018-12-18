@@ -210,6 +210,7 @@ class RestrictMainData(DataStore):
         self.data_class = data_class
         
     def execute(self):
+        print('Length of main data: '+str(len(self.main_data)))
         #If restrict_main_data is called, we automatically discard everything that has a PEP of 1
         self.main_data = [x for x in self.main_data if x.pepvalue!=1]
 
@@ -268,6 +269,9 @@ class RestrictMainData(DataStore):
            restricted_data = self.main_data                   
         
         self.data_class.main_data_restricted = restricted_data
+
+        print('Length of restricted data: '+str(len(restricted_data)))
+
 
         self.data_class.restricted_peptides = [x.identifier.split('.')[1] for x in restricted_data]
         

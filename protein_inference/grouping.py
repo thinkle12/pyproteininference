@@ -70,12 +70,12 @@ class SimpleSubsetting(Grouper):
         prot_obj_list = [x for x in sprots]
         prot_obj_list2 = [x for x in sprots]
         prot_name_list = [x.identifier for x in prot_obj_list2]
-        
+
         #Reverse the list to be lowest number of peptides to highest number of peptides
         prot_obj_list.reverse()
         prot_obj_list2.reverse()
         prot_name_list.reverse()
-        
+
         #We do two backwards for-loops so we can delete from the list as we go
         #Group from Top to bottom - doing bottom to top backwards (as we reverse the sorting above)
         #By doing this, subsets can only be below you in the list
@@ -105,15 +105,15 @@ class SimpleSubsetting(Grouper):
             else:
                 pass
             print len(prot_name_list)
-        
-            
+
+
         #Now get the list of scored proteins
         scored_proteins = list(self.scored_data)
         #Also get a list of the protein identifiers of all scored proteins
         #This is neccesary as protein picker deletes a target or decoy depending on which scored worse
         #So some proteins in the group no longer exist in 'scored_proteins'
         protein_finder = [x.identifier for x in scored_proteins]
-        
+
         scores_grouped = []
         group_id = 0
         for groups in grouped:
@@ -137,19 +137,19 @@ class SimpleSubsetting(Grouper):
                     sub_groups = sorted(sub_groups, key = lambda k: k.score, reverse=False)
                 if higher_or_lower=='higher':
                     sub_groups = sorted(sub_groups, key = lambda k: k.score, reverse=True)
-                
+
                 scores_grouped.append(sub_groups)
 
         #Sort all groups by the lead protein score of each group...
         if higher_or_lower=='lower':
             scores_grouped = sorted(scores_grouped, key = lambda k: k[0].score, reverse=False)
-        if higher_or_lower=='higher':    
-            scores_grouped = sorted(scores_grouped, key = lambda k: k[0].score, reverse=True)  
-            
-        self.data_class.grouped_scored_proteins = scores_grouped    
-    
+        if higher_or_lower=='higher':
+            scores_grouped = sorted(scores_grouped, key = lambda k: k[0].score, reverse=True)
 
-        
+        self.data_class.grouped_scored_proteins = scores_grouped
+
+
+
 class GlpkSetup(Grouper):
     """
     This class is used to setup the glpk file for analysis.
@@ -167,40 +167,40 @@ class GlpkSetup(Grouper):
     def __init__(self,data_class,glpkin_filename='glpkin.mod'):
         self.data_class = data_class
         self.glpkin_filename = glpkin_filename
-        
-    def execute(self):   
-        
+
+    def execute(self):
+
         #Here we get the peptide to protein dictionary
         peptoprot = datastore.PeptideToProteinDictionary(self.data_class)
         peptoprot.execute()
         pep_prot_dict = self.data_class.peptide_protein_dictionary
-        
-        
+
+
         #Here we get the list of all proteins
         plist = []
         for peps in pep_prot_dict.keys():
             for prots in list(pep_prot_dict[peps]):
                 plist.append(prots)
 
-        #Here we get the unique proteins        
+        #Here we get the unique proteins
         unique_prots = list(set(plist).union())
-        
+
         #Setup default dictionaries
         dd_num = collections.defaultdict(list)
         dd_prot_nums = collections.defaultdict(list)
-        
+
         #For all the unique proteins from the search create a number to protein dictionary and a protein to number dictionary
         #Here we essentially assign a number to each protein
         #This is important as the glpk analysis just treats proteins as numbers...
         for p in range(len(unique_prots)):
             dd_num[unique_prots[p]].append(p)
             dd_prot_nums[p].append(unique_prots[p])
-        
+
         #Store this data as glpk_protein_number_dictionary and glpk_number_protein_dictionary
         #The numbers are important as they are used in the GLPK input and we need to know what number in the GLPK output corresponds with which protein from the search
-        self.data_class.glpk_protein_number_dictionary = dd_num        
+        self.data_class.glpk_protein_number_dictionary = dd_num
         self.data_class.glpk_number_protein_dictionary = dd_prot_nums
-                
+
         #Create the GLPK input file
         fileout = open(self.glpkin_filename,'w')
 
@@ -211,17 +211,17 @@ class GlpkSetup(Grouper):
         fileout.write('/* objective function */'+'\n')
         fileout.write('minimize z: sum{i in PROTEINS} y[i];'+'\n'+'\n')
         fileout.write('/* Constraints */'+'\n')
-        
+
         #Here we create the bulk of the input file which needs to look as follows:
         #s.t. c1: y[5658] >=1;
         #s.t. c2: y[14145]+y[4857]+y[4858]+y[10143]+y[2966] >=1;
-        #s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1;   
+        #s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1;
         #Each of the lines (constants, c1,c2,c3) is a peptide and each of the y[x] is a protein
         tot_peps = pep_prot_dict.keys()
         for j in range(len(pep_prot_dict)):
             combine = ['y['+str(dd_num[x][0])+']' for x in list(pep_prot_dict[tot_peps[j]])]
             fileout.write('s.t. c'+str(j+1)+': '+'+'.join(combine)+' >=1;'+'\n')
-        
+
         #Finish writing the rest of the file and close it
         fileout.write('\n')
         fileout.write('data;'+'\n')
@@ -229,10 +229,10 @@ class GlpkSetup(Grouper):
         strlist = ' '.join(numlist)
         #End the file with listing the entire set of proteins... (as its number identifier)
         fileout.write('set PROTEINS := '+strlist+' ;'+'\n'+'\n')
-        
+
         fileout.write('end;')
         fileout.close()
-            
+
 class GlpkRunner(Grouper):
     """
     The GlpkRunner class takes a path to glpsol, the glpk input file from protein_inference.grouping.GlpkSetup(), a glpkout filename as well as a file_override option
@@ -245,36 +245,36 @@ class GlpkRunner(Grouper):
 
     Important output of this class is the glpk output solution file to be used in protein_inference.grouping.GlpkGrouper
     """
-    
+
     def __init__(self,path_to_glpsol = '/glpsol',glpkin='glpkin.mod',glpkout='glpkout.sol',file_override=False):
         self.path_to_glpsol = path_to_glpsol
         self.file_override = file_override
         self.glpkin = glpkin
         self.glpkout = glpkout
-    
+
     def execute(self):
         #If there is no file_override (mainly for offline testing)
         if not self.file_override:
             import subprocess
             #Run GLPK with the following command
             p = subprocess.Popen(str(self.path_to_glpsol)+' -m '+str(self.glpkin)+' -o '+str(self.glpkout), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            
+
             output = p.communicate()
-            
+
             print 'Start Command line Stdout'
             print output[0]
             print 'End Command line Stdout'
             print 'Start Command line Stderr'
             print output[1]
             print 'End Command line Stderr'
-            
+
             if output[0]=='':
                 raise ValueError('Glpk did not produce any output... See potential error output above')
         else:
             pass
-        
 
-        
+
+
 class GlpkGrouper(Grouper):
     """
     This class takes a digest class object, a glpk solution file, as well as an option for swissprot override (protein naming convention).
@@ -304,7 +304,7 @@ class GlpkGrouper(Grouper):
     """
     ###Define indicies better and make this code more readable...
     ###Define indicies in init and show commented examples of how the data looks...
-    
+
     def __init__(self,data_class,digest_class,swissprot_override="soft",glpksolution_filename='glpkout.sol'):
         self.data_class = data_class
         self.digest_class = digest_class
@@ -316,7 +316,7 @@ class GlpkGrouper(Grouper):
         self.data_class = data_class
         self.glpksolution_filename = glpksolution_filename
         self.lead_protein_set = None
-        
+
     def execute(self):
         print('this is working')
         import os
@@ -324,15 +324,15 @@ class GlpkGrouper(Grouper):
 
         #Get the number protein dictionary from glpk_setup
         dd_prot_nums = self.data_class.glpk_number_protein_dictionary
-        
+
         glpk_out = glpk_out.read()
         glpk_out = glpk_out.split('\n')
-        
-        
+
+
         #Cant find a better way to do this... there are modules out there that work with glpk...
         start = glpk_out.index('   No. Column name       Activity     Lower bound   Upper bound')
-        
-        
+
+
         newlist = []
         #Fix this -13 and +2... not really sure how
         #Based on the output file we should start two lines after the start index and stop 13 before the end of the file...
@@ -343,14 +343,14 @@ class GlpkGrouper(Grouper):
                 if stuff!='':
                     res.append(stuff)
             newlist.append(res)
-            
+
         #Use 1 here as 1 is the location in the line of the protein number
         #3 is the location of the binary (which indicates whether or not the protein number has a unique peptide making it a lead protein)
         numbers = [x[1].split(']')[0].split('[')[-1] for x in newlist]
         binary = [x[3] for x in newlist]
 
         self.numbers = numbers
-        
+
         #Here we extract out the lead proteins...
         lead_proteins = []
         for k in range(len(numbers)):
@@ -385,17 +385,17 @@ class GlpkGrouper(Grouper):
         #Delete input and output files...
         #os.remove('glpkin.mod')
         #os.remove(self.glpksolution_filename)
-                
+
         #Now we have the lead Proteins so we need to get the peptides for each lead protein
         #Then we find all proteins that share at least 1 peptide with each lead protein
         #If they share at least 1 peptide then assign that protein to the group...
         self.data_class.glpk_lead_proteins = lead_protein_objects
-        
+
         prottopep = datastore.ProteinToPeptideDictionary(self.data_class)
         prottopep.execute()
         prot_pep_dict = self.data_class.protein_peptide_dictionary
-        
-        #Get the higher or lower variable 
+
+        #Get the higher or lower variable
         if not self.data_class.high_low_better:
             hl = datastore.HigherOrLower(self.data_class)
             hl.execute()
@@ -472,7 +472,7 @@ class GlpkGrouper(Grouper):
 
         #Here are the proteins from the database that are reviewed (swissprot)
         sp_protein_set = set(self.digest_class.swiss_prot_protein_dictionary['swiss-prot'])
-        
+
         #Here dont do swissprot override...
         if not self.swissprot_override:
             print 'Applying Group IDs...'
@@ -510,7 +510,7 @@ class GlpkGrouper(Grouper):
 
 
         if self.swissprot_override=='hard':
-            
+
             #Hard swissprot_override will exchange any lead unreviewed hit with the best reviewed hit in its group... even if the unreviewed has a unique peptide relative to the peptides of all proteins in its group...
             print 'Applying Group IDs... and Executing Hard Swissprot Override...'
             #Here we create group ID's for all groups and do some sorting
@@ -554,7 +554,7 @@ class GlpkGrouper(Grouper):
                     sub_groups[1:] = sorted(sub_groups[1:], key = lambda k: (float(k.score),-float(k.num_peptides)), reverse=False)
                 if higher_or_lower=='higher':
                     sub_groups[1:] = sorted(sub_groups[1:], key = lambda k: (float(k.score),float(k.num_peptides)), reverse=True)
-                
+
                 #scores_grouped is the MAIN list of lists with all protein objects
                 scores_grouped.append(sub_groups)
                 #If the lead is reviewed append it to leads and do nothing else...
@@ -596,7 +596,7 @@ class GlpkGrouper(Grouper):
                                 lead_replaced_prot_pairs.append([cur_tr_lead,new_sp_lead])
                                 #Append new_sp_lead protein to leads, to make sure we dont repeat leads
                                 leads.add(new_sp_lead.identifier)
-                                break                    
+                                break
                             else:
                                 #If no reviewed and none not in leads then pass...
                                 pass
@@ -606,9 +606,9 @@ class GlpkGrouper(Grouper):
                 pg.proteins = sub_groups
                 list_of_group_objects.append(pg)
             self.data_class.lead_replaced_proteins = lead_replaced_prot_pairs
-                
-                
-        
+
+
+
         if self.swissprot_override=='soft':
             print 'Applying Group IDs... and Executing Soft Swissprot Override...'
             # Here we create group ID's for all groups and do some sorting
@@ -718,6 +718,49 @@ class GlpkGrouper(Grouper):
             list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score), reverse=True)
 
 
+        # Sometimes we have cases where:
+        # protein a maps to peptides 1,2,3
+        # protein b maps to peptides 1,2
+        # protein c maps to a bunch of peptides and peptide 3
+        # Therefore, in the model proteins a and b are equivalent in that they map to 2 peptides together - 1 and 2. peptide 3 maps to a but also to c...
+        # Sometimes the model (glpk) will spit out protein b as the lead... we wish to swap protein b as the lead with protein a because it will likely have a better score...
+        print('Potentially Reassigning leads...')
+        lead_protein_set = set([x.proteins[0].identifier for x in list_of_group_objects])
+        for i in range(len(list_of_group_objects)):
+            for j in range(1, len(list_of_group_objects[i].proteins)):  # Loop over all sub proteins in the group...
+                # if the lead proteins peptides are a subset of one of its proteins in the group, and the secondary protein is not a lead protein and its score is better than the leads... and it has more peptides...
+                if higher_or_lower == 'higher':
+                    if set(list_of_group_objects[i].proteins[0].peptides).issubset(set(list_of_group_objects[i].proteins[j].peptides)) and list_of_group_objects[i].proteins[j].identifier not in lead_protein_set and list_of_group_objects[i].proteins[0].score < list_of_group_objects[i].proteins[j].score and len(list_of_group_objects[i].proteins[0].peptides) < len(list_of_group_objects[i].proteins[j].peptides):
+                        print('protein ' + str(list_of_group_objects[i].proteins[j].identifier) + ' will replace protein ' + str(list_of_group_objects[i].proteins[0].identifier) + ' as lead, with index '+str(j))
+                        new_lead = list_of_group_objects[i].proteins[j]
+                        old_lead = list_of_group_objects[i].proteins[0]
+                        lead_protein_set.add(new_lead.identifier)
+                        lead_protein_set.remove(old_lead.identifier)
+                        # Swap their positions in the list
+                        list_of_group_objects[i].proteins[0], list_of_group_objects[i].proteins[j] = new_lead, old_lead
+                        print(j)
+                        break
+
+
+                if higher_or_lower == 'lower':
+                    if set(list_of_group_objects[i].proteins[0].peptides).issubset(set(list_of_group_objects[i].proteins[j].peptides)) and list_of_group_objects[i].proteins[j].identifier not in lead_protein_set and list_of_group_objects[i].proteins[0].score > list_of_group_objects[i].proteins[j].score and len(list_of_group_objects[i].proteins[0].peptides) < len(list_of_group_objects[i].proteins[j].peptides):
+                        print('protein ' + str(list_of_group_objects[i].proteins[j].identifier) + ' will replace protein ' + str(list_of_group_objects[i].proteins[0].identifier) + ' as lead, with index '+str(j))
+                        new_lead = list_of_group_objects[i].proteins[j]
+                        old_lead = list_of_group_objects[i].proteins[0]
+                        lead_protein_set.add(new_lead.identifier)
+                        lead_protein_set.remove(old_lead.identifier)
+                        # Swap their positions in the list
+                        list_of_group_objects[i].proteins[0], list_of_group_objects[i].proteins[j] = new_lead, old_lead
+                        break
+
+
+        print 'Re Sorting Results based on lead Protein Score'
+        if higher_or_lower=='lower':
+            scores_grouped = sorted(scores_grouped, key = lambda k: float(k[0].score), reverse=False)
+            list_of_group_objects = sorted(list_of_group_objects, key = lambda k: float(k.proteins[0].score), reverse=False)
+        if higher_or_lower=='higher':
+            scores_grouped = sorted(scores_grouped, key = lambda k: float(k[0].score), reverse=True)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score), reverse=True)
 
         self.data_class.grouped_scored_proteins = scores_grouped
         self.data_class.protein_group_objects = list_of_group_objects

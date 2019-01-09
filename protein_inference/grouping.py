@@ -175,6 +175,11 @@ class GlpkSetup(Grouper):
         peptoprot.execute()
         pep_prot_dict = self.data_class.peptide_protein_dictionary
 
+        # Here we get the protein to peptide dictionary...
+        # prottopep = datastore.ProteinToPeptideDictionary(self.data_class)
+        # prottopep.execute()
+        # pep_prot_dict = self.data_class.protein_peptide_dictionary
+
 
         #Here we get the list of all proteins
         plist = []
@@ -184,6 +189,29 @@ class GlpkSetup(Grouper):
 
         #Here we get the unique proteins
         unique_prots = list(set(plist).union())
+
+        # Here we get a subset of the unique proteins
+        # Where the peptides from the protein cannot be a subset of the peptides from any other protein that has already been added to the list...
+        # unique_prots_restricted = []
+        # unique_prots_peptides_restricted = []
+        # For p in range(len(unique_prots))
+        #   # At Index 0, simply append the protein and peptides...
+        #   if p==0:
+        #       unique_prots_restricted.append(unique_prots[p])
+        #       unique_prots_peptides_restricted.append(pep_prot_dict[unique_prots[p]])
+        #   else:
+        #       current_peptides = pep_prot_dict[unique_prots[p]]
+        #       for s in unique_prots_peptides_restricted:
+        #           if current_peptides.issubset(s):
+        #               issubset = True
+        #               break
+        #       if issubset==True:
+        #           pass
+        #       if issubset==False:
+        #           unique_prots_restricted.append(unique_prots[p])
+        #           unique_prots_peptides_restricted.append(pep_prot_dict[unique_prots[p]])
+        #
+        # unique_prots = unique_prots_restricted
 
         #Setup default dictionaries
         dd_num = collections.defaultdict(list)

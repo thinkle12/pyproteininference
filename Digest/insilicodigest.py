@@ -32,7 +32,7 @@ class InSilicoDigest(object):
         self.swiss_prot_protein_dictionary = None
         self.database_path = database_path
         self.num_miss_cleavs = num_miss_cleavs
-        self.list_of_digest_types = ['trypsin']
+        self.list_of_digest_types = ['trypsin', 'lysc']
         self.id_splitting = id_splitting
         self.aa_list = ['A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V']
         if digest_type in self.list_of_digest_types:
@@ -52,8 +52,10 @@ class InSilicoDigest(object):
                     cut_sites.append(i+1)
 
 
-        if self.digest_type=='other_type':
-            pass
+        if self.digest_type=='lysc':
+            for i in range(0,len(proseq)-1):
+                if proseq[i]=='K' and proseq[i+1]!='P':
+                    cut_sites.append(i+1)
             #Here write more code for other types of digest types....
         
         if cut_sites[-1]!=len(proseq):

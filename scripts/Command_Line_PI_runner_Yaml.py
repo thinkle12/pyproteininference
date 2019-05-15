@@ -13,48 +13,56 @@ import os
 import yaml
 
 
-parser = argparse.ArgumentParser(description='Protein Inference')
-parser.add_argument("-t","--target", dest="target", required=True,
-                    help="Input target psm output from percolator", metavar="FILE")
-parser.add_argument("-d","--decoy", dest="decoy", required=True,
-                    help="Input decoy psm output from percolator", metavar="FILE")
-parser.add_argument("-o","--output", dest="dir_name", required=True,
-                    help="protein_inference Result Directory to write to - Name of file will be determined by parameters selected and searchID", metavar="FILE")
-parser.add_argument("-db","--database", dest="database", required=True,
-                    help="Provide the database used in the MS search", metavar="FILE")
-parser.add_argument("-roc","--roc_curve_filename", dest="roc_curve", required=False,
-                    help="Provide the a filename with .pdf extension for roc curve output", metavar="FILE")
-parser.add_argument("-ym","--yaml_params", dest="yaml_params", required=False,
-                    help="Provide a Protein Inference Yaml Parameter File... If none given, default parameters will be ran", metavar="FILE")
-args = parser.parse_args()
+# parser = argparse.ArgumentParser(description='Protein Inference')
+# parser.add_argument("-t","--target", dest="target", required=True,
+#                     help="Input target psm output from percolator", metavar="FILE")
+# parser.add_argument("-d","--decoy", dest="decoy", required=True,
+#                     help="Input decoy psm output from percolator", metavar="FILE")
+# parser.add_argument("-o","--output", dest="dir_name", required=True,
+#                     help="protein_inference Result Directory to write to - Name of file will be determined by parameters selected and searchID", metavar="FILE")
+# parser.add_argument("-db","--database", dest="database", required=True,
+#                     help="Provide the database used in the MS search", metavar="FILE")
+# parser.add_argument("-roc","--roc_curve_filename", dest="roc_curve", required=False,
+#                     help="Provide the a filename with .pdf extension for roc curve output", metavar="FILE")
+# parser.add_argument("-ym","--yaml_params", dest="yaml_params", required=False,
+#                     help="Provide a Protein Inference Yaml Parameter File... If none given, default parameters will be ran", metavar="FILE")
+# args = parser.parse_args()
 
-if "Bioplex" in args.target:
-    tag = '_'.join(args.target.split('/')[-1].split('_')[:3])
-    print tag
-if "Bioplex" not in args.target:
-    tag = args.target.split('/')[-1].split('_')[0]
-    print tag
+# if "Bioplex" in args.target:
+#     tag = '_'.join(args.target.split('/')[-1].split('_')[:3])
+#     print tag
+# if "Bioplex" not in args.target:
+#     tag = args.target.split('/')[-1].split('_')[0]
+#     print tag
 
+dir = "/Users/hinklet/random_analysis/nedd8/percolator_output_new/"
+odir = os.listdir(dir)
+database = '/Users/hinklet/PythonPackages/protein_inference/data/UniprotKBConcat1708_HUMAN.fasta'
+target = [os.path.join(dir,x) for x in odir if 'target' in x]
+decoy = [os.path.join(dir,x)  for x in odir if 'decoy' in x]
+yaml_params = '/Users/hinklet/PythonPackages/protein_inference/parameters/Protein_Inference_Params.yaml'
+tag = 'nedd8_newest'
+dir_name = "/Users/hinklet/random_analysis/nedd8/pi_output_new/"
 
 # Need to read in yaml params here for digest...
 # Digest needs to be done first to determine alternative proteins
 # Need to determine all potentially possible proteins because comet loader
 # Now does not load all possible proteins
-with open(args.yaml_params, 'r') as stream:
+with open(yaml_params, 'r') as stream:
     yaml_parameteres_for_digest = yaml.load(stream)
 
 
 # Do in silico digest....
-digest = insilicodigest.InSilicoDigest(database_path=args.database,
+digest = insilicodigest.InSilicoDigest(database_path=database,
                                        num_miss_cleavs=int(yaml_parameteres_for_digest['Parameters']['Missed_Cleavages']),
                                        digest_type=yaml_parameteres_for_digest['Parameters']['Digest_Type'])
 digest.execute()
 
 #Initiate the reader...
 #Input for now is a target percolator output and a decoy percolator output
-pep_and_prot_data = protein_inference.reader.PercolatorRead(target_file=args.target,
-                                                          decoy_file=args.decoy,
-                                                           yaml_param_file=args.yaml_params,
+pep_and_prot_data = protein_inference.reader.PercolatorRead(target_file=target,
+                                                          decoy_file=decoy,
+                                                           yaml_param_file=yaml_params,
                                                            digest_class=digest)
 
 #Execeute the reader instance, this loads the data into the reader class
@@ -162,22 +170,22 @@ export_type = data.yaml_params['Parameters']['Export']
 
 #Write the output to a csv...
 if 'leads' in export_type:
-    export = protein_inference.export.CsvOutLeads(data_class=data,filename_out=args.dir_name+tag+'_'+'leads'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export = protein_inference.export.CsvOutLeads(data_class=data,filename_out=dir_name+tag+'_'+'leads'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'all' in export_type:
-    export = protein_inference.export.CsvOutAll(data_class=data,filename_out=args.dir_name+tag+'_'+'all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export = protein_inference.export.CsvOutAll(data_class=data,filename_out=dir_name+tag+'_'+'all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'comma_sep' in export_type:
-    export = protein_inference.export.CsvOutCommaSep(data_class=data, filename_out=args.dir_name+tag+'_'+'comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export = protein_inference.export.CsvOutCommaSep(data_class=data, filename_out=dir_name+tag+'_'+'comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'q_value_comma_sep' in export_type:
-    export = protein_inference.export.CsvOutCommaSepQValues(data_class=data,filename_out=args.dir_name+tag+'_'+'q_value_comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export = protein_inference.export.CsvOutCommaSepQValues(data_class=data,filename_out=dir_name+tag+'_'+'q_value_comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
-if 'q_value_leads' in export_type:
-    export = protein_inference.export.CsvOutLeadsQValues(data_class=data,filename_out=args.dir_name+tag+'_'+'q_value_leads'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+if 'q_value' in export_type:
+    export = protein_inference.export.CsvOutLeadsQValues(data_class=data,filename_out=dir_name+tag+'_'+'q_value_leads'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 if 'q_value_all' in export_type:
-    export = protein_inference.export.CsvOutAllQValues(data_class=data,filename_out=args.dir_name+tag+'_'+'q_value_all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export = protein_inference.export.CsvOutAllQValues(data_class=data,filename_out=dir_name+tag+'_'+'q_value_all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
     export.execute()
 
 

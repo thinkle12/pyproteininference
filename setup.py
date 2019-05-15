@@ -6,7 +6,7 @@ setup(
     pbr=True,
     scripts=glob.glob("scripts/*.py"),
     name='protein_inference',
-    version='1.0.0',
+    version='0.1.0',
     packages=['digest', 'protein_inference','scripts'],
     url='',
     license='',

@@ -12,6 +12,7 @@ import yaml
 ##The reader class creates a list of psm objects with various attributes...
 
 class Reader(object):
+    # TODO make this an abstract base class... IF I can
     """
     Main Reader Class which is parent to all reader subclasses
     """
@@ -167,6 +168,10 @@ class PercolatorRead(Reader):
                     if alt_proteins not in p.possible_proteins:
                         p.possible_proteins.append(alt_proteins)
 
+                # Restrict to 50 possible proteins
+                p.possible_proteins = p.possible_proteins[:50]
+
+
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)
 
@@ -183,10 +188,10 @@ class ProteologicPostSearch(Reader):
     Essentially it will just be a searchID and an LDA/Percolator ID
     """
     
-    def __init__(self,proteologic_object,search_id,percolator_id,digest_class,yaml_param_file):
+    def __init__(self, proteologic_object, search_id, postsearch_id, digest_class, yaml_param_file):
         self.proteologic_object=proteologic_object
         self.search_id = search_id
-        self.percolator_id = percolator_id
+        self.postsearch_id = postsearch_id
 
         self.psms = None
         self.digest_class = digest_class
@@ -263,8 +268,14 @@ class ProteologicPostSearch(Reader):
                         p.possible_proteins.append(alt_proteins)
 
 
+                # Restrict to 50 possible proteins...
+                p.possible_proteins = p.possible_proteins[:50]
+
+
+
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)
+
 
         self.psms = list_of_psm_objects
         print('Finished reading in data...')

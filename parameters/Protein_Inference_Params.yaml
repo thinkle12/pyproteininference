@@ -8,6 +8,6 @@ Parameters:
   Picker: True
   Restrict_Pep: .9
   Restrict_Peptide_Length: 7
-  Restrict_Q: .005
+  Restrict_Q: .05
   Score_Method: multiplicative_log
   Score_Type: pep_value

@@ -11,6 +11,8 @@ import numpy
 import sys
 
 class Score(object):
+    # TODO make this an abstract base class...
+
     """
     Parent Score class for all scoring subset classes
     """

@@ -9,6 +9,7 @@ Created on Fri Dec  1 10:49:47 2017
 import csv
 
 class Export(object):
+    # TODO make this an abstract base class...
     """
     Main Class for exporting sorted protein lists to CSV
     """

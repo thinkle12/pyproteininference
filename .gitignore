@@ -71,3 +71,9 @@ target/
 # dotenv
 .env
 .idea
+
+old/
+plots/
+piq_output/
+pepxmls/
+percolator_output/

@@ -35,14 +35,15 @@ import yaml
 #     tag = args.target.split('/')[-1].split('_')[0]
 #     print tag
 
-dir = "/Users/hinklet/random_analysis/nedd8/percolator_output_new/"
+dir = "/Users/hinklet/PythonPackages/protein_inference/percolator_output/"
 odir = os.listdir(dir)
-database = '/Users/hinklet/PythonPackages/protein_inference/data/UniprotKBConcat1708_HUMAN.fasta'
-target = [os.path.join(dir,x) for x in odir if 'target' in x]
-decoy = [os.path.join(dir,x)  for x in odir if 'decoy' in x]
+odir = [x for x in odir if "DS_Store" not in x]
+database = '/Users/hinklet/PythonPackages/protein_inference/data/UniprotKBConcat_2017_08_mouse_shigella_contams_comet.fasta'
+target = [os.path.join(dir,x,"post_search_results",x+"_000000_percolator_target_psm_all_psms.txt") for x in odir]
+decoy = [os.path.join(dir,x,"post_search_results",x+"_000000_percolator_decoy_psm_all_psms.txt") for x in odir]
 yaml_params = '/Users/hinklet/PythonPackages/protein_inference/parameters/Protein_Inference_Params.yaml'
-tag = 'nedd8_newest'
-dir_name = "/Users/hinklet/random_analysis/nedd8/pi_output_new/"
+tag = 'piq_test_shigella_p1'
+dir_name = "/Users/hinklet/PythonPackages/protein_inference/piq_output/"
 
 # Need to read in yaml params here for digest...
 # Digest needs to be done first to determine alternative proteins
@@ -55,7 +56,8 @@ with open(yaml_params, 'r') as stream:
 # Do in silico digest....
 digest = insilicodigest.InSilicoDigest(database_path=database,
                                        num_miss_cleavs=int(yaml_parameteres_for_digest['Parameters']['Missed_Cleavages']),
-                                       digest_type=yaml_parameteres_for_digest['Parameters']['Digest_Type'])
+                                       digest_type=yaml_parameteres_for_digest['Parameters']['Digest_Type'],
+                                       id_splitting=False)
 digest.execute()
 
 #Initiate the reader...
@@ -87,7 +89,7 @@ else:
     pl_restrict = None
 
 
-print 'restricting data'
+print('restricting data')
 restrict = protein_inference.datastore.RestrictMainData(data,peptide_length=pl_restrict,posterior_error_prob_threshold=pep_restrict,q_value_threshold=q_restrict)
 restrict.execute()
 
@@ -145,7 +147,7 @@ server_glpk_path = '/gne/research/apps/protchem/glpk/bin/glpsol'
 #Run GLPK setup, runner, grouper...
 if grouping_type=='glpk':
     glpksetup = protein_inference.grouping.GlpkSetup(data_class=data,glpkin_filename='glpkinout/glpkin_'+tag+'.mod')
-    glpksetup.execute()
+    setup = glpksetup.execute()
     glpkrun = protein_inference.grouping.GlpkRunner(path_to_glpsol = data.yaml_params['Parameters']['GLPK_Path'],glpkin='glpkinout/glpkin_'+tag+'.mod',glpkout='glpkinout/glpkout_'+tag+'.sol',file_override=False)
     glpkrun.execute()
     group = protein_inference.grouping.GlpkGrouper(data_class=data, digest_class=digest, swissprot_override='soft', glpksolution_filename='glpkinout/glpkout_'+tag+'.sol')
@@ -164,7 +166,7 @@ q.execute()
 #Finally we have our output restricted data...
 restricted = data.fdr_restricted_grouped_scored_proteins
 #Print the len of restricted data... which is how many protein groups pass FDR threshold
-print 'Number of Proteins passing an FDR of'+str(data.yaml_params['Parameters']['FDR'])+' = '+str(len(restricted))
+print('Number of Proteins passing an FDR of'+str(data.yaml_params['Parameters']['FDR'])+' = '+str(len(restricted)))
 
 export_type = data.yaml_params['Parameters']['Export']
 
@@ -189,7 +191,7 @@ if 'q_value_all' in export_type:
     export.execute()
 
 
-print 'Protein Inference Finished' 
+print('Protein Inference Finished')
 # if args.roc_curve:
 #     roc = ProteinInference.benchmark.RocPlot(data_class=data)
 #     roc.execute(pdf=args.roc_curve)

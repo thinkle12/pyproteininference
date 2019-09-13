@@ -100,12 +100,43 @@ class Grouper(object):
 
         return(return_dict)
 
+    def _apply_protein_group_ids(self, grouped_protein_objects, data_class, digest_class):
+        sp_protein_set = set(digest_class.swiss_prot_protein_dictionary['swiss-prot'])
 
-        #Now get the list of scored proteins
-        scored_proteins = list(self.scored_data)
-        #Also get a list of the protein identifiers of all scored proteins
-        #This is neccesary as protein picker deletes a target or decoy depending on which scored worse
-        #So some proteins in the group no longer exist in 'scored_proteins'
+        prottopep = datastore.ProteinToPeptideDictionary(data_class)
+        prottopep.execute()
+        prot_pep_dict = data_class.protein_peptide_dictionary
+
+        # Here we create group ID's
+        group_id = 0
+        list_of_group_objects = []
+        for protein_group in grouped_protein_objects:
+            protein_list = []
+            group_id = group_id + 1
+            pg = ProteinGroup(group_id)
+            print(str(group_id))
+            for protein in protein_group:
+                cur_protein = protein
+                # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
+                if group_id not in cur_protein.group_identification:
+                    cur_protein.group_identification.add(group_id)
+                if protein.identifier in sp_protein_set:
+                    cur_protein.reviewed = True
+                else:
+                    cur_protein.unreviewed = True
+                cur_identifier = protein.identifier
+                cur_protein.num_peptides = len(prot_pep_dict[cur_identifier])
+                # Here append the number of unique peptides... so we can use this as secondary sorting...
+                protein_list.append(cur_protein)
+                # Sorted protein_groups then becomes a list of lists... of protein objects
+
+            pg.proteins = protein_list
+            list_of_group_objects.append(pg)
+
+        return_dict = {"scores_grouped": grouped_protein_objects, "group_objects":list_of_group_objects}
+
+
+        return(return_dict)
         protein_finder = [x.identifier for x in scored_proteins]
 
         scores_grouped = []

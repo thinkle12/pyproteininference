@@ -22,7 +22,7 @@ class Protein(object):
     def __init__(self,identifier):
         self.identifier = identifier
         self.score = None
-        self.group_identification = []
+        self.group_identification = set()
         self.reviewed = False
         self.unreviewed = False
         self.peptides = None
@@ -32,7 +32,7 @@ class Protein(object):
         self.num_peptides = None
         self.unique_peptides = None
         self.num_unique_peptides = None
-        self.raw_peptides = None
+        self.raw_peptides = set()
         self.psmid_peptide_dictionary = None
         
         

@@ -217,7 +217,7 @@ class InSilicoDigest(object):
                     identifier_stripped = record.id
 
 
-                if record.id[:2] == 'sp':
+                if record.id[:3] == 'sp|':
                     sp_dict['swiss-prot'].append(identifier_stripped)
                 proseq = str(record.seq)
                 peptide_list = InSilicoDigest(self.database_path,self.num_miss_cleavs,self.digest_type).digest(proseq, self.num_miss_cleavs)

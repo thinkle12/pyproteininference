@@ -9,7 +9,7 @@ Created on Thu Nov 30 14:25:00 2017
 import collections
 from Bio import SeqIO
 import os
-import cPickle as pickle
+import pickle as pickle
 from pyteomics import fasta, parser, mass, achrom, electrochem, auxiliary
 
 
@@ -199,7 +199,7 @@ class InSilicoDigest(object):
         if pickle_filename_tag.split('/')[-1]+'_pep_to_prot.pickle' not in os.listdir(db_path_only) or pickle_filename_tag.split('/')[-1]+'_prot_to_pep.pickle' not in os.listdir(db_path_only) or pickle_filename_tag.split('/')[-1]+'_sp_dict.pickle' not in os.listdir(db_path_only):
             handle=SeqIO.parse(self.database_path,'fasta')
 
-            print 'Starting Digest...'
+            print('Starting Digest...')
             pep_dict = collections.defaultdict(set)
             prot_dict = collections.defaultdict(set)
             sp_dict = collections.defaultdict(list)
@@ -248,11 +248,11 @@ class InSilicoDigest(object):
             #
             # print 'sp dictionary has been pickled...'
 
-            print 'Digest finished, peptide and protein dictionaries created based on the provided database'
+            print('Digest finished, peptide and protein dictionaries created based on the provided database')
 
 
         else:
-            print 'Skipping Digest, Importing digest information from'+'\n'+pickle_filename_tag
+            print('Skipping Digest, Importing digest information from'+'\n'+pickle_filename_tag)
 
             pickle_in = open(pickle_filename_tag + '_pep_to_prot.pickle', "rb")
             pep_dict = pickle.load(pickle_in)
@@ -266,7 +266,11 @@ class InSilicoDigest(object):
             sp_dict = pickle.load(pickle_in)
             pickle_in.close()
 
-            print 'Pickle Files Loaded...'
+            print('Pickle Files Loaded...')
+
+        pep_dict_res = collections.defaultdict(set)
+        prot_dict_res = collections.defaultdict(set)
+
 
 
         self.swiss_prot_protein_dictionary = sp_dict
@@ -303,7 +307,7 @@ class PyteomicsDigest(object):
 
 
     def execute(self):
-        print 'Starting Digest...'
+        print('Starting Digest...')
         pep_dict = collections.defaultdict(set)
         prot_dict = collections.defaultdict(set)
         sp_dict = collections.defaultdict(list)

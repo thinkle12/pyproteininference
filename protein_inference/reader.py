@@ -143,6 +143,7 @@ class PercolatorRead(Reader):
 
         list_of_psm_objects = []
         peptide_tracker = set()
+        all_sp_proteins = set(self.digest_class.swiss_prot_protein_dictionary["swiss-prot"])
         #We only want to get unique peptides... using all messes up scoring...
         #Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
 

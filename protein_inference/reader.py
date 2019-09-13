@@ -6,8 +6,10 @@ Created on Thu Nov 30 12:52:14 2017
 @author: hinklet
 """
 
-from physical import Psm
+from protein_inference.physical import Psm
 import yaml
+import csv
+import re
 ##Here we create the reader class which is capable of reading in files as input for ProteinInference
 ##The reader class creates a list of psm objects with various attributes...
 

@@ -713,176 +713,57 @@ class GlpkGrouper(Grouper):
         self.data_class.protein_group_objects = list_of_group_objects
 
 
+class Inclusion(Grouper):
 
+    # TODO Add support for this
 
-                #Sort the groups based on higher or lower indication, secondarily sort the groups based on number of unique peptides
-                #We use the index [1:] as we do not wish to sort the lead protein... from GLPK
-                if higher_or_lower=='lower':
-                    sub_groups[1:] = sorted(sub_groups[1:], key = lambda k: (float(k.score),-float(k.num_peptides)), reverse=False)
-                if higher_or_lower=='higher':
-                    sub_groups[1:] = sorted(sub_groups[1:], key = lambda k: (float(k.score),float(k.num_peptides)), reverse=True)
+    def __init__(self,data_class,digest_class):
+        self.data_class = data_class
+        self.digest_class = digest_class
+        if data_class.picked_proteins_scored:
+            self.scored_data = data_class.picked_proteins_scored
+        else:
+            self.scored_data = data_class.scored_proteins
+        self.data_class = data_class
+        self.lead_protein_set = None
 
-                #scores_grouped is the MAIN list of lists with all protein objects
-                scores_grouped.append(sub_groups)
-                #If the lead is reviewed append it to leads and do nothing else...
+    def execute(self):
 
-                if sub_groups[0].reviewed:
-                    if '-' in sub_groups[0].identifier:
-                        pure_id = sub_groups[0].identifier.split('-')[0]
-                        # Start to loop through sub_groups which is the current group...
-                        for potential_replacement in sub_groups[1:]:
-                            isoform_override = potential_replacement
-                            if isoform_override.identifier==pure_id and isoform_override.identifier not in leads and set(sub_groups[0].peptides).issubset(set(isoform_override.peptides)):
-                                isoform_override_index = scores_grouped[-1].index(isoform_override)
-                                cur_iso_lead = scores_grouped[-1][0]
-                                print cur_iso_lead.identifier
-                                scores_grouped[-1][0], scores_grouped[-1][isoform_override_index] = scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
-                                scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
-                                new_iso_lead = scores_grouped[-1][0]
-                                print new_iso_lead.identifier
-                                lead_replaced_prot_pairs.append([cur_iso_lead, new_iso_lead])
-                                leads.add(sub_groups[0].identifier)
-                #If the lead is unreviewed then try to replace it with the best reviewed hit
-                if not sub_groups[0].reviewed:
-                    #If the lead is unreviewed attempt to replace it...
-                    #Start to loop through sorted_groups which is the current sub group... (sub_groups)
-                    for hits in sub_groups[1:]:
-                        #Find the first reviewed hit... if its not a lead protein already then swap positions in scores_grouped and break...
-                        if hits.reviewed:
-                            best_swiss_prot_prot = hits
-                            if best_swiss_prot_prot.identifier not in leads:
-                                #We use -1 as the index of scores_grouped because the current 'sub_groups' is the last entry appended to scores_grouped
-                                #Essentially scores_grouped[-1]==sub_groups
-                                #We need this syntax so we can switch the location of the unreviewed lead identifier with the best reviewed identifier in scores_grouped
-                                swiss_prot_override_index = scores_grouped[-1].index(best_swiss_prot_prot)
-                                cur_tr_lead = scores_grouped[-1][0]
-                                print cur_tr_lead.identifier
-                                scores_grouped[-1][0], scores_grouped[-1][swiss_prot_override_index] = scores_grouped[-1][swiss_prot_override_index], scores_grouped[-1][0]
-                                new_sp_lead =  scores_grouped[-1][0]
-                                print new_sp_lead.identifier
-                                lead_replaced_prot_pairs.append([cur_tr_lead,new_sp_lead])
-                                #Append new_sp_lead protein to leads, to make sure we dont repeat leads
-                                leads.add(new_sp_lead.identifier)
-                                break
-                            else:
-                                #If no reviewed and none not in leads then pass...
-                                pass
-                        else:
-                            pass
+        group_dict = self._group_by_shared_peptides(scored_data=self.scored_data,data_class=self.data_class,
+                                                    digest_class=self.digest_class, group_type="inclusion")
 
-                pg.proteins = sub_groups
-                list_of_group_objects.append(pg)
-            self.data_class.lead_replaced_proteins = lead_replaced_prot_pairs
+        self.list_of_prots_not_in_db = group_dict["missing_proteins"]
+        self.list_of_peps_not_in_db = group_dict["missing_peptides"]
+        grouped_proteins = group_dict["grouped_proteins"]
 
+        # Get the higher or lower variable
+        if not self.data_class.high_low_better:
+            hl = datastore.HigherOrLower(self.data_class)
+            hl.execute()
+            higher_or_lower = self.data_class.high_low_better
+        else:
+            higher_or_lower = self.data_class.high_low_better
 
+        print("Applying Group ID's for the Inclusion Method")
+        regrouped_proteins = self._apply_protein_group_ids(grouped_protein_objects = grouped_proteins,
+                                                           data_class = self.data_class, digest_class = self.digest_class)
 
-        if self.swissprot_override=='soft':
-            print 'Applying Group IDs... and Executing Soft Swissprot Override...'
-            # Here we create group ID's for all groups and do some sorting
-            scores_grouped = []
-            group_id = 0
-            leads = set()
-            lead_replaced_prot_pairs = []
-            list_of_group_objects = []
-            for groups in grouped:
-                sub_groups = []
-                group_id = group_id + 1
-                pg = ProteinGroup(group_id)
-                print str(group_id)
-                for prots in groups:
-                    try:
-                        # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
-                        pindex = protein_finder.index(prots.identifier)
-                        cur_protein = scored_proteins[pindex]
-                        if group_id not in cur_protein.group_identification:
-                            cur_protein.group_identification.append(group_id)
-                        if prots.identifier in sp_protein_set:
-                            cur_protein.reviewed = True
-                        else:
-                            cur_protein.unreviewed = True
-                        cur_identifier = prots.identifier
-                        cur_protein.num_peptides = len(prot_pep_dict[cur_identifier])
-                        # Here append the number of unique peptides... so we can use this as secondary sorting...
-                        sub_groups.append(cur_protein)
-                        # Sorted groups then becomes a list of lists... of protein objects
+        scores_grouped = regrouped_proteins["scores_grouped"]
+        list_of_group_objects = regrouped_proteins["group_objects"]
 
+        print('Sorting Results based on lead Protein Score')
+        if higher_or_lower == 'lower':
+            scores_grouped = sorted(scores_grouped, key=lambda k: (float(k[0].score), -float(k[0].num_peptides)), reverse=False)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: (float(k.proteins[0].score), -float(k.proteins[0].num_peptides)),
+                                           reverse=False)
+        if higher_or_lower == 'higher':
+            scores_grouped = sorted(scores_grouped, key=lambda k: (float(k[0].score),float(k[0].num_peptides)), reverse=True)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: (float(k.proteins[0].score),float(k.proteins[0].num_peptides)),
+                                           reverse=True)
 
-                    except ValueError:
-                        # Here we pass if the protein does not have a score...
-                        # Potentially it got 'picked' (removed) by protein picker...
-                        pass
+        self.data_class.grouped_scored_proteins = scores_grouped
+        self.data_class.protein_group_objects = list_of_group_objects
 
-
-                # Sort the groups based on higher or lower indication, secondarily sort the groups based on number of unique peptides
-                # We use the index [1:] as we do not wish to sort the lead protein... from GLPK
-                if higher_or_lower == 'lower':
-                    sub_groups[1:] = sorted(sub_groups[1:],
-                                            key=lambda k: (float(k.score), -float(k.num_peptides)),reverse=False)
-                if higher_or_lower == 'higher':
-                    sub_groups[1:] = sorted(sub_groups[1:],
-                                            key=lambda k: (float(k.score), float(k.num_peptides)), reverse=True)
-
-                # scores_grouped is the MAIN list of lists with grouped protein objects
-                scores_grouped.append(sub_groups)
-                # If the lead is reviewed append it to leads and do nothing else...
-                # If the lead is unreviewed then try to replace it with the best reviewed hit
-                if not sub_groups[0].reviewed:
-                    # If the lead is unreviewed attempt to replace it...
-                    # Start to loop through sub_groups which is the current group...
-                    for hits in sub_groups[1:]:
-                        # Find the first reviewed it... if its not a lead protein already then do score swap and break...
-                        if hits.reviewed:
-                            best_swiss_prot_prot = hits
-                            #If the lead proteins peptides are a subset of the best swissprot.... then swap the proteins... (meaning equal peptides or the swissprot completely covers the tremble reference)
-                            if best_swiss_prot_prot.identifier not in leads and set(sub_groups[0].peptides).issubset(set(best_swiss_prot_prot.peptides)):
-                                # We use -1 as the idex of scores_grouped because the current 'sub_groups' is the last entry appended to scores grouped
-                                # Essentially scores_grouped[-1]==sub_groups
-                                # We need this syntax so we can switch the location of the unreviewed lead identifier with the best reviewed identifier in scores_grouped
-                                swiss_prot_override_index = scores_grouped[-1].index(best_swiss_prot_prot)
-                                cur_tr_lead = scores_grouped[-1][0]
-                                print cur_tr_lead.identifier
-                                scores_grouped[-1][0], scores_grouped[-1][swiss_prot_override_index] = scores_grouped[-1][swiss_prot_override_index], scores_grouped[-1][0]
-                                scores_grouped[-1][swiss_prot_override_index], scores_grouped[-1][0]
-                                new_sp_lead = scores_grouped[-1][0]
-                                print new_sp_lead.identifier
-                                lead_replaced_prot_pairs.append([cur_tr_lead, new_sp_lead])
-                                # Append new_sp_lead protein to leads, to make sure we dont repeat leads
-                                leads.add(new_sp_lead.identifier)
-                                break
-                            else:
-                                # If no reviewed and none not in leads then pass...
-                                pass
-                        else:
-                            pass
-                ###NEW ISOFORM OVERRIDE
-                if sub_groups[0].reviewed:
-                    if '-' in sub_groups[0].identifier:
-                        pure_id = sub_groups[0].identifier.split('-')[0]
-                        # Start to loop through sub_groups which is the current group...
-                        for potential_replacement in sub_groups[1:]:
-                            isoform_override = potential_replacement
-                            if isoform_override.identifier==pure_id and isoform_override.identifier not in leads and set(sub_groups[0].peptides).issubset(set(isoform_override.peptides)):
-                                isoform_override_index = scores_grouped[-1].index(isoform_override)
-                                cur_iso_lead = scores_grouped[-1][0]
-                                print cur_iso_lead.identifier
-                                scores_grouped[-1][0], scores_grouped[-1][isoform_override_index] = scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
-                                scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
-                                new_iso_lead = scores_grouped[-1][0]
-                                print new_iso_lead.identifier
-                                lead_replaced_prot_pairs.append([cur_iso_lead, new_iso_lead])
-                                leads.add(sub_groups[0].identifier)
-
-                pg.proteins = sub_groups
-                list_of_group_objects.append(pg)
-            self.data_class.lead_replaced_proteins = lead_replaced_prot_pairs
-
-        print 'Sorting Results based on lead Protein Score'
-        if higher_or_lower=='lower':
-            scores_grouped = sorted(scores_grouped, key = lambda k: float(k[0].score), reverse=False)
-            list_of_group_objects = sorted(list_of_group_objects, key = lambda k: float(k.proteins[0].score), reverse=False)
-        if higher_or_lower=='higher':
-            scores_grouped = sorted(scores_grouped, key = lambda k: float(k[0].score), reverse=True)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score), reverse=True)
 
 
         # Sometimes we have cases where:

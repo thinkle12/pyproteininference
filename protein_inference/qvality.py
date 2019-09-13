@@ -51,12 +51,12 @@ class CalculateQandPepValues(Qvality):
 
         output = p.communicate()
 
-        print 'Start Command line Stdout'
-        print output[0]
-        print 'End Command line Stdout'
-        print 'Start Command line Stderr'
-        print output[1]
-        print 'End Command line Stderr'
+        print('Start Command line Stdout')
+        print(output[0])
+        print('End Command line Stdout')
+        print('Start Command line Stderr')
+        print(output[1])
+        print('End Command line Stderr')
         # Create a file that has all target scores, and a file that has all decoy scores....
 
         qo = open(self.qvality_output_filename, 'r')

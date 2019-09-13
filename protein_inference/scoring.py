@@ -9,6 +9,7 @@ Created on Thu Nov 30 14:25:00 2017
 import math
 import numpy
 import sys
+from functools import reduce
 
 class Score(object):
     # TODO make this an abstract base class...
@@ -44,7 +45,7 @@ class BestPeptidePerProtein(Score):
         
         all_scores = []
 
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = []
             temp_peps = []
@@ -89,7 +90,7 @@ class FishersMethod(Score):
 
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = (x['score'] for x in protein.psm_score_dictionary)
             score = -2*sum([math.log(x) for x in val_list])
@@ -129,8 +130,8 @@ class MultiplicativeLog(Score):
         # Instead of making all_scores a list... make it a generator??
 
         all_scores = []
-        print 'Scoring Proteins...'
-        print 'Using Generators'
+        print('Scoring Proteins...')
+        print('Using Generators')
         for protein in self.pre_score_data:
             # We create a generator of val_list...
             val_list = (x['score'] for x in protein.psm_score_dictionary)
@@ -187,7 +188,7 @@ class DownweightedMultiplicativeLog(Score):
 
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = [x['score'] for x in protein.psm_score_dictionary]
             #Divide by the score mean raised to the length of the number of unique peptides for the protein
@@ -234,7 +235,7 @@ class TopTwoCombined(Score):
             
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -287,7 +288,7 @@ class DownweightedVersion2(Score):
 
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -339,7 +340,7 @@ class IterativeDownweightedLog(Score):
     def execute(self):
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -393,7 +394,7 @@ class GeometricMeanLog(Score):
     def execute(self):
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -430,7 +431,7 @@ class IterativeDownweightingV2(Score):
     def execute(self):
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:

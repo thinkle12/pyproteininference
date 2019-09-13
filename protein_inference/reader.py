@@ -71,6 +71,8 @@ class PercolatorRead(Reader):
                                           'GLPK_Path':'glpsol'}}
 
         self.yaml_params = yaml_params
+        self.regex = re.compile('[^a-zA-Z]')
+        self.decoy_symbol = "##"
 
         
     def execute(self):

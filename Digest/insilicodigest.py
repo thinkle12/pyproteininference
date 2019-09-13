@@ -297,6 +297,7 @@ class PyteomicsDigest(object):
         self.num_miss_cleavs = num_miss_cleavs
         self.list_of_digest_types = ['trypsin']
         self.id_splitting = id_splitting
+        self.methionine = "M"
         self.aa_list = ['A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T',
                         'W', 'Y', 'V']
         if digest_type in self.list_of_digest_types:
@@ -329,11 +330,18 @@ class PyteomicsDigest(object):
                 identifier_stripped = identifier
 
             # If SP add to
-            if identifier[:2] == 'sp':
+            if identifier[:3] == 'sp|':
                 sp_dict['swiss-prot'].append(identifier_stripped)
             for peps in list(new_peptides):
                 pep_dict[peps].add(identifier_stripped)
                 prot_dict[identifier_stripped].add(peps)
+                # Need to account for potential N-term Methionine Cleavage
+                if sequence.startswith(peps) and peps.startswith(self.methionine):
+                    # If our sequence starts with the current peptide... and our current peptide starts with methionine...
+                    # Then we remove the methionine from the peptide and add it to our dicts...
+                    methionine_cleaved_peptide = peps[1:]
+                    pep_dict[methionine_cleaved_peptide].add(identifier_stripped)
+                    prot_dict[identifier_stripped].add(methionine_cleaved_peptide)
 
 
         self.swiss_prot_protein_dictionary = sp_dict

@@ -358,9 +358,11 @@ class GlpkSetup(Grouper):
     s.t. c2: y[14145]+y[4857]+y[4858]+y[10143]+y[2966] >=1;
     s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1
     """
-    def __init__(self,data_class,glpkin_filename='glpkin.mod'):
+    def __init__(self,data_class,digest_class,glpkin_filename='glpkin.mod'):
         self.data_class = data_class
+        self.digest_class = digest_class
         self.glpkin_filename = glpkin_filename
+        self.decoy_symbol = "##" # TODO put this into the param file
 
     def execute(self):
 

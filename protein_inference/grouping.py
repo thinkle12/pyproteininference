@@ -84,33 +84,19 @@ class Grouper(object):
                                 print("Protein from DB {} not found with protein finder for peptide {}".format(protein, peptide))
                                 missing_proteins.add(protein)
 
-    """
-    def __init__(self,data_class):
-        #scored_data is scored data from PI_picker class or from PI_scoring class
-        if data_class.picked_proteins_scored:
-            self.scored_data = data_class.picked_proteins_scored
-        else:
-            self.scored_data = data_class.scored_proteins
-        self.data_class = data_class
+                        else:
+                            pass
+            # Add the proteins to the lead if they share peptides...
+            protein_list_group = protein_list_group + list(current_grouped_proteins)
+            # protein_list_group at first is just the lead protein object...
+            # We then try apply grouping by looking at all peptide from the lead...
+            # For all of these peptide look at all other non lead proteins and try to assign them to the group...
+            # We assign the entire protein object as well... in the above try/except
+            # Then append this sub group to the main list
+            # The variable grouped_proteins is now a list of lists which each element being a Protein object and each list of protein objects corresponding to a group
+            grouped_proteins.append(protein_list_group)
 
-        
-    def execute(self):
-        
-        #Get the protein to peptide dictionary from datastore method
-        ptp = datastore.ProteinToPeptideDictionary(self.data_class)
-        ptp.execute()
-        #Stores the dictionary as protein_peptide_dictionary in data_class
-        prot_pep_dict = self.data_class.protein_peptide_dictionary
-        
-        #Get the higher or lower variable
-        #try to see if high_low_better is already a variable...
-        if not self.data_class.high_low_better:
-            #If not run HigherOrLower method
-            hl = datastore.HigherOrLower(self.data_class)
-            hl.execute()
-            higher_or_lower = self.data_class.high_low_better
-        else:
-            higher_or_lower = self.data_class.high_low_better
+        return_dict = {"grouped_proteins":grouped_proteins, "missing_proteins": list_of_prots_not_in_db, "missing_peptides": list_of_peps_not_in_db}
 
         
         #Generate the number of peptides for all protein objects (This can probably be moved to when we create the pre score data

@@ -160,23 +160,50 @@ class PercolatorRead(Reader):
                 p.percscore = float(psm_info[self.perc_score_index])
                 p.qvalue = float(psm_info[self.q_value_index])
                 p.pepvalue = float(psm_info[self.posterior_error_prob_index])
-                p.possible_proteins = psm_info[self.proteinIDs_index:self.proteinIDs_index+50] # Restrict to 50 total possible proteins...
+                poss_proteins = list(set(psm_info[self.proteinIDs_index:self.proteinIDs_index+50]))
+                p.possible_proteins = poss_proteins # Restrict to 50 total possible proteins...
                 p.psm_id = psm_info[self.psmid_index]
 
+                if "." in current_peptide:
+                    # If we have full peptides split it and take the middle...
+                    current_peptide = current_peptide.split(".")[1]
+                if not current_peptide.isupper() or not current_peptide.isalpha():
+                    # If we have mods remove them...
+                    peptide_string = current_peptide.upper()
+                    stripped_peptide = self.regex.sub('', peptide_string)
+                    current_peptide = stripped_peptide
                 # Add the other possible_proteins from insilicodigest here...
-                current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
-                for alt_proteins in current_alt_proteins:
-                    if alt_proteins not in p.possible_proteins:
-                        p.possible_proteins.append(alt_proteins)
+                current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide]) # TODO This peptide needs to be scrubbed of Mods...
+                # Sort Alt Proteins by Swissprot then Trembl...
+                our_target_sp_proteins = sorted(
+                    [x for x in current_alt_proteins if x in all_sp_proteins and self.decoy_symbol not in x])
+                our_decoy_sp_proteins = sorted(
+                    [x for x in current_alt_proteins if x in all_sp_proteins and self.decoy_symbol in x])
+
+                our_target_tr_proteins = sorted(
+                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.decoy_symbol not in x])
+                our_decoy_tr_proteins = sorted(
+                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.decoy_symbol in x])
+
+                identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
                 # Restrict to 50 possible proteins
-                p.possible_proteins = p.possible_proteins[:50]
+                for alt_proteins in identifiers_sorted[:50]:
+                    if alt_proteins not in p.possible_proteins:
+                        p.possible_proteins.append(alt_proteins)
+                if not current_alt_proteins:
+                    print("Peptide {} was not found in the supplied DB".format(current_peptide))
+
+
 
 
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)
 
+
         self.psms = list_of_psm_objects
+
+        print(len(self.psms))
 
         
         #return perc

@@ -538,12 +538,12 @@ class GlpkRunner(Grouper):
 
             output = p.communicate()
 
-            print 'Start Command line Stdout'
-            print output[0]
-            print 'End Command line Stdout'
-            print 'Start Command line Stderr'
-            print output[1]
-            print 'End Command line Stderr'
+            print('Start Command line Stdout')
+            print(output[0])
+            print('End Command line Stdout')
+            print('Start Command line Stderr')
+            print(output[1])
+            print('End Command line Stderr')
 
             if output[0]=='':
                 raise ValueError('Glpk did not produce any output... See potential error output above')
@@ -641,8 +641,7 @@ class GlpkGrouper(Grouper):
         lead_protein_set = set(lead_proteins)
         self.lead_protein_set = lead_protein_set
 
-        print 'Number of lead proteins = '+str(len(lead_proteins))
-
+        print('Number of lead proteins = '+str(len(lead_proteins)))
 
 
         scored_proteins = list(self.scored_data)

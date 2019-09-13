@@ -70,6 +70,29 @@ class DataStore(object):
         self.qvality_output = None
         
         self.decoy_symbol = "##"
+
+
+    def get_sorted_identifiers(self, digest_class, scored=True):
+
+        if scored:
+            if self.picked_proteins_scored:
+                proteins = set([x.identifier for x in self.picked_proteins_scored])
+            else:
+                proteins = set([x.identifier for x in self.scored_proteins])
+        else:
+            proteins = [x.identifier for x in self.scoring_input]
+
+        all_sp_proteins = set(digest_class.swiss_prot_protein_dictionary['swiss-prot'])
+
+        our_target_sp_proteins = sorted([x for x in proteins if x in all_sp_proteins and self.decoy_symbol not in x])
+        our_decoy_sp_proteins = sorted([x for x in proteins if x in all_sp_proteins and self.decoy_symbol in x])
+
+        our_target_tr_proteins = sorted([x for x in proteins if x not in all_sp_proteins and self.decoy_symbol not in x])
+        our_decoy_tr_proteins = sorted([x for x in proteins if x not in all_sp_proteins and self.decoy_symbol in x])
+
+        our_proteins_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
+
+        return(our_proteins_sorted)
 class ProteinIdentifiers(DataStore):
     """
     Class that outputs all Protein Identifiers and stores it as "potential_proteins" in the DataStore object

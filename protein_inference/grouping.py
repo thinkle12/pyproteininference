@@ -765,161 +765,50 @@ class Inclusion(Grouper):
         self.data_class.protein_group_objects = list_of_group_objects
 
 
+class Exclusion(Grouper):
 
-        # Sometimes we have cases where:
-        # protein a maps to peptides 1,2,3
-        # protein b maps to peptides 1,2
-        # protein c maps to a bunch of peptides and peptide 3
-        # Therefore, in the model proteins a and b are equivalent in that they map to 2 peptides together - 1 and 2. peptide 3 maps to a but also to c...
-        # Sometimes the model (glpk) will spit out protein b as the lead... we wish to swap protein b as the lead with protein a because it will likely have a better score...
-        print('Potentially Reassigning leads...')
-        lead_protein_set = set([x.proteins[0].identifier for x in list_of_group_objects])
-        for i in range(len(list_of_group_objects)):
-            for j in range(1, len(list_of_group_objects[i].proteins)):  # Loop over all sub proteins in the group...
-                # if the lead proteins peptides are a subset of one of its proteins in the group, and the secondary protein is not a lead protein and its score is better than the leads... and it has more peptides...
-                if higher_or_lower == 'higher':
-                    if set(list_of_group_objects[i].proteins[0].peptides).issubset(set(list_of_group_objects[i].proteins[j].peptides)) and list_of_group_objects[i].proteins[j].identifier not in lead_protein_set and list_of_group_objects[i].proteins[0].score < list_of_group_objects[i].proteins[j].score and len(list_of_group_objects[i].proteins[0].peptides) < len(list_of_group_objects[i].proteins[j].peptides):
-                        print('protein ' + str(list_of_group_objects[i].proteins[j].identifier) + ' will replace protein ' + str(list_of_group_objects[i].proteins[0].identifier) + ' as lead, with index '+str(j))
-                        new_lead = list_of_group_objects[i].proteins[j]
-                        old_lead = list_of_group_objects[i].proteins[0]
-                        lead_protein_set.add(new_lead.identifier)
-                        lead_protein_set.remove(old_lead.identifier)
-                        # Swap their positions in the list
-                        list_of_group_objects[i].proteins[0], list_of_group_objects[i].proteins[j] = new_lead, old_lead
-                        print(j)
-                        break
+    def __init__(self, data_class, digest_class):
+        self.data_class = data_class
+        self.digest_class = digest_class
+        if data_class.picked_proteins_scored:
+            self.scored_data = data_class.picked_proteins_scored
+        else:
+            self.scored_data = data_class.scored_proteins
+        self.data_class = data_class
+        self.lead_protein_set = None
 
+    def execute(self):
+        group_dict = self._group_by_shared_peptides(scored_data=self.scored_data, data_class=self.data_class,
+                                                    digest_class=self.digest_class, group_type="exclusion",)
 
-                if higher_or_lower == 'lower':
-                    if set(list_of_group_objects[i].proteins[0].peptides).issubset(set(list_of_group_objects[i].proteins[j].peptides)) and list_of_group_objects[i].proteins[j].identifier not in lead_protein_set and list_of_group_objects[i].proteins[0].score > list_of_group_objects[i].proteins[j].score and len(list_of_group_objects[i].proteins[0].peptides) < len(list_of_group_objects[i].proteins[j].peptides):
-                        print('protein ' + str(list_of_group_objects[i].proteins[j].identifier) + ' will replace protein ' + str(list_of_group_objects[i].proteins[0].identifier) + ' as lead, with index '+str(j))
-                        new_lead = list_of_group_objects[i].proteins[j]
-                        old_lead = list_of_group_objects[i].proteins[0]
-                        lead_protein_set.add(new_lead.identifier)
-                        lead_protein_set.remove(old_lead.identifier)
-                        # Swap their positions in the list
-                        list_of_group_objects[i].proteins[0], list_of_group_objects[i].proteins[j] = new_lead, old_lead
-                        break
+        self.list_of_prots_not_in_db = group_dict["missing_proteins"]
+        self.list_of_peps_not_in_db = group_dict["missing_peptides"]
+        grouped_proteins = group_dict["grouped_proteins"]
 
+        # Get the higher or lower variable
+        if not self.data_class.high_low_better:
+            hl = datastore.HigherOrLower(self.data_class)
+            hl.execute()
+            higher_or_lower = self.data_class.high_low_better
+        else:
+            higher_or_lower = self.data_class.high_low_better
 
-        print 'Re Sorting Results based on lead Protein Score'
-        if higher_or_lower=='lower':
-            scores_grouped = sorted(scores_grouped, key = lambda k: float(k[0].score), reverse=False)
-            list_of_group_objects = sorted(list_of_group_objects, key = lambda k: float(k.proteins[0].score), reverse=False)
-        if higher_or_lower=='higher':
-            scores_grouped = sorted(scores_grouped, key = lambda k: float(k[0].score), reverse=True)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score), reverse=True)
+        print("Applying Group ID's for the Exclusion Method")
+        regrouped_proteins = self._apply_protein_group_ids(grouped_protein_objects=grouped_proteins,
+                                                           data_class=self.data_class, digest_class=self.digest_class)
+
+        scores_grouped = regrouped_proteins["scores_grouped"]
+        list_of_group_objects = regrouped_proteins["group_objects"]
+
+        print('Sorting Results based on lead Protein Score')
+        if higher_or_lower == 'lower':
+            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
+                                           reverse=False)
+        if higher_or_lower == 'higher':
+            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=True)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
+                                           reverse=True)
 
         self.data_class.grouped_scored_proteins = scores_grouped
         self.data_class.protein_group_objects = list_of_group_objects
-
-
-#class multi_subsetting(grouper):
-#    ###Here we only do simple subset grouping
-#    ###If we have two proteins A and B, and protein B's peptides are a complete subset of protein A's peptides
-#    ###Then we create a protein group between the two proteins with protein A leading the group.
-#    ###scored_data is sscored data from PI_picker class or from PI_scoring class
-#    def __init__(self,data_class):
-#        if data_class.picked_proteins_scored:
-#            self.scored_data = data_class.picked_proteins_scored
-#        else:
-#            self.scored_data = data_class.scored_proteins
-#
-#        self.data_class = data_class
-#
-#    def execute(self):
-#
-#        #Get the protein to peptide dictionary from PI_data_store method
-#        ptp = PI_data_store.protein_to_peptide_dictionary(self.data_class)
-#        ptp.execute()
-#        prot_pep_dict = self.data_class.protein_peptide_dictionary
-#
-#        #Get the higher or lower variable
-#        if not self.data_class.high_low_better:
-#            hl = PI_data_store.higher_or_lower(self.data_class)
-#            hl.execute()
-#            higher_or_lower = self.data_class.high_low_better
-#        else:
-#            higher_or_lower = self.data_class.high_low_better
-#
-#
-#        #Create a list of lists of the number of unique peptides with the associated protein
-#        pep_prot_list = []
-#        for keys in prot_pep_dict.keys():
-#            pep_prot_list.append([len(prot_pep_dict[keys]),keys])
-#
-#        #Sort by the number of peptides unique for each protein with the most peptides at the top
-#        sprots = sorted(pep_prot_list,reverse=True)
-#        #Create two protein lists for grouping
-#        prot_list = [x[1] for x in sprots]
-#        prot_list2 = [x[1] for x in sprots]
-#
-#        #Reverse the list to be lowest number of peptides to highest number of peptides
-#        prot_list.reverse()
-#        prot_list2.reverse()
-#
-#        #We do two backwards for loops so we can delete from the list as we go
-#        #Group from Top to bottom - doing bottom to top backwards (as we reverse the sorting above)
-#        #By doing this, subsets can only be below you in the list
-#        #Once something has been grouped, remove it from the list... no need to try it, its already in a group
-#        grouped = []
-#        for i in range(len(prot_list)-1, -1, -1):
-#            #Here check to see if the current protein has been grouped already... if it has pass
-#            if prot_list[i] in prot_list2:
-#                #Not grouped, so create a group for it
-#                grouped.append([prot_list[i]])
-#                #Find its current peptides from the peptide dictionary
-#                cur_peps = prot_pep_dict[prot_list[i]]
-#                #Start the interior reverse loop
-#                for j in range(len(prot_list2)-1, -1, -1):
-#                    #Make sure the protein we test is not identical to the current lead in the protein group
-#                    if prot_list2[j]!=prot_list[i]:
-#                        #If its not get the peptides from the inner protein
-#                        test_peps = prot_pep_dict[prot_list2[j]]
-#                        #Test to see any of the inner proteins peptides are a subset of the outer proteins peptides
-#                        if len(test_peps-cur_peps)!=len(cur_peps):
-#                            cur_peps=test_peps-cur_peps
-#                            #If it is, append the inner protein to the current group
-#                            grouped[-1].append(prot_list2[j])
-#                            #Delete the inner protein from its list as it cannot be in another group, no reason to loop through it
-#                            del prot_list2[j]
-#
-#            else:
-#                pass
-#            print len(prot_list2)
-#
-#        scored_proteins = list(self.scored_data)
-#        protein_finder = [x[0] for x in scored_proteins]
-#
-#        leads = []
-#        scores_grouped = []
-#        group_id = 0
-#        for groups in grouped:
-#            sorted_groups = []
-#            group_id = group_id+1
-#            for prots in groups:
-#                if prots not in leads:
-#                    try:
-#                        pindex = protein_finder.index(prots)
-#                        cur_score = scored_proteins[pindex]
-#                        cur_score.append(group_id)
-#                        sorted_groups.append(cur_score)
-#                    except ValueError:
-#                        pass
-#
-#            if len(sorted_groups)>0:
-#                if higher_or_lower=='lower':
-#                    sorted_groups = sorted(sorted_groups, key = lambda k: float(k[1]), reverse=False)
-#                if higher_or_lower=='higher':
-#                    sorted_groups = sorted(sorted_groups, key = lambda k: float(k[1]), reverse=True)
-#                leads.append(sorted_groups[0][0])
-#                scores_grouped.append(sorted_groups)
-#
-#        if higher_or_lower=='lower':
-#            scores_grouped = sorted(scores_grouped, key = lambda k: float(k[0][1]), reverse=False)
-#        if higher_or_lower=='higher':
-#            scores_grouped = sorted(scores_grouped, key = lambda k: float(k[0][1]), reverse=True)
-#
-#        print scores_grouped
-#
-#        self.data_class.grouped_scored_proteins = scores_grouped

@@ -656,22 +656,33 @@ class GlpkGrouper(Grouper):
                 protein_object = scored_proteins[p_ind]
                 lead_protein_objects.append(protein_object)
                 lead_protein_identifiers.append(protein_object.identifier)
+            else:
+                # Why are some proteins not being found when we run exclusion???
+                print("Protein {} not found with protein finder...".format(proteins))
 
         self.lead_protein_objects = lead_protein_objects
-        #Delete input and output files...
-        #os.remove('glpkin.mod')
-        #os.remove(self.glpksolution_filename)
 
         #Now we have the lead Proteins so we need to get the peptides for each lead protein
         #Then we find all proteins that share at least 1 peptide with each lead protein
         #If they share at least 1 peptide then assign that protein to the group...
         self.data_class.glpk_lead_proteins = lead_protein_objects
 
-        prottopep = datastore.ProteinToPeptideDictionary(self.data_class)
-        prottopep.execute()
-        prot_pep_dict = self.data_class.protein_peptide_dictionary
 
-        #Get the higher or lower variable
+        group_dict = self._group_by_shared_peptides(scored_data=self.scored_data,data_class=self.data_class,digest_class=self.digest_class, group_type="parsimony", lead_protein_objects=self.lead_protein_objects)
+
+        self.list_of_prots_not_in_db = group_dict["missing_proteins"]
+        self.list_of_peps_not_in_db = group_dict["missing_peptides"]
+        grouped_proteins = group_dict["grouped_proteins"]
+
+        regrouped_proteins = self._swissprot_and_isoform_override(scored_data=self.scored_data, grouped_proteins=grouped_proteins, data_class=self.data_class, digest_class=self.digest_class, override_type="soft", isoform_override=True)
+
+        scores_grouped = regrouped_proteins["scores_grouped"]
+        list_of_group_objects = regrouped_proteins["group_objects"]
+        lead_replaced_prot_pairs = regrouped_proteins["lead_replaced"]
+
+        self.data_class.lead_replaced_proteins = lead_replaced_prot_pairs
+
+        # Get the higher or lower variable
         if not self.data_class.high_low_better:
             hl = datastore.HigherOrLower(self.data_class)
             hl.execute()
@@ -679,149 +690,29 @@ class GlpkGrouper(Grouper):
         else:
             higher_or_lower = self.data_class.high_low_better
 
+        print('Sorting Results based on lead Protein Score')
+        if higher_or_lower=='lower':
+            scores_grouped = sorted(scores_grouped, key = lambda k: float(k[0].score), reverse=False)
+            list_of_group_objects = sorted(list_of_group_objects, key = lambda k: float(k.proteins[0].score), reverse=False)
+        if higher_or_lower=='higher':
+            scores_grouped = sorted(scores_grouped, key = lambda k: float(k[0].score), reverse=True)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score), reverse=True)
 
 
+        list_of_group_objects = self._reassign_leads(list_of_group_objects, data_class=self.data_class)
 
-        #####The Nnum_unique_peptide thing isnt working in this code block below I think...
-        #Its saying that a bunch of protein groups dont have unique peptides which doesnt make sense...
-        #Need to go over all proteins and all peptides in the protein and check if the peptide is unique
-        #do this by taking in_silico_peptides_to_proteins (entire mapping of peptides to proteins)
-        #And seeing if the length of the dictionary value (which are proteins) is equal to 1...
-        #If its equal to 1 then that peptide (key) has only 1 protein it maps to potentially...
+        print('Re Sorting Results based on lead Protein Score')
+        if higher_or_lower=='lower':
+            scores_grouped = sorted(scores_grouped, key = lambda k: float(k[0].score), reverse=False)
+            list_of_group_objects = sorted(list_of_group_objects, key = lambda k: float(k.proteins[0].score), reverse=False)
+        if higher_or_lower=='higher':
+            scores_grouped = sorted(scores_grouped, key = lambda k: float(k[0].score), reverse=True)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score), reverse=True)
 
-        list_of_prots_not_in_db = []
-        list_of_peps_not_in_db = []
-        print 'Grouping Proteins...'
-        in_silico_peptides_to_proteins = self.digest_class.peptide_to_protein_dictionary
-        grouped = []
-        for protein_objects in lead_protein_objects:
-            protein_objects.peptides = [x for x in list(prot_pep_dict[protein_objects.identifier]) if x in self.data_class.restricted_peptides]
-            sub_group = [protein_objects]
-            cur_peptides = list(prot_pep_dict[protein_objects.identifier])
-            # Use a default dict set here for automatic union
-            all_potential_proteins = collections.defaultdict(set)
-            all_potential_proteins['current'] = set([])
-            for peptides in cur_peptides:  #Probably put an if here... if peptides is in the list of peptides after being restricted by datastore.RestrictMainData
-                if peptides in self.data_class.restricted_peptides:
-                    # Get the proteins that map to the current peptide using in_silico_peptides_to_proteins
-                    # First make sure our peptide is formatted properly...
-                    if not peptides.isupper() or not peptides.isalpha():
-                        # If the peptide is not all upper case or if its not all alphabetical...
-                        rm = datastore.RemoveMods(peptides)
-                        # Then run remove mods on it...
-                        rm.execute()
-                        # Redefine the peptide as the stripped version below...
-                        peptides = rm.stripped_peptide
-                    potential_protein_list = list(in_silico_peptides_to_proteins[peptides])
-                    if len(potential_protein_list) == 0:
-                        list_of_prots_not_in_db.append(peptides)
-                        list_of_peps_not_in_db.append(protein_objects.identifier)
-                        print 'Protein '+str(protein_objects.identifier)+' and Peptide '+str(peptides)+' is not in database...'
-                    #If these proteins are not a lead add them to all potential protein default dict
-                    for prots in potential_protein_list:
-                        if prots not in lead_protein_set:
-                            try:
-                                #Try to find its object using protein_finder (list of identifiers) and scored_proteins (list of Protein Objects)
-                                cur_index = protein_finder.index(prots)
-                                current_protein_object = scored_proteins[cur_index]
-                                other_peptides = list(prot_pep_dict[current_protein_object.identifier])
-                                # Assign the peptides only if they are in restricted_peptides....
-                                current_protein_object.peptides = [x for x in other_peptides if x in self.data_class.restricted_peptides]
-                                all_potential_proteins['current'].add(current_protein_object)
-                            except ValueError:
-                                # Put a print statement here showing which proteins werent found... Meaning they dont have a protein object
-                                # I think this could be due to the protein having only 1 peptide and it gets filtered out...
-                                # Check to see though...
-                                pass
-            #Next append them to the current sub group... (Which is just the lead protein object)
-            sub_group = sub_group+list(all_potential_proteins['current'])
-            # sub_group at first is just the lead protein object...
-            # We then try apply grouping by looking at all peptides from the lead...
-            # For all of these peptides look at all other non lead proteins and try to assign them to the group...
-            # We assign the entire protein object as well... in the above try/except
-            #Then append this sub group to the main list
-            #The variable grouped is now a list of lists which each element being a Protein object and each list of protein objects corresponding to a group
-            grouped.append(sub_group)
-
-        self.list_of_prots_not_in_db = list_of_prots_not_in_db
-        self.list_of_peps_not_in_db = list_of_peps_not_in_db
-
-        #Here are the proteins from the database that are reviewed (swissprot)
-        sp_protein_set = set(self.digest_class.swiss_prot_protein_dictionary['swiss-prot'])
-
-        #Here dont do swissprot override...
-        if not self.swissprot_override:
-            print 'Applying Group IDs...'
-            # Here we create group ID's for all groups and do some sorting
-            scores_grouped = []
-            list_of_group_objects = []
-            group_id = 0
-            for groups in grouped:
-                sub_groups = []
-                group_id = group_id + 1
-                #Create a ProteinGroup object...
-                pg = ProteinGroup(group_id)
-                print str(group_id)
-                for prots in groups:
-                    try:
-                        # The following loop assigns group_id's, reviewed/unreviewed status, and number of peptides...
-                        pindex = protein_finder.index(prots.identifier)
-                        cur_protein = scored_proteins[pindex]
-                        if group_id not in cur_protein.group_identification:
-                            cur_protein.group_identification.append(group_id)
-                        if prots.identifier in sp_protein_set:
-                            cur_protein.reviewed = True
-                        else:
-                            cur_protein.unreviewed = True
-                        cur_identifier = prots.identifier
-                        cur_protein.num_peptides = len(prot_pep_dict[cur_identifier])
-                        # Here append the number of peptides... so we can use this as secondary sorting...
-                        sub_groups.append(cur_protein)
-                    except ValueError:
-                        pass
-                #Assign the protein objects to their group object...
-                pg.proteins = sub_groups
-                scores_grouped.append(sub_groups)
-                list_of_group_objects.append(pg)
+        self.data_class.grouped_scored_proteins = scores_grouped
+        self.data_class.protein_group_objects = list_of_group_objects
 
 
-        if self.swissprot_override=='hard':
-
-            #Hard swissprot_override will exchange any lead unreviewed hit with the best reviewed hit in its group... even if the unreviewed has a unique peptide relative to the peptides of all proteins in its group...
-            print 'Applying Group IDs... and Executing Hard Swissprot Override...'
-            #Here we create group ID's for all groups and do some sorting
-            scores_grouped = []
-            group_id = 0
-            leads = set()
-            lead_replaced_prot_pairs = []
-            list_of_group_objects = []
-            for groups in grouped:
-                sub_groups = []
-                group_id = group_id + 1
-                pg = ProteinGroup(group_id)
-                print str(group_id)
-                for prots in groups:
-                    try:
-                        # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
-                        pindex = protein_finder.index(prots.identifier)
-                        cur_protein = scored_proteins[pindex]
-                        if group_id not in cur_protein.group_identification:
-                            cur_protein.group_identification.append(group_id)
-                        if prots.identifier in sp_protein_set:
-                            cur_protein.reviewed = True
-                        else:
-                            cur_protein.unreviewed = True
-                        cur_identifier = prots.identifier
-                        cur_protein.num_peptides = len(prot_pep_dict[cur_identifier])
-                        #Here append the number of unique peptides... so we can use this as secondary sorting...
-                        sub_groups.append(cur_protein)
-                        #Sorted groups then becomes a list of lists...
-
-
-                    except ValueError:
-                        #Here we pass if the protein does not have a score...
-                        #Potentially it got 'picked' (removed) by protein picker...
-                        pass
 
 
                 #Sort the groups based on higher or lower indication, secondarily sort the groups based on number of unique peptides

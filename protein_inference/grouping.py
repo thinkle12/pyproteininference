@@ -372,19 +372,73 @@ class GlpkSetup(Grouper):
         pep_prot_dict = self.data_class.peptide_protein_dictionary
 
         # Here we get the protein to peptide dictionary...
-        # prottopep = datastore.ProteinToPeptideDictionary(self.data_class)
-        # prottopep.execute()
-        # pep_prot_dict = self.data_class.protein_peptide_dictionary
+        prottopep = datastore.ProteinToPeptideDictionary(self.data_class)
+        prottopep.execute()
+        prot_pep_dict = self.data_class.protein_peptide_dictionary
 
+        if self.data_class.picked_proteins_scored:
+            identifiers = set([x.identifier for x in self.data_class.picked_proteins_scored])
+        else:
+            identifiers = set([x.identifier for x in self.data_class.scored_proteins])
+
+        # TODO Sort data proteins, sp fwd, sp decoy, tr fwd, tr decoy
+        all_sp_proteins = set(self.digest_class.swiss_prot_protein_dictionary['swiss-prot'])
+
+        our_target_sp_proteins = sorted([x for x in identifiers if x in all_sp_proteins and self.decoy_symbol not in x])
+        our_decoy_sp_proteins = sorted([x for x in identifiers if x in all_sp_proteins and self.decoy_symbol in x])
+
+        our_target_tr_proteins = sorted([x for x in identifiers if x not in all_sp_proteins and self.decoy_symbol not in x])
+        our_decoy_tr_proteins = sorted([x for x in identifiers if x not in all_sp_proteins and self.decoy_symbol  in x])
+
+        identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
+
+        # Get all the proteins that we scored and the ones picked if picker was ran...
+        data_proteins = [x for x in self.data_class.protein_peptide_dictionary.keys() if x in identifiers_sorted]
+        # Get the set of peptides for each protein...
+        data_peptides = [set(self.data_class.protein_peptide_dictionary[x]) for x in data_proteins]
+        flat_peptides_in_data = set([item for sublist in data_peptides for item in sublist])
+        peptide_sets = []
+        # Loop over the list of peptides...
+        for k in range(len(data_peptides)):
+            raw_peptides = data_peptides[k]
+            t_set = set()
+            # Loop over each individual peptide per protein...
+            for peps in raw_peptides:
+                peptide = peps
+
+                # Remove mods...
+                new_peptide = re.sub(r'\W+', '', peptide)
+                # Add it to a temporary set...
+                t_set.add(new_peptide)
+            # Append this set to a new list...
+            peptide_sets.append(t_set)
+            # Set that proteins peptides to be the unmodified ones...
+            data_peptides[k] = t_set
+
+        # Get them all...
+        all_peptides = [x for x in data_peptides]
+        # Remove redundant sets...
+        restrictedlst = [set(i) for i in OrderedDict.fromkeys(frozenset(item) for item in peptide_sets)]
+
+        # Loop over  the restricted list of peptides...
+        ind_list = []
+        for p in restrictedlst:
+            # Get its index in terms of the overall list...
+            ind_list.append(all_peptides.index(p))
+
+        # Get the protein based on the index
+        restricted_proteins = [data_proteins[x] for x in range(len(data_peptides)) if x in ind_list]
 
         #Here we get the list of all proteins
         plist = []
         for peps in pep_prot_dict.keys():
             for prots in list(pep_prot_dict[peps]):
-                plist.append(prots)
+                if prots in restricted_proteins and peps in flat_peptides_in_data:
+                    plist.append(prots)
 
         #Here we get the unique proteins
         unique_prots = list(set(plist).union())
+        unique_protein_set = set(unique_prots)
 
         # Here we get a subset of the unique proteins
         # Where the peptides from the protein cannot be a subset of the peptides from any other protein that has already been added to the list...
@@ -424,7 +478,6 @@ class GlpkSetup(Grouper):
         #The numbers are important as they are used in the GLPK input and we need to know what number in the GLPK output corresponds with which protein from the search
         self.data_class.glpk_protein_number_dictionary = dd_num
         self.data_class.glpk_number_protein_dictionary = dd_prot_nums
-
         #Create the GLPK input file
         fileout = open(self.glpkin_filename,'w')
 
@@ -441,15 +494,15 @@ class GlpkSetup(Grouper):
         #s.t. c2: y[14145]+y[4857]+y[4858]+y[10143]+y[2966] >=1;
         #s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1;
         #Each of the lines (constants, c1,c2,c3) is a peptide and each of the y[x] is a protein
-        tot_peps = pep_prot_dict.keys()
-        for j in range(len(pep_prot_dict)):
-            combine = ['y['+str(dd_num[x][0])+']' for x in list(pep_prot_dict[tot_peps[j]])]
+        tot_peps = list(flat_peptides_in_data)
+        for j in range(len(tot_peps)):
+            combine = ['y[' + str(dd_num[x][0]) + ']' for x in sorted(pep_prot_dict[tot_peps[j]]) if x in unique_protein_set]
             fileout.write('s.t. c'+str(j+1)+': '+'+'.join(combine)+' >=1;'+'\n')
 
         #Finish writing the rest of the file and close it
         fileout.write('\n')
         fileout.write('data;'+'\n')
-        numlist = [str(dd_num[x][0]) for x in unique_prots]
+        numlist = [str(dd_num[x][0]) for x in sorted(unique_prots)]
         strlist = ' '.join(numlist)
         #End the file with listing the entire set of proteins... (as its number identifier)
         fileout.write('set PROTEINS := '+strlist+' ;'+'\n'+'\n')

@@ -49,7 +49,7 @@ class CsvOutAll(Export):
                 for peps in prots.peptides:
                     ungrouped_list[-1].append(peps)
         
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
             
@@ -83,7 +83,7 @@ class CsvOutLeads(Export):
             for peps in groups[0].peptides:
                 ungrouped_list[-1].append(peps)
         
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
             
@@ -119,7 +119,7 @@ class CsvOutCommaSep(Export):
                     ungrouped_list[-1].append(prots.group_identification)
                 else:
                     ungrouped_list[-1].append(prots.identifier)
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
@@ -151,10 +151,11 @@ class CsvOutLeadsQValues(Export):
             else:
                 ungrouped_list[-1].append('Unreviewed')
             ungrouped_list[-1].append(groups.number_id)
-            for peps in lead_protein.peptides:
+            peptides = lead_protein.peptides
+            for peps in sorted(peptides):
                 ungrouped_list[-1].append(peps)
 
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
@@ -189,7 +190,7 @@ class CsvOutCommaSepQValues(Export):
             for other_prots in groups.proteins[1:]:
                 ungrouped_list[-1].append(other_prots.identifier)
 
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
@@ -225,7 +226,7 @@ class CsvOutAllQValues(Export):
                 for peps in proteins.peptides:
                     ungrouped_list[-1].append(peps)
 
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
@@ -251,7 +252,7 @@ class ProteologicAllQValues(Export):
                 for peps in proteins.peptides:
                     ungrouped_list[-1].append(peps)
 
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
@@ -286,6 +287,6 @@ class CsvOutLeadsQValuesLong(Export):
                 ungrouped_list[-1].append(groups.number_id)
                 ungrouped_list[-1].append(peps)
 
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)

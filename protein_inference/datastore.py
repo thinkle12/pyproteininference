@@ -69,6 +69,7 @@ class DataStore(object):
         self.protein_group_objects = None
         self.qvality_output = None
         
+        self.decoy_symbol = "##"
 class ProteinIdentifiers(DataStore):
     """
     Class that outputs all Protein Identifiers and stores it as "potential_proteins" in the DataStore object

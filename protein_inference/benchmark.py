@@ -115,7 +115,7 @@ class RocPlot(Benchmark):
 
         maxf1 = max(f1_scores)
 
-        print 'F1 max = '+str(maxf1)
+        print('F1 max = '+str(maxf1))
 
         area = numpy.trapz(sens_list,spec_list)
 
@@ -125,8 +125,8 @@ class RocPlot(Benchmark):
 
         index_of_union_index = index_of_union.index(min_iu)
 
-        print 'Index of Union 1-specificty = '+str(spec_list[index_of_union_index])
-        print 'Index of Union sensitivity = '+str(sens_list[index_of_union_index])
+        print('Index of Union 1-specificty = '+str(spec_list[index_of_union_index]))
+        print('Index of Union sensitivity = '+str(sens_list[index_of_union_index]))
 
         concord_prob = [reg_spec[x]*sens_list[x] for x in range(len(reg_spec))]
 
@@ -134,8 +134,8 @@ class RocPlot(Benchmark):
 
         concord_ind = concord_prob.index(concord_max)
 
-        print 'Concordance Probability 1-specificty = '+str(spec_list[concord_ind])
-        print 'Concordance Probability sensitivity = '+str(sens_list[concord_ind])
+        print('Concordance Probability 1-specificty = '+str(spec_list[concord_ind]))
+        print('Concordance Probability sensitivity = '+str(sens_list[concord_ind]))
 
         youdens = [reg_spec[x]+sens_list[x]-1 for x in range(len(reg_spec))]
 
@@ -143,8 +143,8 @@ class RocPlot(Benchmark):
 
         youind = youdens.index(youdens_ind)
 
-        print 'Youdens 1-specificty = '+str(spec_list[youind])
-        print 'Youdens sensitivity = '+str(sens_list[youind])
+        print('Youdens 1-specificty = '+str(spec_list[youind]))
+        print('Youdens sensitivity = '+str(sens_list[youind]))
 
         coordinate = [[sens_list[x],spec_list[x]] for x in range(len(sens_list))]
 
@@ -156,11 +156,11 @@ class RocPlot(Benchmark):
 
         best_coord = coordinate[min_ind]
 
-        print 'dist = '+str(min_dist)
-        print 'Euc dist sensitivity,1-specificty = '+str(best_coord)
+        print('dist = '+str(min_dist))
+        print('Euc dist sensitivity,1-specificty = '+str(best_coord))
 
 
-        print "trap area = "+str(area)
+        print("trap area = "+str(area))
 
         import matplotlib.pyplot as plt
         plt.plot([0,1])
@@ -190,4 +190,4 @@ class RocPlot(Benchmark):
         decoys = [x[0].identifier for x in youden_data if '#' in x[0].identifier]
         targets = [x[0].identifier for x in youden_data if '#' not in x[0].identifier]
         youdens_fdr = (len(decoys)*2)/float(len(targets))
-        print 'FDR from Youdens Data = '+str(youdens_fdr)
+        print('FDR from Youdens Data = '+str(youdens_fdr))

@@ -82,28 +82,20 @@ class PercolatorRead(Reader):
             all_target = []
             for t_files in self.target_file:
                 print(t_files)
-                t = open(t_files)
-                t = t.read()
-                lines = t.split('\n')
-
-                #Split each line by tab
-                ptarg = [x.split('\t') for x in lines]
-                #Remove empty ending line in file
-                del ptarg[-1]
-                #Remove header
+                ptarg = []
+                with open(t_files, 'r') as perc_target_file:
+                    spamreader = csv.reader(perc_target_file, delimiter='\t')
+                    for row in spamreader:
+                        ptarg.append(row)
                 del ptarg[0]
                 all_target = all_target + ptarg
         else:
             # If not just read the file...
-            t = open(self.target_file,)
-            t = t.read()
-            lines = t.split('\n')
-
-            # Split each line by tab
-            ptarg = [x.split('\t') for x in lines]
-            # Remove empty ending line in file
-            del ptarg[-1]
-            # Remove header
+            ptarg = []
+            with open(self.target_file, 'r') as perc_target_file:
+                spamreader = csv.reader(perc_target_file, delimiter='\t')
+                for row in spamreader:
+                    ptarg.append(row)
             del ptarg[0]
             all_target = ptarg
 
@@ -113,32 +105,36 @@ class PercolatorRead(Reader):
             all_decoy = []
             for d_files in self.decoy_file:
                 print(d_files)
-                d = open(d_files)
-                d = d.read()
-                dlines = d.split('\n')
-
-                pdec = [x.split('\t') for x in dlines]
-                #Remove empty ending in file
-                del pdec[-1]
-                #Remove header
+                pdec = []
+                with open(d_files, 'r') as perc_decoy_file:
+                    spamreader = csv.reader(perc_decoy_file, delimiter='\t')
+                    for row in spamreader:
+                        pdec.append(row)
                 del pdec[0]
                 all_decoy = all_decoy + pdec
         else:
-            d = open(self.decoy_file)
-            d = d.read()
-            dlines = d.split('\n')
-
-            pdec = [x.split('\t') for x in dlines]
-            # Remove empty ending in file
-            del pdec[-1]
-            # Remove header
+            pdec = []
+            with open(self.decoy_file, 'r') as perc_decoy_file:
+                spamreader = csv.reader(perc_decoy_file, delimiter='\t')
+                for row in spamreader:
+                    pdec.append(row)
             del pdec[0]
             all_decoy = pdec
 
         peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
         #Combine the lists
         perc_all = all_target+all_decoy
-        perc_all = sorted(perc_all, key=lambda x: float(x[1]), reverse = True)
+
+        perc_all_filtered = []
+        for psms in perc_all:
+            try:
+                float(psms[self.posterior_error_prob_index])
+                perc_all_filtered.append(psms)
+            except ValueError as e:
+                pass
+
+        # Filter by pep
+        perc_all = sorted(perc_all_filtered, key=lambda x: float(x[self.posterior_error_prob_index]), reverse = False)
 
         # TODO
         # TRY TO GET PERC_ALL AS A GENERATOR

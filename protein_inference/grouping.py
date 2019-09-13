@@ -98,53 +98,7 @@ class Grouper(object):
 
         return_dict = {"grouped_proteins":grouped_proteins, "missing_proteins": list_of_prots_not_in_db, "missing_peptides": list_of_peps_not_in_db}
 
-        
-        #Generate the number of peptides for all protein objects (This can probably be moved to when we create the pre score data
-        for protein_objects in self.scored_data:
-            cur_identifier = protein_objects.identifier
-            protein_objects.num_peptides = len(prot_pep_dict[cur_identifier])
-            
-        #Sort by the number of peptides for each protein with the most peptides at the top
-        sprots = sorted(self.scored_data, key = lambda k: k.num_peptides, reverse=True)
-        #Create two protein lists for grouping
-        prot_obj_list = [x for x in sprots]
-        prot_obj_list2 = [x for x in sprots]
-        prot_name_list = [x.identifier for x in prot_obj_list2]
-
-        #Reverse the list to be lowest number of peptides to highest number of peptides
-        prot_obj_list.reverse()
-        prot_obj_list2.reverse()
-        prot_name_list.reverse()
-
-        #We do two backwards for-loops so we can delete from the list as we go
-        #Group from Top to bottom - doing bottom to top backwards (as we reverse the sorting above)
-        #By doing this, subsets can only be below you in the list
-        #Once something has been grouped, remove it from the list... no need to try it, its already in a group
-        grouped = []
-        #Loop backwards...
-        for i in range(len(prot_obj_list)-1, -1, -1):
-            #Here check to see if the current protein has been grouped already... if it has pass
-            if prot_obj_list[i].identifier in prot_name_list:
-                #Not grouped, so create a group for it
-                grouped.append([prot_obj_list[i]])
-                #Find its current peptides from the peptide dictionary
-                cur_peps = prot_pep_dict[prot_obj_list[i].identifier]
-                #Start the interior reverse loop
-                for j in range(len(prot_obj_list2)-1, -1, -1):
-                    #Make sure the protein we test is not identical to the current lead in the protein group
-                    if prot_obj_list2[j].identifier!=prot_obj_list[i].identifier:
-                        #If its not get the peptides from the inner protein
-                        test_peps = prot_pep_dict[prot_obj_list2[j].identifier]
-                        #Test to see if the inner proteins peptides are a subset of the outer proteins peptides
-                        if test_peps.issubset(cur_peps):
-                            #If it is, append the inner protein to the current group
-                            grouped[-1].append(prot_obj_list2[j])
-                            #Delete the inner protein from its list as it cannot be in another group, no reason to loop through it
-                            del prot_name_list[j]
-                            del prot_obj_list2[j]
-            else:
-                pass
-            print len(prot_name_list)
+        return(return_dict)
 
 
         #Now get the list of scored proteins

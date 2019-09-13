@@ -505,8 +505,8 @@ class HigherOrLower(DataStore):
         if float(self.best_score)<float(self.worst_score):
             higher_or_lower='lower'
 
-        print 'best score = ' + str(self.best_score)
-        print 'worst score = ' + str(self.worst_score)
+        print('best score = ' + str(self.best_score))
+        print('worst score = ' + str(self.worst_score))
 
         if self.best_score==self.worst_score:
             raise ValueError('Best and Worst scores were identical, equal to '+str(self.best_score)+'. Score type '+str(self.data_class.score_type)+' produced the error, please change score type.')

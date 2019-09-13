@@ -627,68 +627,144 @@ class RemoveMods(DataStore):
         self.stripped_peptide = stripped_peptide
 
 
-class RemoveNonUniquePeptides(DataStore):
+class Exclusion(DataStore):
     """
     This class removes non unique peptides from adding to a proteins score...
     However, if the peptides from two proteins are identical, we keep all peptides
     """
 
-    def __init__(self,data_class):
+    def __init__(self,data_class, digest_class, protein_subset_type = "hard"):
         self.data_class = data_class
+        self.digest_class = digest_class
+        self.protein_subset_type = protein_subset_type
+        self.decoy_symbol = "##"
 
     def execute(self):
-        print('Removing Non Unique Peptides before scoring')
-        # print(str(len(self.data_class.scoring_input)) + ' Total Proteins to Parse')
-        dict_of_matches = collections.defaultdict(list)
-        dict_of_protein_matches = collections.defaultdict(list)
-        j = 0
-        for prots in self.data_class.scoring_input:
-            j = j + 1
-            print(j)
-            for prots2 in self.data_class.scoring_input:
-                if prots != prots2:
-                    peptides_1 = prots.raw_peptides
-                    peptides_2 = prots2.raw_peptides
-                    if peptides_1 != peptides_2:
-                        matching = [x.split('.')[1] for x in peptides_1 if x in peptides_2]
-                        if matching:
-                            dict_of_matches[prots.identifier].append(matching)
-                            dict_of_protein_matches[prots.identifier].append(prots2.identifier)
+        print('Applying Exclusion Model')
+
+        # Get all peptides and protein identifiers from scoring input
+        # Get the proteins and sort them if we can...
+        # Sort for SP first... then sort either number of peptides or alphabetically...
+        proteins = [x.identifier for x in self.data_class.scoring_input]
+
+        all_sp_proteins = set(self.digest_class.swiss_prot_protein_dictionary['swiss-prot'])
+
+        our_target_sp_proteins = sorted([x for x in proteins if x in all_sp_proteins and self.decoy_symbol  not in x])
+        our_decoy_sp_proteins = sorted([x for x in proteins if x in all_sp_proteins and self.decoy_symbol  in x])
+
+        our_target_tr_proteins = sorted([x for x in proteins if x not in all_sp_proteins and self.decoy_symbol  not in x])
+        our_decoy_tr_proteins = sorted([x for x in proteins if x not in all_sp_proteins and self.decoy_symbol   in x])
+
+        our_proteins_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
 
-        new_score_dict = collections.defaultdict(list)
-        new_raw_peptides = collections.defaultdict(list)
-        jj = 0
-        for more_prots in self.data_class.scoring_input:
-            jj = jj + 1
-            print(jj)
-            pep_scores = more_prots.psm_score_dictionary
-            raw_peps = more_prots.raw_peptides
+        if self.protein_subset_type=="hard":
+            # Hard protein subsetting defines protein subsets on the digest level (Entire protein is used)
+            # This is how Percolator PI does subsetting
+            peptides = [self.digest_class.protein_to_peptide_dictionary[x] for x in our_proteins_sorted]
+        elif self.protein_subset_type=="soft":
+            # Soft protein subsetting defines protein subsets on the Peptides identified from the search
+            peptides = [set(x.raw_peptides) for x in self.data_class.scoring_input]
+        else:
+            # If neither is dfined we do "hard" exclusion
+            peptides = [self.digest_class.protein_to_peptide_dictionary[x] for x in our_proteins_sorted]
 
-            protein_list = [item for sublist in dict_of_matches[more_prots.identifier] for item in sublist]
-            for k in range(len(pep_scores)):
-                if pep_scores[k]['peptide'] in protein_list:
-                    pass
-                else:
-                    new_score_dict[more_prots.identifier].append(pep_scores[k])
-                    new_raw_peptides[more_prots.identifier].append(raw_peps[k])
+        # Get frozen set of peptides....
+        # We will also have a corresponding list of proteins...
+        # They will have the same index...
+        sets = [frozenset(e) for e in peptides]
+        # Find a way to sort this list of sets...
+        # We can sort the sets if we sort proteins from above...
+        print(str(len(sets))+' number of peptide sets')
+        us = set()
+        i = 0
+        # Get all peptide sets that are not a subset...
+        while sets:
+            i = i+1
+            e = sets.pop()
+            if any(e.issubset(s) for s in sets) or any(e.issubset(s) for s in us):
+                continue
+            else:
+                us.add(e)
+            if i % 10000 == 0:
+                print("Parsed {} Peptide Sets".format(i))
 
-            if more_prots.identifier not in new_score_dict.keys():
-                print("Protein "+ more_prots.identifier + ' Has been Completely removed')
+        print("Parsed {} Peptide Sets".format(i))
+
+        # Get their index from peptides which is the initial list of sets...
+        list_of_indeces = []
+        for u in us:
+            ind = peptides.index(u)
+            list_of_indeces.append(ind)
+
+        non_subset_proteins = set([our_proteins_sorted[x] for x in list_of_indeces])
+
+        print("Removing direct subset Proteins from the data")
+        # Remove all proteins from scoring input that are a subset of another protein...
+        self.data_class.scoring_input = [x for x in self.data_class.scoring_input if x.identifier in non_subset_proteins]
+
+        print(str(len(self.data_class.scoring_input))+' proteins in scoring input after removing subset proteins')
+
+        # For all the proteins that are not a complete subset of another protein...
+        # Get the raw peptides...
+        raw_peps = [x.raw_peptides for x in self.data_class.scoring_input if x.identifier in non_subset_proteins]
+
+        # Make the raw peptides a flat list
+        flat_peptides = [item.split(".")[1] for sublist in raw_peps for item in sublist]
+
+        # Count the number of peptides in this list...
+        # This is the number of proteins this peptide maps to....
+        counted_peptides = collections.Counter(flat_peptides)
+
+        # If the count is greater than 1... exclude the protein entirely from scoring input... :)
+        raw_peps_good = set([x for x in counted_peptides.keys() if counted_peptides[x]<=1])
 
 
-        all_peptides_flat = []
-        for i in range(len(self.data_class.scoring_input)):
-            self.data_class.scoring_input[i].psm_score_dictionary = new_score_dict[self.data_class.scoring_input[i].identifier]
-            raw_peps = new_raw_peptides[self.data_class.scoring_input[i].identifier]
-            self.data_class.scoring_input[i].raw_peptides = raw_peps
-            all_peptides_flat.append(raw_peps)
+        current_score_input = list(self.data_class.scoring_input)
+        for j in range(len(current_score_input)):
+            k = j + 1
+            new_psm_score_dictionary = []
+            new_psmid_peptide_dictionary = []
+            new_raw_peptides = []
+            current_psm_score_dictionary = current_score_input[j].psm_score_dictionary
+            current_psmid_peptide_dictionary = current_score_input[j].psmid_peptide_dictionary
+            current_raw_peptides = current_score_input[j].raw_peptides
 
-        all_peptides_flat = [item for sublist in all_peptides_flat for item in sublist]
-        all_peptides_flat = [x.split('.')[1] for x in all_peptides_flat]
+            for psm_scores in current_psm_score_dictionary:
+                if psm_scores['peptide'] in raw_peps_good:
+                    new_psm_score_dictionary.append(psm_scores)
+
+            for psm_id in current_psmid_peptide_dictionary:
+                if psm_id['peptide'] in raw_peps_good:
+                    new_psmid_peptide_dictionary.append(psm_id)
+
+            for rp in current_raw_peptides:
+                if rp.split(".")[1] in raw_peps_good:
+                    new_raw_peptides.append(rp)
+
+            current_score_input[j].psm_score_dictionary = new_psm_score_dictionary
+            current_score_input[j].psmid_peptide_dictionary = new_psmid_peptide_dictionary
+            current_score_input[j].raw_peptides = new_raw_peptides
+
+            if k % 10000 == 0:
+                print("Redefined {} Peptide Sets".format(k))
+
+        print("Redefined {} Peptide Sets".format(j))
+
+        filtered_score_input = [x for x in current_score_input if x.psm_score_dictionary]
+
+        self.data_class.scoring_input = filtered_score_input
+
+        # Recompute the flat peptides
+        raw_peps = [x.raw_peptides for x in self.data_class.scoring_input if x.identifier in non_subset_proteins]
+
+        # Make the raw peptides a flat list
+        new_flat_peptides = set([item.split(".")[1] for sublist in raw_peps for item in sublist])
 
         self.data_class.scoring_input = [x for x in self.data_class.scoring_input if x.psm_score_dictionary]
 
 
 
-        self.data_class.restricted_peptides = [x for x in self.data_class.restricted_peptides if x in all_peptides_flat]
+        self.data_class.restricted_peptides = [x for x in self.data_class.restricted_peptides if x in new_flat_peptides]
+
+

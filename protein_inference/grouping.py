@@ -290,7 +290,57 @@ class Grouper(object):
 
         return(return_dict)
 
-        self.data_class.grouped_scored_proteins = scores_grouped
+
+    def _reassign_leads(self, list_of_group_objects, data_class):
+
+        # Get the higher or lower variable
+        if not data_class.high_low_better:
+            hl = datastore.HigherOrLower(data_class)
+            hl.execute()
+            higher_or_lower = data_class.high_low_better
+        else:
+            higher_or_lower = data_class.high_low_better
+
+        # TODO why is this only occuring on the list_of group_objects...
+        # TODO This should be happening to the list of protein objects tooo.... aka scores_grouped
+        # Sometimes we have cases where:
+        # protein a maps to peptides 1,2,3
+        # protein b maps to peptides 1,2
+        # protein c maps to a bunch of peptides and peptide 3
+        # Therefore, in the model proteins a and b are equivalent in that they map to 2 peptides together - 1 and 2. peptide 3 maps to a but also to c...
+        # Sometimes the model (glpk) will spit out protein b as the lead... we wish to swap protein b as the lead with protein a because it will likely have a better score...
+        print('Potentially Reassigning leads...')
+        lead_protein_set = set([x.proteins[0].identifier for x in list_of_group_objects])
+        for i in range(len(list_of_group_objects)):
+            for j in range(1, len(list_of_group_objects[i].proteins)):  # Loop over all sub proteins in the group...
+                # if the lead proteins peptides are a subset of one of its proteins in the group, and the secondary protein is not a lead protein and its score is better than the leads... and it has more peptides...
+                new_lead = list_of_group_objects[i].proteins[j]
+                old_lead = list_of_group_objects[i].proteins[0]
+                if higher_or_lower == 'higher':
+                    if set(old_lead.peptides).issubset(set(new_lead.peptides)) and new_lead.identifier not in lead_protein_set and old_lead.score <= new_lead.score and len(old_lead.peptides) < len(new_lead.peptides):
+                        print('protein {} will replace protein {} as lead, with index {}, New Num Peptides: {}, Old Num Peptides: {}'.format(str(new_lead.identifier),str(old_lead.identifier),str(j),str(len(new_lead.peptides)),str(len(old_lead.peptides))))
+                        lead_protein_set.add(new_lead.identifier)
+                        lead_protein_set.remove(old_lead.identifier)
+                        # Swap their positions in the list
+                        list_of_group_objects[i].proteins[0], list_of_group_objects[i].proteins[j] = new_lead, old_lead
+                        print(j)
+                        break
+
+
+                if higher_or_lower == 'lower':
+                    if set(old_lead.peptides).issubset(set(new_lead.peptides)) and new_lead.identifier not in lead_protein_set and old_lead.score >= new_lead.score and len(old_lead.peptides) < len(new_lead.peptides):
+                        print('protein {} will replace protein {} as lead, with index {}, New Num Peptides: {}, Old Num Peptides: {}'.format(str(new_lead.identifier),str(old_lead.identifier),str(j),str(len(new_lead.peptides)),str(len(old_lead.peptides))))
+                        lead_protein_set.add(new_lead.identifier)
+                        lead_protein_set.remove(old_lead.identifier)
+                        # Swap their positions in the list
+                        list_of_group_objects[i].proteins[0], list_of_group_objects[i].proteins[j] = new_lead, old_lead
+                        break
+
+        return(list_of_group_objects)
+
+    def parse_glpk_output(self):
+        pass
+
 
 
 

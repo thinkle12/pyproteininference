@@ -7,9 +7,11 @@ Created on Mon Dec  4 14:15:15 2017
 """
 
 import collections 
-from physical import Protein
+from protein_inference.physical import Protein
 import yaml
 import re
+from collections import OrderedDict
+
 
 class DataStore(object):
     """

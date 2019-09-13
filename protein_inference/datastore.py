@@ -347,11 +347,11 @@ class PreScoreQValue(DataStore):
         #         yield p
 
         protein_list = []
-        for pkeys in protein_psm_score_dictionary.keys():
+        for pkeys in sorted(protein_psm_score_dictionary.keys()):
             p = Protein(identifier = pkeys)
             p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
             p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
-            p.raw_peptides = [x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]
+            p.raw_peptides = set(sorted([x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]))
             protein_list.append(p)
 
         self.data_class.score_type = 'q_value'
@@ -391,11 +391,12 @@ class PreScorePepValue(DataStore):
                 raw_peptide_dictionary[prots].append({'complete_peptide': psms.identifier})
                 psmid_peptide_dictionary[prots].append({'peptide': psms.identifier.split('.')[1], 'psm_id': psms.psm_id})
         protein_list = []
-        for pkeys in protein_psm_score_dictionary.keys():
+        # TODO Sort the protein_psm_score_dictionary by SP, Then ##SP then TR then ##TR
+        for pkeys in sorted(protein_psm_score_dictionary.keys()):
             p = Protein(identifier = pkeys)
             p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
             p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
-            p.raw_peptides = [x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]
+            p.raw_peptides = set(sorted([x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]))
             protein_list.append(p)
 
         self.data_class.score_type = 'pep_value'

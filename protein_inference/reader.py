@@ -246,6 +246,10 @@ class ProteologicPostSearch(Reader):
                                           'GLPK_Path':'glpsol'}}
 
         self.yaml_params = yaml_params
+        self.regex = re.compile('[^a-zA-Z]')
+        self.decoy_symbol = "##"
+
+
 
 
     def execute(self):
@@ -268,9 +272,12 @@ class ProteologicPostSearch(Reader):
 
         list_of_psm_objects = []
         peptide_tracker = set()
+        all_sp_proteins = set(self.digest_class.swiss_prot_protein_dictionary["swiss-prot"])
         #Peptide tracker is used because we only want UNIQUE peptides...
         #The data is sorted by percolator score... or at least it should be...
         #Or sorted by posterior error probability
+
+        # TODO, We may need to try the quant thing on ALL PSMs, not just unique Peptides...
         for peps in list_of_psms:
             self.peps = peps
             current_peptide = peps.peptide.sequence

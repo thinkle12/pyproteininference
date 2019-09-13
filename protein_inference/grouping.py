@@ -8,8 +8,10 @@ Created on Thu Nov 30 16:51:50 2017
 
 import collections
 ###Should I just import ProteinInference instead?
-import datastore
-from physical import ProteinGroup
+from protein_inference import datastore
+from protein_inference.physical import ProteinGroup
+import re
+from collections import OrderedDict
 
 class Grouper(object):
     """

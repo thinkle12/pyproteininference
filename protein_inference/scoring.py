@@ -9,8 +9,11 @@ Created on Thu Nov 30 14:25:00 2017
 import math
 import numpy
 import sys
+from functools import reduce
 
 class Score(object):
+    # TODO make this an abstract base class...
+
     """
     Parent Score class for all scoring subset classes
     """
@@ -25,7 +28,7 @@ class BestPeptidePerProtein(Score):
 
     This class uses a best peptide per protein scoring scheme
 
-    Example: ProteinInference.scoring.BestPeptidePerProtein(data_class = data)
+    Example: protein_inference.scoring.BestPeptidePerProtein(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -42,16 +45,16 @@ class BestPeptidePerProtein(Score):
         
         all_scores = []
 
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = []
             temp_peps = []
             for vals in protein.psm_score_dictionary:
                 temp_peps.append(vals['peptide'])
                 val_list.append(float(vals['score']))
-                score = min([float(x) for x in val_list])
+            score = min([float(x) for x in val_list])
 
-                protein.score = score
+            protein.score = score
 
             
             all_scores.append(protein)
@@ -70,7 +73,7 @@ class FishersMethod(Score):
 
     This class uses a Fishers method scoring scheme
 
-    Example: ProteinInference.scoring.FishersMethod(data_class = data)
+    Example: protein_inference.scoring.FishersMethod(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -87,11 +90,9 @@ class FishersMethod(Score):
 
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
-            val_list = []
-            for vals in protein.psm_score_dictionary:
-                val_list.append(float(vals['score']))
+            val_list = (x['score'] for x in protein.psm_score_dictionary)
             score = -2*sum([math.log(x) for x in val_list])
 
             protein.score = score
@@ -113,7 +114,7 @@ class MultiplicativeLog(Score):
     This class uses a Multiplicative Log scoring scheme.
     All the Qvalues/PepValues from all the peptides per protein are multiplied together and we take -Log(X) of the multiplied Peptide scores
 
-    Example: ProteinInference.scoring.MultiplicativeLog(data_class = data)
+    Example: protein_inference.scoring.MultiplicativeLog(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -126,13 +127,14 @@ class MultiplicativeLog(Score):
                 'scoring input not found in data class - Please run PreScoreQValue of PreScorePepValue from DataStore to run any scoring type')
         self.data_class = data_class
     def execute(self):            
+        # Instead of making all_scores a list... make it a generator??
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
+        print('Using Generators')
         for protein in self.pre_score_data:
-            val_list = []
-            for vals in protein.psm_score_dictionary:
-                val_list.append(float(vals['score']))
+            # We create a generator of val_list...
+            val_list = (x['score'] for x in protein.psm_score_dictionary)
             
             combine = reduce(lambda x, y: x*y, val_list)
             if combine==0:
@@ -162,7 +164,7 @@ class DownweightedMultiplicativeLog(Score):
     then this number is divided by the set QValue/PepValue mean raised to the number of peptides for that protein
     then we take -Log(X) of the following value
 
-    Example: ProteinInference.scoring.DownweightedMultiplicativeLog(data_class = data)
+    Example: protein_inference.scoring.DownweightedMultiplicativeLog(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -186,11 +188,9 @@ class DownweightedMultiplicativeLog(Score):
 
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
-            val_list = []
-            for vals in protein.psm_score_dictionary:
-                val_list.append(float(vals['score']))
+            val_list = [x['score'] for x in protein.psm_score_dictionary]
             #Divide by the score mean raised to the length of the number of unique peptides for the protein
             #This is an attempt to normalize for number of peptides per protein
             combine = reduce(lambda x, y: x*y, val_list)
@@ -218,7 +218,7 @@ class TopTwoCombined(Score):
     The top two scores for each protein are multiplied together and we take -Log(X) of the  multiplied value.
     If a protein only has 1 score/peptide, then we only do -Log(X) of the 1 peptide score
 
-    Example: ProteinInference.scoring.TopTwoCombined(data_class = data)
+    Example: protein_inference.scoring.TopTwoCombined(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -235,7 +235,7 @@ class TopTwoCombined(Score):
             
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -271,7 +271,7 @@ class DownweightedVersion2(Score):
 
     We also take -Log(X) of the final score here
 
-    Example: ProteinInference.scoring.DownweightedVersion2(data_class = data)
+    Example: protein_inference.scoring.DownweightedVersion2(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -288,7 +288,7 @@ class DownweightedVersion2(Score):
 
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -324,7 +324,7 @@ class IterativeDownweightedLog(Score):
 
     We also take -Log(X) of the final score here
 
-    Example: ProteinInference.scoring.IterativeDownweightedLog(data_class = data)
+    Example: protein_inference.scoring.IterativeDownweightedLog(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -340,7 +340,7 @@ class IterativeDownweightedLog(Score):
     def execute(self):
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -377,7 +377,7 @@ class GeometricMeanLog(Score):
 
     We also take -Log(X) of the final score here
 
-    Example: ProteinInference.scoring.GeometricMeanLog(data_class = data)
+    Example: protein_inference.scoring.GeometricMeanLog(data_class = data)
 
     Where data is a DataStore Object
      """
@@ -394,7 +394,7 @@ class GeometricMeanLog(Score):
     def execute(self):
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -431,7 +431,7 @@ class IterativeDownweightingV2(Score):
     def execute(self):
 
         all_scores = []
-        print 'Scoring Proteins...'
+        print('Scoring Proteins...')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:

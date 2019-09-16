@@ -1,14 +1,11 @@
-import ProteinInference
+import protein_inference
 import matplotlib
 #
 #matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import numpy
 import math
 from matplotlib.backends.backend_pdf import PdfPages
 from Bio import SeqIO
-import scipy.stats
-import sklearn.metrics
 
 class Entrapment(object):
 
@@ -63,10 +60,10 @@ class GeneratePlot(Entrapment):
         self.x = x
         self.y = y
 
-        fdr1 = ProteinInference.fdrcalc.PureDecoyFdr(data_class=data_class, false_discovery_rate=0)
+        fdr1 = protein_inference.fdrcalc.PureDecoyFdr(data_class=data_class, false_discovery_rate=0)
         fdr1.execute()
         self.decoy_fdr_calc_list = fdr1.fdr_list
-        efdr1 = ProteinInference.fdrcalc.EntrapFdr(data_class=data_class,
+        efdr1 = protein_inference.fdrcalc.EntrapFdr(data_class=data_class,
                                                    true_database=self.true_db,other_database=self.other_database, false_discovery_rate=0)
         efdr1.execute()
         self.entrapment_fdr_calc_list = efdr1.fdr_list
@@ -89,7 +86,7 @@ class GeneratePlot(Entrapment):
         protein_data = [x[0].identifier for x in self.grouped_scored_data]
 
 
-        print 'Number of Grouped Proteins = '+str(len(protein_data))
+        print('Number of Grouped Proteins = '+str(len(protein_data)))
 
 
         false_true_positives = []
@@ -119,10 +116,10 @@ class GeneratePlot(Entrapment):
         # This is with NO Decoys...
         true_to_entrap_ratio = float(len(true_proteins))/float(len(false_true_positives))
         # decoy_to_entrap_ratio = float(len(entrapment_proteins))/float(len(decoy_search_proteins))
-        print "True Proteins Divided by False True Positives "+str(true_to_entrap_ratio)
+        print("True Proteins Divided by False True Positives "+str(true_to_entrap_ratio))
 
-        print 'Number of entraped proteins = '+str(len(false_true_positives))
-        print 'Number of decoy proteins = '+str(len(decoys))
+        print('Number of entraped proteins = '+str(len(false_true_positives)))
+        print('Number of decoy proteins = '+str(len(decoys)))
 
         # #Plot 1
         # plt.plot([0, 1])
@@ -137,7 +134,7 @@ class GeneratePlot(Entrapment):
         # plt.show()
         # plt.close()
 
-        efdr05 = ProteinInference.fdrcalc.EntrapFdr(data_class=self.data_class,
+        efdr05 = protein_inference.fdrcalc.EntrapFdr(data_class=self.data_class,
                                                     true_database=self.true_db,other_database=self.other_database,
                                                     false_discovery_rate=.05)
         efdr05.execute()

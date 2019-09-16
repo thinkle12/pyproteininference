@@ -1,9 +1,13 @@
 from setuptools import setup
+import glob
 
 setup(
-    name='ProteinInference',
-    version='1.0.0',
-    packages=['Digest', 'ProteinInference','scripts'],
+    setup_requires=['pbr>=1.8', 'setuptools>=17.1'],
+    pbr=True,
+    scripts=glob.glob("scripts/*.py"),
+    name='protein_inference',
+    version='0.1.0',
+    packages=['digest', 'protein_inference','scripts'],
     url='',
     license='',
     author='hinklet',

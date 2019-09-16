@@ -2,14 +2,12 @@ Parameters:
   Digest_Type: trypsin
   Export: q_value
   FDR: 0.01
+  Group: glpk
   GLPK_Path: glpsol
-  Missed_Cleavages: 3
+  Missed_Cleavages: 2
   Picker: True
   Restrict_Pep: .9
   Restrict_Peptide_Length: 7
-  Restrict_Q: .9
-  Score_Method: best_peptide_per_protein
+  Restrict_Q: .005
+  Score_Method: multiplicative_log
   Score_Type: pep_value
-  Inference_Type: parsimony
-  Decoy_Symbol: \##
-  Isoform_Symbol: -

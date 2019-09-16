@@ -9,7 +9,9 @@ Created on Thu Nov 30 14:25:00 2017
 import collections
 from Bio import SeqIO
 import os
-import cPickle as pickle
+import pickle as pickle
+from pyteomics import fasta, parser, mass, achrom, electrochem, auxiliary
+
 
 class InSilicoDigest(object):
     """
@@ -30,7 +32,7 @@ class InSilicoDigest(object):
         self.swiss_prot_protein_dictionary = None
         self.database_path = database_path
         self.num_miss_cleavs = num_miss_cleavs
-        self.list_of_digest_types = ['trypsin']
+        self.list_of_digest_types = ['trypsin', 'lysc']
         self.id_splitting = id_splitting
         self.aa_list = ['A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V']
         if digest_type in self.list_of_digest_types:
@@ -50,8 +52,10 @@ class InSilicoDigest(object):
                     cut_sites.append(i+1)
 
 
-        if self.digest_type=='other_type':
-            pass
+        if self.digest_type=='lysc':
+            for i in range(0,len(proseq)-1):
+                if proseq[i]=='K' and proseq[i+1]!='P':
+                    cut_sites.append(i+1)
             #Here write more code for other types of digest types....
         
         if cut_sites[-1]!=len(proseq):
@@ -195,7 +199,7 @@ class InSilicoDigest(object):
         if pickle_filename_tag.split('/')[-1]+'_pep_to_prot.pickle' not in os.listdir(db_path_only) or pickle_filename_tag.split('/')[-1]+'_prot_to_pep.pickle' not in os.listdir(db_path_only) or pickle_filename_tag.split('/')[-1]+'_sp_dict.pickle' not in os.listdir(db_path_only):
             handle=SeqIO.parse(self.database_path,'fasta')
 
-            print 'Starting Digest...'
+            print('Starting Digest...')
             pep_dict = collections.defaultdict(set)
             prot_dict = collections.defaultdict(set)
             sp_dict = collections.defaultdict(list)
@@ -213,7 +217,7 @@ class InSilicoDigest(object):
                     identifier_stripped = record.id
 
 
-                if record.id[:2] == 'sp':
+                if record.id[:3] == 'sp|':
                     sp_dict['swiss-prot'].append(identifier_stripped)
                 proseq = str(record.seq)
                 peptide_list = InSilicoDigest(self.database_path,self.num_miss_cleavs,self.digest_type).digest(proseq, self.num_miss_cleavs)
@@ -244,11 +248,11 @@ class InSilicoDigest(object):
             #
             # print 'sp dictionary has been pickled...'
 
-            print 'Digest finished, peptide and protein dictionaries created based on the provided database'
+            print('Digest finished, peptide and protein dictionaries created based on the provided database')
 
 
         else:
-            print 'Skipping Digest, Importing digest information from'+'\n'+pickle_filename_tag
+            print('Skipping Digest, Importing digest information from'+'\n'+pickle_filename_tag)
 
             pickle_in = open(pickle_filename_tag + '_pep_to_prot.pickle', "rb")
             pep_dict = pickle.load(pickle_in)
@@ -262,14 +266,84 @@ class InSilicoDigest(object):
             sp_dict = pickle.load(pickle_in)
             pickle_in.close()
 
-            print 'Pickle Files Loaded...'
+            print('Pickle Files Loaded...')
+
+        pep_dict_res = collections.defaultdict(set)
+        prot_dict_res = collections.defaultdict(set)
+
 
 
         self.swiss_prot_protein_dictionary = sp_dict
         self.peptide_to_protein_dictionary = pep_dict
         self.protein_to_peptide_dictionary = prot_dict
 
+class PyteomicsDigest(object):
+    """
+    The following class creates protein to peptide, peptide to protein, and swissprot protein mappings.
+    These mappings are essential for GlpkGrouper as an InSilicoDigest object is input for GlpkGrouper
+
+    The input is a fasta database, number of missed cleavages, as well as a digestion type ("trypsin").
+
+    Further digestion types need to be added in the future other than just trypsin
+
+    """
+
+    def __init__(self, database_path, num_miss_cleavs=2, digest_type='trypsin', id_splitting=True):
+        self.peptide_to_protein_dictionary = None
+        self.protein_to_peptide_dictionary = None
+        self.protein_peptide_complete_set = None
+        self.swiss_prot_protein_dictionary = None
+        self.database_path = database_path
+        self.num_miss_cleavs = num_miss_cleavs
+        self.list_of_digest_types = ['trypsin']
+        self.id_splitting = id_splitting
+        self.methionine = "M"
+        self.aa_list = ['A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T',
+                        'W', 'Y', 'V']
+        if digest_type in self.list_of_digest_types:
+            self.digest_type = digest_type
+        else:
+            raise ValueError('digest_type must be equal to one of the following' + str(
+                self.list_of_digest_types) + ' or... (List more digest types here in the future...)')
 
 
+    def execute(self):
+        print('Starting Digest...')
+        pep_dict = collections.defaultdict(set)
+        prot_dict = collections.defaultdict(set)
+        sp_dict = collections.defaultdict(list)
 
-                
+        # We use [:2] because that is the first two letters of the protein identifier
+        # We use [3:] below also because we need to remove "sp|" or "tr|" to match what the search results show....
+
+        for description, sequence in fasta.read(self.database_path):
+            new_peptides = parser.cleave(sequence, parser.expasy_rules[self.digest_type], self.num_miss_cleavs)
+
+            # Hopefully this splitting works...
+            # IDK how robust this is...
+            identifier = description.split(' ')[0]
+
+            # Handle ID Splitting...
+            if self.id_splitting == True:
+                identifier_stripped = identifier[3:]
+            if self.id_splitting == False:
+                identifier_stripped = identifier
+
+            # If SP add to
+            if identifier[:3] == 'sp|':
+                sp_dict['swiss-prot'].append(identifier_stripped)
+            for peps in list(new_peptides):
+                pep_dict[peps].add(identifier_stripped)
+                prot_dict[identifier_stripped].add(peps)
+                # Need to account for potential N-term Methionine Cleavage
+                if sequence.startswith(peps) and peps.startswith(self.methionine):
+                    # If our sequence starts with the current peptide... and our current peptide starts with methionine...
+                    # Then we remove the methionine from the peptide and add it to our dicts...
+                    methionine_cleaved_peptide = peps[1:]
+                    pep_dict[methionine_cleaved_peptide].add(identifier_stripped)
+                    prot_dict[identifier_stripped].add(methionine_cleaved_peptide)
+
+
+        self.swiss_prot_protein_dictionary = sp_dict
+        self.peptide_to_protein_dictionary = pep_dict
+        self.protein_to_peptide_dictionary = prot_dict

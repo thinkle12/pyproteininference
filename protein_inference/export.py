@@ -9,6 +9,7 @@ Created on Fri Dec  1 10:49:47 2017
 import csv
 
 class Export(object):
+    # TODO make this an abstract base class...
     """
     Main Class for exporting sorted protein lists to CSV
     """
@@ -23,7 +24,7 @@ class CsvOutAll(Export):
     Only Proteins that pass FDR will be output and ALL proteins
     will be output not just leads
 
-    Example: ProteinInference.export.CsvOutAll(data_class = data, filename_out = "example.csv")
+    Example: protein_inference.export.CsvOutAll(data_class = data, filename_out = "example.csv")
 
     if we assume data = datastore.Datastore(reader_class = reader)
     and if we assume reader is a class object from reader.Reader()
@@ -48,7 +49,7 @@ class CsvOutAll(Export):
                 for peps in prots.peptides:
                     ungrouped_list[-1].append(peps)
         
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
             
@@ -58,7 +59,7 @@ class CsvOutLeads(Export):
     Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
     Only Proteins that pass FDR will be output and only Lead proteins will be output
 
-    Example: ProteinInference.export.CsvOutLeads(data_class = data, filename_out = "example.csv")
+    Example: protein_inference.export.CsvOutLeads(data_class = data, filename_out = "example.csv")
 
     if we assume data = datastore.Datastore(reader_class = reader)
     and if we assume reader is a class object from reader.Reader()
@@ -82,7 +83,7 @@ class CsvOutLeads(Export):
             for peps in groups[0].peptides:
                 ungrouped_list[-1].append(peps)
         
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
             
@@ -93,7 +94,7 @@ class CsvOutCommaSep(Export):
     Only Proteins that pass FDR will be output and only Lead proteins will be output.
     Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-    Example: ProteinInference.export.CsvOutCommaSep(data_class = data, filename_out = "example.csv")
+    Example: protein_inference.export.CsvOutCommaSep(data_class = data, filename_out = "example.csv")
 
     if we assume data = datastore.Datastore(reader_class = reader)
     and if we assume reader is a class object from reader.Reader()
@@ -118,7 +119,7 @@ class CsvOutCommaSep(Export):
                     ungrouped_list[-1].append(prots.group_identification)
                 else:
                     ungrouped_list[-1].append(prots.identifier)
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
@@ -127,7 +128,7 @@ class CsvOutLeadsQValues(Export):
     """
     Class that outputs all lead proteins with Q values.
 
-    Example: ProteinInference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
+    Example: protein_inference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
     if we assume data = datastore.Datastore(reader_class = reader)
 
     and if we assume reader is a class object from reader.Reader()
@@ -150,10 +151,11 @@ class CsvOutLeadsQValues(Export):
             else:
                 ungrouped_list[-1].append('Unreviewed')
             ungrouped_list[-1].append(groups.number_id)
-            for peps in lead_protein.peptides:
+            peptides = lead_protein.peptides
+            for peps in sorted(peptides):
                 ungrouped_list[-1].append(peps)
 
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
@@ -162,7 +164,7 @@ class CsvOutCommaSepQValues(Export):
     Class that outputs all lead proteins with Q values.
     Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-    Example: ProteinInference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
+    Example: protein_inference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
     if we assume data = datastore.Datastore(reader_class = reader)
 
     and if we assume reader is a class object from reader.Reader()
@@ -188,7 +190,7 @@ class CsvOutCommaSepQValues(Export):
             for other_prots in groups.proteins[1:]:
                 ungrouped_list[-1].append(other_prots.identifier)
 
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
@@ -198,7 +200,7 @@ class CsvOutAllQValues(Export):
     Non Lead proteins are also output - entire group gets output
     Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-    Example: ProteinInference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
+    Example: protein_inference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
 
     if we assume data = datastore.Datastore(reader_class = reader)
     and if we assume reader is a class object from reader.Reader()
@@ -224,7 +226,7 @@ class CsvOutAllQValues(Export):
                 for peps in proteins.peptides:
                     ungrouped_list[-1].append(peps)
 
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
@@ -250,7 +252,7 @@ class ProteologicAllQValues(Export):
                 for peps in proteins.peptides:
                     ungrouped_list[-1].append(peps)
 
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
@@ -259,7 +261,7 @@ class CsvOutLeadsQValuesLong(Export):
     """
     Class that outputs all lead proteins with Q values.
 
-    Example: ProteinInference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
+    Example: protein_inference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
     if we assume data = datastore.Datastore(reader_class = reader)
 
     and if we assume reader is a class object from reader.Reader()
@@ -285,6 +287,6 @@ class CsvOutLeadsQValuesLong(Export):
                 ungrouped_list[-1].append(groups.number_id)
                 ungrouped_list[-1].append(peps)
 
-        with open(self.filename_out, "wb") as f:
+        with open(self.filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)

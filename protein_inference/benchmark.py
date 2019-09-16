@@ -6,7 +6,7 @@ Created on Thu Dec  7 10:15:19 2017
 @author: hinklet
 """
 
-import ProteinInference
+import protein_inference
 import matplotlib
 matplotlib.use('Agg')
 # import matplotlib.pyplot as plt
@@ -27,7 +27,7 @@ class RocPlot(Benchmark):
     Class for producing a Roc plot.
     Requires a DataStore object
 
-    Example: rp = ProteinInference.benchmark.RocPlot(data_class = data)
+    Example: rp = protein_inference.benchmark.RocPlot(data_class = data)
              rp.execute(pdf=True)
 
 
@@ -35,11 +35,11 @@ class RocPlot(Benchmark):
     """
 
     def __init__(self,data_class):
-        fdr01 = ProteinInference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=.01)
+        fdr01 = protein_inference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=.01)
         fdr01.execute()
         one_percent_data = data_class.fdr_restricted_grouped_scored_proteins
         self.one_percent_length = len(one_percent_data)
-        fdr1 = ProteinInference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=1)
+        fdr1 = protein_inference.fdrcalc.SetBasedFdr(data_class=data_class, false_discovery_rate=1)
         fdr1.execute()
         self.all_data = data_class.fdr_restricted_grouped_scored_proteins
         self.data_class = data_class
@@ -115,7 +115,7 @@ class RocPlot(Benchmark):
 
         maxf1 = max(f1_scores)
 
-        print 'F1 max = '+str(maxf1)
+        print('F1 max = '+str(maxf1))
 
         area = numpy.trapz(sens_list,spec_list)
 
@@ -125,8 +125,8 @@ class RocPlot(Benchmark):
 
         index_of_union_index = index_of_union.index(min_iu)
 
-        print 'Index of Union 1-specificty = '+str(spec_list[index_of_union_index])
-        print 'Index of Union sensitivity = '+str(sens_list[index_of_union_index])
+        print('Index of Union 1-specificty = '+str(spec_list[index_of_union_index]))
+        print('Index of Union sensitivity = '+str(sens_list[index_of_union_index]))
 
         concord_prob = [reg_spec[x]*sens_list[x] for x in range(len(reg_spec))]
 
@@ -134,8 +134,8 @@ class RocPlot(Benchmark):
 
         concord_ind = concord_prob.index(concord_max)
 
-        print 'Concordance Probability 1-specificty = '+str(spec_list[concord_ind])
-        print 'Concordance Probability sensitivity = '+str(sens_list[concord_ind])
+        print('Concordance Probability 1-specificty = '+str(spec_list[concord_ind]))
+        print('Concordance Probability sensitivity = '+str(sens_list[concord_ind]))
 
         youdens = [reg_spec[x]+sens_list[x]-1 for x in range(len(reg_spec))]
 
@@ -143,8 +143,8 @@ class RocPlot(Benchmark):
 
         youind = youdens.index(youdens_ind)
 
-        print 'Youdens 1-specificty = '+str(spec_list[youind])
-        print 'Youdens sensitivity = '+str(sens_list[youind])
+        print('Youdens 1-specificty = '+str(spec_list[youind]))
+        print('Youdens sensitivity = '+str(sens_list[youind]))
 
         coordinate = [[sens_list[x],spec_list[x]] for x in range(len(sens_list))]
 
@@ -156,11 +156,11 @@ class RocPlot(Benchmark):
 
         best_coord = coordinate[min_ind]
 
-        print 'dist = '+str(min_dist)
-        print 'Euc dist sensitivity,1-specificty = '+str(best_coord)
+        print('dist = '+str(min_dist))
+        print('Euc dist sensitivity,1-specificty = '+str(best_coord))
 
 
-        print "trap area = "+str(area)
+        print("trap area = "+str(area))
 
         import matplotlib.pyplot as plt
         plt.plot([0,1])
@@ -174,7 +174,7 @@ class RocPlot(Benchmark):
         plt.plot([spec_list[self.one_percent_length]],[sens_list[self.one_percent_length]], marker='o', markersize=9, color="black")
         plt.ylabel('sensitivity')
         plt.xlabel('1-specificity')
-        plt.title('Roc Curve Attempt ProteinInference'+'\n'+self.data_class.score_type+' and '+self.data_class.score_method)
+        plt.title('Roc Curve Attempt protein_inference'+'\n'+self.data_class.score_type+' and '+self.data_class.score_method)
         plt.legend(('Random Guess', 'Max Youdens Index', 'Max Concordance Prob', 'Min Index of Union', 'Min Euclidian Dist', 'Min Dist Line','1 Percent FDR','Sens vs 1-Spec'),
            shadow=True, loc=(.6, .05))
         if not pdf:
@@ -190,4 +190,4 @@ class RocPlot(Benchmark):
         decoys = [x[0].identifier for x in youden_data if '#' in x[0].identifier]
         targets = [x[0].identifier for x in youden_data if '#' not in x[0].identifier]
         youdens_fdr = (len(decoys)*2)/float(len(targets))
-        print 'FDR from Youdens Data = '+str(youdens_fdr)
+        print('FDR from Youdens Data = '+str(youdens_fdr))

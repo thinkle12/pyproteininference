@@ -86,7 +86,7 @@ class DataStore(object):
         else:
             proteins = [x.identifier for x in self.scoring_input]
 
-        all_sp_proteins = set(digest_class.swiss_prot_protein_dictionary['swiss-prot'])
+        all_sp_proteins = set(digest_class.swiss_prot_protein_set)
 
         our_target_sp_proteins = sorted([x for x in proteins if x in all_sp_proteins and self.decoy_symbol not in x])
         our_decoy_sp_proteins = sorted([x for x in proteins if x in all_sp_proteins and self.decoy_symbol in x])

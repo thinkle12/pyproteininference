@@ -390,63 +390,24 @@ class DataStore(object):
 
         return list_structure
 
-class RemoveMods(DataStore):
-    """
-    This class simply removes modifications from peptide strings
-            
-    """
-    def __init__(self,peptide_string):
-        self.peptide_string = peptide_string.upper()
-        self.regex = re.compile('[^a-zA-Z]')
+    def exclude_non_distinguishing_peptides(self, digest_class, protein_subset_type = "hard"):
+        # TODO Move this into param file
+        decoy_symbol = "##"
 
-    def execute(self):
-
-        # First parameter is the replacement, second parameter is your input string
-        stripped_peptide = self.regex.sub('', self.peptide_string)
-        self.stripped_peptide = stripped_peptide
-
-
-class Exclusion(DataStore):
-    """
-    This class removes non unique peptides from adding to a proteins score...
-    However, if the peptides from two proteins are identical, we keep all peptides
-    """
-
-    def __init__(self,data_class, digest_class, protein_subset_type = "hard"):
-        self.data_class = data_class
-        self.digest_class = digest_class
-        self.protein_subset_type = protein_subset_type
-        self.decoy_symbol = "##"
-
-    def execute(self):
         print('Applying Exclusion Model')
 
-        # Get all peptides and protein identifiers from scoring input
-        # Get the proteins and sort them if we can...
-        # Sort for SP first... then sort either number of peptides or alphabetically...
-        proteins = [x.identifier for x in self.data_class.scoring_input]
+        our_proteins_sorted = self.get_sorted_identifiers(digest_class=digest_class, scored=False)
 
-        all_sp_proteins = set(self.digest_class.swiss_prot_protein_dictionary['swiss-prot'])
-
-        our_target_sp_proteins = sorted([x for x in proteins if x in all_sp_proteins and self.decoy_symbol  not in x])
-        our_decoy_sp_proteins = sorted([x for x in proteins if x in all_sp_proteins and self.decoy_symbol  in x])
-
-        our_target_tr_proteins = sorted([x for x in proteins if x not in all_sp_proteins and self.decoy_symbol  not in x])
-        our_decoy_tr_proteins = sorted([x for x in proteins if x not in all_sp_proteins and self.decoy_symbol   in x])
-
-        our_proteins_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
-
-
-        if self.protein_subset_type=="hard":
+        if protein_subset_type == "hard":
             # Hard protein subsetting defines protein subsets on the digest level (Entire protein is used)
             # This is how Percolator PI does subsetting
-            peptides = [self.digest_class.protein_to_peptide_dictionary[x] for x in our_proteins_sorted]
-        elif self.protein_subset_type=="soft":
+            peptides = [digest_class.protein_to_peptide_dictionary[x] for x in our_proteins_sorted]
+        elif protein_subset_type == "soft":
             # Soft protein subsetting defines protein subsets on the Peptides identified from the search
-            peptides = [set(x.raw_peptides) for x in self.data_class.scoring_input]
+            peptides = [set(x.raw_peptides) for x in self.scoring_input]
         else:
             # If neither is dfined we do "hard" exclusion
-            peptides = [self.digest_class.protein_to_peptide_dictionary[x] for x in our_proteins_sorted]
+            peptides = [digest_class.protein_to_peptide_dictionary[x] for x in our_proteins_sorted]
 
         # Get frozen set of peptides....
         # We will also have a corresponding list of proteins...
@@ -454,12 +415,12 @@ class Exclusion(DataStore):
         sets = [frozenset(e) for e in peptides]
         # Find a way to sort this list of sets...
         # We can sort the sets if we sort proteins from above...
-        print(str(len(sets))+' number of peptide sets')
+        print(str(len(sets)) + ' number of peptide sets')
         us = set()
         i = 0
         # Get all peptide sets that are not a subset...
         while sets:
-            i = i+1
+            i = i + 1
             e = sets.pop()
             if any(e.issubset(s) for s in sets) or any(e.issubset(s) for s in us):
                 continue
@@ -480,13 +441,14 @@ class Exclusion(DataStore):
 
         print("Removing direct subset Proteins from the data")
         # Remove all proteins from scoring input that are a subset of another protein...
-        self.data_class.scoring_input = [x for x in self.data_class.scoring_input if x.identifier in non_subset_proteins]
+        self.scoring_input = [x for x in self.scoring_input if
+                                         x.identifier in non_subset_proteins]
 
-        print(str(len(self.data_class.scoring_input))+' proteins in scoring input after removing subset proteins')
+        print(str(len(self.scoring_input)) + ' proteins in scoring input after removing subset proteins')
 
         # For all the proteins that are not a complete subset of another protein...
         # Get the raw peptides...
-        raw_peps = [x.raw_peptides for x in self.data_class.scoring_input if x.identifier in non_subset_proteins]
+        raw_peps = [x.raw_peptides for x in self.scoring_input if x.identifier in non_subset_proteins]
 
         # Make the raw peptides a flat list
         flat_peptides = [item.split(".")[1] for sublist in raw_peps for item in sublist]
@@ -496,10 +458,9 @@ class Exclusion(DataStore):
         counted_peptides = collections.Counter(flat_peptides)
 
         # If the count is greater than 1... exclude the protein entirely from scoring input... :)
-        raw_peps_good = set([x for x in counted_peptides.keys() if counted_peptides[x]<=1])
+        raw_peps_good = set([x for x in counted_peptides.keys() if counted_peptides[x] <= 1])
 
-
-        current_score_input = list(self.data_class.scoring_input)
+        current_score_input = list(self.scoring_input)
         for j in range(len(current_score_input)):
             k = j + 1
             new_psm_score_dictionary = []
@@ -532,15 +493,17 @@ class Exclusion(DataStore):
 
         filtered_score_input = [x for x in current_score_input if x.psm_score_dictionary]
 
-        self.data_class.scoring_input = filtered_score_input
+        self.scoring_input = filtered_score_input
 
         # Recompute the flat peptides
-        raw_peps = [x.raw_peptides for x in self.data_class.scoring_input if x.identifier in non_subset_proteins]
+        raw_peps = [x.raw_peptides for x in self.scoring_input if x.identifier in non_subset_proteins]
 
         # Make the raw peptides a flat list
         new_flat_peptides = set([item.split(".")[1] for sublist in raw_peps for item in sublist])
 
-        self.data_class.scoring_input = [x for x in self.data_class.scoring_input if x.psm_score_dictionary]
+        self.scoring_input = [x for x in self.scoring_input if x.psm_score_dictionary]
+
+        self.restricted_peptides = [x for x in self.restricted_peptides if x in new_flat_peptides]
 
 
 

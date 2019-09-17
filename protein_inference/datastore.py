@@ -11,6 +11,8 @@ from protein_inference.physical import Protein
 import yaml
 import re
 from collections import OrderedDict
+from Bio import SeqIO
+
 
 
 class DataStore(object):

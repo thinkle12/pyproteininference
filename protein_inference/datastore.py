@@ -506,6 +506,84 @@ class DataStore(object):
         self.restricted_peptides = [x for x in self.restricted_peptides if x in new_flat_peptides]
 
 
+    def protein_picker(self):
+        # Use higher or lower class to determine if a higher protein score or lower protein score is better based on the scoring method used
+        higher_or_lower = self.higher_or_lower()
+        # Here we determine if a lower or higher score is better
+        # Since all input is ordered from best to worst we can do the following
+
+        index_to_remove = []
+        # data_class.scored_proteins is simply a list of Protein objects...
+        # Create list of all decoy proteins
+        decoy_proteins = [x.identifier for x in self.scored_proteins if self.decoy_symbol in x.identifier]
+        # Create a list of all potential matching targets (some of these may not exist in the search)
+        # TODO change this to being a .replace('##','')
+        # TODO we should also really put the decoy symbol in the param file...
+        matching_targets = [x.replace(self.decoy_symbol,"") for x in decoy_proteins]
+
+        # Create a list of all the proteins from the scored data
+        all_proteins = [x.identifier for x in self.scored_proteins]
+        print(str(len(all_proteins)) + ' proteins scored')
+
+        total_targets = []
+        total_decoys = []
+        decoys_removed = []
+        targets_removed = []
+        # Loop over all decoys identified in the search
+        print('Picking Proteins...')
+        for i in range(len(decoy_proteins)):
+            cur_decoy_index = all_proteins.index(decoy_proteins[i])
+            cur_decoy_protein_object = self.scored_proteins[cur_decoy_index]
+            total_decoys.append(cur_decoy_protein_object.identifier)
+
+            # Try, Except here because the matching target to the decoy may not be a result from the search
+            try:
+                cur_target_index = all_proteins.index(matching_targets[i])
+                cur_target_protein_object = self.scored_proteins[cur_target_index]
+                total_targets.append(cur_target_protein_object.identifier)
+
+                if higher_or_lower == 'higher':
+                    if cur_target_protein_object.score > cur_decoy_protein_object.score:
+                        index_to_remove.append(cur_decoy_index)
+                        decoys_removed.append(cur_decoy_index)
+                        cur_target_protein_object.picked = True
+                        cur_decoy_protein_object.picked = False
+                    else:
+                        index_to_remove.append(cur_target_index)
+                        targets_removed.append(cur_target_index)
+                        cur_decoy_protein_object.picked = True
+                        cur_target_protein_object.picked = False
+
+                if higher_or_lower == 'lower':
+                    if cur_target_protein_object.score < cur_decoy_protein_object.score:
+                        index_to_remove.append(cur_decoy_index)
+                        decoys_removed.append(cur_decoy_index)
+                        cur_target_protein_object.picked = True
+                        cur_decoy_protein_object.picked = False
+                    else:
+                        index_to_remove.append(cur_target_index)
+                        targets_removed.append(cur_target_index)
+                        cur_decoy_protein_object.picked = True
+                        cur_target_protein_object.picked = False
+            except ValueError:
+                pass
+
+        print(str(len(total_decoys)) + ' total decoy proteins')
+        print(str(len(total_targets)) + ' matching target proteins also found in search')
+        print(str(len(decoys_removed)) + ' decoy proteins to be removed')
+        print(str(len(targets_removed)) + ' target proteins to be removed')
+
+        print('Removing Lower Scoring Proteins...')
+        picked_list = []
+        removed_proteins = []
+        for protein_objects in self.scored_proteins:
+            if protein_objects.picked == True:
+                picked_list.append(protein_objects)
+            else:
+                removed_proteins.append(protein_objects)
+        self.picked_proteins_scored = picked_list
+        self.picked_proteins_removed = removed_proteins
+        print('Finished Removing Proteins')
 
         self.data_class.restricted_peptides = [x for x in self.data_class.restricted_peptides if x in new_flat_peptides]
 

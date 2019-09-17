@@ -25,20 +25,22 @@ class InSilicoDigest(object):
     Exmample: Digest.insilicodigest.InSilicoDigest(database_path = "example_human_db.fasta", num_miss_cleavs=2, digest_type='trypsin')
     """
     
-    def __init__(self,database_path,num_miss_cleavs=2,digest_type='trypsin',id_splitting=True):
+    def __init__(self,database_path,parameter_file_object,id_splitting=True):
         self.peptide_to_protein_dictionary = None
         self.protein_to_peptide_dictionary = None
         self.protein_peptide_complete_set = None
-        self.swiss_prot_protein_dictionary = None
+        self.swiss_prot_protein_set = None
         self.database_path = database_path
-        self.num_miss_cleavs = num_miss_cleavs
+        self.num_miss_cleavs = parameter_file_object.missed_cleavages
         self.list_of_digest_types = ['trypsin', 'lysc']
         self.id_splitting = id_splitting
         self.aa_list = ['A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V']
-        if digest_type in self.list_of_digest_types:
-            self.digest_type = digest_type
+        self.reviewed_identifier_symbol = parameter_file_object.reviewed_identifier_symbol
+        if parameter_file_object.digest_type in self.list_of_digest_types:
+            self.digest_type = parameter_file_object.digest_type
         else:
             raise ValueError('digest_type must be equal to one of the following'+str(self.list_of_digest_types)+' or... (List more digest types here in the future...)')
+        self.parameter_file_object = parameter_file_object
         
         
     def digest(self,proseq,miss_cleavage):
@@ -193,7 +195,7 @@ class InSilicoDigest(object):
 
 
 
-    def execute(self):
+    def digest_fasta_database(self):
         db_path_only = '/'.join(self.database_path.split('/')[:-1])+'/'
         pickle_filename_tag = self.database_path.split('.')[0] + '_' + str(self.digest_type) + '_' + str(self.num_miss_cleavs)
         if pickle_filename_tag.split('/')[-1]+'_pep_to_prot.pickle' not in os.listdir(db_path_only) or pickle_filename_tag.split('/')[-1]+'_prot_to_pep.pickle' not in os.listdir(db_path_only) or pickle_filename_tag.split('/')[-1]+'_sp_dict.pickle' not in os.listdir(db_path_only):
@@ -202,7 +204,7 @@ class InSilicoDigest(object):
             print('Starting Digest...')
             pep_dict = collections.defaultdict(set)
             prot_dict = collections.defaultdict(set)
-            sp_dict = collections.defaultdict(list)
+            sp_set = set()
 
 
 
@@ -212,15 +214,15 @@ class InSilicoDigest(object):
             # We use [3:] below also because we need to remove "sp|" or "tr|" to match what the search results show....
             for record in handle:
                 if self.id_splitting == True:
-                    identifier_stripped = record.id[3:]
+                    identifier_stripped = record.id[3:] # TODO instead of using [3:] we should replace sp| with nothing
                 if self.id_splitting == False:
                     identifier_stripped = record.id
 
-
-                if record.id[:3] == 'sp|':
-                    sp_dict['swiss-prot'].append(identifier_stripped)
+                # TODO instead of using [3:] we should replace sp| with nothing
+                if record.id[:3] == self.reviewed_identifier_symbol:
+                    sp_set.add(identifier_stripped)
                 proseq = str(record.seq)
-                peptide_list = InSilicoDigest(self.database_path,self.num_miss_cleavs,self.digest_type).digest(proseq, self.num_miss_cleavs)
+                peptide_list = InSilicoDigest(self.database_path,self.parameter_file_object, self.id_splitting).digest(proseq, self.num_miss_cleavs)
                 for peptide in peptide_list:
                     pep_dict[peptide].add(identifier_stripped)
                     prot_dict[identifier_stripped].add(peptide)
@@ -273,7 +275,7 @@ class InSilicoDigest(object):
 
 
 
-        self.swiss_prot_protein_dictionary = sp_dict
+        self.swiss_prot_protein_set = sp_set
         self.peptide_to_protein_dictionary = pep_dict
         self.protein_to_peptide_dictionary = prot_dict
 
@@ -288,30 +290,31 @@ class PyteomicsDigest(object):
 
     """
 
-    def __init__(self, database_path, num_miss_cleavs=2, digest_type='trypsin', id_splitting=True):
+    def __init__(self, database_path, parameter_file_object, id_splitting=True):
         self.peptide_to_protein_dictionary = None
         self.protein_to_peptide_dictionary = None
         self.protein_peptide_complete_set = None
-        self.swiss_prot_protein_dictionary = None
+        self.swiss_prot_protein_set = None
         self.database_path = database_path
-        self.num_miss_cleavs = num_miss_cleavs
+        self.num_miss_cleavs = parameter_file_object.missed_cleavages
         self.list_of_digest_types = ['trypsin']
         self.id_splitting = id_splitting
         self.methionine = "M"
+        self.reviewed_identifier_symbol = parameter_file_object.reviewed_identifier_symbol
         self.aa_list = ['A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T',
                         'W', 'Y', 'V']
-        if digest_type in self.list_of_digest_types:
-            self.digest_type = digest_type
+        if parameter_file_object.digest_type in self.list_of_digest_types:
+            self.digest_type = parameter_file_object.digest_type
         else:
             raise ValueError('digest_type must be equal to one of the following' + str(
                 self.list_of_digest_types) + ' or... (List more digest types here in the future...)')
 
 
-    def execute(self):
+    def digest_fasta_database(self):
         print('Starting Digest...')
         pep_dict = collections.defaultdict(set)
         prot_dict = collections.defaultdict(set)
-        sp_dict = collections.defaultdict(list)
+        sp_set = set()
 
         # We use [:2] because that is the first two letters of the protein identifier
         # We use [3:] below also because we need to remove "sp|" or "tr|" to match what the search results show....
@@ -325,13 +328,14 @@ class PyteomicsDigest(object):
 
             # Handle ID Splitting...
             if self.id_splitting == True:
-                identifier_stripped = identifier[3:]
+                identifier_stripped = identifier[3:] # TODO instead of using [3:] we should replace sp| with nothing
             if self.id_splitting == False:
                 identifier_stripped = identifier
 
+            # TODO instead of using [:3] we should replace sp| with nothing
             # If SP add to
-            if identifier[:3] == 'sp|':
-                sp_dict['swiss-prot'].append(identifier_stripped)
+            if identifier[:3] == self.reviewed_identifier_symbol:
+                sp_set.add(identifier_stripped)
             for peps in list(new_peptides):
                 pep_dict[peps].add(identifier_stripped)
                 prot_dict[identifier_stripped].add(peps)
@@ -344,6 +348,6 @@ class PyteomicsDigest(object):
                     prot_dict[identifier_stripped].add(methionine_cleaved_peptide)
 
 
-        self.swiss_prot_protein_dictionary = sp_dict
+        self.swiss_prot_protein_set = sp_set
         self.peptide_to_protein_dictionary = pep_dict
         self.protein_to_peptide_dictionary = prot_dict

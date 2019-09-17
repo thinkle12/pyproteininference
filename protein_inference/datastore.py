@@ -682,3 +682,87 @@ class DataStore(object):
         for k in range(len(self.protein_group_objects)):
             self.protein_group_objects[k].q_value = qvalue_list[k]
 
+
+
+    def entrapment_fdr(self, true_database, false_discovery_rate=.05):
+        """
+        Class calculates Entrapment FDR on the lead protein in the groups.
+        Input is a DataStore object, an entrapment database, and a false discovery rate
+
+        Example: protein_inference.fdrcalc.EntrapFdr(data_class = data, entrapment_database = "example_entrap.fasta", other_database = None, false_discovery_rate=.05)
+
+        FDR values are calculated As (entrapped proteins)/total
+
+        This class is useful for calculating an entrapment FDR IF using a benchmark dataset with KNOWN protein content.
+        Entrapment DB would be target proteins known to NOT be in the sample. However, these entrapped proteins should be in the main database that
+        the search was searched against via comet/mascot
+        """
+
+        true_handle = SeqIO.parse(true_database, 'fasta')
+        true_proteins = []
+        for records in true_handle:
+            if not records.id.startsiwith(self.decoy_symbol):  # TODO this should not be an in... should be a startswith and use params
+                true_proteins.append(records.id)
+
+        protein_data = [x[0].identifier for x in self.grouped_scored_proteins]
+        false_true_positives = []
+        decoys = []
+        for i in range(len(protein_data)):
+            # Get a list of false true positives from the protein data... basically if its not a decoy and if its not in true_proteins
+            if not protein_data[i].startswith(self.decoy_symbol) and protein_data[i] not in true_proteins:
+                false_true_positives.append(protein_data[i])
+            if protein_data[i].startswith(self.decoy_symbol):
+                decoys.append(protein_data[i])
+
+        entrapment_proteins_set = list(false_true_positives)
+        entrapment_proteins_set = set(entrapment_proteins_set)
+
+        # pick out the lead scoring protein for each group... lead score is at 0 position
+        lead_score = [x[0] for x in self.grouped_scored_proteins]
+        # Now pick out only the lead protein identifiers
+        lead_proteins = [x.identifier for x in lead_score]
+
+        # Reverse the list (best to worst) -> (worst to best)
+        lead_proteins.reverse()
+
+        fdr_list = []
+        for i in range(len(lead_proteins)):
+            binary_entrap_target_list = [1 if elem in entrapment_proteins_set else 0 for elem in lead_proteins]
+            total = len(lead_proteins)
+            entraped = sum(binary_entrap_target_list)
+            # Calculate FDR at every step starting with the entire list...
+            # Delete first entry (worst score) every time we go through a cycle
+            fdr = (entraped) / (float(total))
+            fdr_list.append(fdr)
+            print(fdr)
+            if fdr < false_discovery_rate:
+                break
+            else:
+                # Here we delete the worst score every time... thus making our list smaller and smaller
+                del lead_proteins[0]
+
+        lead_proteins.reverse()
+
+        fdr_restricted_set = [self.grouped_scored_proteins[x] for x in range(len(lead_proteins))]
+
+        self.fdr_list = fdr_list
+
+        onehitwonders = []
+        for groups in fdr_restricted_set:
+            if int(groups[0].num_peptides) == 1:
+                onehitwonders.append(groups[0])
+
+        print('Protein Group leads that pass with more than 1 PSM with a ' + str(
+            false_discovery_rate) + ' Entrapment FDR = ' + str(len(fdr_restricted_set) - len(onehitwonders)))
+        print('Protein Group lead One hit Wonders that pass ' + str(
+            false_discovery_rate) + ' Entrapment FDR = ' + str(
+            len(onehitwonders)))
+
+        print(
+            'Number of Protein groups that pass a ' + str(false_discovery_rate * 100) + ' Entrapment FDR: ' + str(
+                len(fdr_restricted_set)))
+        self.fdr_restricted_grouped_scored_proteins = fdr_restricted_set
+
+        self.restricted_proteins = fdr_restricted_set
+
+        self.entrapment_proteins = false_true_positives

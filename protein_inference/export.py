@@ -9,69 +9,57 @@ Created on Fri Dec  1 10:49:47 2017
 import csv
 
 class Export(object):
-    # TODO make this an abstract base class...
     """
     Main Class for exporting sorted protein lists to CSV
     """
     
-    def __init__(self):
-        None
-        
-class CsvOutAll(Export):
-    """
-    Class that outputs a subset of the passing proteins based on FDR.
-    Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
-    Only Proteins that pass FDR will be output and ALL proteins
-    will be output not just leads
+    def __init__(self,data_class):
+        self.data_class = data_class
 
-    Example: protein_inference.export.CsvOutAll(data_class = data, filename_out = "example.csv")
+    def csv_export_all_restricted(self, filename_out):
+        """
+        Class that outputs a subset of the passing proteins based on FDR.
+        Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
+        Only Proteins that pass FDR will be output and ALL proteins
+        will be output not just leads
 
-    if we assume data = datastore.Datastore(reader_class = reader)
-    and if we assume reader is a class object from reader.Reader()
-    """
-    
-    def __init__(self,data_class,filename_out):
-        self.data_to_write = data_class.fdr_restricted_grouped_scored_proteins
-        self.filename_out = filename_out
-        
-    def execute(self):
-        ungrouped_list = [['Protein','Score','Number_of_Peptides','Identifier_Type','GroupID','Peptides']]
-        for groups in self.data_to_write:
+        Example: protein_inference.export.CsvOutAll(data_class = data, filename_out = "example.csv")
+
+        if we assume data = datastore.Datastore(reader_class = reader)
+        and if we assume reader is a class object from reader.Reader()
+        """
+        data_to_write = self.data_class.fdr_restricted_grouped_scored_proteins
+        ungrouped_list = [['Protein', 'Score', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
+        for groups in data_to_write:
             for prots in groups:
                 ungrouped_list.append([prots.identifier])
                 ungrouped_list[-1].append(prots.score)
                 ungrouped_list[-1].append(prots.num_peptides)
-                if prots.reviewed==True:
+                if prots.reviewed == True:
                     ungrouped_list[-1].append('Reviewed')
                 else:
                     ungrouped_list[-1].append('Unreviewed')
                 ungrouped_list[-1].append(prots.group_identification)
                 for peps in prots.peptides:
                     ungrouped_list[-1].append(peps)
-        
-        with open(self.filename_out, "w") as f:
+
+        with open(filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
-            
-class CsvOutLeads(Export):
-    """
-    Class that outputs a subset of the passing proteins based on FDR.
-    Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
-    Only Proteins that pass FDR will be output and only Lead proteins will be output
 
-    Example: protein_inference.export.CsvOutLeads(data_class = data, filename_out = "example.csv")
+    def csv_export_leads_restricted(self, filename_out):
+        """
+        Class that outputs a subset of the passing proteins based on FDR.
+        Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
+        Only Proteins that pass FDR will be output and only Lead proteins will be output
 
-    if we assume data = datastore.Datastore(reader_class = reader)
-    and if we assume reader is a class object from reader.Reader()
-    """
-    
-    def __init__(self,data_class,filename_out):
-        self.data_to_write = data_class.fdr_restricted_grouped_scored_proteins
-        self.filename_out = filename_out
-        
-    def execute(self):
-        ungrouped_list = [['Protein','Score','Number_of_Peptides','Identifier_Type','GroupID','Peptides']]
-        for groups in self.data_to_write:
+        Example: protein_inference.export.CsvOutLeads(data_class = data, filename_out = "example.csv")
+
+        if we assume data = datastore.Datastore(reader_class = reader)
+        and if we assume reader is a class object from reader.Reader()
+        """
+        ungrouped_list = [['Protein', 'Score', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
+        for groups in self.data_class.fdr_restricted_grouped_scored_proteins:
             ungrouped_list.append([groups[0].identifier])
             ungrouped_list[-1].append(groups[0].score)
             ungrouped_list[-1].append(groups[0].num_peptides)
@@ -82,31 +70,26 @@ class CsvOutLeads(Export):
             ungrouped_list[-1].append(groups[0].group_identification)
             for peps in groups[0].peptides:
                 ungrouped_list[-1].append(peps)
-        
-        with open(self.filename_out, "w") as f:
+
+        with open(filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
-            
-class CsvOutCommaSep(Export):
-    """
-    Class that outputs a subset of the passing proteins based on FDR.
-    Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
-    Only Proteins that pass FDR will be output and only Lead proteins will be output.
-    Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-    Example: protein_inference.export.CsvOutCommaSep(data_class = data, filename_out = "example.csv")
 
-    if we assume data = datastore.Datastore(reader_class = reader)
-    and if we assume reader is a class object from reader.Reader()
-    """
-    
-    def __init__(self,data_class,filename_out):
-        self.data_to_write = data_class.fdr_restricted_grouped_scored_proteins
-        self.filename_out = filename_out
-        
-    def execute(self):
+    def csv_export_comma_sep_restricted(self, filename_out):
+        """
+        Class that outputs a subset of the passing proteins based on FDR.
+        Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
+        Only Proteins that pass FDR will be output and only Lead proteins will be output.
+        Proteins in the groups of lead proteins will also be output in the same row as the lead
+
+        Example: protein_inference.export.CsvOutCommaSep(data_class = data, filename_out = "example.csv")
+
+        if we assume data = datastore.Datastore(reader_class = reader)
+        and if we assume reader is a class object from reader.Reader()
+        """
         ungrouped_list = [['Protein','Score','Number_of_Peptides','Identifier_Type','GroupID','Other_Potential_Identifiers']]
-        for groups in self.data_to_write:
+        for groups in self.data_class.fdr_restricted_grouped_scored_proteins:
             for prots in groups:
                 if prots==groups[0]:
                     ungrouped_list.append([prots.identifier])
@@ -119,28 +102,21 @@ class CsvOutCommaSep(Export):
                     ungrouped_list[-1].append(prots.group_identification)
                 else:
                     ungrouped_list[-1].append(prots.identifier)
-        with open(self.filename_out, "w") as f:
+        with open(filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
+            
+    def csv_export_q_value_leads(self, filename_out):
+        """
+        Class that outputs all lead proteins with Q values.
 
+        Example: protein_inference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
+        if we assume data = datastore.Datastore(reader_class = reader)
 
-class CsvOutLeadsQValues(Export):
-    """
-    Class that outputs all lead proteins with Q values.
-
-    Example: protein_inference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
-    if we assume data = datastore.Datastore(reader_class = reader)
-
-    and if we assume reader is a class object from reader.Reader()
-    """
-
-    def __init__(self,data_class,filename_out):
-        self.data_to_write = data_class.protein_group_objects
-        self.filename_out = filename_out
-
-    def execute(self):
+        and if we assume reader is a class object from reader.Reader()
+        """
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
-        for groups in self.data_to_write:
+        for groups in self.data_class.protein_group_objects:
             lead_protein = groups.proteins[0]
             ungrouped_list.append([lead_protein.identifier])
             ungrouped_list[-1].append(lead_protein.score)
@@ -155,28 +131,22 @@ class CsvOutLeadsQValues(Export):
             for peps in sorted(peptides):
                 ungrouped_list[-1].append(peps)
 
-        with open(self.filename_out, "w") as f:
+        with open(filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
-class CsvOutCommaSepQValues(Export):
-    """
-    Class that outputs all lead proteins with Q values.
-    Proteins in the groups of lead proteins will also be output in the same row as the lead
+    def csv_export_q_value_comma_sep(self, filename_out):
+        """
+        Class that outputs all lead proteins with Q values.
+        Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-    Example: protein_inference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
-    if we assume data = datastore.Datastore(reader_class = reader)
+        Example: protein_inference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
+        if we assume data = datastore.Datastore(reader_class = reader)
 
-    and if we assume reader is a class object from reader.Reader()
-    """
-
-    def __init__(self,data_class,filename_out):
-        self.data_to_write = data_class.protein_group_objects
-        self.filename_out = filename_out
-
-    def execute(self):
+        and if we assume reader is a class object from reader.Reader()
+        """
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Other_Potential_Identifiers']]
-        for groups in self.data_to_write:
+        for groups in self.data_class.protein_group_objects:
             lead_protein = groups.proteins[0]
             ungrouped_list.append([lead_protein.identifier])
             ungrouped_list[-1].append(lead_protein.score)
@@ -190,29 +160,24 @@ class CsvOutCommaSepQValues(Export):
             for other_prots in groups.proteins[1:]:
                 ungrouped_list[-1].append(other_prots.identifier)
 
-        with open(self.filename_out, "w") as f:
+        with open(filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
-class CsvOutAllQValues(Export):
-    """
-    Class that outputs all proteins with Q values.
-    Non Lead proteins are also output - entire group gets output
-    Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-    Example: protein_inference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
+    def csv_export_q_value_all(self, filename_out):
+        """
+        Class that outputs all proteins with Q values.
+        Non Lead proteins are also output - entire group gets output
+        Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-    if we assume data = datastore.Datastore(reader_class = reader)
-    and if we assume reader is a class object from reader.Reader()
-    """
+        Example: protein_inference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
 
-    def __init__(self,data_class,filename_out):
-        self.data_to_write = data_class.protein_group_objects
-        self.filename_out = filename_out
-
-    def execute(self):
+        if we assume data = datastore.Datastore(reader_class = reader)
+        and if we assume reader is a class object from reader.Reader()
+        """
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
-        for groups in self.data_to_write:
+        for groups in self.data_class.protein_group_objects:
             for proteins in groups.proteins:
                 ungrouped_list.append([proteins.identifier])
                 ungrouped_list[-1].append(proteins.score)
@@ -226,19 +191,14 @@ class CsvOutAllQValues(Export):
                 for peps in proteins.peptides:
                     ungrouped_list[-1].append(peps)
 
-        with open(self.filename_out, "w") as f:
+        with open(filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
 
-class ProteologicAllQValues(Export):
 
-    def __init__(self,data_class,filename_out):
-        self.data_to_write = data_class.protein_group_objects
-        self.filename_out = filename_out
-
-    def execute(self):
+    def csv_export_q_value_all_proteologic(self, filename_out):
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
-        for groups in self.data_to_write:
+        for groups in self.data_class.protein_group_objects:
             for proteins in groups.proteins:
                 ungrouped_list.append([proteins.identifier])
                 ungrouped_list[-1].append(proteins.score)
@@ -252,28 +212,21 @@ class ProteologicAllQValues(Export):
                 for peps in proteins.peptides:
                     ungrouped_list[-1].append(peps)
 
-        with open(self.filename_out, "w") as f:
+        with open(filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
+            
+    def csv_export_q_value_all_long(self, filename_out):
+        """
+        Class that outputs all lead proteins with Q values.
 
+        Example: protein_inference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
+        if we assume data = datastore.Datastore(reader_class = reader)
 
-class CsvOutLeadsQValuesLong(Export):
-    """
-    Class that outputs all lead proteins with Q values.
-
-    Example: protein_inference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
-    if we assume data = datastore.Datastore(reader_class = reader)
-
-    and if we assume reader is a class object from reader.Reader()
-    """
-
-    def __init__(self,data_class,filename_out):
-        self.data_to_write = data_class.protein_group_objects
-        self.filename_out = filename_out
-
-    def execute(self):
+        and if we assume reader is a class object from reader.Reader()
+        """
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
-        for groups in self.data_to_write:
+        for groups in self.data_class.protein_group_objects:
             lead_protein = groups.proteins[0]
             for peps in lead_protein.peptides:
                 ungrouped_list.append([lead_protein.identifier])
@@ -287,6 +240,6 @@ class CsvOutLeadsQValuesLong(Export):
                 ungrouped_list[-1].append(groups.number_id)
                 ungrouped_list[-1].append(peps)
 
-        with open(self.filename_out, "w") as f:
+        with open(filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)

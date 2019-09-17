@@ -5,7 +5,7 @@ Created on Fri Dec 15 09:43:35 2017
 
 @author: hinklet
 """
-
+import re
 
 
 class Protein(object):
@@ -43,8 +43,11 @@ class Psm(object):
     This is done to speed up runtime of the PI algorithm
 
     Example: Psm(identifier = "K.DLIDEGHAATQLVNQLHDVVVENNLSDK.Q")
+    # TODO need to be able to handle identifiers with and without trailing/leading AA with the .'s
     """
     __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins','psm_id']
+
+    AMINO_ACID_SYMBOLS = re.compile('[^a-zA-Z]')
     
     def __init__(self,identifier):
         self.identifier = identifier
@@ -53,7 +56,11 @@ class Psm(object):
         self.pepvalue = None
         self.possible_proteins = None
         self.psm_id = None
-        
+
+    @classmethod
+    def remove_peptide_mods(cls, peptide_string):
+        stripped_peptide = cls.AMINO_ACID_SYMBOLS.sub('', peptide_string)
+        return(stripped_peptide)
 
 class ProteinGroup(object):
     """

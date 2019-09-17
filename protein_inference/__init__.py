@@ -8,9 +8,7 @@ Created on Fri Dec  1 11:07:11 2017
 
 from protein_inference import reader
 from protein_inference import scoring
-from protein_inference import picker
-from protein_inference import grouping
-from protein_inference import fdrcalc
+from protein_inference import inference
 from protein_inference import export
 from protein_inference import datastore
 from protein_inference import benchmark

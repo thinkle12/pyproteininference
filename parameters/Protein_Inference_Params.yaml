@@ -10,6 +10,8 @@ Parameters:
   Restrict_Q: .9
   Score_Method: best_peptide_per_protein
   Score_Type: pep_value
+  Decoy_Symbol: "##"
+  Isoform_Symbol: "-"
+  Reviewed_Identifier_Symbol: "sp|"
   Inference_Type: parsimony
-  Decoy_Symbol: \##
-  Isoform_Symbol: -
+  Tag: Test

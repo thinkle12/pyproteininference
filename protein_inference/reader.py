@@ -22,12 +22,12 @@ class Reader(object):
     def __init__(self):
         None 
         
-class PercolatorRead(Reader):
+class PercolatorReader(Reader):
     """
     The following class takes a percolator target file and a percolator decoy file and creates standard protein_inference.physical.Psm() objects.
     This reader class is used as input for the DataStore class which is used in all further protein_inference Classes
 
-    Example: protein_inference.reader.PercolatorRead(target_file = "example_target.txt", decoy_file = "example_decoy.txt")
+    Example: protein_inference.reader.PercolatorReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt")
 
     Percolator Output is formatted as follows:
     with each entry being tabbed delimited
@@ -35,10 +35,11 @@ class PercolatorRead(Reader):
     116108.15139.15139.6.dta	 3.44016	 0.000479928	7.60258e-10	K.MVVSMTLGLHPWIANIDDTQYLAAK.R	CNDP1_HUMAN|Q96KN2	B4E180_HUMAN|B4E180	A8K1K1_HUMAN|A8K1K1	J3KRP0_HUMAN|J3KRP0
 
     """
-    def __init__(self,target_file,decoy_file,digest_class,yaml_param_file):
+    def __init__(self,target_file,decoy_file,digest_class,parameter_file_object):
         self.target_file = target_file
         self.decoy_file = decoy_file
         #Define Indicies based on input
+        # TODO Change this from index based to reading in as a dict... similar to percolator
         self.psmid_index = 0
         self.perc_score_index = 1
         self.q_value_index = 2
@@ -49,33 +50,10 @@ class PercolatorRead(Reader):
         self.search_id = None
         self.digest_class = digest_class
 
-        self.yaml_param_file = yaml_param_file
-        if self.yaml_param_file:
-            with open(self.yaml_param_file, 'r') as stream:
-                yaml_params = yaml.load(stream)
-            #Read param file..... params read in as dict...
-            #We will then have a bunch of... if param in param_dict.... do... if not pass....
-        else:
-            #Default params to be used if no Yaml file is provided...
-            yaml_params = {'Parameters': {'Picker': True,
-                                      'Restrict_Q': False,
-                                      'Restrict_Pep': False,
-                                      'Restrict_Peptide_Length': 7,
-                                          'Group': "glpk",
-                                          'Export': "q_value_leads",
-                                          'FDR': .01,
-                                          'Score_Type': "q_value",
-                                          'Score_Method': "downweighted_multiplicative_log",
-                                          'Missed_Cleavages': 2,
-                                          'Digest_Type': "trypsin",
-                                          'GLPK_Path':'glpsol'}}
-
-        self.yaml_params = yaml_params
-        self.regex = re.compile('[^a-zA-Z]')
-        self.decoy_symbol = "##"
+        self.parameter_file_object = parameter_file_object
 
         
-    def execute(self):
+    def read_psms(self):
         #Read in and split by line
         # If target_file is a list... read them all in and concatenate...
         if isinstance(self.target_file, (list,)):
@@ -143,7 +121,7 @@ class PercolatorRead(Reader):
 
         list_of_psm_objects = []
         peptide_tracker = set()
-        all_sp_proteins = set(self.digest_class.swiss_prot_protein_dictionary["swiss-prot"])
+        all_sp_proteins = set(self.digest_class.swiss_prot_protein_set)
         #We only want to get unique peptides... using all messes up scoring...
         #Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
 
@@ -170,20 +148,20 @@ class PercolatorRead(Reader):
                 if not current_peptide.isupper() or not current_peptide.isalpha():
                     # If we have mods remove them...
                     peptide_string = current_peptide.upper()
-                    stripped_peptide = self.regex.sub('', peptide_string)
+                    stripped_peptide = Psm.remove_peptide_mods(peptide_string)
                     current_peptide = stripped_peptide
                 # Add the other possible_proteins from insilicodigest here...
                 current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide]) # TODO This peptide needs to be scrubbed of Mods...
                 # Sort Alt Proteins by Swissprot then Trembl...
                 our_target_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.decoy_symbol not in x])
+                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
                 our_decoy_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.decoy_symbol in x])
+                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
 
                 our_target_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.decoy_symbol not in x])
+                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
                 our_decoy_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.decoy_symbol in x])
+                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
 
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
@@ -208,7 +186,7 @@ class PercolatorRead(Reader):
         
         #return perc
         
-class ProteologicPostSearch(Reader):
+class ProteologicPostSearchReader(Reader):
     """
     Potential Future class to read in from another source.
     Potentially from a database, another Psm scoring source, or potentially from Percolator XML source.
@@ -216,7 +194,7 @@ class ProteologicPostSearch(Reader):
     Essentially it will just be a searchID and an LDA/Percolator ID
     """
     
-    def __init__(self, proteologic_object, search_id, postsearch_id, digest_class, yaml_param_file):
+    def __init__(self, proteologic_object, search_id, postsearch_id, digest_class, parameter_file_object):
         self.proteologic_object=proteologic_object
         self.search_id = search_id
         self.postsearch_id = postsearch_id
@@ -224,35 +202,12 @@ class ProteologicPostSearch(Reader):
         self.psms = None
         self.digest_class = digest_class
 
-        self.yaml_param_file = yaml_param_file
-        if self.yaml_param_file:
-            with open(self.yaml_param_file, 'r') as stream:
-                yaml_params = yaml.load(stream)
-            #Read param file..... params read in as dict...
-            #We will then have a bunch of... if param in param_dict.... do... if not pass....
-        else:
-            #Default params to be used if no Yaml file is provided...
-            yaml_params = {'Parameters': {'Picker': True,
-                                      'Restrict_Q': False,
-                                      'Restrict_Pep': False,
-                                      'Restrict_Peptide_Length': 7,
-                                          'Group': "glpk",
-                                          'Export': "q_value_leads",
-                                          'FDR': .01,
-                                          'Score_Type': "q_value",
-                                          'Score_Method': "downweighted_multiplicative_log",
-                                          'Missed_Cleavages': 2,
-                                          'Digest_Type': "trypsin",
-                                          'GLPK_Path':'glpsol'}}
-
-        self.yaml_params = yaml_params
-        self.regex = re.compile('[^a-zA-Z]')
-        self.decoy_symbol = "##"
+        self.parameter_file_object = parameter_file_object
 
 
 
 
-    def execute(self):
+    def read_psms(self):
         print('Reading in data...')
         if isinstance(self.proteologic_object, (list,)):
             list_of_psms = []
@@ -272,7 +227,7 @@ class ProteologicPostSearch(Reader):
 
         list_of_psm_objects = []
         peptide_tracker = set()
-        all_sp_proteins = set(self.digest_class.swiss_prot_protein_dictionary["swiss-prot"])
+        all_sp_proteins = set(self.digest_class.swiss_prot_protein_set)
         #Peptide tracker is used because we only want UNIQUE peptides...
         #The data is sorted by percolator score... or at least it should be...
         #Or sorted by posterior error probability
@@ -302,20 +257,20 @@ class ProteologicPostSearch(Reader):
                 if not current_peptide.isupper() or not current_peptide.isalpha():
                     # If we have mods remove them...
                     peptide_string = current_peptide.upper()
-                    stripped_peptide = self.regex.sub('', peptide_string)
+                    stripped_peptide = Psm.remove_peptide_mods(peptide_string)
                     current_peptide = stripped_peptide
                 # Add the other possible_proteins from insilicodigest here...
                 current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
                 # Sort Alt Proteins by Swissprot then Trembl...
                 our_target_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.decoy_symbol not in x])
+                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
                 our_decoy_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.decoy_symbol in x])
+                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
 
                 our_target_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.decoy_symbol not in x])
+                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
                 our_decoy_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.decoy_symbol in x])
+                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
 
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 

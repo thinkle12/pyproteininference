@@ -53,7 +53,7 @@ class PercolatorReader(Reader):
         self.parameter_file_object = parameter_file_object
 
         
-    def execute(self):
+    def read_psms(self):
         #Read in and split by line
         # If target_file is a list... read them all in and concatenate...
         if isinstance(self.target_file, (list,)):
@@ -207,7 +207,7 @@ class ProteologicPostSearchReader(Reader):
 
 
 
-    def execute(self):
+    def read_psms(self):
         print('Reading in data...')
         if isinstance(self.proteologic_object, (list,)):
             list_of_psms = []

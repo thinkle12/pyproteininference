@@ -70,8 +70,10 @@ class DataStore(object):
         self.picked_proteins_removed = None
         self.protein_group_objects = None
         self.qvality_output = None
-        
-        self.decoy_symbol = "##"
+        self.decoy_symbol = self.parameter_file_object.decoy_symbol
+        self.score_mapper = {"q_value":"qvalue",
+                             "pep_value": "pepvalue",
+                             "perc_score":"percscore"}
 
 
     def get_sorted_identifiers(self, digest_class, scored=True):

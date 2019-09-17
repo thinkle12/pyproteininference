@@ -148,7 +148,7 @@ class PercolatorReader(Reader):
                 if not current_peptide.isupper() or not current_peptide.isalpha():
                     # If we have mods remove them...
                     peptide_string = current_peptide.upper()
-                    stripped_peptide = self.regex.sub('', peptide_string)
+                    stripped_peptide = Psm.remove_peptide_mods(peptide_string)
                     current_peptide = stripped_peptide
                 # Add the other possible_proteins from insilicodigest here...
                 current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide]) # TODO This peptide needs to be scrubbed of Mods...
@@ -257,7 +257,7 @@ class ProteologicPostSearchReader(Reader):
                 if not current_peptide.isupper() or not current_peptide.isalpha():
                     # If we have mods remove them...
                     peptide_string = current_peptide.upper()
-                    stripped_peptide = self.regex.sub('', peptide_string)
+                    stripped_peptide = Psm.remove_peptide_mods(peptide_string)
                     current_peptide = stripped_peptide
                 # Add the other possible_proteins from insilicodigest here...
                 current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])

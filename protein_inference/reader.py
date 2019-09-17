@@ -154,14 +154,14 @@ class PercolatorReader(Reader):
                 current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide]) # TODO This peptide needs to be scrubbed of Mods...
                 # Sort Alt Proteins by Swissprot then Trembl...
                 our_target_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.decoy_symbol not in x])
+                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
                 our_decoy_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.decoy_symbol in x])
+                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
 
                 our_target_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.decoy_symbol not in x])
+                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
                 our_decoy_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.decoy_symbol in x])
+                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
 
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
@@ -263,14 +263,14 @@ class ProteologicPostSearchReader(Reader):
                 current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
                 # Sort Alt Proteins by Swissprot then Trembl...
                 our_target_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.decoy_symbol not in x])
+                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
                 our_decoy_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.decoy_symbol in x])
+                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
 
                 our_target_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.decoy_symbol not in x])
+                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
                 our_decoy_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.decoy_symbol in x])
+                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
 
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 

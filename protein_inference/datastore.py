@@ -643,3 +643,42 @@ class DataStore(object):
         self.fdr_restricted_grouped_scored_proteins = fdr_restricted_set
 
 
+    def calculate_q_values(self):
+        """
+        Class calculates Q values on the lead protein in the groups
+        Input is a DataStore object
+
+        Example: protein_inference.fdrcalc.SetBasedFDR(data_class = data)
+
+        Q values are calculated As (2*decoys)/total
+        """
+        #pick out the lead scoring protein for each group... lead score is at 0 position
+        lead_score = [x.proteins[0] for x in self.protein_group_objects]
+        #Now pick out only the lead protein identifiers
+        lead_proteins = [x.identifier for x in lead_score]
+
+        lead_proteins.reverse()
+
+        fdr_list = []
+        for i in range(len(lead_proteins)):
+            binary_decoy_target_list = [1 if elem.startswith(self.decoy_symbol) else 0 for elem in lead_proteins]
+            total = len(lead_proteins)
+            decoys = sum(binary_decoy_target_list)
+            # Calculate FDR at every step starting with the entire list...
+            # Delete first entry (worst score) every time we go through a cycle
+            fdr = (decoys * 2) / (float(total))
+            fdr_list.append(fdr)
+            del lead_proteins[0]
+
+        qvalue_list = []
+        new_fdr_list = []
+        for fdrs in fdr_list:
+            new_fdr_list.append(fdrs)
+            qvalue = min(new_fdr_list)
+            qvalue_list.append(qvalue)
+
+        qvalue_list.reverse()
+
+        for k in range(len(self.protein_group_objects)):
+            self.protein_group_objects[k].q_value = qvalue_list[k]
+

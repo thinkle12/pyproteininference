@@ -93,513 +93,288 @@ class DataStore(object):
         our_proteins_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
         return(our_proteins_sorted)
-class ProteinIdentifiers(DataStore):
-    """
-    Class that outputs all Protein Identifiers and stores it as "potential_proteins" in the DataStore object
 
-    Example: protein_inference.datastore.ProteinIdenfitiers(data_class = data)
+    @classmethod
+    def sort_proteins(cls):
+        # TODO make a method that sorts entire lists of proteins or leads...
+        pass
 
-    Where data is a DataStore Object.
+    @classmethod
+    def sort_protein_sub_groups(cls):
+        # TODO make a method that sorts one protein group
+        pass
 
-    Running execute will store the protein list and it can be accessed as:
+    @classmethod
+    def sort_protein_groups(cls):
+        # TODO make a method that sorts physical protein groups by their leads...
+        pass
 
-    data.potential_proteins - where data again is a DataStore Object
-    """
-    
-    def __init__(self,data_class):
+    def higher_or_lower(self):
+        # TODO make this an instance method of the datastore class...
+        pass
 
-        #Select whether to use main_data_restricted or main_data_form... restricted is used if restrict_main_data is ever called
-        if data_class.main_data_restricted:
-            self.data_to_use = data_class.main_data_restricted
+    def get_psm_data(self):
+        if self.main_data_restricted:
+            psm_data = self.main_data_restricted
         else:
-            self.data_to_use = data_class.main_data_form
-        self.data_class = data_class
-            
-    def execute(self):
-            
-        proteins = [x.possible_proteins for x in self.data_to_use]
-        self.data_class.potential_proteins = proteins
-        
-class QValues(DataStore):
-    """
-    Class that outputs all Qvalues and stores it as "qvalues" in the DataStore object
+            psm_data = self.main_data_form
 
-    Example: protein_inference.datastore.QValues(data_class = data)
+        return(psm_data)
 
-    Where data is a DataStore Object.
-
-    Running execute will store the qvalue list and it can be accessed as:
-
-    data.qvalues - where data again is a DataStore Object
-    """
-    
-    def __init__(self,data_class):
-        
-        if data_class.main_data_restricted:
-            self.data_to_use = data_class.main_data_restricted
+    def get_protein_data(self):
+        if self.picked_proteins_scored:
+            scored_proteins = self.picked_proteins_scored
         else:
-            self.data_to_use = data_class.main_data_form
-        self.data_class = data_class
-            
-    def execute(self):
-            
-        qvalues = [x.qvalue for x in self.data_to_use]
-        self.data_class.qvalues = qvalues
-        
-class PepValues(DataStore):
-    """
-    Class that outputs all PepValues and stores it as "pepvalues" in the DataStore object
+            scored_proteins = self.scored_proteins
 
-    Example: protein_inference.datastore.PepValues(data_class = data)
+        return(scored_proteins)
 
-    Where data is a DataStore Object.
+    def get_protein_identifiers_from_psm_data(self):
+        psm_data = self.get_psm_data()
 
-    Running execute will store the pepvalue list and it can be accessed as:
+        proteins = [x.possible_proteins for x in psm_data]
 
-    data.pepvalues - where data again is a DataStore Object
-    """
-    
-    def __init__(self,data_class):
-        
-        if data_class.main_data_restricted:
-            self.data_to_use = data_class.main_data_restricted
-        else:
-            self.data_to_use = data_class.main_data_form
-        self.data_class = data_class
-            
-    def execute(self):
-            
-        pepvalues = [x.pepvalue for x in self.data_to_use]
-        self.data_class.pepvalues = pepvalues
-        
-class ProteinInformationDictionary(DataStore):
-    """
-    Class that creates a protein information dictionary and stores it as "protein_info_dict" in the DataStore object
+        return(proteins)
 
-    Example: protein_inference.datastore.ProteinInformationDictionary(data_class = data)
+    def get_q_values(self):
+        psm_data = self.get_psm_data()
 
-    Where data is a DataStore Object.
+        q_values = [x.qvalue for x in psm_data]
 
-    Running execute will store the dictionary and it can be accessed as:
+        return(q_values)
 
-    data.protein_info_dict - where data again is a DataStore Object
+    def get_pep_values(self):
+        psm_data = self.get_psm_data()
 
-    Stored in the dictionary is the peptide, Qvlaue, PepValue, and PercScore
-    """
+        pep_values = [x.qvalue for x in psm_data]
 
-    def __init__(self,data_class):
-        
-        if data_class.main_data_restricted:
-            self.data_to_use = data_class.main_data_restricted
-        else:
-            self.data_to_use = data_class.main_data_form
-        self.data_class = data_class
-    
-    def execute(self):
-            
+        return(pep_values)
+
+    def get_protein_information_dictionary(self):
+        psm_data = self.get_psm_data()
+
         protein_psm_score_dictionary = collections.defaultdict(list)
 
-        #Loop through all Psms
-        for psms in self.data_to_use:
-            #Loop through all proteins
+        # Loop through all Psms
+        for psms in psm_data:
+            # Loop through all proteins
             for prots in psms.possible_proteins:
-                protein_psm_score_dictionary[prots].append({'peptide':psms.identifier,'Qvalue':psms.qvalue,'PosteriorErrorProbability':psms.pepvalue,'Percscore':psms.percscore})
-        
-        self.data_class.protein_info_dict = protein_psm_score_dictionary
-        
+                protein_psm_score_dictionary[prots].append(
+                    {'peptide': psms.identifier, 'Qvalue': psms.qvalue, 'PosteriorErrorProbability': psms.pepvalue,
+                     'Percscore': psms.percscore})
+
+        self.protein_info_dict = protein_psm_score_dictionary
+
+        return(protein_psm_score_dictionary)
+
+    def restrict_psm_data(self,parameter_file_object):
+        print('restricting data')
+
+        peptide_length = parameter_file_object.restrict_peptide_length
+        posterior_error_prob_threshold = parameter_file_object.restrict_pep
+        q_value_threshold = parameter_file_object.restrict_q
+
+        main_psm_data = self.main_data_form
+        print('Length of main data: ' + str(len(self.main_data_form)))
+        # If restrict_main_data is called, we automatically discard everything that has a PEP of 1
+        main_psm_data = [x for x in main_psm_data if x.pepvalue != 1]
+
+        # Restrict peptide length and posterior error probability
+        if peptide_length and posterior_error_prob_threshold and not q_value_threshold:
+            restricted_data = []
+            for psms in main_psm_data:
+                if len(psms.identifier.split('.')[1]) >= peptide_length and psms.pepvalue < float(
+                        posterior_error_prob_threshold):
+                    restricted_data.append(psms)
+
+        # Restrict peptide length only
+        if peptide_length and not posterior_error_prob_threshold and not q_value_threshold:
+            restricted_data = []
+            for psms in main_psm_data:
+                if len(psms.identifier.split('.')[1]) >= peptide_length:
+                    restricted_data.append(psms)
+
+        # Restrict peptide length, posterior error probability, and qvalue
+        if peptide_length and posterior_error_prob_threshold and q_value_threshold:
+            restricted_data = []
+            for psms in main_psm_data:
+                if len(psms.identifier.split('.')[1]) >= peptide_length and psms.pepvalue < float(
+                        posterior_error_prob_threshold) and psms.qvalue < float(q_value_threshold):
+                    restricted_data.append(psms)
+
+        # Restrict peptide length and qvalue
+        if peptide_length and not posterior_error_prob_threshold and q_value_threshold:
+            restricted_data = []
+            for psms in main_psm_data:
+                if len(psms.identifier.split('.')[1]) >= peptide_length and psms.qvalue < float(
+                        q_value_threshold):
+                    restricted_data.append(psms)
+
+        # Restrict posterior error probability and q value
+        if not peptide_length and posterior_error_prob_threshold and q_value_threshold:
+            restricted_data = []
+            for psms in main_psm_data:
+                if psms.pepvalue < float(posterior_error_prob_threshold) and psms.qvalue < float(
+                        q_value_threshold):
+                    restricted_data.append(psms)
+
+                    # Restrict qvalue only
+        if not peptide_length and not posterior_error_prob_threshold and q_value_threshold:
+            restricted_data = []
+            for psms in main_psm_data:
+                if psms.qvalue < float(q_value_threshold):
+                    restricted_data.append(psms)
+
+                    # Restrict posterior error probability only
+        if not peptide_length and posterior_error_prob_threshold and not q_value_threshold:
+            restricted_data = []
+            for psms in main_psm_data:
+                if psms.pepvalue < float(posterior_error_prob_threshold):
+                    restricted_data.append(psms)
+
+        # Restrict nothing... (only PEP gets restricted - takes everything less than 1)
+        if not peptide_length and not posterior_error_prob_threshold and not q_value_threshold:
+            restricted_data = main_psm_data
+
+        self.main_data_restricted = restricted_data
+
+        print('Length of restricted data: ' + str(len(restricted_data)))
+
+        self.restricted_peptides = [x.identifier.split('.')[1] for x in restricted_data]
     
-class RestrictMainData(DataStore):
-
-    """
-    This is a main and central class that allows us to restrict our PSM's on serveral criteria
-
-    Peptide length, posterior error probability, and q value
-
-    This is open and customizable... Defaults are set to peptide length of 7 and pep/qvalue are left at none
-
-    If this is ran, we automatically discared everything that has a PEP of 1
-    This means it has a 100% chance of being an incorrect match...
-
-    Example: protein_inference.datastore.RestrictMainData(data_class = data,peptide_length=7,posterior_error_prob_threshold=None,q_value_threshold=None)
-
-    Again, data is a DataStore Object
-
-    It is highly recommended to run this class with default parameters before pre score is ran.
-    """
-
-    def __init__(self,data_class,peptide_length=7,posterior_error_prob_threshold=None,q_value_threshold=None):
-        
-        self.main_data = data_class.main_data_form
-        self.posterior_error_prob_threshold = posterior_error_prob_threshold
-        self.peptide_length = peptide_length
-        self.q_value_threshold = q_value_threshold
-        self.data_class = data_class
-        
-    def execute(self):
-        print('Length of main data: '+str(len(self.main_data)))
-        #If restrict_main_data is called, we automatically discard everything that has a PEP of 1
-        self.main_data = [x for x in self.main_data if x.pepvalue!=1]
-
-
-        #Restrict peptide length and posterior error probability
-        if self.peptide_length and self.posterior_error_prob_threshold and not self.q_value_threshold:
-            restricted_data = []
-            for psms in self.main_data:
-                if len(psms.identifier.split('.')[1])>=self.peptide_length and psms.pepvalue<float(self.posterior_error_prob_threshold):
-                    restricted_data.append(psms)
-
-        #Restrict peptide length only
-        if self.peptide_length and not self.posterior_error_prob_threshold and not self.q_value_threshold:
-            restricted_data = []
-            for psms in self.main_data:
-                if len(psms.identifier.split('.')[1])>=self.peptide_length:
-                    restricted_data.append(psms)
-
-        #Restrict peptide length, posterior error probability, and qvalue
-        if self.peptide_length and self.posterior_error_prob_threshold and self.q_value_threshold:
-            restricted_data = []
-            for psms in self.main_data:
-                if len(psms.identifier.split('.')[1])>=self.peptide_length and psms.pepvalue<float(self.posterior_error_prob_threshold) and psms.qvalue<float(self.q_value_threshold):
-                    restricted_data.append(psms)
-
-        #Restrict peptide length and qvalue
-        if self.peptide_length and not self.posterior_error_prob_threshold and self.q_value_threshold:
-            restricted_data = []
-            for psms in self.main_data:
-                if len(psms.identifier.split('.')[1])>=self.peptide_length and psms.qvalue<float(self.q_value_threshold):
-                    restricted_data.append(psms)
-
-        #Restrict posterior error probability and q value
-        if not self.peptide_length and self.posterior_error_prob_threshold and self.q_value_threshold:
-            restricted_data = []
-            for psms in self.main_data:
-                if psms.pepvalue<float(self.posterior_error_prob_threshold) and psms.qvalue<float(self.q_value_threshold):
-                    restricted_data.append(psms)     
-
-        #Restrict qvalue only
-        if not self.peptide_length and not self.posterior_error_prob_threshold and self.q_value_threshold:
-            restricted_data = []
-            for psms in self.main_data:
-                if psms.qvalue<float(self.q_value_threshold):
-                    restricted_data.append(psms)       
-
-        #Restrict posterior error probability only
-        if not self.peptide_length and self.posterior_error_prob_threshold and not self.q_value_threshold:
-            restricted_data = []
-            for psms in self.main_data:
-                if psms.pepvalue<float(self.posterior_error_prob_threshold):
-                    restricted_data.append(psms)
-
-        #Restrict nothing... (only PEP gets restricted - takes everything less than 1)
-        if not self.peptide_length and not self.posterior_error_prob_threshold and not self.q_value_threshold:
-           restricted_data = self.main_data                   
-        
-        self.data_class.main_data_restricted = restricted_data
-
-        print('Length of restricted data: '+str(len(restricted_data)))
-
-
-        self.data_class.restricted_peptides = [x.identifier.split('.')[1] for x in restricted_data]
-        
-        
-class PreScoreQValue(DataStore):
-    """
-    This class generates the generic data structure used in protein scoring
-    If this class is called, Qvalues are used for scoring...
-
-    Example: protein_inference.datastore.PreScoreQValue(data_class = data)
-
-    Where data is a DataStore Object
-    """
-    def __init__(self,data_class):
-
-        #Select which data to use... restricted or main
-        if data_class.main_data_restricted:
-            self.data_to_use = data_class.main_data_restricted
-        else:
-            self.data_to_use = data_class.main_data_form
-        self.data_class = data_class
-    
-    def execute(self):
-
+    def create_scoring_input(self, score_input="pep_value"):
+        psm_data = self.get_psm_data()
 
         protein_psm_score_dictionary = collections.defaultdict(list)
         raw_peptide_dictionary = collections.defaultdict(list)
         psmid_peptide_dictionary = collections.defaultdict(list)
 
-
-        #Loop through all Psms
-        for psms in self.data_to_use:
-            #Loop through all proteins
+        # Loop through all Psms
+        for psms in psm_data:
+            # Loop through all proteins
             for prots in psms.possible_proteins:
-                #Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
-                protein_psm_score_dictionary[prots].append({'peptide':psms.identifier.split('.')[1],'score':psms.qvalue})
-                raw_peptide_dictionary[prots].append({'complete_peptide':psms.identifier})
-                psmid_peptide_dictionary[prots].append({'peptide':psms.identifier.split('.')[1],'psm_id':psms.psm_id})
-
-        # print 'Using Generators for Pre Scoring...'
-        # def gen():
-        #     for pkeys in protein_psm_score_dictionary.keys():
-        #         p = Protein(identifier=pkeys)
-        #         p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
-        #         p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
-        #         p.raw_peptides = [x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]
-        #         yield p
-
-        protein_list = []
-        for pkeys in sorted(protein_psm_score_dictionary.keys()):
-            p = Protein(identifier = pkeys)
-            p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
-            p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
-            p.raw_peptides = set(sorted([x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]))
-            protein_list.append(p)
-
-        self.data_class.score_type = 'q_value'
-        self.data_class.scoring_input = protein_list
-        
-        
-class PreScorePepValue(DataStore):
-    """
-    This class generates the generic data structure used in protein scoring
-    If this class is called, Pepvalues are used for scoring...
-
-    Example: protein_inference.datastore.PreScorePepValue(data_class = data)
-
-    Where data is a DataStore Object
-    """
-    def __init__(self,data_class):
-        
-        if data_class.main_data_restricted:
-            self.data_to_use = data_class.main_data_restricted
-        else:
-            self.data_to_use = data_class.main_data_form
-        self.data_class = data_class
-    
-    def execute(self):
-            
-        protein_psm_score_dictionary = collections.defaultdict(list)
-        raw_peptide_dictionary = collections.defaultdict(list)
-        psmid_peptide_dictionary = collections.defaultdict(list)
-
-
-        #Loop through all Psms
-        for psms in self.data_to_use:
-            #Loop through all proteins
-            for prots in psms.possible_proteins:
-                #Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
-                protein_psm_score_dictionary[prots].append({'peptide':psms.identifier.split('.')[1],'score':psms.pepvalue})
+                # Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
+                protein_psm_score_dictionary[prots].append(
+                    {'peptide': psms.identifier.split('.')[1], 'score': getattr(psms, self.score_mapper[score_input])})
                 raw_peptide_dictionary[prots].append({'complete_peptide': psms.identifier})
-                psmid_peptide_dictionary[prots].append({'peptide': psms.identifier.split('.')[1], 'psm_id': psms.psm_id})
+                psmid_peptide_dictionary[prots].append(
+                    {'peptide': psms.identifier.split('.')[1], 'psm_id': psms.psm_id})
         protein_list = []
         # TODO Sort the protein_psm_score_dictionary by SP, Then ##SP then TR then ##TR
         for pkeys in sorted(protein_psm_score_dictionary.keys()):
-            p = Protein(identifier = pkeys)
+            p = Protein(identifier=pkeys)
             p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
             p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
             p.raw_peptides = set(sorted([x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]))
             protein_list.append(p)
 
-        self.data_class.score_type = 'pep_value'
-        self.data_class.scoring_input = protein_list
-        
-class ProteinToPeptideDictionary(DataStore):
-    """
-    This class creates the Protein to Peptide dictionary for peptides from the search results
+        self.score_type = score_input
+        self.scoring_input = protein_list
 
-    Example: protein_inference.datastore.ProteinToPeptideDictionary(data_class = data)
+    def protein_to_peptide_dictionary(self):
+        psm_data = self.get_psm_data()
 
-    Where data is a DataStore Object
-
-    This class provides a quick and easy map of Proteins to peptides from the search and is used in protein_inference.grouping
-    """
-    
-    def __init__(self,data_class):
-        #Here we create the protein to peptide mappings with peptides
-        #We create a dictionary where the key is the protein and the entries are peptides
-        if data_class.main_data_restricted:
-            self.data_to_use = data_class.main_data_restricted
-        else:
-            self.data_to_use = data_class.main_data_form
-        self.data_class = data_class
-            
-    def execute(self):
-
-        res_pep_set = set(self.data_class.restricted_peptides)
+        res_pep_set = set(self.restricted_peptides)
         dd_prots = collections.defaultdict(set)
-        for peptide_objects in self.data_to_use:
+        for peptide_objects in psm_data:
             for prots in peptide_objects.possible_proteins:
                 cur_peptide = peptide_objects.identifier.split('.')[1]
                 if cur_peptide in res_pep_set:
                     dd_prots[prots].add(cur_peptide)
-        
-        self.data_class.protein_peptide_dictionary = dd_prots
-        
-class PeptideToProteinDictionary(DataStore):
-    """
-    This class creates the Peptide to Protein dictionary for peptides from the search results
 
-    Example: protein_inference.datastore.PeptideToProteinDictionary(data_class = data)
+        self.protein_peptide_dictionary = dd_prots
 
-    Where data is a DataStore Object
+        return(dd_prots)
 
-    This class provides a quick and easy map of Peptides to Proteins from the search and is used in protein_inference.grouping.GlpkSetup
-    """
-    
-    def __init__(self,data_class):
-        #Here we create the peptide to protein mappings with unique peptides
-        #This class is useful when using the glpk based grouping
-        if data_class.main_data_restricted:
-            self.data_to_use = data_class.main_data_restricted
-        else:
-            self.data_to_use = data_class.main_data_form
-        self.data_class = data_class
-        
-    def execute(self):
+    def peptide_to_protein_dictionary(self):
+        psm_data = self.get_psm_data()
 
-
-        res_pep_set = set(self.data_class.restricted_peptides)
+        res_pep_set = set(self.restricted_peptides)
         dd_peps = collections.defaultdict(set)
-        for peptide_objects in self.data_to_use:
+        for peptide_objects in psm_data:
             for prots in peptide_objects.possible_proteins:
                 cur_peptide = peptide_objects.identifier.split('.')[1]
                 if cur_peptide in res_pep_set:
                     dd_peps[cur_peptide].add(prots)
                 else:
                     pass
-                
-        self.data_class.peptide_protein_dictionary = dd_peps
+
+        self.peptide_protein_dictionary = dd_peps
+
+        return(dd_peps)
         
-        
+    def higher_or_lower(self):
+        worst_score = self.scored_proteins[-1].score
+        best_score = self.scored_proteins[0].score
 
-class HigherOrLower(DataStore):
-    """
-    Important class that is useful in determining how to sort the data based on the score...
-
-    This class is simple in that it takes the best score from a scoring output and the worst score for a scoring output and compares them.
-
-    It then assigns an internal variable known as high_low_better to showcase whether a higher or lower score is better based on the scoring scheme chosen.
-
-    This is important as whenever results are sorted by score, we need to know whether a higher or a lower score is better.
-    Given that a higher score or a lower score can be seen as "better" for different scoring types, we implement this class to determine if higher or lower is better
-
-    Example: protein_inference.datastore.HigherOrLower(data_class = data)
-
-    where data is a DataStore Object
-    """
-
-    def __init__(self,data_class):
-
-        #Get the best and worst scored proteins...
-        #data_class.scored_proteins is a sorted list of all scored proteins
-        #These are sorted based on the method and it is pre known what the sorting should be...
-        #This class is for determining downstream sorting...
-        self.worst_score = data_class.scored_proteins[-1].score
-        self.best_score = data_class.scored_proteins[0].score
-        self.data_class = data_class
-        
-    def execute(self):
-        
-        if float(self.best_score)>float(self.worst_score):
+        if float(best_score) > float(worst_score):
             higher_or_lower = 'higher'
-            
-        if float(self.best_score)<float(self.worst_score):
-            higher_or_lower='lower'
 
-        print('best score = ' + str(self.best_score))
-        print('worst score = ' + str(self.worst_score))
+        if float(best_score) < float(worst_score):
+            higher_or_lower = 'lower'
 
-        if self.best_score==self.worst_score:
-            raise ValueError('Best and Worst scores were identical, equal to '+str(self.best_score)+'. Score type '+str(self.data_class.score_type)+' produced the error, please change score type.')
+        print('best score = ' + str(best_score))
+        print('worst score = ' + str(worst_score))
+
+        if best_score == worst_score:
+            raise ValueError(
+                'Best and Worst scores were identical, equal to ' + str(best_score) + '. Score type ' + str(
+                    self.score_type) + ' produced the error, please change score type.')
+
+        self.high_low_better = higher_or_lower
+
+        return(higher_or_lower)
         
-        self.data_class.high_low_better = higher_or_lower
 
+    def get_protein_identifiers(self, data_form):
+        if data_form == 'main':
+            # All the data (unrestricted)
+            data_to_select = self.main_data_form
+            prots = [[x.possible_proteins] for x in data_to_select]
+            proteins = prots
 
+        if data_form == 'restricted':
+            # Proteins that pass certain restriction criteria (peptide length, pep, qvalue)
+            data_to_select = self.main_data_restricted
+            prots = [[x.possible_proteins] for x in data_to_select]
+            proteins = prots
+
+        if data_form == 'picked':
+            # Here we look at proteins that are 'picked' (aka the proteins that beat out their matching target/decoy)
+            data_to_select = self.picked_proteins_scored
+            prots = [x.identifier for x in data_to_select]
+            proteins = prots
+
+        if data_form == 'picked_removed':
+            # Here we look at the proteins that were removed due to picking (aka the proteins that have a worse score than their target/decoy counterpart)
+            data_to_select = self.picked_proteins_removed
+            prots = [x.identifier for x in data_to_select]
+            proteins = prots
+
+        if data_form == 'fdr_restricted':
+            # Proteins that pass fdr restriction...
+            data_to_select = self.fdr_restricted_grouped_scored_proteins
+            prots = [x.identifier for x in data_to_select]
+            proteins = prots
+
+        return(proteins)
         
-class GetProteinIdentifiers(DataStore):
-
-    """
-    This class gets protein identifiers from a variety of threshold spots in the algorithm
-    One can get all identifiers from ['main', 'restricted', 'picked', 'picked_removed', and 'fdr_restricted']
-    This is useful as we can see what proteins are removed from the data at what steps of the algorithm...
-
-    Example: protein_inference.datastore.GetProteinIdentifiers(data_class = data, data_form = 'restricted')
-
-    data_class is a DataStore object
-    data_form can be one of the following = ['main', 'restricted', 'picked', 'picked_removed', and 'fdr_restricted']
-    """
-    def __init__(self,data_class,data_form):
-        self.data_class = data_class
-        self.data_form = data_form
-        self.proteins = None
-               
-    def execute(self):
-        if self.data_form == 'main':
-            #All the data (unrestricted)
-            data_to_select = self.data_class.main_data_form
-            prots = [[x.possible_proteins] for x in data_to_select]
-            self.proteins = prots
-                
-        if self.data_form == 'restricted':
-            #Proteins that pass certain restriction criteria (peptide length, pep, qvalue)
-            data_to_select = self.data_class.main_data_restricted
-            prots = [[x.possible_proteins] for x in data_to_select]
-            self.proteins = prots
-            
-        if self.data_form == 'picked':
-            #Here we look at proteins that are 'picked' (aka the proteins that beat out their matching target/decoy)
-            data_to_select = self.data_class.picked_proteins_scored
-            prots = [x.identifier for x in data_to_select]
-            self.proteins = prots
-            
-        if self.data_form == 'picked_removed':
-            #Here we look at the proteins that were removed due to picking (aka the proteins that have a worse score than their target/decoy counterpart)
-            data_to_select = self.data_class.picked_proteins_removed
-            prots = [x.identifier for x in data_to_select]
-            self.proteins = prots
-            
-        if self.data_form == 'fdr_restricted':
-            #Proteins that pass fdr restriction...
-            data_to_select = self.data_class.fdr_restricted_grouped_scored_proteins
-            prots = [x.identifier for x in data_to_select]
-            self.proteins = prots
-            
-
-class GetProteinInformation(DataStore):
-    """
-    This class displays protein information once proteins are scored
-    we can look at the following attributes of the proteins:
-    Score, groups, reviewed/unreviewed, peptides, peptide scores, picked/removed, number of peptides...
-
-    Example: gpi = protein_inference.datastore.GetProteinInformation(data_class = data)
-
-             gpi.execute(protein_string = PRKDC_HUMAN|P78527)
-
-    This code currently does not support outputting the peptide scores (unsure why)
-
-    where data is a DataStore Object
-
-
-    """
-    def __init__(self,data_class):
-        self.data_class = data_class
-        self.scored_data = data_class.scored_proteins
-
-    def execute(self,protein_string):
-
-        all_scored_protein_data = self.scored_data
+    def get_protein_information(self, protein_string):
+        all_scored_protein_data = self.scored_proteins
         identifiers = [x.identifier for x in all_scored_protein_data]
         protein_scores = [x.score for x in all_scored_protein_data]
         groups = [x.group_identification for x in all_scored_protein_data]
         reviewed = [x.reviewed for x in all_scored_protein_data]
         peptides = [x.peptides for x in all_scored_protein_data]
-        #Peptide scores currently broken...
+        # Peptide scores currently broken...
         peptide_scores = [x.peptide_scores for x in all_scored_protein_data]
         picked = [x.picked for x in all_scored_protein_data]
         num_peptides = [x.num_peptides for x in all_scored_protein_data]
 
         main_index = identifiers.index(protein_string)
 
-        list_structure = [['identifier','protein_score','groups','reviewed','peptides','peptide_scores','picked','num_peptides']]
+        list_structure = [['identifier', 'protein_score', 'groups', 'reviewed', 'peptides', 'peptide_scores', 'picked',
+                           'num_peptides']]
         list_structure.append([protein_string])
         list_structure[-1].append(protein_scores[main_index])
         list_structure[-1].append(groups[main_index])

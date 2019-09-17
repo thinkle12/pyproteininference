@@ -47,7 +47,7 @@ class DataStore(object):
 
             #This is bad because default GLPK_Path is glpsol... on rescomp this will not work...
 
-        self.yaml_params = reader_class.yaml_params
+        self.parameter_file_object = reader_class.parameter_file_object
         self.protein_info_dict = None
         self.potential_proteins = None
         self.main_data_restricted = None

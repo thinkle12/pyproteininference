@@ -35,10 +35,11 @@ class PercolatorReader(Reader):
     116108.15139.15139.6.dta	 3.44016	 0.000479928	7.60258e-10	K.MVVSMTLGLHPWIANIDDTQYLAAK.R	CNDP1_HUMAN|Q96KN2	B4E180_HUMAN|B4E180	A8K1K1_HUMAN|A8K1K1	J3KRP0_HUMAN|J3KRP0
 
     """
-    def __init__(self,target_file,decoy_file,digest_class,yaml_param_file):
+    def __init__(self,target_file,decoy_file,digest_class,parameter_file_object):
         self.target_file = target_file
         self.decoy_file = decoy_file
         #Define Indicies based on input
+        # TODO Change this from index based to reading in as a dict... similar to percolator
         self.psmid_index = 0
         self.perc_score_index = 1
         self.q_value_index = 2
@@ -49,30 +50,7 @@ class PercolatorReader(Reader):
         self.search_id = None
         self.digest_class = digest_class
 
-        self.yaml_param_file = yaml_param_file
-        if self.yaml_param_file:
-            with open(self.yaml_param_file, 'r') as stream:
-                yaml_params = yaml.load(stream)
-            #Read param file..... params read in as dict...
-            #We will then have a bunch of... if param in param_dict.... do... if not pass....
-        else:
-            #Default params to be used if no Yaml file is provided...
-            yaml_params = {'Parameters': {'Picker': True,
-                                      'Restrict_Q': False,
-                                      'Restrict_Pep': False,
-                                      'Restrict_Peptide_Length': 7,
-                                          'Group': "glpk",
-                                          'Export': "q_value_leads",
-                                          'FDR': .01,
-                                          'Score_Type': "q_value",
-                                          'Score_Method': "downweighted_multiplicative_log",
-                                          'Missed_Cleavages': 2,
-                                          'Digest_Type': "trypsin",
-                                          'GLPK_Path':'glpsol'}}
-
-        self.yaml_params = yaml_params
-        self.regex = re.compile('[^a-zA-Z]')
-        self.decoy_symbol = "##"
+        self.parameter_file_object = parameter_file_object
 
         
     def execute(self):
@@ -208,7 +186,7 @@ class PercolatorReader(Reader):
         
         #return perc
         
-class ProteologicPostSearch(Reader):
+class ProteologicPostSearchReader(Reader):
     """
     Potential Future class to read in from another source.
     Potentially from a database, another Psm scoring source, or potentially from Percolator XML source.
@@ -216,7 +194,7 @@ class ProteologicPostSearch(Reader):
     Essentially it will just be a searchID and an LDA/Percolator ID
     """
     
-    def __init__(self, proteologic_object, search_id, postsearch_id, digest_class, yaml_param_file):
+    def __init__(self, proteologic_object, search_id, postsearch_id, digest_class, parameter_file_object):
         self.proteologic_object=proteologic_object
         self.search_id = search_id
         self.postsearch_id = postsearch_id
@@ -224,30 +202,7 @@ class ProteologicPostSearch(Reader):
         self.psms = None
         self.digest_class = digest_class
 
-        self.yaml_param_file = yaml_param_file
-        if self.yaml_param_file:
-            with open(self.yaml_param_file, 'r') as stream:
-                yaml_params = yaml.load(stream)
-            #Read param file..... params read in as dict...
-            #We will then have a bunch of... if param in param_dict.... do... if not pass....
-        else:
-            #Default params to be used if no Yaml file is provided...
-            yaml_params = {'Parameters': {'Picker': True,
-                                      'Restrict_Q': False,
-                                      'Restrict_Pep': False,
-                                      'Restrict_Peptide_Length': 7,
-                                          'Group': "glpk",
-                                          'Export': "q_value_leads",
-                                          'FDR': .01,
-                                          'Score_Type': "q_value",
-                                          'Score_Method': "downweighted_multiplicative_log",
-                                          'Missed_Cleavages': 2,
-                                          'Digest_Type': "trypsin",
-                                          'GLPK_Path':'glpsol'}}
-
-        self.yaml_params = yaml_params
-        self.regex = re.compile('[^a-zA-Z]')
-        self.decoy_symbol = "##"
+        self.parameter_file_object = parameter_file_object
 
 
 

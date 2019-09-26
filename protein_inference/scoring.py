@@ -38,6 +38,8 @@ class Score(object):
             self.top_two_combied()
         if score_method == 'geometric_mean':
             self.geometric_mean_log()
+        if score_method == "additive":
+            self.additive()
 
 
     def best_peptide_per_protein(self):
@@ -350,6 +352,30 @@ class Score(object):
             val_list = [val_list[x] ** (1 / float(1 + x)) for x in range(len(val_list))]
             # val_list = [val_list[x]**(1/float(1+(float(x)/10))) for x in range(len(val_list))]
             score = -math.log(reduce(lambda x, y: x * y, val_list))
+
+            protein.score = score
+            all_scores.append(protein)
+
+        # Higher score is better as a smaller q or pep in a -log will give a larger value
+        all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
+
+        self.data_class.score_method = 'iterative_downweighting2'
+        self.data_class.short_score_method = 'idw2'
+        self.data_class.scored_proteins = all_scores
+
+
+    def additive(self):
+        """
+        The following class is an experimental class essentially used for future development of potential scoring schemes
+        """
+        all_scores = []
+        print('Scoring Proteins...')
+        for protein in self.pre_score_data:
+            val_list = []
+            for vals in protein.psm_score_dictionary:
+                val_list.append(float(vals['score']))
+            # Take the sum of our scores
+            score = sum(val_list)
 
             protein.score = score
             all_scores.append(protein)

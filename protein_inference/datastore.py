@@ -250,12 +250,17 @@ class DataStore(object):
 
         self.restricted_peptides = [x.identifier.split('.')[1] for x in restricted_data]
     
-    def create_scoring_input(self, score_input="pep_value"):
+    def create_scoring_input(self, score_input="posterior_error_prob"):
         psm_data = self.get_psm_data()
 
         protein_psm_score_dictionary = collections.defaultdict(list)
         raw_peptide_dictionary = collections.defaultdict(list)
         psmid_peptide_dictionary = collections.defaultdict(list)
+
+        try:
+            score_key = self.SCORE_MAPPER[score_input]
+        except KeyError:
+            score_key = self.CUSTOM_SCORE_KEY
 
         # Loop through all Psms
         for psms in psm_data:
@@ -263,7 +268,7 @@ class DataStore(object):
             for prots in psms.possible_proteins:
                 # Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
                 protein_psm_score_dictionary[prots].append(
-                    {'peptide': psms.identifier.split('.')[1], 'score': getattr(psms, self.score_mapper[score_input])})
+                    {'peptide': psms.identifier.split('.')[1], 'score': getattr(psms, score_key)})
                 raw_peptide_dictionary[prots].append({'complete_peptide': psms.identifier})
                 psmid_peptide_dictionary[prots].append(
                     {'peptide': psms.identifier.split('.')[1], 'psm_id': psms.psm_id})
@@ -276,7 +281,7 @@ class DataStore(object):
             p.raw_peptides = set(sorted([x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]))
             protein_list.append(p)
 
-        self.score_type = score_input
+        self.score = score_input
         self.scoring_input = protein_list
 
     def protein_to_peptide_dictionary(self):
@@ -327,7 +332,7 @@ class DataStore(object):
         if best_score == worst_score:
             raise ValueError(
                 'Best and Worst scores were identical, equal to ' + str(best_score) + '. Score type ' + str(
-                    self.score_type) + ' produced the error, please change score type.')
+                    self.score) + ' produced the error, please change score type.')
 
         self.high_low_better = higher_or_lower
 

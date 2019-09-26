@@ -400,8 +400,6 @@ class DataStore(object):
         return list_structure
 
     def exclude_non_distinguishing_peptides(self, digest_class, protein_subset_type = "hard"):
-        # TODO Move this into param file
-        decoy_symbol = "##"
 
         print('Applying Exclusion Model')
 

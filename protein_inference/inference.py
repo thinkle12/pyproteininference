@@ -24,84 +24,104 @@ class Inference(object):
     def __init__(self):
         None
 
-    def _group_by_shared_peptides(self, scored_data, data_class, digest_class, group_type="parsimony", lead_protein_objects=None):
-        if group_type=="parsimony":
+    def _group_by_peptides(self, scored_data, data_class, digest_class, inference_type="parsimony", lead_protein_objects=None, grouping_type="shared_peptides"):
+
+        scored_data = sorted(scored_data, key=lambda k: len(k.raw_peptides), reverse=True)
+
+        if inference_type== "parsimony":
             scored_proteins = lead_protein_objects
+            scored_proteins = sorted(scored_proteins, key=lambda k: len(k.raw_peptides), reverse=True)
         else:
             scored_proteins = list(scored_data)
+            scored_proteins = sorted(scored_proteins, key=lambda k: len(k.raw_peptides), reverse=True)
+            # Add some code here to remove complete subset proteins...
         protein_finder = [x.identifier for x in scored_data]
 
         prot_pep_dict = data_class.protein_to_peptide_dictionary()
 
+        protein_tracker = set()
         restricted_peptides_set = set(data_class.restricted_peptides)
         picked_removed = set([x.identifier for x in data_class.picked_proteins_removed])
         list_of_prots_not_in_db = []
         list_of_peps_not_in_db = []
         missing_proteins = set()
-        print('Grouping Proteins...')
+        print('Grouping Proteins by Subsetting...')
         in_silico_peptides_to_proteins = digest_class.peptide_to_protein_dictionary
         grouped_proteins = []
         for protein_objects in scored_proteins:
-            cur_protein_identifier = protein_objects.identifier
+            if protein_objects not in protein_tracker:
+                protein_tracker.add(protein_objects)
+                cur_protein_identifier = protein_objects.identifier
 
-            # Set peptide variable if the peptide is in the restricted peptide set
-            # Sort the peptides alphabetically
-            protein_objects.peptides = set(sorted([x for x in prot_pep_dict[cur_protein_identifier] if
-                                        x in restricted_peptides_set]))
-            protein_list_group = [protein_objects]
-            current_peptides = prot_pep_dict[cur_protein_identifier]
+                # Set peptide variable if the peptide is in the restricted peptide set
+                # Sort the peptides alphabetically
+                protein_objects.peptides = set(sorted([x for x in prot_pep_dict[cur_protein_identifier] if
+                                                       x in restricted_peptides_set]))
+                protein_list_group = [protein_objects]
+                current_peptides = prot_pep_dict[cur_protein_identifier]
 
-            current_grouped_proteins = set()
-            for peptide in current_peptides:  # Probably put an if here... if peptide is in the list of peptide after being restricted by datastore.RestrictMainData
-                if peptide in restricted_peptides_set:
-                    # Get the proteins that map to the current peptide using in_silico_peptides_to_proteins
-                    # First make sure our peptide is formatted properly...
-                    if not peptide.isupper() or not peptide.isalpha():
-                        # If the peptide is not all upper case or if its not all alphabetical...
-                        peptide = Psm.remove_peptide_mods(peptide)
-                    potential_protein_list = in_silico_peptides_to_proteins[peptide]
-                    if not potential_protein_list:
-                        list_of_prots_not_in_db.append(peptide)
-                        list_of_peps_not_in_db.append(protein_objects.identifier)
-                        print('Protein ' + str(protein_objects.identifier) + ' and Peptide ' + str(
-                            peptide) + ' is not in database...')
-                    # Assign proteins to groups based on shared peptide... unless the protein is equivalent to the current identifier
-                    for protein in potential_protein_list:
-                        # If statement below to avoid grouping the same protein twice and to not group the lead
-                        if protein not in current_grouped_proteins and protein != cur_protein_identifier and protein not in picked_removed and protein not in missing_proteins:
-                            try:
-                                # Try to find its object using protein_finder (list of identifiers) and scored_proteins (list of Protein Objects)
-                                cur_index = protein_finder.index(protein)
-                                current_protein_object = scored_data[cur_index]
-                                if not current_protein_object.peptides:
-                                    current_protein_object.peptides = set(sorted([x for x in prot_pep_dict[current_protein_object.identifier] if
-                                        x in restricted_peptides_set]))
-                                current_grouped_proteins.add(current_protein_object)
-                            except ValueError:
-                                print("Protein from DB {} not found with protein finder for peptide {}".format(protein, peptide))
-                                missing_proteins.add(protein)
+                current_grouped_proteins = set()
+                for peptide in current_peptides:  # Probably put an if here... if peptide is in the list of peptide after being restricted by datastore.RestrictMainData
+                    if peptide in restricted_peptides_set:
+                        # Get the proteins that map to the current peptide using in_silico_peptides_to_proteins
+                        # First make sure our peptide is formatted properly...
+                        if not peptide.isupper() or not peptide.isalpha():
+                            # If the peptide is not all upper case or if its not all alphabetical...
+                            peptide = Psm.remove_peptide_mods(peptide)
+                        potential_protein_list = in_silico_peptides_to_proteins[peptide]
+                        if not potential_protein_list:
+                            list_of_prots_not_in_db.append(peptide)
+                            list_of_peps_not_in_db.append(protein_objects.identifier)
+                            print('Protein ' + str(protein_objects.identifier) + ' and Peptide ' + str(
+                                peptide) + ' is not in database...')
+                        # Assign proteins to groups based on shared peptide... unless the protein is equivalent to the current identifier
+                        for protein in potential_protein_list:
+                            # If statement below to avoid grouping the same protein twice and to not group the lead
+                            if protein not in current_grouped_proteins and protein != cur_protein_identifier and protein not in picked_removed and protein not in missing_proteins:
+                                try:
+                                    # Try to find its object using protein_finder (list of identifiers) and scored_proteins (list of Protein Objects)
+                                    cur_index = protein_finder.index(protein)
+                                    current_protein_object = scored_data[cur_index]
+                                    if not current_protein_object.peptides:
+                                        current_protein_object.peptides = set(
+                                            sorted([x for x in prot_pep_dict[current_protein_object.identifier] if
+                                                    x in restricted_peptides_set]))
+                                    if grouping_type=="shared_peptides":
+                                        current_grouped_proteins.add(current_protein_object)
+                                    elif grouping_type=="subset_peptides":
+                                        if current_protein_object.peptides.issubset(protein_objects.peptides):
+                                            current_grouped_proteins.add(current_protein_object)
+                                            protein_tracker.add(current_protein_object)
+                                        else:
+                                            pass
+                                    else:
+                                        pass
+                                except ValueError:
+                                    print("Protein from DB {} not found with protein finder for peptide {}".format(protein,
+                                                                                                                   peptide))
+                                    missing_proteins.add(protein)
 
-                        else:
-                            pass
-            # Add the proteins to the lead if they share peptides...
-            protein_list_group = protein_list_group + list(current_grouped_proteins)
-            # protein_list_group at first is just the lead protein object...
-            # We then try apply grouping by looking at all peptide from the lead...
-            # For all of these peptide look at all other non lead proteins and try to assign them to the group...
-            # We assign the entire protein object as well... in the above try/except
-            # Then append this sub group to the main list
-            # The variable grouped_proteins is now a list of lists which each element being a Protein object and each list of protein objects corresponding to a group
-            grouped_proteins.append(protein_list_group)
+                            else:
+                                pass
+                # Add the proteins to the lead if they share peptides...
+                protein_list_group = protein_list_group + list(current_grouped_proteins)
+                # protein_list_group at first is just the lead protein object...
+                # We then try apply grouping by looking at all peptide from the lead...
+                # For all of these peptide look at all other non lead proteins and try to assign them to the group...
+                # We assign the entire protein object as well... in the above try/except
+                # Then append this sub group to the main list
+                # The variable grouped_proteins is now a list of lists which each element being a Protein object and each list of protein objects corresponding to a group
+                grouped_proteins.append(protein_list_group)
 
-        return_dict = {"grouped_proteins":grouped_proteins, "missing_proteins": list_of_prots_not_in_db, "missing_peptides": list_of_peps_not_in_db}
+        return_dict = {"grouped_proteins": grouped_proteins, "missing_proteins": list_of_prots_not_in_db,
+                       "missing_peptides": list_of_peps_not_in_db}
 
-        return(return_dict)
+        return (return_dict)
 
     def _apply_protein_group_ids(self, grouped_protein_objects, data_class, digest_class):
         sp_protein_set = set(digest_class.swiss_prot_protein_set)
 
         prot_pep_dict = data_class.protein_to_peptide_dictionary()
-
 
         # Here we create group ID's
         group_id = 0
@@ -257,8 +277,8 @@ class Inference(object):
             ###NEW ISOFORM OVERRIDE
             if isoform_override:
                 if protein_list[0].reviewed:
-                    if '-' in protein_list[0].identifier:
-                        pure_id = protein_list[0].identifier.split('-')[0]
+                    if data_class.parameter_file_object.isoform_symbol in protein_list[0].identifier:
+                        pure_id = protein_list[0].identifier.split(data_class.parameter_file_object.isoform_symbol)[0]
                         # Start to loop through protein_list which is the current group...
                         for potential_replacement in protein_list[1:]:
                             isoform_override = potential_replacement
@@ -341,8 +361,8 @@ class Inclusion(Inference):
 
     def infer_proteins(self):
 
-        group_dict = self._group_by_shared_peptides(scored_data=self.scored_data,data_class=self.data_class,
-                                                    digest_class=self.digest_class, group_type="inclusion")
+        group_dict = self._group_by_peptides(scored_data=self.scored_data, data_class=self.data_class,
+                                             digest_class=self.digest_class, inference_type="inclusion", grouping_type=self.data_class.parameter_file_object.grouping_type)
 
         self.list_of_prots_not_in_db = group_dict["missing_proteins"]
         self.list_of_peps_not_in_db = group_dict["missing_peptides"]
@@ -387,8 +407,8 @@ class Exclusion(Inference):
         self.lead_protein_set = None
 
     def infer_proteins(self):
-        group_dict = self._group_by_shared_peptides(scored_data=self.scored_data, data_class=self.data_class,
-                                                    digest_class=self.digest_class, group_type="exclusion",)
+        group_dict = self._group_by_peptides(scored_data=self.scored_data, data_class=self.data_class,
+                                             digest_class=self.digest_class, inference_type="exclusion", grouping_type=self.data_class.parameter_file_object.grouping_type)
 
         self.list_of_prots_not_in_db = group_dict["missing_proteins"]
         self.list_of_peps_not_in_db = group_dict["missing_peptides"]
@@ -701,9 +721,9 @@ class Parsimony(Inference):
         # If they share at least 1 peptide then assign that protein to the group...
         self.data_class.glpk_lead_proteins = lead_protein_objects
 
-        group_dict = self._group_by_shared_peptides(scored_data=scored_data, data_class=self.data_class,
-                                                    digest_class=self.digest_class, group_type="parsimony",
-                                                    lead_protein_objects=self.lead_protein_objects)
+        group_dict = self._group_by_peptides(scored_data=scored_data, data_class=self.data_class,
+                                             digest_class=self.digest_class, inference_type="parsimony",
+                                             lead_protein_objects=self.lead_protein_objects, grouping_type=self.data_class.parameter_file_object.grouping_type)
 
         self.list_of_prots_not_in_db = group_dict["missing_proteins"]
         self.list_of_peps_not_in_db = group_dict["missing_peptides"]

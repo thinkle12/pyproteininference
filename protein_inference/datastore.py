@@ -65,15 +65,19 @@ class DataStore(object):
         self.glpk_lead_proteins = None
         self.in_silico_digest = None
         self.max_youdens_data = None
-        self.score_type = None
+        self.score = None
         self.score_method = None
         self.picked_proteins_removed = None
         self.protein_group_objects = None
         self.qvality_output = None
         self.decoy_symbol = self.parameter_file_object.decoy_symbol
-        self.score_mapper = {"q_value":"qvalue",
+        self.SCORE_MAPPER = {"q_value":"qvalue",
                              "pep_value": "pepvalue",
-                             "perc_score":"percscore"}
+                             "perc_score":"percscore",
+                             "q-value": "qvalue",
+                             "posterior_error_prob":"pepvalue",
+                             "posterior_error_probability":"pepvalue"}
+        self.CUSTOM_SCORE_KEY = "custom_score"
 
 
     def get_sorted_identifiers(self, digest_class, scored=True):
@@ -246,12 +250,17 @@ class DataStore(object):
 
         self.restricted_peptides = [x.identifier.split('.')[1] for x in restricted_data]
     
-    def create_scoring_input(self, score_input="pep_value"):
+    def create_scoring_input(self, score_input="posterior_error_prob"):
         psm_data = self.get_psm_data()
 
         protein_psm_score_dictionary = collections.defaultdict(list)
         raw_peptide_dictionary = collections.defaultdict(list)
         psmid_peptide_dictionary = collections.defaultdict(list)
+
+        try:
+            score_key = self.SCORE_MAPPER[score_input]
+        except KeyError:
+            score_key = self.CUSTOM_SCORE_KEY
 
         # Loop through all Psms
         for psms in psm_data:
@@ -259,7 +268,7 @@ class DataStore(object):
             for prots in psms.possible_proteins:
                 # Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
                 protein_psm_score_dictionary[prots].append(
-                    {'peptide': psms.identifier.split('.')[1], 'score': getattr(psms, self.score_mapper[score_input])})
+                    {'peptide': psms.identifier.split('.')[1], 'score': getattr(psms, score_key)})
                 raw_peptide_dictionary[prots].append({'complete_peptide': psms.identifier})
                 psmid_peptide_dictionary[prots].append(
                     {'peptide': psms.identifier.split('.')[1], 'psm_id': psms.psm_id})
@@ -272,7 +281,7 @@ class DataStore(object):
             p.raw_peptides = set(sorted([x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]))
             protein_list.append(p)
 
-        self.score_type = score_input
+        self.score = score_input
         self.scoring_input = protein_list
 
     def protein_to_peptide_dictionary(self):
@@ -323,7 +332,7 @@ class DataStore(object):
         if best_score == worst_score:
             raise ValueError(
                 'Best and Worst scores were identical, equal to ' + str(best_score) + '. Score type ' + str(
-                    self.score_type) + ' produced the error, please change score type.')
+                    self.score) + ' produced the error, please change score type.')
 
         self.high_low_better = higher_or_lower
 
@@ -391,8 +400,6 @@ class DataStore(object):
         return list_structure
 
     def exclude_non_distinguishing_peptides(self, digest_class, protein_subset_type = "hard"):
-        # TODO Move this into param file
-        decoy_symbol = "##"
 
         print('Applying Exclusion Model')
 
@@ -439,6 +446,8 @@ class DataStore(object):
 
         non_subset_proteins = set([our_proteins_sorted[x] for x in list_of_indeces])
 
+        self.non_subset_proteins = non_subset_proteins
+
         print("Removing direct subset Proteins from the data")
         # Remove all proteins from scoring input that are a subset of another protein...
         self.scoring_input = [x for x in self.scoring_input if
@@ -456,6 +465,8 @@ class DataStore(object):
         # Count the number of peptides in this list...
         # This is the number of proteins this peptide maps to....
         counted_peptides = collections.Counter(flat_peptides)
+
+        self.counted_peptides = counted_peptides
 
         # If the count is greater than 1... exclude the protein entirely from scoring input... :)
         raw_peps_good = set([x for x in counted_peptides.keys() if counted_peptides[x] <= 1])

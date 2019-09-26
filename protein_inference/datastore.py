@@ -65,15 +65,19 @@ class DataStore(object):
         self.glpk_lead_proteins = None
         self.in_silico_digest = None
         self.max_youdens_data = None
-        self.score_type = None
+        self.score = None
         self.score_method = None
         self.picked_proteins_removed = None
         self.protein_group_objects = None
         self.qvality_output = None
         self.decoy_symbol = self.parameter_file_object.decoy_symbol
-        self.score_mapper = {"q_value":"qvalue",
+        self.SCORE_MAPPER = {"q_value":"qvalue",
                              "pep_value": "pepvalue",
-                             "perc_score":"percscore"}
+                             "perc_score":"percscore",
+                             "q-value": "qvalue",
+                             "posterior_error_prob":"pepvalue",
+                             "posterior_error_probability":"pepvalue"}
+        self.CUSTOM_SCORE_KEY = "custom_score"
 
 
     def get_sorted_identifiers(self, digest_class, scored=True):

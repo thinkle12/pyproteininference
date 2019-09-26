@@ -21,7 +21,12 @@ class Reader(object):
     """
     
     def __init__(self):
-        None 
+        None
+
+    def remap(self, fieldnames):
+        price_count = itertools.count(1)
+        return ['alternative_protein_{}'.format(next(price_count)) if f=="" else f
+                for f in fieldnames]
         
 class PercolatorReader(Reader):
     """

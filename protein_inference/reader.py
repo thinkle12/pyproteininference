@@ -175,6 +175,8 @@ class PercolatorReader(Reader):
                 for alt_proteins in identifiers_sorted[:50]:
                     if alt_proteins not in p.possible_proteins:
                         p.possible_proteins.append(alt_proteins)
+
+                p.possible_proteins = [x for x in p.possible_proteins if x]
                 if not current_alt_proteins:
                     print("Peptide {} was not found in the supplied DB".format(current_peptide))
 

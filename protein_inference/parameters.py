@@ -37,6 +37,7 @@ class ProteinInferenceParameter(object):
         self.reviewed_identifier_symbol = None
         self.inference_type = None
         self.tag = None
+        self.score = None
 
         self.convert_to_object()
 
@@ -72,6 +73,8 @@ class ProteinInferenceParameter(object):
             self.reviewed_identifier_symbol = yaml_params['Parameters']['Reviewed_Identifier_Symbol']
             self.inference_type = yaml_params['Parameters']['Inference_Type']
             self.tag = yaml_params['Parameters']["Tag"]
+            self.score = yaml_params["Parameters"]["Score"]
+            self.grouping_type = yaml_params["Parameters"]["Grouping_Type"]
 
         else:
             print("Yaml parameter file not found, parameters set to default")
@@ -85,10 +88,12 @@ class ProteinInferenceParameter(object):
             self.restrict_peptide_length = 7
             self.restrict_q = 0.005
             self.score_method = "multiplicative_log"
-            self.score_type = "pep_value"
+            self.score = "pep_value"
             self.decoy_symbol = "##"
             self.isoform_symbol = "-"
             self.reviewed_identifier_symbol = "sp|"
             self.inference_type = "parsimony"
             self.tag = "Test"
+            self.score_type = "multiplicative"
+            self.grouping_type = "shared_peptides"
 

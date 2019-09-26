@@ -9,9 +9,11 @@ Parameters:
   Restrict_Peptide_Length: 7
   Restrict_Q: .9
   Score_Method: best_peptide_per_protein
-  Score_Type: pep_value
+  Score: posterior_error_prob
+  Score_Type: multiplicative
   Decoy_Symbol: "##"
   Isoform_Symbol: "-"
   Reviewed_Identifier_Symbol: "sp|"
-  Inference_Type: parsimony
-  Tag: Test
+  Inference_Type: inclusion
+  Tag: inclusion_tst_shared_peptides
+  Grouping_Type: subset_shared_peptides

@@ -446,6 +446,8 @@ class DataStore(object):
 
         non_subset_proteins = set([our_proteins_sorted[x] for x in list_of_indeces])
 
+        self.non_subset_proteins = non_subset_proteins
+
         print("Removing direct subset Proteins from the data")
         # Remove all proteins from scoring input that are a subset of another protein...
         self.scoring_input = [x for x in self.scoring_input if
@@ -463,6 +465,8 @@ class DataStore(object):
         # Count the number of peptides in this list...
         # This is the number of proteins this peptide maps to....
         counted_peptides = collections.Counter(flat_peptides)
+
+        self.counted_peptides = counted_peptides
 
         # If the count is greater than 1... exclude the protein entirely from scoring input... :)
         raw_peps_good = set([x for x in counted_peptides.keys() if counted_peptides[x] <= 1])

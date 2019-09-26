@@ -257,8 +257,8 @@ class Inference(object):
             ###NEW ISOFORM OVERRIDE
             if isoform_override:
                 if protein_list[0].reviewed:
-                    if '-' in protein_list[0].identifier:
-                        pure_id = protein_list[0].identifier.split('-')[0]
+                    if data_class.parameter_file_object.isoform_symbol in protein_list[0].identifier:
+                        pure_id = protein_list[0].identifier.split(data_class.parameter_file_object.isoform_symbol)[0]
                         # Start to loop through protein_list which is the current group...
                         for potential_replacement in protein_list[1:]:
                             isoform_override = potential_replacement

@@ -45,7 +45,7 @@ class Psm(object):
     Example: Psm(identifier = "K.DLIDEGHAATQLVNQLHDVVVENNLSDK.Q")
     # TODO need to be able to handle identifiers with and without trailing/leading AA with the .'s
     """
-    __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins','psm_id']
+    __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins','psm_id','custom_score']
 
     AMINO_ACID_SYMBOLS = re.compile('[^a-zA-Z]')
     
@@ -56,6 +56,7 @@ class Psm(object):
         self.pepvalue = None
         self.possible_proteins = None
         self.psm_id = None
+        self.custom_score = None
 
     @classmethod
     def remove_peptide_mods(cls, peptide_string):

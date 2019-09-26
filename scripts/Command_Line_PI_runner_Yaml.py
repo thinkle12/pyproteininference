@@ -63,7 +63,7 @@ data.restrict_psm_data(parameter_file_object=protein_inference_parameters)
 ### Step 6: Generate protein scoring input
 ### Step 6: Generate protein scoring input
 ### Step 6: Generate protein scoring input
-data.create_scoring_input(score_input = protein_inference_parameters.score_type)
+data.create_scoring_input(score_input = protein_inference_parameters.score)
 
 ### Step 7: Remove non unique peptides if running exclusion
 ### Step 7: Remove non unique peptides if running exclusion
@@ -123,17 +123,17 @@ print('Number of Proteins passing an FDR of'+str(protein_inference_parameters.fd
 export_type = protein_inference_parameters.export
 export = protein_inference.export.Export(data_class = data)
 if 'leads' in export_type:
-    export.csv_export_leads_restricted(filename_out=args.dir_name+protein_inference_parameters.tag+'_'+'leads'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export.csv_export_leads_restricted(filename_out=args.dir_name + protein_inference_parameters.tag +'_' +'leads' +'_' + data.short_score_method +'_' + data.score + '.csv')
 if 'all' in export_type:
-    export.csv_export_all_restricted(filename_out=args.dir_name+protein_inference_parameters.tag+'_'+'all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export.csv_export_all_restricted(filename_out=args.dir_name + protein_inference_parameters.tag +'_' +'all' +'_' + data.short_score_method +'_' + data.score + '.csv')
 if 'comma_sep' in export_type:
-    export.csv_export_comma_sep_restricted(filename_out=args.dir_name+protein_inference_parameters.tag+'_'+'comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export.csv_export_comma_sep_restricted(filename_out=args.dir_name + protein_inference_parameters.tag +'_' +'comma_sep' +'_' + data.short_score_method +'_' + data.score + '.csv')
 if 'q_value_comma_sep' in export_type:
-    export.csv_export_q_value_comma_sep(filename_out=args.dir_name+protein_inference_parameters.tag+'_'+'q_value_comma_sep'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export.csv_export_q_value_comma_sep(filename_out=args.dir_name + protein_inference_parameters.tag +'_' +'q_value_comma_sep' +'_' + data.short_score_method +'_' + data.score + '.csv')
 if 'q_value' in export_type:
-    export.csv_export_q_value_leads(filename_out=args.dir_name+protein_inference_parameters.tag+'_'+'q_value_leads'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export.csv_export_q_value_leads(filename_out=args.dir_name + protein_inference_parameters.tag +'_' +'q_value_leads' +'_' + data.short_score_method +'_' + data.score + '.csv')
 if 'q_value_all' in export_type:
-    export.csv_export_q_value_all(filename_out=args.dir_name+protein_inference_parameters.tag+'_'+'q_value_all'+'_'+data.short_score_method+'_'+data.score_type+'.csv')
+    export.csv_export_q_value_all(filename_out=args.dir_name + protein_inference_parameters.tag +'_' +'q_value_all' +'_' + data.short_score_method +'_' + data.score + '.csv')
 
 
 print('Protein Inference Finished')

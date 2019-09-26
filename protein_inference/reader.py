@@ -10,6 +10,7 @@ from protein_inference.physical import Psm
 import yaml
 import csv
 import re
+import itertools
 ##Here we create the reader class which is capable of reading in files as input for ProteinInference
 ##The reader class creates a list of psm objects with various attributes...
 

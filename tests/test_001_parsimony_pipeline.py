@@ -36,7 +36,7 @@ PEPTIDES_INDEX = 6
 
 class TestLoadParsimonyWorkflow(TestCase):
 
-    def test_workflow(self):
+    def test_workflow1(self):
 
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###

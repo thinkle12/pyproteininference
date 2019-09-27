@@ -34,7 +34,7 @@ PEPTIDES_INDEX = 6
 
 class TestLoadInclusionWorkflow(TestCase):
 
-    def test_workflow(self):
+    def test_workflow2(self):
 
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###

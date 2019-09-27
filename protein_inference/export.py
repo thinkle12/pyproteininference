@@ -188,7 +188,7 @@ class Export(object):
                 else:
                     ungrouped_list[-1].append('Unreviewed')
                 ungrouped_list[-1].append(groups.number_id)
-                for peps in proteins.peptides:
+                for peps in sorted(proteins.peptides):
                     ungrouped_list[-1].append(peps)
 
         with open(filename_out, "w") as f:

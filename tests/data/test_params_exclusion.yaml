@@ -1,0 +1,19 @@
+Parameters:
+  Digest_Type: trypsin
+  Export: q_value
+  FDR: 0.01
+  GLPK_Path: glpsol
+  Missed_Cleavages: 3
+  Picker: True
+  Restrict_Pep: .9
+  Restrict_Peptide_Length: 7
+  Restrict_Q: .9
+  Score_Method: multiplicative_log
+  Score: posterior_error_prob
+  Score_Type: multiplicative
+  Decoy_Symbol: "##"
+  Isoform_Symbol: "-"
+  Reviewed_Identifier_Symbol: "sp|"
+  Inference_Type: exclusion
+  Tag: test_exclusion
+  Grouping_Type: subset_peptides

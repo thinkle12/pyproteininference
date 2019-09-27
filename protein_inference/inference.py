@@ -591,7 +591,7 @@ class Parsimony(Inference):
         fileout.write('end;')
         fileout.close()
 
-    def _glpk_runner(self, path_to_glpsol = 'glpsol',glpkin='glpkin.mod',glpkout='glpkout.sol'):
+    def _glpk_runner(self, path_to_glpsol = 'glpsol',glpkin='glpkin.mod',glpkout='glpkout.sol', skip_running = False):
         """
         The GlpkRunner class takes a path to glpsol, the glpk input file from protein_inference.grouping.GlpkSetup(), a glpkout filename as well as a file_override option
 
@@ -605,18 +605,21 @@ class Parsimony(Inference):
         """
         #If there is no file_override (mainly for offline testing)
         #Run GLPK with the following command
-        p = subprocess.Popen(str(path_to_glpsol)+' -m '+str(glpkin)+' -o '+str(glpkout), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        output = p.communicate()
+        if not skip_running:
+            p = subprocess.Popen(str(path_to_glpsol)+' -m '+str(glpkin)+' -o '+str(glpkout), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            output = p.communicate()
 
-        print('Start Command line Stdout')
-        print(output[0])
-        print('End Command line Stdout')
-        print('Start Command line Stderr')
-        print(output[1])
-        print('End Command line Stderr')
+            print('Start Command line Stdout')
+            print(output[0])
+            print('End Command line Stdout')
+            print('Start Command line Stderr')
+            print(output[1])
+            print('End Command line Stderr')
 
-        if output[0]=='':
-            raise ValueError('Glpk did not produce any output... See potential error output above')
+            if output[0]=='':
+                raise ValueError('Glpk did not produce any output... See potential error output above')
+        else:
+            print("Not running GLPK, File {} will be used downstream in grouping".format(glpkout))
 
 
 
@@ -772,20 +775,21 @@ class Parsimony(Inference):
         self.data_class.grouped_scored_proteins = scores_grouped
         self.data_class.protein_group_objects = list_of_group_objects
 
-    def infer_proteins(self):
+    def infer_proteins(self, glpkinout_directory = "glpkinout/", skip_running_glpk = False):
 
         try:
-            os.mkdir('glpkinout/')
+            os.mkdir(glpkinout_directory)
         except OSError:
-            print("Directory glpkinout/ cannot be created or already exists")
+            print("Directory {} cannot be created or already exists".format(glpkinout_directory))
 
-        self._setup_glpk(glpkin_filename='glpkinout/glpkin_' + self.parameter_file_object.tag + '.mod')
+        self._setup_glpk(glpkin_filename=os.path.join(glpkinout_directory,'glpkin_' + self.parameter_file_object.tag + '.mod'))
 
         # For reference server_glpk_path = '/gne/research/apps/protchem/glpk/bin/glpsol'
         self._glpk_runner(path_to_glpsol=self.parameter_file_object.glpk_path,
-                          glpkin='glpkinout/glpkin_' + self.parameter_file_object.tag + '.mod',
-                          glpkout='glpkinout/glpkout_' + self.parameter_file_object.tag + '.sol')
+                          glpkin=os.path.join(glpkinout_directory,'glpkin_' + self.parameter_file_object.tag + '.mod'),
+                          glpkout=os.path.join(glpkinout_directory,'glpkout_' + self.parameter_file_object.tag + '.sol'),
+                          skip_running=skip_running_glpk)
 
         self._glpk_grouper(data_class=self.data_class, digest_class=self.digest_class,
                            swissprot_override='soft',
-                           glpksolution_filename='glpkinout/glpkout_' + self.parameter_file_object.tag + '.sol')
+                           glpksolution_filename=os.path.join(glpkinout_directory,'glpkout_' + self.parameter_file_object.tag + '.sol'))

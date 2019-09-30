@@ -77,7 +77,7 @@ class Inference(object):
                         # Assign proteins to groups based on shared peptide... unless the protein is equivalent to the current identifier
                         for protein in potential_protein_list:
                             # If statement below to avoid grouping the same protein twice and to not group the lead
-                            if protein not in current_grouped_proteins and protein != cur_protein_identifier and protein not in picked_removed and protein not in missing_proteins:
+                            if protein not in current_grouped_proteins and protein != cur_protein_identifier and protein not in picked_removed and protein not in missing_proteins and inference_type!="none":
                                 try:
                                     # Try to find its object using protein_finder (list of identifiers) and scored_proteins (list of Protein Objects)
                                     cur_index = protein_finder.index(protein)
@@ -798,3 +798,46 @@ class Parsimony(Inference):
         self._glpk_grouper(data_class=self.data_class, digest_class=self.digest_class,
                            swissprot_override='soft',
                            glpksolution_filename=os.path.join(glpkinout_directory,'glpkout_' + self.parameter_file_object.tag + '.sol'))
+
+class FirstProtein(Inference):
+
+    def __init__(self, data_class, digest_class):
+        self.data_class = data_class
+        self.digest_class = digest_class
+        self.scored_data = self.data_class.get_protein_data()
+        self.data_class = data_class
+        self.lead_protein_set = None
+
+    def infer_proteins(self):
+        group_dict = self._group_by_peptides(scored_data=self.scored_data, data_class=self.data_class,
+                                             digest_class=self.digest_class, inference_type="none", grouping_type=self.data_class.parameter_file_object.grouping_type)
+
+        self.list_of_prots_not_in_db = group_dict["missing_proteins"]
+        self.list_of_peps_not_in_db = group_dict["missing_peptides"]
+        grouped_proteins = group_dict["grouped_proteins"]
+
+        # Get the higher or lower variable
+        if not self.data_class.high_low_better:
+            self.data_class.higher_or_lower()
+        else:
+            higher_or_lower = self.data_class.high_low_better
+
+        print("Applying Group ID's for the Exclusion Method")
+        regrouped_proteins = self._apply_protein_group_ids(grouped_protein_objects=grouped_proteins,
+                                                           data_class=self.data_class, digest_class=self.digest_class)
+
+        scores_grouped = regrouped_proteins["scores_grouped"]
+        list_of_group_objects = regrouped_proteins["group_objects"]
+
+        print('Sorting Results based on lead Protein Score')
+        if higher_or_lower == 'lower':
+            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
+                                           reverse=False)
+        if higher_or_lower == 'higher':
+            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=True)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
+                                           reverse=True)
+
+        self.data_class.grouped_scored_proteins = scores_grouped
+        self.data_class.protein_group_objects = list_of_group_objects

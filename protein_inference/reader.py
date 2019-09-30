@@ -350,7 +350,13 @@ class GenericReader(Reader):
         self.MAX_ALTERNATIVE_PROTEIN_COLUMN_NAMES = [self.EXTRA_PROTEIN_IDS.format(x) for x in
                                                 range(1, self.MAX_ALLOWED_ALTERNATIVE_PROTEINS + 1)]
 
+        # If we select to not run inference at all
+        if self.parameter_file_object.inference_type=="none":
+            # Only allow 1 Protein per PSM
+            self.MAX_ALLOWED_ALTERNATIVE_PROTEINS = 1
+
     def read_psms(self):
+        print("Reading in Input Files...")
         # Read in and split by line
         # If target_file is a list... read them all in and concatenate...
         if isinstance(self.target_file, (list,)):
@@ -482,7 +488,7 @@ class GenericReader(Reader):
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
                 # Restrict to 50 possible proteins
-                for alt_proteins in identifiers_sorted[:50]:
+                for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
                     if alt_proteins not in p.possible_proteins:
                         p.possible_proteins.append(alt_proteins)
                 if not current_alt_proteins:

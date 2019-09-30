@@ -81,19 +81,19 @@ class TestLoadExclusionWorkflow(TestCase):
                                                                       digest_class=digest)
         pep_and_prot_data.read_psms()
 
-        self.assertEqual(len(pep_and_prot_data.psms), 16)
+        self.assertEqual(len(pep_and_prot_data.psms), 15)
 
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
-        data = protein_inference.datastore.DataStore(pep_and_prot_data)
+        data = protein_inference.datastore.DataStore(pep_and_prot_data, digest_class=digest)
 
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
         data.restrict_psm_data(parameter_file_object=protein_inference_parameters)
 
-        self.assertEqual(len(data.main_data_restricted), 15)
+        self.assertEqual(len(data.main_data_restricted), 14)
 
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input

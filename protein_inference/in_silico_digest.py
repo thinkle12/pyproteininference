@@ -24,7 +24,10 @@ class InSilicoDigest(object):
 
     Exmample: Digest.insilicodigest.InSilicoDigest(database_path = "example_human_db.fasta", num_miss_cleavs=2, digest_type='trypsin')
     """
-    
+
+    LIST_OF_DIGEST_TYPES = ['trypsin', 'lysc']
+    AA_LIST = ['A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V']
+
     def __init__(self,database_path,parameter_file_object,id_splitting=True):
         self.peptide_to_protein_dictionary = None
         self.protein_to_peptide_dictionary = None
@@ -32,14 +35,12 @@ class InSilicoDigest(object):
         self.swiss_prot_protein_set = None
         self.database_path = database_path
         self.num_miss_cleavs = parameter_file_object.missed_cleavages
-        self.list_of_digest_types = ['trypsin', 'lysc']
         self.id_splitting = id_splitting
-        self.aa_list = ['A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V']
         self.reviewed_identifier_symbol = parameter_file_object.reviewed_identifier_symbol
-        if parameter_file_object.digest_type in self.list_of_digest_types:
+        if parameter_file_object.digest_type in self.LIST_OF_DIGEST_TYPES:
             self.digest_type = parameter_file_object.digest_type
         else:
-            raise ValueError('digest_type must be equal to one of the following'+str(self.list_of_digest_types)+' or... (List more digest types here in the future...)')
+            raise ValueError('digest_type must be equal to one of the following'+str(self.LIST_OF_DIGEST_TYPES)+' or... (List more digest types here in the future...)')
         self.parameter_file_object = parameter_file_object
         
         
@@ -184,7 +185,7 @@ class InSilicoDigest(object):
             for peps in peptides:
                 if 'X' in peps:
                     x_index = peps.index('X')
-                    for aa in self.aa_list:
+                    for aa in self.AA_LIST:
                         peptide_list = list(peps)
                         peptide_list[x_index] = aa
                         new_pep = ''.join(peptide_list)
@@ -290,6 +291,9 @@ class PyteomicsDigest(object):
 
     """
 
+    LIST_OF_DIGEST_TYPES = ['trypsin', 'lysc']
+    AA_LIST = ['A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V']
+
     def __init__(self, database_path, parameter_file_object, id_splitting=True):
         self.peptide_to_protein_dictionary = None
         self.protein_to_peptide_dictionary = None
@@ -297,17 +301,14 @@ class PyteomicsDigest(object):
         self.swiss_prot_protein_set = None
         self.database_path = database_path
         self.num_miss_cleavs = parameter_file_object.missed_cleavages
-        self.list_of_digest_types = ['trypsin']
         self.id_splitting = id_splitting
         self.methionine = "M"
         self.reviewed_identifier_symbol = parameter_file_object.reviewed_identifier_symbol
-        self.aa_list = ['A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T',
-                        'W', 'Y', 'V']
-        if parameter_file_object.digest_type in self.list_of_digest_types:
+        if parameter_file_object.digest_type in self.LIST_OF_DIGEST_TYPES:
             self.digest_type = parameter_file_object.digest_type
         else:
             raise ValueError('digest_type must be equal to one of the following' + str(
-                self.list_of_digest_types) + ' or... (List more digest types here in the future...)')
+                self.LIST_OF_DIGEST_TYPES) + ' or... (List more digest types here in the future...)')
 
 
     def digest_fasta_database(self):

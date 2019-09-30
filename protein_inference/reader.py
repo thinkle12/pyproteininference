@@ -11,6 +11,7 @@ import yaml
 import csv
 import re
 import itertools
+from logging import getLogger
 ##Here we create the reader class which is capable of reading in files as input for ProteinInference
 ##The reader class creates a list of psm objects with various attributes...
 
@@ -57,6 +58,8 @@ class PercolatorReader(Reader):
         self.digest_class = digest_class
 
         self.parameter_file_object = parameter_file_object
+        self.logger = getLogger('protein_inference.reader.PercolatorReader.read_psms')
+
 
         
     def read_psms(self):
@@ -65,7 +68,7 @@ class PercolatorReader(Reader):
         if isinstance(self.target_file, (list,)):
             all_target = []
             for t_files in self.target_file:
-                print(t_files)
+                self.logger.info(t_files)
                 ptarg = []
                 with open(t_files, 'r') as perc_target_file:
                     spamreader = csv.reader(perc_target_file, delimiter='\t')
@@ -88,7 +91,7 @@ class PercolatorReader(Reader):
         if isinstance(self.decoy_file, (list,)):
             all_decoy = []
             for d_files in self.decoy_file:
-                print(d_files)
+                self.logger.info(d_files)
                 pdec = []
                 with open(d_files, 'r') as perc_decoy_file:
                     spamreader = csv.reader(perc_decoy_file, delimiter='\t')
@@ -134,7 +137,7 @@ class PercolatorReader(Reader):
         # TODO
         # make this for loop a generator...
 
-        print(len(perc_all))
+        self.logger.info("Length of PSM Data: {}".format(len(perc_all)))
         for psm_info in perc_all:
             current_peptide = psm_info[self.peptide_index]
             #Define the Psm...
@@ -178,7 +181,7 @@ class PercolatorReader(Reader):
 
                 p.possible_proteins = [x for x in p.possible_proteins if x]
                 if not current_alt_proteins:
-                    print("Peptide {} was not found in the supplied DB".format(current_peptide))
+                    self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
 
 
 
@@ -189,7 +192,7 @@ class PercolatorReader(Reader):
 
         self.psms = list_of_psm_objects
 
-        print(len(self.psms))
+        self.logger.info("Length of PSM Data: {}".format(len(self.psms)))
 
         
         #return perc
@@ -211,12 +214,14 @@ class ProteologicPostSearchReader(Reader):
         self.digest_class = digest_class
 
         self.parameter_file_object = parameter_file_object
+        self.logger = getLogger('protein_inference.reader.ProteologicPostSearchReader.read_psms')
+
 
 
 
 
     def read_psms(self):
-        print('Reading in data...')
+        self.logger.info('Reading in data from Proteologic...')
         if isinstance(self.proteologic_object, (list,)):
             list_of_psms = []
             for p_objs in self.proteologic_object:
@@ -287,7 +292,7 @@ class ProteologicPostSearchReader(Reader):
                     if alt_proteins not in p.possible_proteins:
                         p.possible_proteins.append(alt_proteins)
                 if not current_alt_proteins:
-                    print("Peptide {} was not found in the supplied DB".format(current_peptide))
+                    self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
 
 
 
@@ -300,7 +305,7 @@ class ProteologicPostSearchReader(Reader):
 
 
         self.psms = list_of_psm_objects
-        print('Finished reading in data...')
+        self.logger.info('Finished reading in data from Proteologic...')
 
 
 class GenericReader(Reader):
@@ -340,11 +345,13 @@ class GenericReader(Reader):
         self.parameter_file_object = parameter_file_object
         self.scoring_variable = parameter_file_object.score
 
+        self.logger = getLogger('protein_inference.reader.GenericReader.read_psms')
+
         if self.scoring_variable!=self.Q_VALUE and self.scoring_variable!=self.POSTERIOR_ERROR_PROB:
             self.load_custom_score = True
-            print("Pulling custom column based on parameter file input for score, Column: {}".format(self.scoring_variable))
+            self.logger.info("Pulling custom column based on parameter file input for score, Column: {}".format(self.scoring_variable))
         else:
-            print("Pulling no custom columns based on parameter file input for score, using standard Column: {}".format(
+            self.logger.info("Pulling no custom columns based on parameter file input for score, using standard Column: {}".format(
                 self.scoring_variable))
 
         self.MAX_ALTERNATIVE_PROTEIN_COLUMN_NAMES = [self.EXTRA_PROTEIN_IDS.format(x) for x in
@@ -356,16 +363,15 @@ class GenericReader(Reader):
             self.MAX_ALLOWED_ALTERNATIVE_PROTEINS = 1
 
     def read_psms(self):
-        print("Reading in Input Files...")
+        self.logger.info("Reading in Input Files using Generic Reader...")
         # Read in and split by line
         # If target_file is a list... read them all in and concatenate...
         if isinstance(self.target_file, (list,)):
             all_target = []
             for t_files in self.target_file:
-                print(t_files)
                 ptarg = []
                 with open(self.target_file, 'r') as perc_target_file:
-                    print(self.target_file)
+                    self.logger.info(self.target_file)
                     spamreader = csv.reader(perc_target_file, delimiter='\t')
                     fieldnames = self.remap(next(spamreader))
                     for row in spamreader:
@@ -375,7 +381,7 @@ class GenericReader(Reader):
             # If not just read the file...
             ptarg = []
             with open(self.target_file, 'r') as perc_target_file:
-                print(self.target_file)
+                self.logger.info(self.target_file)
                 spamreader = csv.reader(perc_target_file, delimiter='\t')
                 fieldnames = self.remap(next(spamreader))
                 for row in spamreader:
@@ -386,10 +392,9 @@ class GenericReader(Reader):
         if isinstance(self.decoy_file, (list,)):
             all_decoy = []
             for d_files in self.decoy_file:
-                print(d_files)
                 pdec = []
                 with open(self.decoy_file, 'r') as perc_decoy_file:
-                    print(self.decoy_file)
+                    self.logger.info(self.decoy_file)
                     spamreader = csv.reader(perc_decoy_file, delimiter='\t')
                     fieldnames = self.remap(next(spamreader))
                     for row in spamreader:
@@ -398,7 +403,7 @@ class GenericReader(Reader):
         else:
             pdec = []
             with open(self.decoy_file, 'r') as perc_decoy_file:
-                print(self.decoy_file)
+                self.logger.info(self.decoy_file)
                 spamreader = csv.reader(perc_decoy_file, delimiter='\t')
                 fieldnames = self.remap(next(spamreader))
                 for row in spamreader:
@@ -434,7 +439,7 @@ class GenericReader(Reader):
         # TODO
         # make this for loop a generator...
 
-        print(len(perc_all))
+        self.logger.info("Length of PSM Data: {}".format(len(perc_all)))
         for psm_info in perc_all:
             current_peptide = psm_info[self.PEPTIDE]
             # Define the Psm...
@@ -496,11 +501,13 @@ class GenericReader(Reader):
                     if alt_proteins not in p.possible_proteins:
                         p.possible_proteins.append(alt_proteins)
                 if not current_alt_proteins:
-                    print("Peptide {} was not found in the supplied DB".format(current_peptide))
+                    self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
 
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)
 
         self.psms = list_of_psm_objects
 
-        print(len(self.psms))
+        self.logger.info("Length of PSM Data: {}".format(len(self.psms)))
+
+        self.logger.info('Finished GenericReader.read_psms...')

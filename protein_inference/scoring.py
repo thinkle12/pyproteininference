@@ -10,6 +10,7 @@ import math
 import numpy
 import sys
 from functools import reduce
+from logging import getLogger
 
 class Score(object):
     """
@@ -29,7 +30,7 @@ class Score(object):
         else:
             raise ValueError('scoring input not found in data class - Please run PreScoreQValue of PreScorePepValue from DataStore to run any scoring type')
         self.data_class = data_class
-
+        
     def score_psms(self, score_method="multiplicative_log"):
         if score_method == 'best_peptide_per_protein':
             self.best_peptide_per_protein()
@@ -60,9 +61,11 @@ class Score(object):
 
         Where data is a DataStore Object
          """
+        logger = getLogger('protein_inference.scoring.Score.best_peptide_per_protein')
+
         all_scores = []
 
-        print('Scoring Proteins...')
+        logger.info('Scoring Proteins with BPPP')
         for protein in self.pre_score_data:
             val_list = []
             temp_peps = []
@@ -92,8 +95,10 @@ class Score(object):
 
         Where data is a DataStore Object
          """
+        logger = getLogger('protein_inference.scoring.Score.fishers_method')
+
         all_scores = []
-        print('Scoring Proteins...')
+        logger.info('Scoring Proteins with fishers method')
         for protein in self.pre_score_data:
             val_list = (x['score'] for x in protein.psm_score_dictionary)
             score = -2 * sum([math.log(x) for x in val_list])
@@ -119,11 +124,13 @@ class Score(object):
 
         Where data is a DataStore Object
          """
+        logger = getLogger('protein_inference.scoring.Score.multiplicative_log')
+
         # Instead of making all_scores a list... make it a generator??
 
         all_scores = []
-        print('Scoring Proteins...')
-        print('Using Generators')
+        logger.info('Scoring Proteins with Multiplicative Log Method')
+        logger.info('Using Generators')
         for protein in self.pre_score_data:
             # We create a generator of val_list...
             val_list = (x['score'] for x in protein.psm_score_dictionary)
@@ -157,6 +164,8 @@ class Score(object):
 
         Where data is a DataStore Object
          """
+        logger = getLogger('protein_inference.scoring.Score.down_weighted_multiplicative_log')
+
         score_list = []
         for proteins in self.pre_score_data:
             cur_score_dict = proteins.psm_score_dictionary
@@ -165,7 +174,7 @@ class Score(object):
         score_mean = numpy.mean(score_list)
 
         all_scores = []
-        print('Scoring Proteins...')
+        logger.info('Scoring Proteins with DWML method')
         for protein in self.pre_score_data:
             val_list = [x['score'] for x in protein.psm_score_dictionary]
             # Divide by the score mean raised to the length of the number of unique peptides for the protein
@@ -198,9 +207,11 @@ class Score(object):
 
         Where data is a DataStore Object
          """
+        logger = getLogger('protein_inference.scoring.Score.top_two_combied')
+
 
         all_scores = []
-        print('Scoring Proteins...')
+        logger.info('Scoring Proteins with Top Two Method')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -239,8 +250,10 @@ class Score(object):
 
         Where data is a DataStore Object
          """
+        logger = getLogger('protein_inference.scoring.Score.down_weighted_v2')
+
         all_scores = []
-        print('Scoring Proteins...')
+        logger.info('Scoring Proteins with down weighted v2 method')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -279,8 +292,10 @@ class Score(object):
 
         Where data is a DataStore Object
          """
+        logger = getLogger('protein_inference.scoring.Score.iterative_down_weighted_log')
+
         all_scores = []
-        print('Scoring Proteins...')
+        logger.info('Scoring Proteins with IDWL method')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -321,8 +336,10 @@ class Score(object):
 
         Where data is a DataStore Object
          """
+        logger = getLogger('protein_inference.scoring.Score.geometric_mean_log')
+
         all_scores = []
-        print('Scoring Proteins...')
+        logger.info('Scoring Proteins. with GML method')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -347,8 +364,10 @@ class Score(object):
         """
         The following class is an experimental class essentially used for future development of potential scoring schemes
         """
+        logger = getLogger('protein_inference.scoring.Score.iterative_down_weighted_v2')
+
         all_scores = []
-        print('Scoring Proteins...')
+        logger.info('Scoring Proteins with iterative down weighted v2 method')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:
@@ -375,8 +394,10 @@ class Score(object):
         """
         The following class is an experimental class essentially used for future development of potential scoring schemes
         """
+        logger = getLogger('protein_inference.scoring.Score.additive')
+
         all_scores = []
-        print('Scoring Proteins...')
+        logger.info('Scoring Proteins with additive method')
         for protein in self.pre_score_data:
             val_list = []
             for vals in protein.psm_score_dictionary:

@@ -53,7 +53,7 @@ pep_and_prot_data.read_psms()
 ### STEP 4: Initiate the datastore class ###
 ### STEP 4: Initiate the datastore class ###
 ### STEP 4: Initiate the datastore class ###
-data = protein_inference.datastore.DataStore(pep_and_prot_data)
+data = protein_inference.datastore.DataStore(pep_and_prot_data, digest_class=digest)
 
 ### Step 5: Restrict the PSM data
 ### Step 5: Restrict the PSM data

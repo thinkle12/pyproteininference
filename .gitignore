@@ -78,3 +78,5 @@ piq_output/
 pepxmls/
 percolator_output/
 output/
+glpkinout/
+data/

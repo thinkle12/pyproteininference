@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import math
 from matplotlib.backends.backend_pdf import PdfPages
 from Bio import SeqIO
+from logging import getLogger
 
 class Entrapment(object):
 
@@ -70,6 +71,7 @@ class GeneratePlot(Entrapment):
 
     def execute(self):
 
+        logger = getLogger('protein_inference.entrapment.GeneratePlot.execute')
 
 
         true_handle = SeqIO.parse(self.true_db, 'fasta')
@@ -86,7 +88,7 @@ class GeneratePlot(Entrapment):
         protein_data = [x[0].identifier for x in self.grouped_scored_data]
 
 
-        print('Number of Grouped Proteins = '+str(len(protein_data)))
+        logger.info('Number of Grouped Proteins = '+str(len(protein_data)))
 
 
         false_true_positives = []
@@ -116,10 +118,10 @@ class GeneratePlot(Entrapment):
         # This is with NO Decoys...
         true_to_entrap_ratio = float(len(true_proteins))/float(len(false_true_positives))
         # decoy_to_entrap_ratio = float(len(entrapment_proteins))/float(len(decoy_search_proteins))
-        print("True Proteins Divided by False True Positives "+str(true_to_entrap_ratio))
+        logger.info("True Proteins Divided by False True Positives "+str(true_to_entrap_ratio))
 
-        print('Number of entraped proteins = '+str(len(false_true_positives)))
-        print('Number of decoy proteins = '+str(len(decoys)))
+        logger.info('Number of entraped proteins = '+str(len(false_true_positives)))
+        logger.info('Number of decoy proteins = '+str(len(decoys)))
 
         # #Plot 1
         # plt.plot([0, 1])

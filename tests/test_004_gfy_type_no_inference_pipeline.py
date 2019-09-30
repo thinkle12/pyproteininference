@@ -14,6 +14,7 @@ import protein_inference
 from protein_inference import in_silico_digest
 from protein_inference.parameters import ProteinInferenceParameter
 import os
+import logging
 
 TEST_DATABASE = resource_filename('protein_inference', '../tests/data/test_database.fasta')
 TARGET_FILE = resource_filename('protein_inference', '../tests/data/test_perc_data_target.txt')
@@ -30,6 +31,9 @@ SCORE_INDEX = 1
 Q_VALUE_INDEX = 2
 GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("protein_inference.tests.test_004_gfy_type_no_inference_pipeline.py")
 
 
 class TestLoadNoInferenceWorkflow(TestCase):
@@ -153,7 +157,7 @@ class TestLoadNoInferenceWorkflow(TestCase):
         data.calculate_q_values()
 
         #Print the len of restricted data... which is how many protein groups pass FDR threshold
-        print('Number of Proteins passing an FDR of'+str(protein_inference_parameters.fdr)+' = '+str(len(data.fdr_restricted_grouped_scored_proteins)))
+        logger.info('Number of Proteins passing an FDR of '+str(protein_inference_parameters.fdr)+' = '+str(len(data.fdr_restricted_grouped_scored_proteins)))
 
 
         ### STEP 12: Export to CSV
@@ -161,21 +165,10 @@ class TestLoadNoInferenceWorkflow(TestCase):
         ### STEP 12: Export to CSV
         export_type = protein_inference_parameters.export
         export = protein_inference.export.Export(data_class = data)
-        if 'leads' in export_type:
-            export.csv_export_leads_restricted(filename_out=OUTPUT_DIR + protein_inference_parameters.tag +'_' +'leads' +'_' + data.short_score_method +'_' + data.score + '.csv')
-        if 'all' in export_type:
-            export.csv_export_all_restricted(filename_out=OUTPUT_DIR + protein_inference_parameters.tag +'_' +'all' +'_' + data.short_score_method +'_' + data.score + '.csv')
-        if 'comma_sep' in export_type:
-            export.csv_export_comma_sep_restricted(filename_out=OUTPUT_DIR + protein_inference_parameters.tag +'_' +'comma_sep' +'_' + data.short_score_method +'_' + data.score + '.csv')
-        if 'q_value_comma_sep' in export_type:
-            export.csv_export_q_value_comma_sep(filename_out=OUTPUT_DIR + protein_inference_parameters.tag +'_' +'q_value_comma_sep' +'_' + data.short_score_method +'_' + data.score + '.csv')
-        if 'q_value' in export_type:
-            export.csv_export_q_value_leads(filename_out=OUTPUT_DIR + protein_inference_parameters.tag +'_' +'q_value_leads' +'_' + data.short_score_method +'_' + data.score + '.csv')
-        if 'q_value' in export_type:
-            export.csv_export_q_value_all(filename_out=OUTPUT_DIR + protein_inference_parameters.tag +'_' +'q_value_all' +'_' + data.short_score_method +'_' + data.score + '.csv')
+        export.export_to_csv(directory=OUTPUT_DIR, export_type=export_type)
 
 
-        print('Protein Inference Finished')
+        logger.info('Protein Inference Finished')
 
         lead_output = []
         with open(LEAD_OUTPUT_FILE, 'r') as lead_output_file:

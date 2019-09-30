@@ -11,6 +11,7 @@ from protein_inference import in_silico_digest
 from protein_inference.parameters import ProteinInferenceParameter
 import os
 import argparse
+import logging
 
 
 parser = argparse.ArgumentParser(description='Protein Inference')
@@ -27,6 +28,11 @@ parser.add_argument("-roc","--roc_curve_filename", dest="roc_curve", required=Fa
 parser.add_argument("-ym","--yaml_params", dest="yaml_params", required=False,
                     help="Provide a Protein Inference Yaml Parameter File... If none given, default parameters will be ran", metavar="FILE")
 args = parser.parse_args()
+
+logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger("protein_inference.scripts.Command_Line_PI_Runner_Yaml")
+
 
 ### STEP 1: Load parameter file ###
 ### STEP 1: Load parameter file ###
@@ -107,6 +113,10 @@ if inference_type == "exclusion":
     group = protein_inference.inference.Exclusion(data_class=data, digest_class=digest)
     group.infer_proteins()
 
+if inference_type == "none":
+    group = protein_inference.inference.FirstProtein(data_class=data, digest_class=digest)
+    group.infer_proteins()
+
 ### STEP 11: Run FDR and Q value Calculations
 ### STEP 11: Run FDR and Q value Calculations
 ### STEP 11: Run FDR and Q value Calculations
@@ -114,7 +124,7 @@ data.set_based_fdr(false_discovery_rate=float(protein_inference_parameters.fdr))
 data.calculate_q_values()
 
 #Print the len of restricted data... which is how many protein groups pass FDR threshold
-print('Number of Proteins passing an FDR of'+str(protein_inference_parameters.fdr)+' = '+str(len(data.fdr_restricted_grouped_scored_proteins)))
+logger.info('Number of Proteins passing an FDR of'+str(protein_inference_parameters.fdr)+' = '+str(len(data.fdr_restricted_grouped_scored_proteins)))
 
 
 ### STEP 12: Export to CSV
@@ -122,21 +132,10 @@ print('Number of Proteins passing an FDR of'+str(protein_inference_parameters.fd
 ### STEP 12: Export to CSV
 export_type = protein_inference_parameters.export
 export = protein_inference.export.Export(data_class = data)
-if 'leads' in export_type:
-    export.csv_export_leads_restricted(filename_out=args.dir_name + protein_inference_parameters.tag +'_' +'leads' +'_' + data.short_score_method +'_' + data.score + '.csv')
-if 'all' in export_type:
-    export.csv_export_all_restricted(filename_out=args.dir_name + protein_inference_parameters.tag +'_' +'all' +'_' + data.short_score_method +'_' + data.score + '.csv')
-if 'comma_sep' in export_type:
-    export.csv_export_comma_sep_restricted(filename_out=args.dir_name + protein_inference_parameters.tag +'_' +'comma_sep' +'_' + data.short_score_method +'_' + data.score + '.csv')
-if 'q_value_comma_sep' in export_type:
-    export.csv_export_q_value_comma_sep(filename_out=args.dir_name + protein_inference_parameters.tag +'_' +'q_value_comma_sep' +'_' + data.short_score_method +'_' + data.score + '.csv')
-if 'q_value' in export_type:
-    export.csv_export_q_value_leads(filename_out=args.dir_name + protein_inference_parameters.tag +'_' +'q_value_leads' +'_' + data.short_score_method +'_' + data.score + '.csv')
-if 'q_value_all' in export_type:
-    export.csv_export_q_value_all(filename_out=args.dir_name + protein_inference_parameters.tag +'_' +'q_value_all' +'_' + data.short_score_method +'_' + data.score + '.csv')
+export.export_to_csv(directory=args.dir_name, export_type=export_type)
 
 
-print('Protein Inference Finished')
+logger.info('Protein Inference Finished')
 
 
 

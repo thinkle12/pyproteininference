@@ -22,7 +22,7 @@ PARAMETER_FILE = resource_filename('protein_inference', '../tests/data/test_para
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('protein_inference', '../tests/output/')
 GLPKINOUT_PATH = resource_filename('protein_inference', '../tests/glpkinout/')
-SKIP_RUNNING_GLPK = True # TODO if we skip running glpk the test fails...
+SKIP_RUNNING_GLPK = True
 
 LEAD_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/test_parsimony_q_value_leads_ml_posterior_error_prob.csv')
 ALL_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/test_parsimony_q_value_all_ml_posterior_error_prob.csv')

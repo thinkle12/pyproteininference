@@ -520,6 +520,11 @@ class Parsimony(Inference):
         unique_prots = list(set(plist).union())
         unique_protein_set = set(unique_prots)
 
+        unique_prots_sorted = [x for x in identifiers_sorted if x in unique_prots]
+
+        if len(unique_prots)!=len(unique_prots_sorted):
+            raise ValueError("Sorted proteins length is not equal to unsorted length...")
+
         # Here we get a subset of the unique proteins
         # Where the peptides from the protein cannot be a subset of the peptides from any other protein that has already been added to the list...
         # unique_prots_restricted = []
@@ -550,9 +555,9 @@ class Parsimony(Inference):
         # For all the unique proteins from the search create a number to protein dictionary and a protein to number dictionary
         # Here we essentially assign a number to each protein
         # This is important as the glpk analysis just treats proteins as numbers...
-        for p in range(len(unique_prots)):
-            dd_num[unique_prots[p]].append(p)
-            dd_prot_nums[p].append(unique_prots[p])
+        for p in range(len(unique_prots_sorted)):
+            dd_num[unique_prots_sorted[p]].append(p)
+            dd_prot_nums[p].append(unique_prots_sorted[p])
 
         # Store this data as glpk_protein_number_dictionary and glpk_number_protein_dictionary
         # The numbers are important as they are used in the GLPK input and we need to know what number in the GLPK output corresponds with which protein from the search
@@ -574,7 +579,7 @@ class Parsimony(Inference):
         # s.t. c2: y[14145]+y[4857]+y[4858]+y[10143]+y[2966] >=1;
         # s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1;
         # Each of the lines (constants, c1,c2,c3) is a peptide and each of the y[x] is a protein
-        tot_peps = list(flat_peptides_in_data)
+        tot_peps = list(set(flat_peptides_in_data)) # Sort peptides alphabetically first...
         for j in range(len(tot_peps)):
             combine = ['y[' + str(dd_num[x][0]) + ']' for x in sorted(pep_prot_dict[tot_peps[j]]) if
                        x in unique_protein_set]

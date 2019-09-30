@@ -15,6 +15,13 @@ class Score(object):
     """
     Parent Score class for all scoring subset classes
     """
+
+    SCORE_METHODS = ['best_peptide_per_protein', 'iterative_downweighted_log',
+                     'multiplicative_log', 'downweighted_multiplicative_log',
+                     'downweighted_version2', 'top_two_combined', 'geometric_mean',
+                     'additive']
+
+    SCORE_TYPES = ['multiplicative', 'additive']
     
     def __init__(self,data_class):
         if data_class.scoring_input:

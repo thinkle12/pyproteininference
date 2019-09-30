@@ -15,6 +15,8 @@ from protein_inference.physical import ProteinGroup
 from protein_inference.physical import Psm
 import re
 from collections import OrderedDict
+from logging import getLogger
+
 
 class Inference(object):
     """
@@ -29,7 +31,11 @@ class Inference(object):
 
     def run_inference(self, data_class, digest_class):
 
+        logger = getLogger('protein_inference.inference.Inference.run_inference')
+
         inference_type = data_class.parameter_file_object.inference_type
+
+        logger.info("Running Inference with Inference Type: {}".format(inference_type))
 
         # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == 'parsimony':
@@ -50,6 +56,11 @@ class Inference(object):
 
     def _group_by_peptides(self, scored_data, data_class, digest_class, inference_type="parsimony", lead_protein_objects=None, grouping_type="shared_peptides"):
 
+        logger = getLogger('protein_inference.inference.Inference._group_by_peptides')
+
+        logger.info("Grouping Peptides with Grouping Type: {}".format(grouping_type))
+        logger.info("Grouping Peptides with Inference Type: {}".format(inference_type))
+
         scored_data = sorted(scored_data, key=lambda k: len(k.raw_peptides), reverse=True)
 
         if inference_type== "parsimony":
@@ -69,7 +80,6 @@ class Inference(object):
         list_of_prots_not_in_db = []
         list_of_peps_not_in_db = []
         missing_proteins = set()
-        print('Grouping Proteins by Subsetting...')
         in_silico_peptides_to_proteins = digest_class.peptide_to_protein_dictionary
         grouped_proteins = []
         for protein_objects in scored_proteins:
@@ -96,7 +106,7 @@ class Inference(object):
                         if not potential_protein_list:
                             list_of_prots_not_in_db.append(peptide)
                             list_of_peps_not_in_db.append(protein_objects.identifier)
-                            print('Protein ' + str(protein_objects.identifier) + ' and Peptide ' + str(
+                            logger.warning('Protein ' + str(protein_objects.identifier) + ' and Peptide ' + str(
                                 peptide) + ' is not in database...')
                         # Assign proteins to groups based on shared peptide... unless the protein is equivalent to the current identifier
                         for protein in potential_protein_list:
@@ -121,7 +131,7 @@ class Inference(object):
                                     else:
                                         pass
                                 except ValueError:
-                                    print("Protein from DB {} not found with protein finder for peptide {}".format(protein,
+                                    logger.warning("Protein from DB {} not found with protein finder for peptide {}".format(protein,
                                                                                                                    peptide))
                                     missing_proteins.add(protein)
 
@@ -143,6 +153,8 @@ class Inference(object):
         return (return_dict)
 
     def _apply_protein_group_ids(self, grouped_protein_objects, data_class, digest_class):
+        logger = getLogger('protein_inference.inference.Inference._apply_protein_group_ids')
+
         sp_protein_set = set(digest_class.swiss_prot_protein_set)
 
         prot_pep_dict = data_class.protein_to_peptide_dictionary()
@@ -154,7 +166,7 @@ class Inference(object):
             protein_list = []
             group_id = group_id + 1
             pg = ProteinGroup(group_id)
-            print(str(group_id))
+            logger.info("Created Protein Group with ID: {}".format(str(group_id)))
             for protein in protein_group:
                 cur_protein = protein
                 # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
@@ -179,6 +191,8 @@ class Inference(object):
         return(return_dict)
 
     def _swissprot_and_isoform_override(self, scored_data, grouped_proteins, data_class, digest_class, override_type="soft", isoform_override=True):
+        logger = getLogger('protein_inference.inference.Inference._swissprot_and_isoform_override')
+
         sp_protein_set = set(digest_class.swiss_prot_protein_set)
         scored_proteins = list(scored_data)
         protein_finder = [x.identifier for x in scored_proteins]
@@ -193,7 +207,7 @@ class Inference(object):
             higher_or_lower = data_class.high_low_better
 
 
-        print('Applying Group IDs... and Executing {} Swissprot Override...'.format(override_type))
+        logger.info('Applying Group IDs... and Executing {} Swissprot Override...'.format(override_type))
         # Here we create group ID's for all groups and do some sorting
         scores_grouped = []
         group_id = 0
@@ -205,7 +219,7 @@ class Inference(object):
             group_id = group_id + 1
             # Make a protein group
             pg = ProteinGroup(group_id)
-            print(str(group_id))
+            logger.info("Created Protein Group with ID: {}".format(str(group_id)))
             for prots in protein_group:
                 # Loop over all proteins in the original group
                 try:
@@ -261,13 +275,13 @@ class Inference(object):
                                 # We need this syntax so we can switch the location of the unreviewed lead identifier with the best reviewed identifier in scores_grouped
                                 swiss_prot_override_index = scores_grouped[-1].index(best_swiss_prot_prot)
                                 cur_tr_lead = scores_grouped[-1][0]
-                                print(cur_tr_lead.identifier)
+                                logger.info(cur_tr_lead.identifier)
                                 scores_grouped[-1][0], scores_grouped[-1][swiss_prot_override_index] = scores_grouped[-1][
                                                                                                            swiss_prot_override_index], \
                                                                                                        scores_grouped[-1][0]
                                 scores_grouped[-1][swiss_prot_override_index], scores_grouped[-1][0]
                                 new_sp_lead = scores_grouped[-1][0]
-                                print(new_sp_lead.identifier)
+                                logger.info(new_sp_lead.identifier)
                                 lead_replaced_prot_pairs.append([cur_tr_lead, new_sp_lead])
                                 # Append new_sp_lead protein to leads, to make sure we dont repeat leads
                                 leads.add(new_sp_lead.identifier)
@@ -283,11 +297,11 @@ class Inference(object):
                                 # We need this syntax so we can switch the location of the unreviewed lead identifier with the best reviewed identifier in scores_grouped
                                 swiss_prot_override_index = scores_grouped[-1].index(best_swiss_prot_prot)
                                 cur_tr_lead = scores_grouped[-1][0]
-                                print(cur_tr_lead.identifier)
+                                logger.info(cur_tr_lead.identifier)
                                 scores_grouped[-1][0], scores_grouped[-1][swiss_prot_override_index] = \
                                 scores_grouped[-1][swiss_prot_override_index], scores_grouped[-1][0]
                                 new_sp_lead = scores_grouped[-1][0]
-                                print(new_sp_lead.identifier)
+                                logger.info(new_sp_lead.identifier)
                                 lead_replaced_prot_pairs.append([cur_tr_lead, new_sp_lead])
                                 # Append new_sp_lead protein to leads, to make sure we dont repeat leads
                                 leads.add(new_sp_lead.identifier)
@@ -310,13 +324,13 @@ class Inference(object):
                                     protein_list[0].peptides).issubset(set(isoform_override.peptides)):
                                 isoform_override_index = scores_grouped[-1].index(isoform_override)
                                 cur_iso_lead = scores_grouped[-1][0]
-                                print(cur_iso_lead.identifier)
+                                logger.info(cur_iso_lead.identifier)
                                 scores_grouped[-1][0], scores_grouped[-1][isoform_override_index] = scores_grouped[-1][
                                                                                                         isoform_override_index], \
                                                                                                     scores_grouped[-1][0]
                                 scores_grouped[-1][isoform_override_index], scores_grouped[-1][0]
                                 new_iso_lead = scores_grouped[-1][0]
-                                print(new_iso_lead.identifier)
+                                logger.info(new_iso_lead.identifier)
                                 lead_replaced_prot_pairs.append([cur_iso_lead, new_iso_lead])
                                 leads.add(protein_list[0].identifier)
 
@@ -329,6 +343,8 @@ class Inference(object):
 
 
     def _reassign_leads(self, list_of_group_objects, data_class):
+
+        logger = getLogger('protein_inference.inference.Inference._reassign_leads')
 
         # Get the higher or lower variable
         if not data_class.high_low_better:
@@ -344,7 +360,7 @@ class Inference(object):
         # protein c maps to a bunch of peptides and peptide 3
         # Therefore, in the model proteins a and b are equivalent in that they map to 2 peptides together - 1 and 2. peptide 3 maps to a but also to c...
         # Sometimes the model (glpk) will spit out protein b as the lead... we wish to swap protein b as the lead with protein a because it will likely have a better score...
-        print('Potentially Reassigning leads...')
+        logger.info('Potentially Reassigning leads...')
         lead_protein_set = set([x.proteins[0].identifier for x in list_of_group_objects])
         for i in range(len(list_of_group_objects)):
             for j in range(1, len(list_of_group_objects[i].proteins)):  # Loop over all sub proteins in the group...
@@ -353,18 +369,18 @@ class Inference(object):
                 old_lead = list_of_group_objects[i].proteins[0]
                 if higher_or_lower == 'higher':
                     if set(old_lead.peptides).issubset(set(new_lead.peptides)) and new_lead.identifier not in lead_protein_set and old_lead.score <= new_lead.score and len(old_lead.peptides) < len(new_lead.peptides):
-                        print('protein {} will replace protein {} as lead, with index {}, New Num Peptides: {}, Old Num Peptides: {}'.format(str(new_lead.identifier),str(old_lead.identifier),str(j),str(len(new_lead.peptides)),str(len(old_lead.peptides))))
+                        logger.info('protein {} will replace protein {} as lead, with index {}, New Num Peptides: {}, Old Num Peptides: {}'.format(str(new_lead.identifier),str(old_lead.identifier),str(j),str(len(new_lead.peptides)),str(len(old_lead.peptides))))
                         lead_protein_set.add(new_lead.identifier)
                         lead_protein_set.remove(old_lead.identifier)
                         # Swap their positions in the list
                         list_of_group_objects[i].proteins[0], list_of_group_objects[i].proteins[j] = new_lead, old_lead
-                        print(j)
+                        logger.info(j)
                         break
 
 
                 if higher_or_lower == 'lower':
                     if set(old_lead.peptides).issubset(set(new_lead.peptides)) and new_lead.identifier not in lead_protein_set and old_lead.score >= new_lead.score and len(old_lead.peptides) < len(new_lead.peptides):
-                        print('protein {} will replace protein {} as lead, with index {}, New Num Peptides: {}, Old Num Peptides: {}'.format(str(new_lead.identifier),str(old_lead.identifier),str(j),str(len(new_lead.peptides)),str(len(old_lead.peptides))))
+                        logger.info('protein {} will replace protein {} as lead, with index {}, New Num Peptides: {}, Old Num Peptides: {}'.format(str(new_lead.identifier),str(old_lead.identifier),str(j),str(len(new_lead.peptides)),str(len(old_lead.peptides))))
                         lead_protein_set.add(new_lead.identifier)
                         lead_protein_set.remove(old_lead.identifier)
                         # Swap their positions in the list
@@ -385,6 +401,8 @@ class Inclusion(Inference):
 
     def infer_proteins(self):
 
+        logger = getLogger('protein_inference.inference.Inclusion.infer_proteins')
+
         group_dict = self._group_by_peptides(scored_data=self.scored_data, data_class=self.data_class,
                                              digest_class=self.digest_class, inference_type="inclusion", grouping_type=self.data_class.parameter_file_object.grouping_type)
 
@@ -400,14 +418,14 @@ class Inclusion(Inference):
         else:
             higher_or_lower = self.data_class.high_low_better
 
-        print("Applying Group ID's for the Inclusion Method")
+        logger.info("Applying Group ID's for the Inclusion Method")
         regrouped_proteins = self._apply_protein_group_ids(grouped_protein_objects = grouped_proteins,
                                                            data_class = self.data_class, digest_class = self.digest_class)
 
         scores_grouped = regrouped_proteins["scores_grouped"]
         list_of_group_objects = regrouped_proteins["group_objects"]
 
-        print('Sorting Results based on lead Protein Score')
+        logger.info('Sorting Results based on lead Protein Score')
         if higher_or_lower == 'lower':
             scores_grouped = sorted(scores_grouped, key=lambda k: (float(k[0].score), -float(k[0].num_peptides)), reverse=False)
             list_of_group_objects = sorted(list_of_group_objects, key=lambda k: (float(k.proteins[0].score), -float(k.proteins[0].num_peptides)),
@@ -431,6 +449,8 @@ class Exclusion(Inference):
         self.lead_protein_set = None
 
     def infer_proteins(self):
+        logger = getLogger('protein_inference.inference.Exclusion.infer_proteins')
+
         group_dict = self._group_by_peptides(scored_data=self.scored_data, data_class=self.data_class,
                                              digest_class=self.digest_class, inference_type="exclusion", grouping_type=self.data_class.parameter_file_object.grouping_type)
 
@@ -444,14 +464,14 @@ class Exclusion(Inference):
         else:
             higher_or_lower = self.data_class.high_low_better
 
-        print("Applying Group ID's for the Exclusion Method")
+        logger.info("Applying Group ID's for the Exclusion Method")
         regrouped_proteins = self._apply_protein_group_ids(grouped_protein_objects=grouped_proteins,
                                                            data_class=self.data_class, digest_class=self.digest_class)
 
         scores_grouped = regrouped_proteins["scores_grouped"]
         list_of_group_objects = regrouped_proteins["group_objects"]
 
-        print('Sorting Results based on lead Protein Score')
+        logger.info('Sorting Results based on lead Protein Score')
         if higher_or_lower == 'lower':
             scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
             list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
@@ -488,6 +508,7 @@ class Parsimony(Inference):
         s.t. c2: y[14145]+y[4857]+y[4858]+y[10143]+y[2966] >=1;
         s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1
         """
+
         # Here we get the peptide to protein dictionary
         pep_prot_dict = self.data_class.peptide_to_protein_dictionary()
 
@@ -632,23 +653,25 @@ class Parsimony(Inference):
 
         Important output of this class is the glpk output solution file to be used in protein_inference.grouping.GlpkGrouper
         """
+        logger = getLogger('protein_inference.inference.Parsimony._glpk_runner')
+
         #If there is no file_override (mainly for offline testing)
         #Run GLPK with the following command
         if not skip_running:
             p = subprocess.Popen(str(path_to_glpsol)+' -m '+str(glpkin)+' -o '+str(glpkout), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             output = p.communicate()
 
-            print('Start Command line Stdout')
-            print(output[0])
-            print('End Command line Stdout')
-            print('Start Command line Stderr')
-            print(output[1])
-            print('End Command line Stderr')
+            logger.info('Start Command line Stdout')
+            logger.info(output[0])
+            logger.info('End Command line Stdout')
+            logger.info('Start Command line Stderr')
+            logger.info(output[1])
+            logger.info('End Command line Stderr')
 
             if output[0]=='':
                 raise ValueError('Glpk did not produce any output... See potential error output above')
         else:
-            print("Not running GLPK, File {} will be used downstream in grouping".format(glpkout))
+            logger.info("Not running GLPK, File {} will be used downstream in grouping".format(glpkout))
 
 
 
@@ -683,6 +706,8 @@ class Parsimony(Inference):
         This setting is not recommended given that you can potentially lose out on Unique peptides
 
         """
+        logger = getLogger('protein_inference.inference.Parsimony._glpk_grouper')
+
         scored_data = data_class.get_protein_data()
 
 
@@ -714,7 +739,6 @@ class Parsimony(Inference):
         binary = [x[3] for x in newlist]
 
         self.numbers = numbers
-        print(numbers)
 
         # Here we extract out the lead proteins...
         lead_proteins = []
@@ -724,12 +748,12 @@ class Parsimony(Inference):
                     passing_protein_number = int(numbers[k])
                     lead_proteins.append(dd_prot_nums[passing_protein_number][0])
                 except IndexError:
-                    print("No Protein for Protein Number" + str(passing_protein_number))
+                    logger.warning("No Protein for Protein Number" + str(passing_protein_number))
 
         lead_protein_set = set(lead_proteins)
         self.lead_protein_set = lead_protein_set
 
-        print('Number of lead proteins = ' + str(len(lead_proteins)))
+        logger.info('Number of lead proteins = ' + str(len(lead_proteins)))
 
         scored_proteins = list(scored_data)
         protein_finder = [x.identifier for x in scored_proteins]
@@ -744,7 +768,7 @@ class Parsimony(Inference):
                 lead_protein_identifiers.append(protein_object.identifier)
             else:
                 # Why are some proteins not being found when we run exclusion???
-                print("Protein {} not found with protein finder...".format(proteins))
+                logger.warning("Protein {} not found with protein finder...".format(proteins))
 
         self.lead_protein_objects = lead_protein_objects
 
@@ -779,7 +803,7 @@ class Parsimony(Inference):
         else:
             higher_or_lower = self.data_class.high_low_better
 
-        print('Sorting Results based on lead Protein Score')
+        logger.info('Sorting Results based on lead Protein Score')
         if higher_or_lower == 'lower':
             scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
             list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
@@ -791,7 +815,7 @@ class Parsimony(Inference):
 
         list_of_group_objects = self._reassign_leads(list_of_group_objects, data_class=self.data_class)
 
-        print('Re Sorting Results based on lead Protein Score')
+        logger.info('Re Sorting Results based on lead Protein Score')
         if higher_or_lower == 'lower':
             scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
             list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
@@ -806,10 +830,12 @@ class Parsimony(Inference):
 
     def infer_proteins(self, glpkinout_directory = "glpkinout/", skip_running_glpk = False):
 
+        logger = getLogger('protein_inference.inference.Parsimony.infer_proteins')
+
         try:
             os.mkdir(glpkinout_directory)
         except OSError:
-            print("Directory {} cannot be created or already exists".format(glpkinout_directory))
+            logger.warning("Directory {} cannot be created or already exists".format(glpkinout_directory))
 
         self._setup_glpk(glpkin_filename=os.path.join(glpkinout_directory,'glpkin_' + self.parameter_file_object.tag + '.mod'))
 
@@ -833,6 +859,9 @@ class FirstProtein(Inference):
         self.lead_protein_set = None
 
     def infer_proteins(self):
+
+        logger = getLogger('protein_inference.inference.FirstProtein.infer_proteins')
+
         group_dict = self._group_by_peptides(scored_data=self.scored_data, data_class=self.data_class,
                                              digest_class=self.digest_class, inference_type="none", grouping_type=self.data_class.parameter_file_object.grouping_type)
 
@@ -846,14 +875,14 @@ class FirstProtein(Inference):
         else:
             higher_or_lower = self.data_class.high_low_better
 
-        print("Applying Group ID's for the Exclusion Method")
+        logger.info("Applying Group ID's for the First Protein Method")
         regrouped_proteins = self._apply_protein_group_ids(grouped_protein_objects=grouped_proteins,
                                                            data_class=self.data_class, digest_class=self.digest_class)
 
         scores_grouped = regrouped_proteins["scores_grouped"]
         list_of_group_objects = regrouped_proteins["group_objects"]
 
-        print('Sorting Results based on lead Protein Score')
+        logger.info('Sorting Results based on lead Protein Score')
         if higher_or_lower == 'lower':
             scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
             list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),

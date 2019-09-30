@@ -6,12 +6,11 @@ Created on Mon Dec  4 14:15:15 2017
 @author: hinklet
 """
 
-import collections 
-from protein_inference.physical import Protein
-import yaml
-import re
-from collections import OrderedDict
+import collections
 from Bio import SeqIO
+from logging import getLogger
+from protein_inference.physical import Protein
+
 
 
 
@@ -78,6 +77,8 @@ class DataStore(object):
                              "posterior_error_prob":"pepvalue",
                              "posterior_error_probability":"pepvalue"}
         self.CUSTOM_SCORE_KEY = "custom_score"
+
+        self.logger = getLogger('protein_inference.datastore.DataStore')
 
         # Run Checks and Validations
         self.validate_psm_data()
@@ -181,14 +182,17 @@ class DataStore(object):
         return(protein_psm_score_dictionary)
 
     def restrict_psm_data(self,parameter_file_object):
-        print('restricting data')
+
+        logger = getLogger('protein_inference.datastore.DataStore.restrict_psm_data')
+
+        logger.info('Restricting PSM data')
 
         peptide_length = parameter_file_object.restrict_peptide_length
         posterior_error_prob_threshold = parameter_file_object.restrict_pep
         q_value_threshold = parameter_file_object.restrict_q
 
         main_psm_data = self.main_data_form
-        print('Length of main data: ' + str(len(self.main_data_form)))
+        logger.info('Length of main data: ' + str(len(self.main_data_form)))
         # If restrict_main_data is called, we automatically discard everything that has a PEP of 1
         main_psm_data = [x for x in main_psm_data if x.pepvalue != 1]
 
@@ -251,11 +255,15 @@ class DataStore(object):
 
         self.main_data_restricted = restricted_data
 
-        print('Length of restricted data: ' + str(len(restricted_data)))
+        logger.info('Length of restricted data: ' + str(len(restricted_data)))
 
         self.restricted_peptides = [x.identifier.split('.')[1] for x in restricted_data]
     
     def create_scoring_input(self, score_input="posterior_error_prob"):
+
+        logger = getLogger('protein_inference.datastore.DataStore.create_scoring_input')
+
+        logger.info("Creating Scoring Input")
         psm_data = self.get_psm_data()
 
         protein_psm_score_dictionary = collections.defaultdict(list)
@@ -322,6 +330,10 @@ class DataStore(object):
         return(dd_peps)
         
     def higher_or_lower(self):
+
+        logger = getLogger('protein_inference.datastore.DataStore.higher_or_lower')
+
+        logger.info("Determining If a higher or lower score is better based on scored proteins")
         worst_score = self.scored_proteins[-1].score
         best_score = self.scored_proteins[0].score
 
@@ -331,8 +343,8 @@ class DataStore(object):
         if float(best_score) < float(worst_score):
             higher_or_lower = 'lower'
 
-        print('best score = ' + str(best_score))
-        print('worst score = ' + str(worst_score))
+        logger.info('best score = ' + str(best_score))
+        logger.info('worst score = ' + str(worst_score))
 
         if best_score == worst_score:
             raise ValueError(
@@ -406,7 +418,9 @@ class DataStore(object):
 
     def exclude_non_distinguishing_peptides(self, digest_class, protein_subset_type = "hard"):
 
-        print('Applying Exclusion Model')
+        logger = getLogger('protein_inference.datastore.DataStore.exclude_non_distinguishing_peptides')
+
+        logger.info('Applying Exclusion Model')
 
         our_proteins_sorted = self.get_sorted_identifiers(digest_class=digest_class, scored=False)
 
@@ -427,7 +441,7 @@ class DataStore(object):
         sets = [frozenset(e) for e in peptides]
         # Find a way to sort this list of sets...
         # We can sort the sets if we sort proteins from above...
-        print(str(len(sets)) + ' number of peptide sets')
+        logger.info(str(len(sets)) + ' number of peptide sets')
         us = set()
         i = 0
         # Get all peptide sets that are not a subset...
@@ -439,9 +453,9 @@ class DataStore(object):
             else:
                 us.add(e)
             if i % 10000 == 0:
-                print("Parsed {} Peptide Sets".format(i))
+                logger.info("Parsed {} Peptide Sets".format(i))
 
-        print("Parsed {} Peptide Sets".format(i))
+        logger.info("Parsed {} Peptide Sets".format(i))
 
         # Get their index from peptides which is the initial list of sets...
         list_of_indeces = []
@@ -453,12 +467,12 @@ class DataStore(object):
 
         self.non_subset_proteins = non_subset_proteins
 
-        print("Removing direct subset Proteins from the data")
+        logger.info("Removing direct subset Proteins from the data")
         # Remove all proteins from scoring input that are a subset of another protein...
         self.scoring_input = [x for x in self.scoring_input if
                                          x.identifier in non_subset_proteins]
 
-        print(str(len(self.scoring_input)) + ' proteins in scoring input after removing subset proteins')
+        logger.info(str(len(self.scoring_input)) + ' proteins in scoring input after removing subset proteins')
 
         # For all the proteins that are not a complete subset of another protein...
         # Get the raw peptides...
@@ -503,9 +517,9 @@ class DataStore(object):
             current_score_input[j].raw_peptides = new_raw_peptides
 
             if k % 10000 == 0:
-                print("Redefined {} Peptide Sets".format(k))
+                logger.info("Redefined {} Peptide Sets".format(k))
 
-        print("Redefined {} Peptide Sets".format(j))
+        logger.info("Redefined {} Peptide Sets".format(j))
 
         filtered_score_input = [x for x in current_score_input if x.psm_score_dictionary]
 
@@ -523,6 +537,11 @@ class DataStore(object):
 
 
     def protein_picker(self):
+
+        logger = getLogger('protein_inference.datastore.DataStore.protein_picker')
+
+        logger.info("Running Protein Picker")
+
         # Use higher or lower class to determine if a higher protein score or lower protein score is better based on the scoring method used
         higher_or_lower = self.higher_or_lower()
         # Here we determine if a lower or higher score is better
@@ -539,14 +558,14 @@ class DataStore(object):
 
         # Create a list of all the proteins from the scored data
         all_proteins = [x.identifier for x in self.scored_proteins]
-        print(str(len(all_proteins)) + ' proteins scored')
+        logger.info(str(len(all_proteins)) + ' proteins scored')
 
         total_targets = []
         total_decoys = []
         decoys_removed = []
         targets_removed = []
         # Loop over all decoys identified in the search
-        print('Picking Proteins...')
+        logger.info('Picking Proteins...')
         for i in range(len(decoy_proteins)):
             cur_decoy_index = all_proteins.index(decoy_proteins[i])
             cur_decoy_protein_object = self.scored_proteins[cur_decoy_index]
@@ -584,12 +603,12 @@ class DataStore(object):
             except ValueError:
                 pass
 
-        print(str(len(total_decoys)) + ' total decoy proteins')
-        print(str(len(total_targets)) + ' matching target proteins also found in search')
-        print(str(len(decoys_removed)) + ' decoy proteins to be removed')
-        print(str(len(targets_removed)) + ' target proteins to be removed')
+        logger.info(str(len(total_decoys)) + ' total decoy proteins')
+        logger.info(str(len(total_targets)) + ' matching target proteins also found in search')
+        logger.info(str(len(decoys_removed)) + ' decoy proteins to be removed')
+        logger.info(str(len(targets_removed)) + ' target proteins to be removed')
 
-        print('Removing Lower Scoring Proteins...')
+        logger.info('Removing Lower Scoring Proteins...')
         picked_list = []
         removed_proteins = []
         for protein_objects in self.scored_proteins:
@@ -599,7 +618,7 @@ class DataStore(object):
                 removed_proteins.append(protein_objects)
         self.picked_proteins_scored = picked_list
         self.picked_proteins_removed = removed_proteins
-        print('Finished Removing Proteins')
+        logger.info('Finished Removing Proteins')
 
     def set_based_fdr(self, false_discovery_rate = 0.01, regular=True):
         """
@@ -610,6 +629,9 @@ class DataStore(object):
 
         FDR is calculated As (2*decoys)/total
         """
+
+        logger = getLogger('protein_inference.datastore.DataStore.set_based_fdr')
+
         # pick out the lead scoring protein for each group... lead score is at 0 position
         lead_score = [x[0] for x in self.grouped_scored_proteins]
         # Now pick out only the lead protein identifiers
@@ -649,12 +671,12 @@ class DataStore(object):
             if int(groups[0].num_peptides) == 1:
                 onehitwonders.append(groups[0])
 
-        print('Protein Group leads that pass with more than 1 PSM with a ' + str(
+        logger.info('Protein Group leads that pass with more than 1 PSM with a ' + str(
             false_discovery_rate) + ' FDR = ' + str(len(fdr_restricted_set) - len(onehitwonders)))
-        print('Protein Group lead One hit Wonders that pass ' + str(false_discovery_rate) + ' FDR = ' + str(
+        logger.info('Protein Group lead One hit Wonders that pass ' + str(false_discovery_rate) + ' FDR = ' + str(
             len(onehitwonders)))
 
-        print('Number of Protein groups that pass a ' + str(false_discovery_rate * 100) + ' percent FDR: ' + str(
+        logger.info('Number of Protein groups that pass a ' + str(false_discovery_rate * 100) + ' percent FDR: ' + str(
             len(fdr_restricted_set)))
         self.fdr_restricted_grouped_scored_proteins = fdr_restricted_set
 
@@ -668,6 +690,11 @@ class DataStore(object):
 
         Q values are calculated As (2*decoys)/total
         """
+
+        logger = getLogger('protein_inference.datastore.DataStore.calculate_q_values')
+
+        logger.info("Calculating Q values from the protein group objects")
+
         #pick out the lead scoring protein for each group... lead score is at 0 position
         lead_score = [x.proteins[0] for x in self.protein_group_objects]
         #Now pick out only the lead protein identifiers
@@ -698,6 +725,7 @@ class DataStore(object):
         for k in range(len(self.protein_group_objects)):
             self.protein_group_objects[k].q_value = qvalue_list[k]
 
+        logger.info("Finished Q value Calculation")
 
 
     def entrapment_fdr(self, true_database, false_discovery_rate=.05):
@@ -713,6 +741,8 @@ class DataStore(object):
         Entrapment DB would be target proteins known to NOT be in the sample. However, these entrapped proteins should be in the main database that
         the search was searched against via comet/mascot
         """
+
+        logger = getLogger('protein_inference.datastore.DataStore.entrapment_fdr')
 
         true_handle = SeqIO.parse(true_database, 'fasta')
         true_proteins = []
@@ -750,7 +780,7 @@ class DataStore(object):
             # Delete first entry (worst score) every time we go through a cycle
             fdr = (entraped) / (float(total))
             fdr_list.append(fdr)
-            print(fdr)
+            # print(fdr)
             if fdr < false_discovery_rate:
                 break
             else:
@@ -768,13 +798,13 @@ class DataStore(object):
             if int(groups[0].num_peptides) == 1:
                 onehitwonders.append(groups[0])
 
-        print('Protein Group leads that pass with more than 1 PSM with a ' + str(
+        logger.info('Protein Group leads that pass with more than 1 PSM with a ' + str(
             false_discovery_rate) + ' Entrapment FDR = ' + str(len(fdr_restricted_set) - len(onehitwonders)))
-        print('Protein Group lead One hit Wonders that pass ' + str(
+        logger.info('Protein Group lead One hit Wonders that pass ' + str(
             false_discovery_rate) + ' Entrapment FDR = ' + str(
             len(onehitwonders)))
 
-        print(
+        logger.info(
             'Number of Protein groups that pass a ' + str(false_discovery_rate * 100) + ' Entrapment FDR: ' + str(
                 len(fdr_restricted_set)))
         self.fdr_restricted_grouped_scored_proteins = fdr_restricted_set
@@ -799,64 +829,76 @@ class DataStore(object):
 
 
     def _check_data_digest_overlap_psms(self, digest_class):
+        logger = getLogger('protein_inference.datastore.DataStore._check_data_digest_overlap_psms')
+
         ## TODO write a function here that looks at the peptides we have and checks how many of these peptides we do not find in our Digest...
         peptides = [x.identifier.split(".")[1] for x in self.main_data_form]
         peptides_in_digest = set(digest_class.peptide_to_protein_dictionary.keys())
         peptides_from_search_in_digest = [x for x in peptides if x in peptides_in_digest]
         percentage = float(len(peptides))/float(len(peptides_from_search_in_digest))
-        print("{} PSMs identified from input files".format(len(peptides)))
-        print("{} PSMs identified from input files that are also present in database digestion".format(len(peptides_from_search_in_digest)))
-        print("{} percent of PSMs identified from input files that are also present in database digestion".format(percentage))
+        logger.info("{} PSMs identified from input files".format(len(peptides)))
+        logger.info("{} PSMs identified from input files that are also present in database digestion".format(len(peptides_from_search_in_digest)))
+        logger.info("{} percent of PSMs identified from input files that are also present in database digestion".format(percentage))
 
     def _check_data_digest_overlap_proteins(self, digest_class):
+        logger = getLogger('protein_inference.datastore.DataStore._check_data_digest_overlap_proteins')
+
         proteins = [x.possible_proteins for x in self.main_data_form]
         flat_proteins = set([item for sublist in proteins for item in sublist])
         proteins_in_digest = set(digest_class.protein_to_peptide_dictionary.keys())
         proteins_from_search_in_digest = [x for x in flat_proteins if x in proteins_in_digest]
         percentage = float(len(flat_proteins))/float(len(proteins_from_search_in_digest))
-        print("{} proteins identified from input files".format(len(flat_proteins)))
-        print("{} proteins identified from input files that are also present in database digestion".format(len(proteins_from_search_in_digest)))
-        print("{} percent of proteins identified from input files that are also present in database digestion".format(percentage))
+        logger.info("{} proteins identified from input files".format(len(flat_proteins)))
+        logger.info("{} proteins identified from input files that are also present in database digestion".format(len(proteins_from_search_in_digest)))
+        logger.info("{} percent of proteins identified from input files that are also present in database digestion".format(percentage))
 
     def _check_target_decoy_split(self, digest_class):
+        logger = getLogger('protein_inference.datastore.DataStore._check_target_decoy_split')
+
         # Check the number of targets vs the number of decoys from the digest
         targets = [x for x in digest_class.protein_to_peptide_dictionary.keys() if self.parameter_file_object.decoy_symbol not in x]
         decoys = [x for x in digest_class.protein_to_peptide_dictionary.keys() if self.parameter_file_object.decoy_symbol in x]
         ratio = float(len(targets)) / float(len(decoys))
-        print("Number of Target Proteins in Digest: {}".format(len(targets)))
-        print("Number of Decoy Proteins in Digest: {}".format(len(decoys)))
-        print("Ratio of Targets Proteins to Decoy Proteins: {}".format(ratio))
+        logger.info("Number of Target Proteins in Digest: {}".format(len(targets)))
+        logger.info("Number of Decoy Proteins in Digest: {}".format(len(decoys)))
+        logger.info("Ratio of Targets Proteins to Decoy Proteins: {}".format(ratio))
 
     def _validate_score(self):
         # Make sure the score is actually in our data file header... Not sure if we can do this...?
         pass
 
     def _validate_decoys_from_data(self):
+        logger = getLogger('protein_inference.datastore.DataStore._validate_decoys_from_data')
+
         # Check to see if we find decoys from our input files
         proteins = [x.possible_proteins for x in self.main_data_form]
         flat_proteins = set([item for sublist in proteins for item in sublist])
         targets = [x for x in flat_proteins if self.parameter_file_object.decoy_symbol not in x]
         decoys = [x for x in flat_proteins if self.parameter_file_object.decoy_symbol in x]
-        print("Number of Target Proteins in Data Files: {}".format(len(targets)))
-        print("Number of Decoy Proteins in Data Files: {}".format(len(decoys)))
+        logger.info("Number of Target Proteins in Data Files: {}".format(len(targets)))
+        logger.info("Number of Decoy Proteins in Data Files: {}".format(len(decoys)))
 
 
     def _validate_isoform_from_data(self):
+        logger = getLogger('protein_inference.datastore.DataStore._validate_isoform_from_data')
+
         # Check to see if we find any proteins with isoform info in name in our input files
         proteins = [x.possible_proteins for x in self.main_data_form]
         flat_proteins = set([item for sublist in proteins for item in sublist])
         non_iso = [x for x in flat_proteins if self.parameter_file_object.isoform_symbol not in x]
         iso = [x for x in flat_proteins if self.parameter_file_object.isoform_symbol in x]
-        print("Number of Non Isoform Labeled Proteins in Data Files: {}".format(len(non_iso)))
-        print("Number of Isoform Labeled Proteins in Data Files: {}".format(len(iso)))
+        logger.info("Number of Non Isoform Labeled Proteins in Data Files: {}".format(len(non_iso)))
+        logger.info("Number of Isoform Labeled Proteins in Data Files: {}".format(len(iso)))
 
 
     def _validate_reviewed_v_unreviewed(self, digest_class):
+        logger = getLogger('protein_inference.datastore.DataStore._validate_reviewed_v_unreviewed')
+
         # Check to see if we get reviewed prots in digest...
         reviewed_proteins = len(digest_class.swiss_prot_protein_set)
         proteins_in_digest = len(set(digest_class.protein_to_peptide_dictionary.keys()))
         unreviewed_proteins = proteins_in_digest - reviewed_proteins
-        print("Number of Total Proteins in from Digest: {}".format(proteins_in_digest))
-        print("Number of Reviewed Proteins in from Digest: {}".format(reviewed_proteins))
-        print("Number of Unreviewed Proteins in from Digest: {}".format(unreviewed_proteins))
+        logger.info("Number of Total Proteins in from Digest: {}".format(proteins_in_digest))
+        logger.info("Number of Reviewed Proteins in from Digest: {}".format(reviewed_proteins))
+        logger.info("Number of Unreviewed Proteins in from Digest: {}".format(unreviewed_proteins))
 

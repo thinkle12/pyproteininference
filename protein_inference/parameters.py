@@ -1,4 +1,5 @@
 import yaml
+from logging import getLogger
 
 from protein_inference.in_silico_digest import InSilicoDigest
 from protein_inference.export import Export
@@ -40,6 +41,7 @@ class ProteinInferenceParameter(object):
         self.inference_type = None
         self.tag = None
         self.score = None
+        self.logger = getLogger('protein_inference.parameters.ProteinInferenceParameter.validate_parameters')
 
         self.convert_to_object()
 
@@ -81,7 +83,7 @@ class ProteinInferenceParameter(object):
             self.grouping_type = yaml_params["Parameters"]["Grouping_Type"]
 
         else:
-            print("Yaml parameter file not found, parameters set to default")
+            self.logger.info("Yaml parameter file not found, parameters set to default")
             self.digest_type = "trypsin"
             self.export = "q_value"
             self.fdr = 0.01
@@ -121,14 +123,14 @@ class ProteinInferenceParameter(object):
     def _validate_digest_type(self):
         # Make sure we have a valid digest type
         if self.digest_type in InSilicoDigest.LIST_OF_DIGEST_TYPES:
-            print("Using digest type '{}'".format(self.digest_type))
+            self.logger.info("Using digest type '{}'".format(self.digest_type))
         else:
             raise ValueError("Digest Type '{}' not supported, please use one of the following enyzme digestions: '{}'".format(self.digest_type, ", ".join(InSilicoDigest.LIST_OF_DIGEST_TYPES)))
 
     def _validate_export_type(self):
         # Make sure we have a valid export type
         if self.export in Export.EXPORT_TYPES:
-            print("Using Export type '{}'".format(self.export))
+            self.logger.info("Using Export type '{}'".format(self.export))
         else:
             raise ValueError("Export Type '{}' not supported, please use one of the following export types: '{}'".format(self.export, ", ".join(Export.EXPORT_TYPES)))
         pass
@@ -138,7 +140,7 @@ class ProteinInferenceParameter(object):
 
         try:
             if 0<=float(self.fdr)<=1:
-                print("FDR Input {}".format(self.fdr))
+                self.logger.info("FDR Input {}".format(self.fdr))
             else:
                 raise ValueError("FDR must be a decimal between 0 and 1, FDR provided: {}".format(self.fdr))
         except ValueError:
@@ -146,7 +148,7 @@ class ProteinInferenceParameter(object):
 
         try:
             if 0<=float(self.restrict_pep)<=1:
-                print("PEP restriction {}".format(self.restrict_pep))
+                self.logger.info("PEP restriction {}".format(self.restrict_pep))
             else:
                 raise ValueError("PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(self.restrict_pep))
         except ValueError:
@@ -155,7 +157,7 @@ class ProteinInferenceParameter(object):
 
         try:
             if 0<=float(self.restrict_q)<=1:
-                print("Q Value restriction {}".format(self.restrict_q))
+                self.logger.info("Q Value restriction {}".format(self.restrict_q))
 
             else:
                 raise ValueError("Q Value restriction must be a decimal between 0 and 1, Q Value restriction provided: {}".format(self.restrict_q))
@@ -170,7 +172,7 @@ class ProteinInferenceParameter(object):
             raise ValueError("Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
                 self.missed_cleavages))
         if type(self.missed_cleavages)==int:
-            print("Missed Cleavages selected: {}".format(self.missed_cleavages))
+            self.logger.info("Missed Cleavages selected: {}".format(self.missed_cleavages))
 
         else:
             raise ValueError("Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(self.missed_cleavages))
@@ -182,19 +184,19 @@ class ProteinInferenceParameter(object):
                 raise ValueError("Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
                     self.restrict_peptide_length))
             if type(self.restrict_peptide_length)==int:
-                print("Peptide Length Restriction: Len {}".format(self.restrict_peptide_length))
+                self.logger.info("Peptide Length Restriction: Len {}".format(self.restrict_peptide_length))
             else:
                 raise ValueError("Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(self.restrict_peptide_length))
         else:
-            print("Not Restricting by Peptide Length")
+            self.logger.info("Not Restricting by Peptide Length")
 
     def _validate_bools(self):
         # Make sure picker is a bool
         if type(self.picker)==bool:
             if self.picker:
-                print("Parameters loaded to run Picker")
+                self.logger.info("Parameters loaded to run Picker")
             else:
-                print("Parameters loaded to NOT run Picker")
+                self.logger.info("Parameters loaded to NOT run Picker")
         else:
             raise ValueError("Picker Variable must be set to True or False, Picker Variable provided: {}".format(self.picker))
 
@@ -202,7 +204,7 @@ class ProteinInferenceParameter(object):
     def _validate_score_method(self):
         # Make sure we have the score method defined in code to use...
         if self.score_method in Score.SCORE_METHODS:
-            print("Using Score Method '{}'".format(self.score_method))
+            self.logger.info("Using Score Method '{}'".format(self.score_method))
         else:
             raise ValueError("Score Method '{}' not supported, "
                              "please use one of the following Score Methods: '{}'".format(self.score_method, ", ".join(Score.SCORE_METHODS)))
@@ -212,7 +214,7 @@ class ProteinInferenceParameter(object):
     def _validate_score_type(self):
         # Make sure score type is multiplicative or additive
         if self.score_type in Score.SCORE_TYPES:
-            print("Using Score Type '{}'".format(self.score_type))
+            self.logger.info("Using Score Type '{}'".format(self.score_type))
         else:
             raise ValueError("Score Type '{}' not supported, "
                              "please use one of the following Score Types: '{}'".format(self.score_type,
@@ -232,12 +234,12 @@ class ProteinInferenceParameter(object):
                              "select one of the following score methods: {}".format(", ".join([x for x in Score.SCORE_METHODS if x!="additive"])))
 
         else:
-            print("Combination of Score Type: '{}' and Score Method: '{}' is Ok".format(self.score_type, self.score_method))
+            self.logger.info("Combination of Score Type: '{}' and Score Method: '{}' is Ok".format(self.score_type, self.score_method))
 
     def _validate_inference_type(self):
         # Check if its parsimony, exclusion, inclusion, none
         if self.inference_type in Inference.INFERENCE_TYPES:
-            print("Using inference type '{}'".format(self.inference_type))
+            self.logger.info("Using inference type '{}'".format(self.inference_type))
         else:
             raise ValueError(
                 "Inferece Type '{}' not supported, please use one of the following Inferece Types: '{}'".format(
@@ -246,7 +248,7 @@ class ProteinInferenceParameter(object):
     def _validate_grouping_type(self):
         # Check if its parsimony, exclusion, inclusion, none
         if self.grouping_type in Inference.GROUPING_TYPES:
-            print("Using Grouping type '{}'".format(self.grouping_type))
+            self.logger.info("Using Grouping type '{}'".format(self.grouping_type))
         else:
             raise ValueError(
                 "Grouping Type '{}' not supported, please use one of the following Grouping Types: '{}'".format(

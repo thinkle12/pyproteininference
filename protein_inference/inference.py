@@ -624,7 +624,7 @@ class Parsimony(Inference):
         # s.t. c2: y[14145]+y[4857]+y[4858]+y[10143]+y[2966] >=1;
         # s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1;
         # Each of the lines (constants, c1,c2,c3) is a peptide and each of the y[x] is a protein
-        tot_peps = list(set(flat_peptides_in_data)) # Sort peptides alphabetically first...
+        tot_peps = sorted(list(set(flat_peptides_in_data))) # Sort peptides alphabetically first...
         for j in range(len(tot_peps)):
             combine = ['y[' + str(dd_num[x][0]) + ']' for x in sorted(pep_prot_dict[tot_peps[j]]) if
                        x in unique_protein_set]

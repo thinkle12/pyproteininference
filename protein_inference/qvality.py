@@ -3,6 +3,7 @@ import uuid
 import tempfile
 import os
 import subprocess
+from logging import getLogger
 
 class Qvality(object):
 
@@ -29,6 +30,8 @@ class CalculateQandPepValues(Qvality):
         self.qvality_output_filename = os.path.join(self.temp_dir,'qvality_output-'+ self.uuid_tag)
 
     def execute(self):
+        logger = getLogger('protein_inference.qvality.CalculateQandPepValues.execute')
+
         # Need to generate UUIDs for the filenames... because we are going to delete all of them...
         targets = []
         decoys = []
@@ -51,12 +54,12 @@ class CalculateQandPepValues(Qvality):
 
         output = p.communicate()
 
-        print('Start Command line Stdout')
-        print(output[0])
-        print('End Command line Stdout')
-        print('Start Command line Stderr')
-        print(output[1])
-        print('End Command line Stderr')
+        logger.info('Start Command line Stdout')
+        logger.info(output[0])
+        logger.info('End Command line Stdout')
+        logger.info('Start Command line Stderr')
+        logger.info(output[1])
+        logger.info('End Command line Stderr')
         # Create a file that has all target scores, and a file that has all decoy scores....
 
         qo = open(self.qvality_output_filename, 'r')

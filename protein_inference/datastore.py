@@ -26,7 +26,7 @@ class DataStore(object):
     """
 
     #Feed data_store instance the reader class...
-    def __init__(self,reader_class):
+    def __init__(self,reader_class, digest_class):
         #If the reader class is from a percolator.psms then define main_data_form as reader_class.psms
         #main_data_form is the starting point for all other analyses
         if reader_class.psms:
@@ -78,6 +78,11 @@ class DataStore(object):
                              "posterior_error_prob":"pepvalue",
                              "posterior_error_probability":"pepvalue"}
         self.CUSTOM_SCORE_KEY = "custom_score"
+
+        # Run Checks and Validations
+        self.validate_psm_data()
+        self.validate_digest(digest_class)
+        self.check_data_consistency(digest_class)
 
 
     def get_sorted_identifiers(self, digest_class, scored=True):
@@ -777,3 +782,81 @@ class DataStore(object):
         self.restricted_proteins = fdr_restricted_set
 
         self.entrapment_proteins = false_true_positives
+
+    def validate_psm_data(self):
+        self._validate_decoys_from_data()
+        self._validate_isoform_from_data()
+
+
+    def validate_digest(self, digest_class):
+        self._validate_reviewed_v_unreviewed(digest_class)
+        self._check_target_decoy_split(digest_class)
+
+
+    def check_data_consistency(self, digest_class):
+        self._check_data_digest_overlap_psms(digest_class)
+        self._check_data_digest_overlap_proteins(digest_class)
+
+
+    def _check_data_digest_overlap_psms(self, digest_class):
+        ## TODO write a function here that looks at the peptides we have and checks how many of these peptides we do not find in our Digest...
+        peptides = [x.identifier.split(".")[1] for x in self.main_data_form]
+        peptides_in_digest = set(digest_class.peptide_to_protein_dictionary.keys())
+        peptides_from_search_in_digest = [x for x in peptides if x in peptides_in_digest]
+        percentage = float(len(peptides))/float(len(peptides_from_search_in_digest))
+        print("{} PSMs identified from input files".format(len(peptides)))
+        print("{} PSMs identified from input files that are also present in database digestion".format(len(peptides_from_search_in_digest)))
+        print("{} percent of PSMs identified from input files that are also present in database digestion".format(percentage))
+
+    def _check_data_digest_overlap_proteins(self, digest_class):
+        proteins = [x.possible_proteins for x in self.main_data_form]
+        flat_proteins = set([item for sublist in proteins for item in sublist])
+        proteins_in_digest = set(digest_class.protein_to_peptide_dictionary.keys())
+        proteins_from_search_in_digest = [x for x in flat_proteins if x in proteins_in_digest]
+        percentage = float(len(flat_proteins))/float(len(proteins_from_search_in_digest))
+        print("{} proteins identified from input files".format(len(flat_proteins)))
+        print("{} proteins identified from input files that are also present in database digestion".format(len(proteins_from_search_in_digest)))
+        print("{} percent of proteins identified from input files that are also present in database digestion".format(percentage))
+
+    def _check_target_decoy_split(self, digest_class):
+        # Check the number of targets vs the number of decoys from the digest
+        targets = [x for x in digest_class.protein_to_peptide_dictionary.keys() if self.parameter_file_object.decoy_symbol not in x]
+        decoys = [x for x in digest_class.protein_to_peptide_dictionary.keys() if self.parameter_file_object.decoy_symbol in x]
+        ratio = float(len(targets)) / float(len(decoys))
+        print("Number of Target Proteins in Digest: {}".format(len(targets)))
+        print("Number of Decoy Proteins in Digest: {}".format(len(decoys)))
+        print("Ratio of Targets Proteins to Decoy Proteins: {}".format(ratio))
+
+    def _validate_score(self):
+        # Make sure the score is actually in our data file header... Not sure if we can do this...?
+        pass
+
+    def _validate_decoys_from_data(self):
+        # Check to see if we find decoys from our input files
+        proteins = [x.possible_proteins for x in self.main_data_form]
+        flat_proteins = set([item for sublist in proteins for item in sublist])
+        targets = [x for x in flat_proteins if self.parameter_file_object.decoy_symbol not in x]
+        decoys = [x for x in flat_proteins if self.parameter_file_object.decoy_symbol in x]
+        print("Number of Target Proteins in Data Files: {}".format(len(targets)))
+        print("Number of Decoy Proteins in Data Files: {}".format(len(decoys)))
+
+
+    def _validate_isoform_from_data(self):
+        # Check to see if we find any proteins with isoform info in name in our input files
+        proteins = [x.possible_proteins for x in self.main_data_form]
+        flat_proteins = set([item for sublist in proteins for item in sublist])
+        non_iso = [x for x in flat_proteins if self.parameter_file_object.isoform_symbol not in x]
+        iso = [x for x in flat_proteins if self.parameter_file_object.isoform_symbol in x]
+        print("Number of Non Isoform Labeled Proteins in Data Files: {}".format(len(non_iso)))
+        print("Number of Isoform Labeled Proteins in Data Files: {}".format(len(iso)))
+
+
+    def _validate_reviewed_v_unreviewed(self, digest_class):
+        # Check to see if we get reviewed prots in digest...
+        reviewed_proteins = len(digest_class.swiss_prot_protein_set)
+        proteins_in_digest = len(set(digest_class.protein_to_peptide_dictionary.keys()))
+        unreviewed_proteins = proteins_in_digest - reviewed_proteins
+        print("Number of Total Proteins in from Digest: {}".format(proteins_in_digest))
+        print("Number of Reviewed Proteins in from Digest: {}".format(reviewed_proteins))
+        print("Number of Unreviewed Proteins in from Digest: {}".format(unreviewed_proteins))
+

@@ -365,6 +365,7 @@ class GenericReader(Reader):
                 print(t_files)
                 ptarg = []
                 with open(self.target_file, 'r') as perc_target_file:
+                    print(self.target_file)
                     spamreader = csv.reader(perc_target_file, delimiter='\t')
                     fieldnames = self.remap(next(spamreader))
                     for row in spamreader:
@@ -374,6 +375,7 @@ class GenericReader(Reader):
             # If not just read the file...
             ptarg = []
             with open(self.target_file, 'r') as perc_target_file:
+                print(self.target_file)
                 spamreader = csv.reader(perc_target_file, delimiter='\t')
                 fieldnames = self.remap(next(spamreader))
                 for row in spamreader:
@@ -387,6 +389,7 @@ class GenericReader(Reader):
                 print(d_files)
                 pdec = []
                 with open(self.decoy_file, 'r') as perc_decoy_file:
+                    print(self.decoy_file)
                     spamreader = csv.reader(perc_decoy_file, delimiter='\t')
                     fieldnames = self.remap(next(spamreader))
                     for row in spamreader:
@@ -395,6 +398,7 @@ class GenericReader(Reader):
         else:
             pdec = []
             with open(self.decoy_file, 'r') as perc_decoy_file:
+                print(self.decoy_file)
                 spamreader = csv.reader(perc_decoy_file, delimiter='\t')
                 fieldnames = self.remap(next(spamreader))
                 for row in spamreader:

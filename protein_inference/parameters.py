@@ -1,7 +1,9 @@
 import yaml
 
-from proteologic.data.domain.mapper import AbstractPhysicalObject
-
+from protein_inference.in_silico_digest import InSilicoDigest
+from protein_inference.export import Export
+from protein_inference.scoring import Score
+from protein_inference.inference import Inference
 
 
 class ProteinInferenceParameter(object):
@@ -40,6 +42,8 @@ class ProteinInferenceParameter(object):
         self.score = None
 
         self.convert_to_object()
+
+        self.validate_parameters()
 
 
 
@@ -96,4 +100,156 @@ class ProteinInferenceParameter(object):
             self.tag = "Test"
             self.score_type = "multiplicative"
             self.grouping_type = "shared_peptides"
+
+    # TODO write custom validators for our params...
+    # TODO The values that are checked against should be class variables in their respective classes...
+    # TODO so we can easily import them here and we dont have information written down twice...
+
+    def validate_parameters(self):
+        # Run all of the parameter validations
+        self._validate_digest_type()
+        self._validate_export_type()
+        self._validate_floats()
+        self._validate_bools()
+        self._validate_score_type()
+        self._validate_score_method()
+        self._validate_score_combination()
+        self._validate_inference_type()
+        self._validate_grouping_type()
+
+
+    def _validate_digest_type(self):
+        # Make sure we have a valid digest type
+        if self.digest_type in InSilicoDigest.LIST_OF_DIGEST_TYPES:
+            print("Using digest type '{}'".format(self.digest_type))
+        else:
+            raise ValueError("Digest Type '{}' not supported, please use one of the following enyzme digestions: '{}'".format(self.digest_type, ", ".join(InSilicoDigest.LIST_OF_DIGEST_TYPES)))
+
+    def _validate_export_type(self):
+        # Make sure we have a valid export type
+        if self.export in Export.EXPORT_TYPES:
+            print("Using Export type '{}'".format(self.export))
+        else:
+            raise ValueError("Export Type '{}' not supported, please use one of the following export types: '{}'".format(self.export, ", ".join(Export.EXPORT_TYPES)))
+        pass
+
+    def _validate_floats(self):
+        # Validate that FDR, cleavages, and restrict values are all floats and or ints if they need to be
+
+        try:
+            if 0<=float(self.fdr)<=1:
+                print("FDR Input {}".format(self.fdr))
+            else:
+                raise ValueError("FDR must be a decimal between 0 and 1, FDR provided: {}".format(self.fdr))
+        except ValueError:
+            raise ValueError("FDR must be a decimal between 0 and 1, FDR provided: {}".format(self.fdr))
+
+        try:
+            if 0<=float(self.restrict_pep)<=1:
+                print("PEP restriction {}".format(self.restrict_pep))
+            else:
+                raise ValueError("PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(self.restrict_pep))
+        except ValueError:
+            raise ValueError("PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(
+                self.restrict_pep))
+
+        try:
+            if 0<=float(self.restrict_q)<=1:
+                print("Q Value restriction {}".format(self.restrict_q))
+
+            else:
+                raise ValueError("Q Value restriction must be a decimal between 0 and 1, Q Value restriction provided: {}".format(self.restrict_q))
+        except ValueError:
+            raise ValueError(
+                "Q Value restriction must be a decimal between 0 and 1, Q Value restriction provided: {}".format(
+                    self.restrict_q))
+
+        try:
+            int(self.missed_cleavages)
+        except ValueError:
+            raise ValueError("Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
+                self.missed_cleavages))
+        if type(self.missed_cleavages)==int:
+            print("Missed Cleavages selected: {}".format(self.missed_cleavages))
+
+        else:
+            raise ValueError("Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(self.missed_cleavages))
+
+        if self.restrict_peptide_length:
+            try:
+                int(self.restrict_peptide_length)
+            except ValueError:
+                raise ValueError("Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
+                    self.restrict_peptide_length))
+            if type(self.restrict_peptide_length)==int:
+                print("Peptide Length Restriction: Len {}".format(self.restrict_peptide_length))
+            else:
+                raise ValueError("Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(self.restrict_peptide_length))
+        else:
+            print("Not Restricting by Peptide Length")
+
+    def _validate_bools(self):
+        # Make sure picker is a bool
+        if type(self.picker)==bool:
+            if self.picker:
+                print("Parameters loaded to run Picker")
+            else:
+                print("Parameters loaded to NOT run Picker")
+        else:
+            raise ValueError("Picker Variable must be set to True or False, Picker Variable provided: {}".format(self.picker))
+
+
+    def _validate_score_method(self):
+        # Make sure we have the score method defined in code to use...
+        if self.score_method in Score.SCORE_METHODS:
+            print("Using Score Method '{}'".format(self.score_method))
+        else:
+            raise ValueError("Score Method '{}' not supported, "
+                             "please use one of the following Score Methods: '{}'".format(self.score_method, ", ".join(Score.SCORE_METHODS)))
+        pass
+
+
+    def _validate_score_type(self):
+        # Make sure score type is multiplicative or additive
+        if self.score_type in Score.SCORE_TYPES:
+            print("Using Score Type '{}'".format(self.score_type))
+        else:
+            raise ValueError("Score Type '{}' not supported, "
+                             "please use one of the following Score Types: '{}'".format(self.score_type,
+                                                                                      ", ".join(Score.SCORE_TYPES)))
+        pass
+
+    def _validate_score_combination(self):
+        # Check to see if combination of score (column), method(multiplicative log, additive), and score type (multiplicative/additive) is possible...
+        # This will be super custom
+
+        if self.score_type=="additive" and self.score_method!= "additive":
+            raise ValueError("If Score type is 'additive' (Higher PSM score is better) then you must use the 'additive' score method")
+
+        elif self.score_type=="multiplicative" and self.score_method=="additive":
+            raise ValueError("If Score type is 'multiplicative' (Lower PSM score is better) "
+                             "then you must NOT use the 'additive' score method please "
+                             "select one of the following score methods: {}".format(", ".join([x for x in Score.SCORE_METHODS if x!="additive"])))
+
+        else:
+            print("Combination of Score Type: '{}' and Score Method: '{}' is Ok".format(self.score_type, self.score_method))
+
+    def _validate_inference_type(self):
+        # Check if its parsimony, exclusion, inclusion, none
+        if self.inference_type in Inference.INFERENCE_TYPES:
+            print("Using inference type '{}'".format(self.inference_type))
+        else:
+            raise ValueError(
+                "Inferece Type '{}' not supported, please use one of the following Inferece Types: '{}'".format(
+                    self.inference_type, ", ".join(Inference.INFERENCE_TYPES)))
+
+    def _validate_grouping_type(self):
+        # Check if its parsimony, exclusion, inclusion, none
+        if self.grouping_type in Inference.GROUPING_TYPES:
+            print("Using Grouping type '{}'".format(self.grouping_type))
+        else:
+            raise ValueError(
+                "Grouping Type '{}' not supported, please use one of the following Grouping Types: '{}'".format(
+                    self.grouping_type, ", ".join(Inference.GROUPING_TYPES)))
+
 

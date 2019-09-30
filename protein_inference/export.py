@@ -6,15 +6,53 @@ Created on Fri Dec  1 10:49:47 2017
 @author: hinklet
 """
 
+import os
 import csv
 
 class Export(object):
     """
     Main Class for exporting sorted protein lists to CSV
     """
+
+    EXPORT_TYPES = ['leads', 'all', 'comma_sep', 'q_value_comma_sep', 'q_value', 'q_value_all']
     
     def __init__(self,data_class):
         self.data_class = data_class
+
+    def export_to_csv(self, directory, export_type = "q_value"):
+
+        data = self.data_class
+        tag = data.parameter_file_object.tag
+
+        if 'leads' in export_type:
+            filename = '{}_leads_{}_{}.csv'.format(tag, data.short_score_method, data.score)
+            complete_filepath = os.path.join(directory, filename)
+            self.csv_export_leads_restricted(filename_out=complete_filepath)
+
+        if 'all' in export_type:
+            filename = '{}_all_{}_{}.csv'.format(tag, data.short_score_method, data.score)
+            complete_filepath = os.path.join(directory, filename)
+            self.csv_export_all_restricted(complete_filepath)
+
+        if 'comma_sep' in export_type:
+            filename = '{}_comma_sep_{}_{}.csv'.format(tag, data.short_score_method, data.score)
+            complete_filepath = os.path.join(directory, filename)
+            self.csv_export_comma_sep_restricted(complete_filepath)
+
+        if 'q_value_comma_sep' in export_type:
+            filename = '{}_q_value_comma_sep_{}_{}.csv'.format(tag, data.short_score_method, data.score)
+            complete_filepath = os.path.join(directory, filename)
+            self.csv_export_q_value_comma_sep(complete_filepath)
+
+        if 'q_value' in export_type:
+            filename = '{}_q_value_leads_{}_{}.csv'.format(tag, data.short_score_method, data.score)
+            complete_filepath = os.path.join(directory, filename)
+            self.csv_export_q_value_leads(complete_filepath)
+
+        if 'q_value_all' in export_type:
+            filename = '{}_q_value_all_{}_{}.csv'.format(tag, data.short_score_method, data.score)
+            complete_filepath = os.path.join(directory, filename)
+            self.csv_export_q_value_all(complete_filepath)
 
     def csv_export_all_restricted(self, filename_out):
         """

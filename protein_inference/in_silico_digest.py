@@ -11,6 +11,8 @@ from Bio import SeqIO
 import os
 import pickle as pickle
 from pyteomics import fasta, parser, mass, achrom, electrochem, auxiliary
+from logging import getLogger
+
 
 
 class InSilicoDigest(object):
@@ -42,6 +44,8 @@ class InSilicoDigest(object):
         else:
             raise ValueError('digest_type must be equal to one of the following'+str(self.LIST_OF_DIGEST_TYPES)+' or... (List more digest types here in the future...)')
         self.parameter_file_object = parameter_file_object
+        self.logger = getLogger('protein_inference.in_silico_digest.InSilicoDigest')
+
         
         
     def digest(self,proseq,miss_cleavage):
@@ -202,7 +206,7 @@ class InSilicoDigest(object):
         if pickle_filename_tag.split('/')[-1]+'_pep_to_prot.pickle' not in os.listdir(db_path_only) or pickle_filename_tag.split('/')[-1]+'_prot_to_pep.pickle' not in os.listdir(db_path_only) or pickle_filename_tag.split('/')[-1]+'_sp_dict.pickle' not in os.listdir(db_path_only):
             handle=SeqIO.parse(self.database_path,'fasta')
 
-            print('Starting Digest...')
+            self.logger.info('Starting Standard Digest...')
             pep_dict = collections.defaultdict(set)
             prot_dict = collections.defaultdict(set)
             sp_set = set()
@@ -251,11 +255,11 @@ class InSilicoDigest(object):
             #
             # print 'sp dictionary has been pickled...'
 
-            print('Digest finished, peptide and protein dictionaries created based on the provided database')
+            self.logger.info('Digest finished, peptide and protein dictionaries created based on the provided database')
 
 
         else:
-            print('Skipping Digest, Importing digest information from'+'\n'+pickle_filename_tag)
+            self.logger.info('Skipping Digest, Importing digest information from'+'\n'+pickle_filename_tag)
 
             pickle_in = open(pickle_filename_tag + '_pep_to_prot.pickle', "rb")
             pep_dict = pickle.load(pickle_in)
@@ -269,7 +273,7 @@ class InSilicoDigest(object):
             sp_dict = pickle.load(pickle_in)
             pickle_in.close()
 
-            print('Pickle Files Loaded...')
+            self.logger.info('Pickle Files Loaded...')
 
         pep_dict_res = collections.defaultdict(set)
         prot_dict_res = collections.defaultdict(set)
@@ -279,6 +283,9 @@ class InSilicoDigest(object):
         self.swiss_prot_protein_set = sp_set
         self.peptide_to_protein_dictionary = pep_dict
         self.protein_to_peptide_dictionary = prot_dict
+
+        self.logger.info('Standard Digest Finished...')
+
 
 class PyteomicsDigest(object):
     """
@@ -309,10 +316,11 @@ class PyteomicsDigest(object):
         else:
             raise ValueError('digest_type must be equal to one of the following' + str(
                 self.LIST_OF_DIGEST_TYPES) + ' or... (List more digest types here in the future...)')
+        self.logger = getLogger('protein_inference.in_silico_digest.PyteomicsDigest')
 
 
     def digest_fasta_database(self):
-        print('Starting Digest...')
+        self.logger.info('Starting Pyteomics Digest...')
         pep_dict = collections.defaultdict(set)
         prot_dict = collections.defaultdict(set)
         sp_set = set()
@@ -352,3 +360,5 @@ class PyteomicsDigest(object):
         self.swiss_prot_protein_set = sp_set
         self.peptide_to_protein_dictionary = pep_dict
         self.protein_to_peptide_dictionary = prot_dict
+
+        self.logger.info('Pyteomics Digest Finished...')

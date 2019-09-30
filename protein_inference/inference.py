@@ -20,9 +20,33 @@ class Inference(object):
     """
     Parent Inference class for all grouper subset classes
     """
+
+    INFERENCE_TYPES = ["parsimony", "inclusion", "exclusion", "none"]
+    GROUPING_TYPES = ["subset_peptides", "shared_peptides"]
     
     def __init__(self):
         None
+
+    def run_inference(self, data_class, digest_class):
+
+        inference_type = data_class.parameter_file_object.inference_type
+
+        # For parsimony... Run GLPK setup, runner, grouper...
+        if inference_type == 'parsimony':
+            group = Parsimony(data_class=data_class, digest_class=digest_class)
+            group.infer_proteins()
+
+        if inference_type == "inclusion":
+            group = Inclusion(data_class=data_class, digest_class=digest_class)
+            group.infer_proteins()
+
+        if inference_type == "exclusion":
+            group = Exclusion(data_class=data_class, digest_class=digest_class)
+            group.infer_proteins()
+
+        if inference_type == "none":
+            group = FirstProtein(data_class=data_class, digest_class=digest_class)
+            group.infer_proteins()
 
     def _group_by_peptides(self, scored_data, data_class, digest_class, inference_type="parsimony", lead_protein_objects=None, grouping_type="shared_peptides"):
 

@@ -330,6 +330,17 @@ class DataStore(object):
         self.peptide_protein_dictionary = dd_peps
 
         return(dd_peps)
+
+    def unique_to_leads_peptides(self):
+        if self.grouped_scored_proteins:
+            lead_peptides = [list(x[0].peptides) for x in self.grouped_scored_proteins]
+            flat_peptides = [item for sublist in lead_peptides for item in sublist]
+            counted_peps = collections.Counter(flat_peptides)
+            unique_to_leads_peptides = set([x for x in counted_peps if counted_peps[x] == 1])
+        else:
+            unique_to_leads_peptides=set()
+
+        return(unique_to_leads_peptides)
         
     def higher_or_lower(self):
 

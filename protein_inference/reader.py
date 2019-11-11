@@ -7,16 +7,11 @@ Created on Thu Nov 30 12:52:14 2017
 """
 
 from protein_inference.physical import Psm
-import yaml
 import csv
-import re
 import itertools
 from logging import getLogger
-##Here we create the reader class which is capable of reading in files as input for ProteinInference
-##The reader class creates a list of psm objects with various attributes...
 
 class Reader(object):
-    # TODO make this an abstract base class... IF I can
     """
     Main Reader Class which is parent to all reader subclasses
     """
@@ -42,11 +37,13 @@ class PercolatorReader(Reader):
     116108.15139.15139.6.dta	 3.44016	 0.000479928	7.60258e-10	K.MVVSMTLGLHPWIANIDDTQYLAAK.R	CNDP1_HUMAN|Q96KN2	B4E180_HUMAN|B4E180	A8K1K1_HUMAN|A8K1K1	J3KRP0_HUMAN|J3KRP0
 
     """
+
+    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
+
     def __init__(self,target_file,decoy_file,digest_class,parameter_file_object):
         self.target_file = target_file
         self.decoy_file = decoy_file
         #Define Indicies based on input
-        # TODO Change this from index based to reading in as a dict... similar to percolator
         self.psmid_index = 0
         self.perc_score_index = 1
         self.q_value_index = 2
@@ -147,7 +144,7 @@ class PercolatorReader(Reader):
                 p.percscore = float(psm_info[self.perc_score_index])
                 p.qvalue = float(psm_info[self.q_value_index])
                 p.pepvalue = float(psm_info[self.posterior_error_prob_index])
-                poss_proteins = list(set(psm_info[self.proteinIDs_index:self.proteinIDs_index+50]))
+                poss_proteins = list(set(psm_info[self.proteinIDs_index:self.proteinIDs_index+self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]))
                 p.possible_proteins = poss_proteins # Restrict to 50 total possible proteins...
                 p.psm_id = psm_info[self.psmid_index]
 
@@ -160,7 +157,7 @@ class PercolatorReader(Reader):
                     stripped_peptide = Psm.remove_peptide_mods(peptide_string)
                     current_peptide = stripped_peptide
                 # Add the other possible_proteins from insilicodigest here...
-                current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide]) # TODO This peptide needs to be scrubbed of Mods...
+                current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
                 # Sort Alt Proteins by Swissprot then Trembl...
                 our_target_sp_proteins = sorted(
                     [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
@@ -175,7 +172,7 @@ class PercolatorReader(Reader):
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
                 # Restrict to 50 possible proteins
-                for alt_proteins in identifiers_sorted[:50]:
+                for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
                     if alt_proteins not in p.possible_proteins:
                         p.possible_proteins.append(alt_proteins)
 
@@ -204,6 +201,8 @@ class ProteologicPostSearchReader(Reader):
     This Method will be used to read from post processing proteologic logical object... which can either be LDA or Percolator Results...
     Essentially it will just be a searchID and an LDA/Percolator ID
     """
+
+    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
     
     def __init__(self, proteologic_object, search_id, postsearch_id, digest_class, parameter_file_object):
         self.proteologic_object=proteologic_object
@@ -288,7 +287,7 @@ class ProteologicPostSearchReader(Reader):
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
                 # Restrict to 50 possible proteins...
-                for alt_proteins in identifiers_sorted[:50]:
+                for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
                     if alt_proteins not in p.possible_proteins:
                         p.possible_proteins.append(alt_proteins)
                 if not current_alt_proteins:

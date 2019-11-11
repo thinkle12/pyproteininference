@@ -25,7 +25,7 @@ class DataStore(object):
     """
 
     #Feed data_store instance the reader class...
-    def __init__(self,reader_class, digest_class):
+    def __init__(self,reader_class, digest_class, validate=True):
         #If the reader class is from a percolator.psms then define main_data_form as reader_class.psms
         #main_data_form is the starting point for all other analyses
         if reader_class.psms:
@@ -81,9 +81,10 @@ class DataStore(object):
         self.logger = getLogger('protein_inference.datastore.DataStore')
 
         # Run Checks and Validations
-        self.validate_psm_data()
-        self.validate_digest(digest_class)
-        self.check_data_consistency(digest_class)
+        if validate:
+            self.validate_psm_data()
+            self.validate_digest(digest_class)
+            self.check_data_consistency(digest_class)
 
 
     def get_sorted_identifiers(self, digest_class, scored=True):

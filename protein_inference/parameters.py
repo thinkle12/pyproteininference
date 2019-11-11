@@ -13,7 +13,7 @@ class ProteinInferenceParameter(object):
 
     """
 
-    def __init__(self, yaml_param_filepath):
+    def __init__(self, yaml_param_filepath, validate=True):
         """ Class to store percolator parameter information as an object
 
         Args:
@@ -45,7 +45,8 @@ class ProteinInferenceParameter(object):
 
         self.convert_to_object()
 
-        self.validate_parameters()
+        if validate:
+            self.validate_parameters()
 
 
 
@@ -102,10 +103,6 @@ class ProteinInferenceParameter(object):
             self.tag = "Test"
             self.score_type = "multiplicative"
             self.grouping_type = "shared_peptides"
-
-    # TODO write custom validators for our params...
-    # TODO The values that are checked against should be class variables in their respective classes...
-    # TODO so we can easily import them here and we dont have information written down twice...
 
     def validate_parameters(self):
         # Run all of the parameter validations

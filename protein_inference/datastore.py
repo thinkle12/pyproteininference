@@ -182,7 +182,7 @@ class DataStore(object):
 
         return(protein_psm_score_dictionary)
 
-    def restrict_psm_data(self,parameter_file_object):
+    def restrict_psm_data(self,parameter_file_object, remove1pep=True):
 
         logger = getLogger('protein_inference.datastore.DataStore.restrict_psm_data')
 
@@ -195,7 +195,8 @@ class DataStore(object):
         main_psm_data = self.main_data_form
         logger.info('Length of main data: ' + str(len(self.main_data_form)))
         # If restrict_main_data is called, we automatically discard everything that has a PEP of 1
-        main_psm_data = [x for x in main_psm_data if x.pepvalue != 1]
+        if remove1pep:
+            main_psm_data = [x for x in main_psm_data if x.pepvalue != 1]
 
         # Restrict peptide length and posterior error probability
         if peptide_length and posterior_error_prob_threshold and not q_value_threshold:

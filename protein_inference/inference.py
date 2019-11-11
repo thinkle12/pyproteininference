@@ -76,7 +76,10 @@ class Inference(object):
 
         protein_tracker = set()
         restricted_peptides_set = set(data_class.restricted_peptides)
-        picked_removed = set([x.identifier for x in data_class.picked_proteins_removed])
+        try:
+            picked_removed = set([x.identifier for x in data_class.picked_proteins_removed])
+        except TypeError:
+            picked_removed = set([])
         list_of_prots_not_in_db = []
         list_of_peps_not_in_db = []
         missing_proteins = set()
@@ -455,8 +458,7 @@ class Inclusion(Inference):
 
         # Get the higher or lower variable
         if not self.data_class.high_low_better:
-            hl = datastore.HigherOrLower(self.data_class)
-            hl.read_psms()
+            hl = self.data_class.higher_or_lower()
             higher_or_lower = self.data_class.high_low_better
         else:
             higher_or_lower = self.data_class.high_low_better

@@ -40,7 +40,7 @@ class PercolatorReader(Reader):
 
     MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
 
-    def __init__(self,target_file,decoy_file,digest_class,parameter_file_object):
+    def __init__(self,target_file,decoy_file,digest_class,parameter_file_object,append_alt_from_db=False):
         self.target_file = target_file
         self.decoy_file = decoy_file
         #Define Indicies based on input
@@ -53,6 +53,7 @@ class PercolatorReader(Reader):
         self.psms = None
         self.search_id = None
         self.digest_class = digest_class
+        self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
         self.logger = getLogger('protein_inference.reader.PercolatorReader.read_psms')
@@ -204,13 +205,15 @@ class ProteologicPostSearchReader(Reader):
 
     MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
     
-    def __init__(self, proteologic_object, search_id, postsearch_id, digest_class, parameter_file_object):
+    def __init__(self, proteologic_object, search_id, postsearch_id, digest_class, parameter_file_object, append_alt_from_db=False):
         self.proteologic_object=proteologic_object
         self.search_id = search_id
         self.postsearch_id = postsearch_id
 
         self.psms = None
         self.digest_class = digest_class
+        self.append_alt_from_db = append_alt_from_db
+
 
         self.parameter_file_object = parameter_file_object
         self.logger = getLogger('protein_inference.reader.ProteologicPostSearchReader.read_psms')
@@ -333,13 +336,15 @@ class GenericReader(Reader):
 
 
 
-    def __init__(self, target_file, decoy_file, digest_class, parameter_file_object):
+    def __init__(self, target_file, decoy_file, digest_class, parameter_file_object, append_alt_from_db=False):
         self.target_file = target_file
         self.decoy_file = decoy_file
         self.psms = None
         self.search_id = None
         self.digest_class = digest_class
         self.load_custom_score = False
+
+        self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
         self.scoring_variable = parameter_file_object.score

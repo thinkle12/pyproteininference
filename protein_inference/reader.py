@@ -173,9 +173,14 @@ class PercolatorReader(Reader):
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
                 # Restrict to 50 possible proteins
-                for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
-                    if alt_proteins not in p.possible_proteins:
-                        p.possible_proteins.append(alt_proteins)
+                if self.append_alt_from_db:
+                    for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
+                        if alt_proteins not in p.possible_proteins and len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
+                            p.possible_proteins.append(alt_proteins)
+                if len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
+                    p.possible_proteins = [p.possible_proteins[x] for x in range(self.MAX_ALLOWED_ALTERNATIVE_PROTEINS)]
+                else:
+                    pass
 
                 p.possible_proteins = [x for x in p.possible_proteins if x]
                 if not current_alt_proteins:
@@ -290,9 +295,14 @@ class ProteologicPostSearchReader(Reader):
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
                 # Restrict to 50 possible proteins...
-                for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
-                    if alt_proteins not in p.possible_proteins:
-                        p.possible_proteins.append(alt_proteins)
+                if self.append_alt_from_db:
+                    for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
+                        if alt_proteins not in p.possible_proteins and len(p.possible_proteins)<self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
+                            p.possible_proteins.append(alt_proteins)
+                if len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
+                    p.possible_proteins = [p.possible_proteins[x] for x in range(self.MAX_ALLOWED_ALTERNATIVE_PROTEINS)]
+                else:
+                    pass
                 if not current_alt_proteins:
                     self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
 
@@ -501,9 +511,15 @@ class GenericReader(Reader):
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
                 # Restrict to 50 possible proteins
-                for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
-                    if alt_proteins not in p.possible_proteins:
-                        p.possible_proteins.append(alt_proteins)
+                if self.append_alt_from_db:
+                    for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
+                        if alt_proteins not in p.possible_proteins and len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
+                            p.possible_proteins.append(alt_proteins)
+
+                if len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
+                    p.possible_proteins = [p.possible_proteins[x] for x in range(self.MAX_ALLOWED_ALTERNATIVE_PROTEINS)]
+                else:
+                    pass
                 if not current_alt_proteins:
                     self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
 

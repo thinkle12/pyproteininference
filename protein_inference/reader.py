@@ -145,7 +145,10 @@ class PercolatorReader(Reader):
                 p.percscore = float(psm_info[self.perc_score_index])
                 p.qvalue = float(psm_info[self.q_value_index])
                 p.pepvalue = float(psm_info[self.posterior_error_prob_index])
-                poss_proteins = list(set(psm_info[self.proteinIDs_index:self.proteinIDs_index+self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]))
+                if self.parameter_file_object.inference_type=="none":
+                    poss_proteins = psm_info[self.proteinIDs_index]
+                else:
+                    poss_proteins = list(set(psm_info[self.proteinIDs_index:self.proteinIDs_index+self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]))
                 p.possible_proteins = poss_proteins # Restrict to 50 total possible proteins...
                 p.psm_id = psm_info[self.psmid_index]
 
@@ -186,7 +189,9 @@ class PercolatorReader(Reader):
                 if not current_alt_proteins:
                     self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
 
-
+                # If no inference only select first poss protein
+                if self.parameter_file_object.inference_type=="none":
+                    p.possible_proteins = [p.possible_proteins[0]]
 
 
                 list_of_psm_objects.append(p)
@@ -307,7 +312,9 @@ class ProteologicPostSearchReader(Reader):
                     self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
 
 
-
+                # If no inference only select first poss protein
+                if self.parameter_file_object.inference_type=="none":
+                    p.possible_proteins = [p.possible_proteins[0]]
 
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)
@@ -477,7 +484,8 @@ class GenericReader(Reader):
                     except KeyError:
                         break
                 # Remove potential Repeats
-                p.possible_proteins = list(set(p.possible_proteins))
+                if self.parameter_file_object.inference_type!="none":
+                    p.possible_proteins = list(set(p.possible_proteins))
 
                 # Restrict to 50 total possible proteins...
                 p.psm_id = psm_info[self.PSMID]
@@ -522,6 +530,10 @@ class GenericReader(Reader):
                     pass
                 if not current_alt_proteins:
                     self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
+
+                # If no inference only select first poss protein
+                if self.parameter_file_object.inference_type=="none":
+                    p.possible_proteins = [p.possible_proteins[0]]
 
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)

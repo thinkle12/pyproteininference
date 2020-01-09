@@ -87,7 +87,7 @@ class TestLoadParsimonyWorkflow(TestCase):
                                                                       digest_class=digest)
         pep_and_prot_data.read_psms()
 
-        self.assertEqual(len(pep_and_prot_data.psms), 15)
+        self.assertEqual(len(pep_and_prot_data.psms), 27)
 
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
@@ -99,7 +99,7 @@ class TestLoadParsimonyWorkflow(TestCase):
         ### Step 5: Restrict the PSM data
         data.restrict_psm_data(parameter_file_object=protein_inference_parameters)
 
-        self.assertEqual(len(data.main_data_restricted), 14)
+        self.assertEqual(len(data.main_data_restricted), 26)
 
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input

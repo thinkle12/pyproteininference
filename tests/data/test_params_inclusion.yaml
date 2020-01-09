@@ -16,4 +16,4 @@ Parameters:
   Reviewed_Identifier_Symbol: "sp|"
   Inference_Type: inclusion
   Tag: test_inclusion
-  Grouping_Type: subset_peptides
+  Grouping_Type: none

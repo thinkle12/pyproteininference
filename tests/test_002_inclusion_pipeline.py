@@ -63,7 +63,7 @@ class TestLoadInclusionWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.reviewed_identifier_symbol, 'sp|')
         self.assertEqual(protein_inference_parameters.inference_type, 'inclusion')
         self.assertEqual(protein_inference_parameters.tag, 'test_inclusion')
-        self.assertEqual(protein_inference_parameters.grouping_type, 'subset_peptides')
+        self.assertEqual(protein_inference_parameters.grouping_type, 'none')
 
 
         ### STEP 2: Start with running an In Silico Digestion ###
@@ -84,7 +84,7 @@ class TestLoadInclusionWorkflow(TestCase):
                                                                       digest_class=digest)
         pep_and_prot_data.read_psms()
 
-        self.assertEqual(len(pep_and_prot_data.psms), 15)
+        self.assertEqual(len(pep_and_prot_data.psms), 27)
 
 
         ### STEP 4: Initiate the datastore class ###
@@ -97,7 +97,7 @@ class TestLoadInclusionWorkflow(TestCase):
         ### Step 5: Restrict the PSM data
         data.restrict_psm_data(parameter_file_object=protein_inference_parameters)
 
-        self.assertEqual(len(data.main_data_restricted), 14)
+        self.assertEqual(len(data.main_data_restricted), 26)
 
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input

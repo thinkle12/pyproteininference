@@ -25,7 +25,7 @@ class DataStore(object):
     """
 
     #Feed data_store instance the reader class...
-    def __init__(self,reader_class, digest_class):
+    def __init__(self,reader_class, digest_class, validate=True):
         #If the reader class is from a percolator.psms then define main_data_form as reader_class.psms
         #main_data_form is the starting point for all other analyses
         if reader_class.psms:
@@ -81,9 +81,10 @@ class DataStore(object):
         self.logger = getLogger('protein_inference.datastore.DataStore')
 
         # Run Checks and Validations
-        self.validate_psm_data()
-        self.validate_digest(digest_class)
-        self.check_data_consistency(digest_class)
+        if validate:
+            self.validate_psm_data()
+            self.validate_digest(digest_class)
+            self.check_data_consistency(digest_class)
 
 
     def get_sorted_identifiers(self, digest_class, scored=True):
@@ -181,7 +182,7 @@ class DataStore(object):
 
         return(protein_psm_score_dictionary)
 
-    def restrict_psm_data(self,parameter_file_object):
+    def restrict_psm_data(self,parameter_file_object, remove1pep=True):
 
         logger = getLogger('protein_inference.datastore.DataStore.restrict_psm_data')
 
@@ -194,7 +195,8 @@ class DataStore(object):
         main_psm_data = self.main_data_form
         logger.info('Length of main data: ' + str(len(self.main_data_form)))
         # If restrict_main_data is called, we automatically discard everything that has a PEP of 1
-        main_psm_data = [x for x in main_psm_data if x.pepvalue != 1]
+        if remove1pep:
+            main_psm_data = [x for x in main_psm_data if x.pepvalue != 1]
 
         # Restrict peptide length and posterior error probability
         if peptide_length and posterior_error_prob_threshold and not q_value_threshold:
@@ -328,6 +330,17 @@ class DataStore(object):
         self.peptide_protein_dictionary = dd_peps
 
         return(dd_peps)
+
+    def unique_to_leads_peptides(self):
+        if self.grouped_scored_proteins:
+            lead_peptides = [list(x[0].peptides) for x in self.grouped_scored_proteins]
+            flat_peptides = [item for sublist in lead_peptides for item in sublist]
+            counted_peps = collections.Counter(flat_peptides)
+            unique_to_leads_peptides = set([x for x in counted_peps if counted_peps[x] == 1])
+        else:
+            unique_to_leads_peptides=set()
+
+        return(unique_to_leads_peptides)
         
     def higher_or_lower(self):
 
@@ -717,7 +730,8 @@ class DataStore(object):
         new_fdr_list = []
         for fdrs in fdr_list:
             new_fdr_list.append(fdrs)
-            qvalue = min(new_fdr_list)
+            # qvalue = min(new_fdr_list)
+            qvalue = fdrs
             qvalue_list.append(qvalue)
 
         qvalue_list.reverse()

@@ -24,7 +24,7 @@ class Inference(object):
     """
 
     INFERENCE_TYPES = ["parsimony", "inclusion", "exclusion", "none"]
-    GROUPING_TYPES = ["subset_peptides", "shared_peptides"]
+    GROUPING_TYPES = ["subset_peptides", "shared_peptides", "none"]
     
     def __init__(self):
         None
@@ -76,7 +76,10 @@ class Inference(object):
 
         protein_tracker = set()
         restricted_peptides_set = set(data_class.restricted_peptides)
-        picked_removed = set([x.identifier for x in data_class.picked_proteins_removed])
+        try:
+            picked_removed = set([x.identifier for x in data_class.picked_proteins_removed])
+        except TypeError:
+            picked_removed = set([])
         list_of_prots_not_in_db = []
         list_of_peps_not_in_db = []
         missing_proteins = set()
@@ -125,6 +128,7 @@ class Inference(object):
                                     elif grouping_type=="subset_peptides":
                                         if current_protein_object.peptides.issubset(protein_objects.peptides):
                                             current_grouped_proteins.add(current_protein_object)
+                                            # if inference_type!="inclusion":
                                             protein_tracker.add(current_protein_object)
                                         else:
                                             pass
@@ -151,6 +155,48 @@ class Inference(object):
                        "missing_peptides": list_of_peps_not_in_db}
 
         return (return_dict)
+
+    def _apply_group_ids_no_groups(self, grouped_protein_objects, digest_class, data_class):
+
+        logger = getLogger('protein_inference.inference.Inference._group_by_score')
+
+        sp_protein_set = set(digest_class.swiss_prot_protein_set)
+
+        prot_pep_dict = data_class.protein_to_peptide_dictionary()
+
+        score_dd = collections.defaultdict(list)
+
+        # Here we create group ID's
+        group_id = 0
+        list_of_group_objects = []
+        for protein_group in grouped_protein_objects:
+            protein_list = []
+            group_id = group_id + 1
+            pg = ProteinGroup(group_id)
+            logger.info("Created Protein Group with ID: {}".format(str(group_id)))
+            for prot in protein_group:
+                cur_protein = prot
+                # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
+                if group_id not in cur_protein.group_identification:
+                    cur_protein.group_identification.add(group_id)
+                if cur_protein.identifier in sp_protein_set:
+                    cur_protein.reviewed = True
+                else:
+                    cur_protein.unreviewed = True
+                cur_identifier = cur_protein.identifier
+                cur_protein.num_peptides = len(prot_pep_dict[cur_identifier])
+                # Here append the number of unique peptides... so we can use this as secondary sorting...
+                protein_list.append(cur_protein)
+                # Sorted protein_groups then becomes a list of lists... of protein objects
+
+            pg.proteins = protein_list
+            list_of_group_objects.append(pg)
+
+
+        return_dict = {"scores_grouped": grouped_protein_objects, "group_objects":list_of_group_objects}
+
+        return(return_dict)
+
 
     def _apply_protein_group_ids(self, grouped_protein_objects, data_class, digest_class):
         logger = getLogger('protein_inference.inference.Inference._apply_protein_group_ids')
@@ -412,15 +458,19 @@ class Inclusion(Inference):
 
         # Get the higher or lower variable
         if not self.data_class.high_low_better:
-            hl = datastore.HigherOrLower(self.data_class)
-            hl.read_psms()
+            hl = self.data_class.higher_or_lower()
             higher_or_lower = self.data_class.high_low_better
         else:
             higher_or_lower = self.data_class.high_low_better
 
         logger.info("Applying Group ID's for the Inclusion Method")
-        regrouped_proteins = self._apply_protein_group_ids(grouped_protein_objects = grouped_proteins,
+        # regrouped_proteins = self._apply_protein_group_ids(grouped_protein_objects = grouped_proteins,
+        #                                                    data_class = self.data_class, digest_class = self.digest_class)
+
+        regrouped_proteins = self._apply_group_ids_no_groups(grouped_protein_objects = grouped_proteins,
                                                            data_class = self.data_class, digest_class = self.digest_class)
+
+
 
         scores_grouped = regrouped_proteins["scores_grouped"]
         list_of_group_objects = regrouped_proteins["group_objects"]

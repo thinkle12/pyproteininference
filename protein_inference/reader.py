@@ -7,16 +7,11 @@ Created on Thu Nov 30 12:52:14 2017
 """
 
 from protein_inference.physical import Psm
-import yaml
 import csv
-import re
 import itertools
 from logging import getLogger
-##Here we create the reader class which is capable of reading in files as input for ProteinInference
-##The reader class creates a list of psm objects with various attributes...
 
 class Reader(object):
-    # TODO make this an abstract base class... IF I can
     """
     Main Reader Class which is parent to all reader subclasses
     """
@@ -42,11 +37,13 @@ class PercolatorReader(Reader):
     116108.15139.15139.6.dta	 3.44016	 0.000479928	7.60258e-10	K.MVVSMTLGLHPWIANIDDTQYLAAK.R	CNDP1_HUMAN|Q96KN2	B4E180_HUMAN|B4E180	A8K1K1_HUMAN|A8K1K1	J3KRP0_HUMAN|J3KRP0
 
     """
-    def __init__(self,target_file,decoy_file,digest_class,parameter_file_object):
+
+    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
+
+    def __init__(self,target_file,decoy_file,digest_class,parameter_file_object,append_alt_from_db=False):
         self.target_file = target_file
         self.decoy_file = decoy_file
         #Define Indicies based on input
-        # TODO Change this from index based to reading in as a dict... similar to percolator
         self.psmid_index = 0
         self.perc_score_index = 1
         self.q_value_index = 2
@@ -56,6 +53,7 @@ class PercolatorReader(Reader):
         self.psms = None
         self.search_id = None
         self.digest_class = digest_class
+        self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
         self.logger = getLogger('protein_inference.reader.PercolatorReader.read_psms')
@@ -147,7 +145,10 @@ class PercolatorReader(Reader):
                 p.percscore = float(psm_info[self.perc_score_index])
                 p.qvalue = float(psm_info[self.q_value_index])
                 p.pepvalue = float(psm_info[self.posterior_error_prob_index])
-                poss_proteins = list(set(psm_info[self.proteinIDs_index:self.proteinIDs_index+50]))
+                if self.parameter_file_object.inference_type=="none":
+                    poss_proteins = psm_info[self.proteinIDs_index]
+                else:
+                    poss_proteins = list(set(psm_info[self.proteinIDs_index:self.proteinIDs_index+self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]))
                 p.possible_proteins = poss_proteins # Restrict to 50 total possible proteins...
                 p.psm_id = psm_info[self.psmid_index]
 
@@ -160,7 +161,7 @@ class PercolatorReader(Reader):
                     stripped_peptide = Psm.remove_peptide_mods(peptide_string)
                     current_peptide = stripped_peptide
                 # Add the other possible_proteins from insilicodigest here...
-                current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide]) # TODO This peptide needs to be scrubbed of Mods...
+                current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
                 # Sort Alt Proteins by Swissprot then Trembl...
                 our_target_sp_proteins = sorted(
                     [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
@@ -175,15 +176,22 @@ class PercolatorReader(Reader):
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
                 # Restrict to 50 possible proteins
-                for alt_proteins in identifiers_sorted[:50]:
-                    if alt_proteins not in p.possible_proteins:
-                        p.possible_proteins.append(alt_proteins)
+                if self.append_alt_from_db:
+                    for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
+                        if alt_proteins not in p.possible_proteins and len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
+                            p.possible_proteins.append(alt_proteins)
+                if len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
+                    p.possible_proteins = [p.possible_proteins[x] for x in range(self.MAX_ALLOWED_ALTERNATIVE_PROTEINS)]
+                else:
+                    pass
 
                 p.possible_proteins = [x for x in p.possible_proteins if x]
                 if not current_alt_proteins:
                     self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
 
-
+                # If no inference only select first poss protein
+                if self.parameter_file_object.inference_type=="none":
+                    p.possible_proteins = [p.possible_proteins[0]]
 
 
                 list_of_psm_objects.append(p)
@@ -204,14 +212,18 @@ class ProteologicPostSearchReader(Reader):
     This Method will be used to read from post processing proteologic logical object... which can either be LDA or Percolator Results...
     Essentially it will just be a searchID and an LDA/Percolator ID
     """
+
+    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
     
-    def __init__(self, proteologic_object, search_id, postsearch_id, digest_class, parameter_file_object):
+    def __init__(self, proteologic_object, search_id, postsearch_id, digest_class, parameter_file_object, append_alt_from_db=False):
         self.proteologic_object=proteologic_object
         self.search_id = search_id
         self.postsearch_id = postsearch_id
 
         self.psms = None
         self.digest_class = digest_class
+        self.append_alt_from_db = append_alt_from_db
+
 
         self.parameter_file_object = parameter_file_object
         self.logger = getLogger('protein_inference.reader.ProteologicPostSearchReader.read_psms')
@@ -288,14 +300,21 @@ class ProteologicPostSearchReader(Reader):
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
                 # Restrict to 50 possible proteins...
-                for alt_proteins in identifiers_sorted[:50]:
-                    if alt_proteins not in p.possible_proteins:
-                        p.possible_proteins.append(alt_proteins)
+                if self.append_alt_from_db:
+                    for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
+                        if alt_proteins not in p.possible_proteins and len(p.possible_proteins)<self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
+                            p.possible_proteins.append(alt_proteins)
+                if len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
+                    p.possible_proteins = [p.possible_proteins[x] for x in range(self.MAX_ALLOWED_ALTERNATIVE_PROTEINS)]
+                else:
+                    pass
                 if not current_alt_proteins:
                     self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
 
 
-
+                # If no inference only select first poss protein
+                if self.parameter_file_object.inference_type=="none":
+                    p.possible_proteins = [p.possible_proteins[0]]
 
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)
@@ -334,13 +353,15 @@ class GenericReader(Reader):
 
 
 
-    def __init__(self, target_file, decoy_file, digest_class, parameter_file_object):
+    def __init__(self, target_file, decoy_file, digest_class, parameter_file_object, append_alt_from_db=False):
         self.target_file = target_file
         self.decoy_file = decoy_file
         self.psms = None
         self.search_id = None
         self.digest_class = digest_class
         self.load_custom_score = False
+
+        self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
         self.scoring_variable = parameter_file_object.score
@@ -463,7 +484,8 @@ class GenericReader(Reader):
                     except KeyError:
                         break
                 # Remove potential Repeats
-                p.possible_proteins = list(set(p.possible_proteins))
+                if self.parameter_file_object.inference_type!="none":
+                    p.possible_proteins = list(set(p.possible_proteins))
 
                 # Restrict to 50 total possible proteins...
                 p.psm_id = psm_info[self.PSMID]
@@ -497,11 +519,21 @@ class GenericReader(Reader):
                 identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 
                 # Restrict to 50 possible proteins
-                for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
-                    if alt_proteins not in p.possible_proteins:
-                        p.possible_proteins.append(alt_proteins)
+                if self.append_alt_from_db:
+                    for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
+                        if alt_proteins not in p.possible_proteins and len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
+                            p.possible_proteins.append(alt_proteins)
+
+                if len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
+                    p.possible_proteins = [p.possible_proteins[x] for x in range(self.MAX_ALLOWED_ALTERNATIVE_PROTEINS)]
+                else:
+                    pass
                 if not current_alt_proteins:
                     self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
+
+                # If no inference only select first poss protein
+                if self.parameter_file_object.inference_type=="none":
+                    p.possible_proteins = [p.possible_proteins[0]]
 
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)

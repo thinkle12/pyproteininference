@@ -158,7 +158,7 @@ class Inference(object):
 
     def _apply_group_ids_no_groups(self, grouped_protein_objects, digest_class, data_class):
 
-        logger = getLogger('protein_inference.inference.Inference._group_by_score')
+        logger = getLogger('protein_inference.inference.Inference._apply_group_ids_no_groups')
 
         sp_protein_set = set(digest_class.swiss_prot_protein_set)
 

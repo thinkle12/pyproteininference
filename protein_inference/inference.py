@@ -979,3 +979,50 @@ class FirstProtein(Inference):
 
         self.data_class.grouped_scored_proteins = scores_grouped
         self.data_class.protein_group_objects = list_of_group_objects
+
+
+class PeptideCentric(Inference):
+
+    def __init__(self, data_class, digest_class):
+
+        self.data_class = data_class
+        self.digest_class = digest_class
+        self.scored_data = self.data_class.get_protein_data()
+        self.lead_protein_set = None
+        self.parameter_file_object = data_class.parameter_file_object
+
+
+    def infer_proteins(self):
+
+        logger = getLogger('protein_inference.inference.PeptideCentric.infer_proteins')
+
+        # Get the higher or lower variable
+        if not self.data_class.high_low_better:
+            hl = self.data_class.higher_or_lower()
+            higher_or_lower = self.data_class.high_low_better
+        else:
+            higher_or_lower = self.data_class.high_low_better
+
+        logger.info("Applying Group ID's for the Peptide Centric Method")
+
+        regrouped_proteins = self._apply_group_ids_peptide_centric(data_class=self.data_class)
+
+        scores_grouped = regrouped_proteins["scores_grouped"]
+        list_of_group_objects = regrouped_proteins["group_objects"]
+
+        logger.info('Sorting Results based on lead Protein Score')
+        if higher_or_lower == 'lower':
+            scores_grouped = sorted(scores_grouped, key=lambda k: (float(k[0].score), -float(k[0].num_peptides)),
+                                    reverse=False)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: (
+            float(k.proteins[0].score), -float(k.proteins[0].num_peptides)),
+                                           reverse=False)
+        if higher_or_lower == 'higher':
+            scores_grouped = sorted(scores_grouped, key=lambda k: (float(k[0].score), float(k[0].num_peptides)),
+                                    reverse=True)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: (
+            float(k.proteins[0].score), float(k.proteins[0].num_peptides)),
+                                           reverse=True)
+
+        self.data_class.grouped_scored_proteins = scores_grouped
+        self.data_class.protein_group_objects = list_of_group_objects

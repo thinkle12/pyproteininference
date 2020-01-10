@@ -23,7 +23,7 @@ class Inference(object):
     Parent Inference class for all grouper subset classes
     """
 
-    INFERENCE_TYPES = ["parsimony", "inclusion", "exclusion", "none"]
+    INFERENCE_TYPES = ["parsimony", "inclusion", "exclusion", "none", "peptide_centric"]
     GROUPING_TYPES = ["subset_peptides", "shared_peptides", "none"]
     
     def __init__(self):

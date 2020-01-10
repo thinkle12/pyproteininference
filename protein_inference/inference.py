@@ -198,6 +198,41 @@ class Inference(object):
         return(return_dict)
 
 
+    def _apply_group_ids_peptide_centric(self, data_class):
+
+        logger = getLogger('protein_inference.inference.Inference._apply_group_ids_peptide_centric')
+
+        grouped_protein_objects = data_class.get_protein_data()
+
+        # Here we create group ID's
+        group_id = 0
+        list_of_proteins_grouped = []
+        list_of_group_objects = []
+        for protein_group in grouped_protein_objects:
+            # TODO, This split needs to get moved to an external function or method and should be backed by param file
+            protein_group.peptides = set([x.split(".")[1] for x in list(protein_group.raw_peptides)])
+            protein_list = []
+            group_id = group_id + 1
+            pg = ProteinGroup(group_id)
+            logger.info("Created Protein Group with ID: {}".format(str(group_id)))
+            # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
+            if group_id not in protein_group.group_identification:
+                protein_group.group_identification.add(group_id)
+            protein_group.num_peptides = len(protein_group.peptides)
+            # Here append the number of unique peptides... so we can use this as secondary sorting...
+            protein_list.append(protein_group)
+            # Sorted protein_groups then becomes a list of lists... of protein objects
+
+            pg.proteins = protein_list
+            list_of_group_objects.append(pg)
+            list_of_proteins_grouped.append([protein_group])
+
+
+        return_dict = {"scores_grouped": list_of_proteins_grouped, "group_objects":list_of_group_objects}
+
+        return(return_dict)
+
+
     def _apply_protein_group_ids(self, grouped_protein_objects, data_class, digest_class):
         logger = getLogger('protein_inference.inference.Inference._apply_protein_group_ids')
 

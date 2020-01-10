@@ -277,16 +277,35 @@ class DataStore(object):
         except KeyError:
             score_key = self.CUSTOM_SCORE_KEY
 
-        # Loop through all Psms
-        for psms in psm_data:
-            # Loop through all proteins
-            for prots in psms.possible_proteins:
+        if self.parameter_file_object.inference_type!="peptide_centric":
+            # Loop through all Psms
+            for psms in psm_data:
+                # Loop through all proteins
+                for prots in psms.possible_proteins:
+                    # Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
+                    protein_psm_score_dictionary[prots].append(
+                        {'peptide': psms.identifier.split('.')[1], 'score': getattr(psms, score_key)})
+                    raw_peptide_dictionary[prots].append({'complete_peptide': psms.identifier})
+                    psmid_peptide_dictionary[prots].append(
+                        {'peptide': psms.identifier.split('.')[1], 'psm_id': psms.psm_id})
+
+
+        else:
+            self.peptide_to_protein_dictionary()
+
+            for psms in psm_data:
+                protein_set = self.peptide_protein_dictionary[psms.identifier.split(".")[1]]
+                # TODO here is where we would order the protein name by turning protein_set to an ordered list.
+                # TODO also we would restrict the number of identifiers here IE 5, this value could come from param object or could be a class constant
+                protein_name = ";".join(sorted(list(protein_set)))
+
                 # Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
-                protein_psm_score_dictionary[prots].append(
+                protein_psm_score_dictionary[protein_name].append(
                     {'peptide': psms.identifier.split('.')[1], 'score': getattr(psms, score_key)})
-                raw_peptide_dictionary[prots].append({'complete_peptide': psms.identifier})
-                psmid_peptide_dictionary[prots].append(
+                raw_peptide_dictionary[protein_name].append({'complete_peptide': psms.identifier})
+                psmid_peptide_dictionary[protein_name].append(
                     {'peptide': psms.identifier.split('.')[1], 'psm_id': psms.psm_id})
+
         protein_list = []
         # TODO Sort the protein_psm_score_dictionary by SP, Then ##SP then TR then ##TR
         for pkeys in sorted(protein_psm_score_dictionary.keys()):

@@ -41,6 +41,7 @@ class ProteinInferenceParameter(object):
         self.inference_type = None
         self.tag = None
         self.score = None
+        self.max_identifiers_peptide_centric = None
         self.logger = getLogger('protein_inference.parameters.ProteinInferenceParameter.validate_parameters')
 
         self.convert_to_object()
@@ -82,6 +83,7 @@ class ProteinInferenceParameter(object):
             self.tag = yaml_params['Parameters']["Tag"]
             self.score = yaml_params["Parameters"]["Score"]
             self.grouping_type = yaml_params["Parameters"]["Grouping_Type"]
+            self.max_identifiers_peptide_centric = yaml_params["Parameters"]["Max_Identifiers_Peptide_Centric"]
 
         else:
             self.logger.info("Yaml parameter file not found, parameters set to default")
@@ -103,6 +105,7 @@ class ProteinInferenceParameter(object):
             self.tag = "Test"
             self.score_type = "multiplicative"
             self.grouping_type = "shared_peptides"
+            self.max_identifiers_peptide_centric = 5
 
     def validate_parameters(self):
         # Run all of the parameter validations

@@ -70,6 +70,7 @@ class DataStore(object):
         self.protein_group_objects = None
         self.qvality_output = None
         self.decoy_symbol = self.parameter_file_object.decoy_symbol
+        self.digest_class = digest_class
         self.SCORE_MAPPER = {"q_value":"qvalue",
                              "pep_value": "pepvalue",
                              "perc_score":"percscore",

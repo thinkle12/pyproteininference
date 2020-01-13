@@ -67,6 +67,8 @@ class TestLoadParsimonyWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.inference_type, 'parsimony')
         self.assertEqual(protein_inference_parameters.tag, 'test_parsimony')
         self.assertEqual(protein_inference_parameters.grouping_type, 'shared_peptides')
+        self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
+
 
 
         ### STEP 2: Start with running an In Silico Digestion ###

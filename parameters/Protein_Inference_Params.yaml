@@ -17,3 +17,4 @@ Parameters:
   Inference_Type: inclusion
   Tag: inclusion_tst_shared_peptides
   Grouping_Type: subset_peptides
+  Max_Identifiers_Peptide_Centric: 5

@@ -294,11 +294,14 @@ class DataStore(object):
         else:
             self.peptide_to_protein_dictionary()
 
+            sp_proteins = self.digest_class.swiss_prot_protein_set
             for psms in psm_data:
                 protein_set = self.peptide_protein_dictionary[psms.identifier.split(".")[1]]
-                # TODO here is where we would order the protein name by turning protein_set to an ordered list.
-                # TODO also we would restrict the number of identifiers here IE 5, this value could come from param object or could be a class constant
-                protein_name = ";".join(sorted(list(protein_set)))
+                # Sort protein_set by sp-alpha, decoy-sp-alpha, tr-alpha, decoy-tr-alpha
+                sorted_protein_list = self.sort_protein_strings(protein_string_list=protein_set, sp_proteins=sp_proteins)
+                # Restrict the number of identifiers by the value in param file max_identifiers_peptide_centric
+                sorted_protein_list = sorted_protein_list[:self.parameter_file_object.max_identifiers_peptide_centric]
+                protein_name = ";".join(sorted_protein_list)
 
                 # Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
                 protein_psm_score_dictionary[protein_name].append(

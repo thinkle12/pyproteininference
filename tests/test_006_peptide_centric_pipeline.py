@@ -67,6 +67,7 @@ class TestLoadPeptideCentricWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.inference_type, 'peptide_centric')
         self.assertEqual(protein_inference_parameters.tag, 'test_peptide_centric')
         self.assertEqual(protein_inference_parameters.grouping_type, 'none')
+        self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
 
 
         ### STEP 2: Start with running an In Silico Digestion ###

@@ -80,3 +80,5 @@ percolator_output/
 output/
 glpkinout/
 data/
+!tests/data/
+!tests/output/

@@ -17,3 +17,4 @@ Parameters:
   Inference_Type: inclusion
   Tag: test_inclusion
   Grouping_Type: none
+  Max_Identifiers_Peptide_Centric: 5

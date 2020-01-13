@@ -70,6 +70,7 @@ class DataStore(object):
         self.protein_group_objects = None
         self.qvality_output = None
         self.decoy_symbol = self.parameter_file_object.decoy_symbol
+        self.digest_class = digest_class
         self.SCORE_MAPPER = {"q_value":"qvalue",
                              "pep_value": "pepvalue",
                              "perc_score":"percscore",
@@ -277,16 +278,38 @@ class DataStore(object):
         except KeyError:
             score_key = self.CUSTOM_SCORE_KEY
 
-        # Loop through all Psms
-        for psms in psm_data:
-            # Loop through all proteins
-            for prots in psms.possible_proteins:
+        if self.parameter_file_object.inference_type!="peptide_centric":
+            # Loop through all Psms
+            for psms in psm_data:
+                # Loop through all proteins
+                for prots in psms.possible_proteins:
+                    # Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
+                    protein_psm_score_dictionary[prots].append(
+                        {'peptide': psms.identifier.split('.')[1], 'score': getattr(psms, score_key)})
+                    raw_peptide_dictionary[prots].append({'complete_peptide': psms.identifier})
+                    psmid_peptide_dictionary[prots].append(
+                        {'peptide': psms.identifier.split('.')[1], 'psm_id': psms.psm_id})
+
+
+        else:
+            self.peptide_to_protein_dictionary()
+
+            sp_proteins = self.digest_class.swiss_prot_protein_set
+            for psms in psm_data:
+                protein_set = self.peptide_protein_dictionary[psms.identifier.split(".")[1]]
+                # Sort protein_set by sp-alpha, decoy-sp-alpha, tr-alpha, decoy-tr-alpha
+                sorted_protein_list = self.sort_protein_strings(protein_string_list=protein_set, sp_proteins=sp_proteins)
+                # Restrict the number of identifiers by the value in param file max_identifiers_peptide_centric
+                sorted_protein_list = sorted_protein_list[:self.parameter_file_object.max_identifiers_peptide_centric]
+                protein_name = ";".join(sorted_protein_list)
+
                 # Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
-                protein_psm_score_dictionary[prots].append(
+                protein_psm_score_dictionary[protein_name].append(
                     {'peptide': psms.identifier.split('.')[1], 'score': getattr(psms, score_key)})
-                raw_peptide_dictionary[prots].append({'complete_peptide': psms.identifier})
-                psmid_peptide_dictionary[prots].append(
+                raw_peptide_dictionary[protein_name].append({'complete_peptide': psms.identifier})
+                psmid_peptide_dictionary[protein_name].append(
                     {'peptide': psms.identifier.split('.')[1], 'psm_id': psms.psm_id})
+
         protein_list = []
         # TODO Sort the protein_psm_score_dictionary by SP, Then ##SP then TR then ##TR
         for pkeys in sorted(protein_psm_score_dictionary.keys()):
@@ -915,4 +938,24 @@ class DataStore(object):
         logger.info("Number of Total Proteins in from Digest: {}".format(proteins_in_digest))
         logger.info("Number of Reviewed Proteins in from Digest: {}".format(reviewed_proteins))
         logger.info("Number of Unreviewed Proteins in from Digest: {}".format(unreviewed_proteins))
+
+    def sort_protein_strings(self,protein_string_list, sp_proteins):
+
+        our_target_sp_proteins = sorted(
+            [x for x in protein_string_list if
+             x in sp_proteins and self.parameter_file_object.decoy_symbol not in x])
+        our_decoy_sp_proteins = sorted(
+            [x for x in protein_string_list if
+             x in sp_proteins and self.parameter_file_object.decoy_symbol in x])
+
+        our_target_tr_proteins = sorted(
+            [x for x in protein_string_list if
+             x not in sp_proteins and self.parameter_file_object.decoy_symbol not in x])
+        our_decoy_tr_proteins = sorted(
+            [x for x in protein_string_list if
+             x not in sp_proteins and self.parameter_file_object.decoy_symbol in x])
+
+        identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
+
+        return(identifiers_sorted)
 

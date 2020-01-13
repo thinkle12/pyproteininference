@@ -64,6 +64,7 @@ class TestLoadExclusionWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.inference_type, 'exclusion')
         self.assertEqual(protein_inference_parameters.tag, 'test_exclusion')
         self.assertEqual(protein_inference_parameters.grouping_type, 'subset_peptides')
+        self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
 
 
 

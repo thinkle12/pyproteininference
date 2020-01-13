@@ -14,7 +14,7 @@ Parameters:
   Decoy_Symbol: "##"
   Isoform_Symbol: "-"
   Reviewed_Identifier_Symbol: "sp|"
-  Inference_Type: parsimony
-  Tag: test_parsimony
-  Grouping_Type: shared_peptides
+  Inference_Type: peptide_centric
+  Tag: test_peptide_centric
+  Grouping_Type: none
   Max_Identifiers_Peptide_Centric: 5

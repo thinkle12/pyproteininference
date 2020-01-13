@@ -118,6 +118,7 @@ class ProteinInferenceParameter(object):
         self._validate_score_combination()
         self._validate_inference_type()
         self._validate_grouping_type()
+        self._validate_max_id()
 
 
     def _validate_digest_type(self):
@@ -253,5 +254,12 @@ class ProteinInferenceParameter(object):
             raise ValueError(
                 "Grouping Type '{}' not supported, please use one of the following Grouping Types: '{}'".format(
                     self.grouping_type, ", ".join(Inference.GROUPING_TYPES)))
+
+    def _validate_max_id(self):
+        # Check if max_identifiers_peptide_centric param is an INT
+        if type(self.max_identifiers_peptide_centric)==int:
+            self.logger.info("Max Number of Indentifiers for Peptide Centric Inference: '{}'".format(self.max_identifiers_peptide_centric))
+        else:
+            raise ValueError("Max Number of Indentifiers for Peptide Centric Inference must be an integer, provided value: {}".format(self.max_identifiers_peptide_centric))
 
 

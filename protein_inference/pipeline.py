@@ -11,6 +11,8 @@ class ProteinInferencePipeline(object):
         # Add an option to just have files... which is target/decoy already combined...
         self.files = files
         self.output_directory = output_directory
+        self.data = None
+        self.digest = None
 
     def execute(self):
 
@@ -118,6 +120,9 @@ class ProteinInferencePipeline(object):
         export_type = protein_inference_parameters.export
         export = protein_inference.export.Export(data_class=data)
         export.export_to_csv(directory=self.output_directory, export_type=export_type)
+
+        self.data = data
+        self.digest = digest
 
         logger.info('Protein Inference Finished')
 

@@ -21,7 +21,7 @@ class ProteinInferencePipeline(object):
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
-        protein_inference_parameters = protein_inference.ProteinInferenceParameter(yaml_param_filepath=self.parameter_file)
+        protein_inference_parameters = protein_inference.parameters.ProteinInferenceParameter(yaml_param_filepath=self.parameter_file)
 
         ### STEP 2: Start with running an In Silico Digestion ###
         ### STEP 2: Start with running an In Silico Digestion ###

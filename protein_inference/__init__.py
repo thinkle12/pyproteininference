@@ -16,3 +16,4 @@ from protein_inference import physical
 from protein_inference import entrapment
 from protein_inference import qvality
 from protein_inference import parameters
+from protein_inference import pipeline

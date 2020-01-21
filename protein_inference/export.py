@@ -25,6 +25,9 @@ class Export(object):
 
         logger = getLogger('protein_inference.export.Export.export_to_csv')
 
+        if not directory:
+            directory = os.getcwd()
+
         data = self.data_class
         tag = data.parameter_file_object.tag
 

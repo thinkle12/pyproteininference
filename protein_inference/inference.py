@@ -16,6 +16,7 @@ from protein_inference.physical import Psm
 import re
 from collections import OrderedDict
 from logging import getLogger
+import pulp
 
 
 class Inference(object):

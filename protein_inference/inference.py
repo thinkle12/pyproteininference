@@ -605,7 +605,7 @@ class Parsimony(Inference):
         identifiers_sorted = self.data_class.get_sorted_identifiers(digest_class=self.digest_class, scored=True)
 
         # Get all the proteins that we scored and the ones picked if picker was ran...
-        data_proteins = [x for x in self.data_class.protein_peptide_dictionary.keys() if x in identifiers_sorted]
+        data_proteins = sorted([x for x in self.data_class.protein_peptide_dictionary.keys() if x in identifiers_sorted])
         # Get the set of peptides for each protein...
         data_peptides = [set(self.data_class.protein_peptide_dictionary[x]) for x in data_proteins]
         flat_peptides_in_data = set([item for sublist in data_peptides for item in sublist])

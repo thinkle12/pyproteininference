@@ -20,14 +20,13 @@ import logging
 TEST_DATABASE = resource_filename('protein_inference', '../tests/data/test_database.fasta')
 TARGET_FILE = resource_filename('protein_inference', '../tests/data/test_perc_data_target.txt')
 DECOY_FILE = resource_filename('protein_inference', '../tests/data/test_perc_data_decoy.txt')
-PARAMETER_FILE = resource_filename('protein_inference', '../tests/data/test_params_peptide_centric.yaml')
+PARAMETER_FILE = resource_filename('protein_inference', '../tests/data/test_params_parsimony_pulp.yaml')
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('protein_inference', '../tests/output/')
 GLPKINOUT_PATH = resource_filename('protein_inference', '../tests/glpkinout/')
-SKIP_RUNNING_GLPK = True
 
-LEAD_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/test_peptide_centric_q_value_leads_ml_posterior_error_prob.csv')
-ALL_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/test_peptide_centric_q_value_all_ml_posterior_error_prob.csv')
+LEAD_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/test_parsimony_q_value_leads_ml_posterior_error_prob.csv')
+ALL_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/test_parsimony_q_value_all_ml_posterior_error_prob.csv')
 
 IDENTIFIER_INDEX = 0
 SCORE_INDEX = 1
@@ -36,10 +35,10 @@ GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("protein_inference.tests.test_006_peptide_centric_pipeline.py")
+logger = logging.getLogger("protein_inference.tests.test_001_parsimony_pipeline.py")
 
 
-class TestLoadPeptideCentricWorkflow(TestCase):
+class TestLoadParsimonyPulpWorkflow(TestCase):
 
     def test_workflow1(self):
 
@@ -64,11 +63,11 @@ class TestLoadPeptideCentricWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.decoy_symbol, '##')
         self.assertEqual(protein_inference_parameters.isoform_symbol, '-')
         self.assertEqual(protein_inference_parameters.reviewed_identifier_symbol, 'sp|')
-        self.assertEqual(protein_inference_parameters.inference_type, 'peptide_centric')
-        self.assertEqual(protein_inference_parameters.tag, 'test_peptide_centric')
-        self.assertEqual(protein_inference_parameters.grouping_type, 'none')
+        self.assertEqual(protein_inference_parameters.inference_type, 'parsimony')
+        self.assertEqual(protein_inference_parameters.tag, 'test_parsimony')
+        self.assertEqual(protein_inference_parameters.grouping_type, 'shared_peptides')
         self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
-        self.assertEqual(protein_inference_parameters.lp_solver, "none")
+        self.assertEqual(protein_inference_parameters.lp_solver, 'pulp')
 
 
 
@@ -141,7 +140,7 @@ class TestLoadPeptideCentricWorkflow(TestCase):
         # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == 'parsimony':
             group = protein_inference.inference.Parsimony(data_class=data, digest_class=digest)
-            group.infer_proteins(glpkinout_directory=GLPKINOUT_PATH, skip_running_glpk=SKIP_RUNNING_GLPK)
+            group.infer_proteins(glpkinout_directory=None, skip_running_glpk=None)
 
         if inference_type == "inclusion":
             group = protein_inference.inference.Inclusion(data_class=data, digest_class=digest)
@@ -150,15 +149,6 @@ class TestLoadPeptideCentricWorkflow(TestCase):
         if inference_type == "exclusion":
             group = protein_inference.inference.Exclusion(data_class=data, digest_class=digest)
             group.infer_proteins()
-
-        if inference_type == "exclusion":
-            group = protein_inference.inference.Exclusion(data_class=data, digest_class=digest)
-            group.infer_proteins()
-
-        if inference_type == "peptide_centric":
-            group = protein_inference.inference.PeptideCentric(data_class=data, digest_class=digest)
-            group.infer_proteins()
-
 
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
@@ -196,6 +186,7 @@ class TestLoadPeptideCentricWorkflow(TestCase):
             self.assertAlmostEqual(lead_protein.score, float(lead_output[i][SCORE_INDEX]))
             self.assertEqual(protein_groups[i].q_value, float(lead_output[i][Q_VALUE_INDEX]))
             self.assertEqual(protein_groups[i].number_id, int(lead_output[i][GROUP_ID_INDEX]))
+            # TODO also, make the pulp inference code cleaner... TY
             self.assertEqual(lead_protein.peptides, set(lead_output[i][PEPTIDES_INDEX:]))
 
 

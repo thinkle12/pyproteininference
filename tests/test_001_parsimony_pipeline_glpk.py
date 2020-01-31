@@ -20,7 +20,7 @@ import logging
 TEST_DATABASE = resource_filename('protein_inference', '../tests/data/test_database.fasta')
 TARGET_FILE = resource_filename('protein_inference', '../tests/data/test_perc_data_target.txt')
 DECOY_FILE = resource_filename('protein_inference', '../tests/data/test_perc_data_decoy.txt')
-PARAMETER_FILE = resource_filename('protein_inference', '../tests/data/test_params_parsimony.yaml')
+PARAMETER_FILE = resource_filename('protein_inference', '../tests/data/test_params_parsimony_glpk.yaml')
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('protein_inference', '../tests/output/')
 GLPKINOUT_PATH = resource_filename('protein_inference', '../tests/glpkinout/')
@@ -39,7 +39,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("protein_inference.tests.test_001_parsimony_pipeline.py")
 
 
-class TestLoadParsimonyWorkflow(TestCase):
+class TestLoadParsimonyGlpkWorkflow(TestCase):
 
     def test_workflow1(self):
 
@@ -68,6 +68,7 @@ class TestLoadParsimonyWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.tag, 'test_parsimony')
         self.assertEqual(protein_inference_parameters.grouping_type, 'shared_peptides')
         self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
+        self.assertEqual(protein_inference_parameters.lp_solver, 'glpk')
 
 
 

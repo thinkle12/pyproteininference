@@ -65,6 +65,7 @@ class TestLoadNoInferenceWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.tag, 'test_no_inference')
         self.assertEqual(protein_inference_parameters.grouping_type, 'subset_peptides')
         self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
+        self.assertEqual(protein_inference_parameters.lp_solver, "none")
 
 
 

@@ -892,6 +892,169 @@ class Parsimony(Inference):
         self.data_class.grouped_scored_proteins = scores_grouped
         self.data_class.protein_group_objects = list_of_group_objects
 
+
+    def _pulp_grouper(self, data_class):
+
+        logger = getLogger('protein_inference.inference.Parsimony._pulp_grouper')
+
+        # Here we get the peptide to protein dictionary
+        pep_prot_dict = self.data_class.peptide_to_protein_dictionary()
+
+        prot_pep_dict = self.data_class.protein_to_peptide_dictionary()
+
+        identifiers_sorted = self.data_class.get_sorted_identifiers(digest_class=self.digest_class, scored=True)
+
+        # Get all the proteins that we scored and the ones picked if picker was ran...
+        data_proteins = sorted([x for x in self.data_class.protein_peptide_dictionary.keys() if x in identifiers_sorted])
+        # Get the set of peptides for each protein...
+        data_peptides = [set(self.data_class.protein_peptide_dictionary[x]) for x in data_proteins]
+        flat_peptides_in_data = set([item for sublist in data_peptides for item in sublist])
+
+        peptide_sets = []
+        # Loop over the list of peptides...
+        for k in range(len(data_peptides)):
+            raw_peptides = data_peptides[k]
+            t_set = set()
+            # Loop over each individual peptide per protein...
+            for peps in raw_peptides:
+                peptide = peps
+
+                # Remove mods...
+                new_peptide = Psm.remove_peptide_mods(peptide)
+                # Add it to a temporary set...
+                t_set.add(new_peptide)
+            # Append this set to a new list...
+            peptide_sets.append(t_set)
+            # Set that proteins peptides to be the unmodified ones...
+            data_peptides[k] = t_set
+
+        # Get them all...
+        all_peptides = [x for x in data_peptides]
+        # Remove redundant sets...
+        restrictedlst = [set(i) for i in OrderedDict.fromkeys(frozenset(item) for item in peptide_sets)]
+
+        # Loop over  the restricted list of peptides...
+        ind_list = []
+        for p in restrictedlst:
+            # Get its index in terms of the overall list...
+            ind_list.append(all_peptides.index(p))
+
+        # Get the protein based on the index
+        restricted_proteins = [data_proteins[x] for x in range(len(data_peptides)) if x in ind_list]
+
+        # Here we get the list of all proteins
+        plist = []
+        for peps in pep_prot_dict.keys():
+            for prots in list(pep_prot_dict[peps]):
+                if prots in restricted_proteins and peps in flat_peptides_in_data:
+                    plist.append(prots)
+
+        # Here we get the unique proteins
+        unique_prots = list(set(plist).union())
+        unique_protein_set = set(unique_prots)
+
+        unique_prots_sorted = [x for x in identifiers_sorted if x in unique_prots]
+
+        # Define the protein variables with a lower bound of 0 and catgeory Integer
+        prots = pulp.LpVariable.dicts("prot", indexs=unique_prots_sorted, lowBound=0, cat="Integer")
+
+        # Define our Lp Problem which is to Minimize our objective function
+        prob = pulp.LpProblem("Parsimony_Problem", pulp.LpMinimize)
+
+        # Define our objective function, which is to take the sum of all of our proteins and find the minimum set.
+        prob += pulp.lpSum([prots[i] for i in prots])
+
+        # Set up our constraints. The constrains are as follows:
+
+        # Loop over each peptide and determine the proteins it maps to...
+        # Each peptide is a constraint with the proteins it maps to having to be greater than or equal to 1
+        # In the case below we see that protein 3 has a unique peptide, protein 2 is redundant
+
+        # TODO try to add sorted() to pep_prot_dict[peptides] below...
+        logger.info("Sorting peptides before looping")
+        for peptides in sorted(list(pep_prot_dict.keys())):
+            try:
+                prob += pulp.lpSum([prots[i] for i in sorted(list(pep_prot_dict[peptides])) if i in unique_protein_set]) >= 1
+            except KeyError:
+                logger.info("Not including protein {} in pulp model".format(pep_prot_dict[peptides]))
+
+        prob.solve()
+
+        scored_data = data_class.get_protein_data()
+        scored_proteins = list(scored_data)
+        protein_finder = [x.identifier for x in scored_proteins]
+
+        lead_protein_objects = []
+        lead_protein_identifiers = []
+        for proteins in unique_prots_sorted:
+            parsimony_value = pulp.value(prots[proteins])
+            # print("prot" + str(proteins) + '  ' + str(parsimony_value))
+            if proteins in protein_finder and parsimony_value==1:
+                p_ind = protein_finder.index(proteins)
+                protein_object = scored_proteins[p_ind]
+                lead_protein_objects.append(protein_object)
+                lead_protein_identifiers.append(protein_object.identifier)
+            else:
+                if parsimony_value==1:
+                    # Why are some proteins not being found when we run exclusion???
+                    logger.warning("Protein {} not found with protein finder...".format(proteins))
+                else:
+                    pass
+
+
+        self.lead_protein_objects = lead_protein_objects
+
+        group_dict = self._group_by_peptides(scored_data=scored_data, data_class=self.data_class,
+                                             digest_class=self.digest_class, inference_type="parsimony",
+                                             lead_protein_objects=self.lead_protein_objects, grouping_type=self.data_class.parameter_file_object.grouping_type)
+
+        self.list_of_prots_not_in_db = group_dict["missing_proteins"]
+        self.list_of_peps_not_in_db = group_dict["missing_peptides"]
+        grouped_proteins = group_dict["grouped_proteins"]
+
+        regrouped_proteins = self._swissprot_and_isoform_override(scored_data=scored_data,
+                                                                  grouped_proteins=grouped_proteins,
+                                                                  data_class=self.data_class,
+                                                                  digest_class=self.digest_class,
+                                                                  override_type="soft", isoform_override=True)
+
+        scores_grouped = regrouped_proteins["scores_grouped"]
+        list_of_group_objects = regrouped_proteins["group_objects"]
+        lead_replaced_prot_pairs = regrouped_proteins["lead_replaced"]
+
+        self.data_class.lead_replaced_proteins = lead_replaced_prot_pairs
+
+        # Get the higher or lower variable
+        if not self.data_class.high_low_better:
+            higher_or_lower = self.data_class.higher_or_lower()
+        else:
+            higher_or_lower = self.data_class.high_low_better
+
+        logger.info('Sorting Results based on lead Protein Score')
+        if higher_or_lower == 'lower':
+            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
+                                           reverse=False)
+        if higher_or_lower == 'higher':
+            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=True)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
+                                           reverse=True)
+
+        list_of_group_objects = self._reassign_leads(list_of_group_objects, data_class=self.data_class)
+
+        logger.info('Re Sorting Results based on lead Protein Score')
+        if higher_or_lower == 'lower':
+            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
+                                           reverse=False)
+        if higher_or_lower == 'higher':
+            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=True)
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
+                                           reverse=True)
+
+        self.data_class.grouped_scored_proteins = scores_grouped
+        self.data_class.protein_group_objects = list_of_group_objects
+
     def infer_proteins(self, glpkinout_directory = "glpkinout/", skip_running_glpk = False):
 
         logger = getLogger('protein_inference.inference.Parsimony.infer_proteins')

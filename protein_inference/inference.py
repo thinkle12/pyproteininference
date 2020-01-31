@@ -1059,22 +1059,27 @@ class Parsimony(Inference):
 
         logger = getLogger('protein_inference.inference.Parsimony.infer_proteins')
 
-        try:
-            os.mkdir(glpkinout_directory)
-        except OSError:
-            logger.warning("Directory {} cannot be created or already exists".format(glpkinout_directory))
+        if self.parameter_file_object.lp_solver=="pulp":
 
-        self._setup_glpk(glpkin_filename=os.path.join(glpkinout_directory,'glpkin_' + self.parameter_file_object.tag + '.mod'))
+            self._pulp_grouper(data_class=self.data_class)
 
-        # For reference server_glpk_path = '/gne/research/apps/protchem/glpk/bin/glpsol'
-        self._glpk_runner(path_to_glpsol=self.parameter_file_object.glpk_path,
-                          glpkin=os.path.join(glpkinout_directory,'glpkin_' + self.parameter_file_object.tag + '.mod'),
-                          glpkout=os.path.join(glpkinout_directory,'glpkout_' + self.parameter_file_object.tag + '.sol'),
-                          skip_running=skip_running_glpk)
+        else:
 
-        self._glpk_grouper(data_class=self.data_class, digest_class=self.digest_class,
-                           swissprot_override='soft',
-                           glpksolution_filename=os.path.join(glpkinout_directory,'glpkout_' + self.parameter_file_object.tag + '.sol'))
+            try:
+                os.mkdir(glpkinout_directory)
+            except OSError:
+                logger.warning("Directory {} cannot be created or already exists".format(glpkinout_directory))
+
+            self._setup_glpk(glpkin_filename=os.path.join(glpkinout_directory,'glpkin_' + self.parameter_file_object.tag + '.mod'))
+
+            self._glpk_runner(path_to_glpsol=self.parameter_file_object.glpk_path,
+                              glpkin=os.path.join(glpkinout_directory,'glpkin_' + self.parameter_file_object.tag + '.mod'),
+                              glpkout=os.path.join(glpkinout_directory,'glpkout_' + self.parameter_file_object.tag + '.sol'),
+                              skip_running=skip_running_glpk)
+
+            self._glpk_grouper(data_class=self.data_class, digest_class=self.digest_class,
+                               swissprot_override='soft',
+                               glpksolution_filename=os.path.join(glpkinout_directory,'glpkout_' + self.parameter_file_object.tag + '.sol'))
 
 class FirstProtein(Inference):
 

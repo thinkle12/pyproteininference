@@ -24,7 +24,6 @@ PARAMETER_FILE = resource_filename('protein_inference', '../tests/data/test_para
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('protein_inference', '../tests/output/')
 GLPKINOUT_PATH = resource_filename('protein_inference', '../tests/glpkinout/')
-SKIP_RUNNING_GLPK = True
 
 LEAD_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/test_parsimony_q_value_leads_ml_posterior_error_prob.csv')
 ALL_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/test_parsimony_q_value_all_ml_posterior_error_prob.csv')
@@ -141,7 +140,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == 'parsimony':
             group = protein_inference.inference.Parsimony(data_class=data, digest_class=digest)
-            group.infer_proteins(glpkinout_directory=GLPKINOUT_PATH, skip_running_glpk=SKIP_RUNNING_GLPK)
+            group.infer_proteins(glpkinout_directory=None, skip_running_glpk=None)
 
         if inference_type == "inclusion":
             group = protein_inference.inference.Inclusion(data_class=data, digest_class=digest)

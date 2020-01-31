@@ -63,14 +63,14 @@ class Inference(object):
         logger.info("Grouping Peptides with Grouping Type: {}".format(grouping_type))
         logger.info("Grouping Peptides with Inference Type: {}".format(inference_type))
 
-        scored_data = sorted(scored_data, key=lambda k: len(k.raw_peptides), reverse=True)
+        scored_data = sorted(scored_data, key=lambda k: (len(k.raw_peptides),k.identifier), reverse=True)
 
         if inference_type== "parsimony":
             scored_proteins = lead_protein_objects
-            scored_proteins = sorted(scored_proteins, key=lambda k: len(k.raw_peptides), reverse=True)
+            scored_proteins = sorted(scored_proteins, key=lambda k: (len(k.raw_peptides),k.identifier), reverse=True)
         else:
             scored_proteins = list(scored_data)
-            scored_proteins = sorted(scored_proteins, key=lambda k: len(k.raw_peptides), reverse=True)
+            scored_proteins = sorted(scored_proteins, key=lambda k: (len(k.raw_peptides),k.identifier), reverse=True)
             # Add some code here to remove complete subset proteins...
         protein_finder = [x.identifier for x in scored_data]
 

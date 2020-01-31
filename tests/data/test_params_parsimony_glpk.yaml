@@ -14,8 +14,8 @@ Parameters:
   Decoy_Symbol: "##"
   Isoform_Symbol: "-"
   Reviewed_Identifier_Symbol: "sp|"
-  Inference_Type: inclusion
-  Tag: test_inclusion
-  Grouping_Type: none
+  Inference_Type: parsimony
+  Tag: test_parsimony
+  Grouping_Type: shared_peptides
   Max_Identifiers_Peptide_Centric: 5
-  LP_Solver: none
+  LP_Solver: glpk

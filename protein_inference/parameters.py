@@ -84,6 +84,7 @@ class ProteinInferenceParameter(object):
             self.score = yaml_params["Parameters"]["Score"]
             self.grouping_type = yaml_params["Parameters"]["Grouping_Type"]
             self.max_identifiers_peptide_centric = yaml_params["Parameters"]["Max_Identifiers_Peptide_Centric"]
+            self.lp_solver = yaml_params["Parameters"]["LP_Solver"]
 
         else:
             self.logger.info("Yaml parameter file not found, parameters set to default")
@@ -106,6 +107,7 @@ class ProteinInferenceParameter(object):
             self.score_type = "multiplicative"
             self.grouping_type = "shared_peptides"
             self.max_identifiers_peptide_centric = 5
+            self.lp_solver = "pulp"
 
     def validate_parameters(self):
         # Run all of the parameter validations
@@ -119,6 +121,7 @@ class ProteinInferenceParameter(object):
         self._validate_inference_type()
         self._validate_grouping_type()
         self._validate_max_id()
+        self._validate_lp_solver()
 
 
     def _validate_digest_type(self):
@@ -262,4 +265,11 @@ class ProteinInferenceParameter(object):
         else:
             raise ValueError("Max Number of Indentifiers for Peptide Centric Inference must be an integer, provided value: {}".format(self.max_identifiers_peptide_centric))
 
-
+    def _validate_lp_solver(self):
+        # Check if its pulp or glpk
+        if self.lp_solver in Inference.LP_SOLVERS:
+            self.logger.info("Using LP Solver '{}'".format(self.lp_solver))
+        else:
+            raise ValueError(
+                "LP Solver '{}' not supported, please use one of the following LP Solvers: '{}'".format(
+                    self.lp_solver, ", ".join(Inference.LP_SOLVERS)))

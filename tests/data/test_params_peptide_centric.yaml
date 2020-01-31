@@ -18,3 +18,4 @@ Parameters:
   Tag: test_peptide_centric
   Grouping_Type: none
   Max_Identifiers_Peptide_Centric: 5
+  LP_Solver: none

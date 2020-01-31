@@ -657,29 +657,6 @@ class Parsimony(Inference):
         if len(unique_prots)!=len(unique_prots_sorted):
             raise ValueError("Sorted proteins length is not equal to unsorted length...")
 
-        # Here we get a subset of the unique proteins
-        # Where the peptides from the protein cannot be a subset of the peptides from any other protein that has already been added to the list...
-        # unique_prots_restricted = []
-        # unique_prots_peptides_restricted = []
-        # For p in range(len(unique_prots))
-        #   # At Index 0, simply append the protein and peptides...
-        #   if p==0:
-        #       unique_prots_restricted.append(unique_prots[p])
-        #       unique_prots_peptides_restricted.append(pep_prot_dict[unique_prots[p]])
-        #   else:
-        #       current_peptides = pep_prot_dict[unique_prots[p]]
-        #       for s in unique_prots_peptides_restricted:
-        #           if current_peptides.issubset(s):
-        #               issubset = True
-        #               break
-        #       if issubset==True:
-        #           pass
-        #       if issubset==False:
-        #           unique_prots_restricted.append(unique_prots[p])
-        #           unique_prots_peptides_restricted.append(pep_prot_dict[unique_prots[p]])
-        #
-        # unique_prots = unique_prots_restricted
-
         # Setup default dictionaries
         dd_num = collections.defaultdict(list)
         dd_prot_nums = collections.defaultdict(list)

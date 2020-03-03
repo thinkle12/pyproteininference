@@ -209,84 +209,33 @@ class InSilicoDigest(Digest):
 
 
     def digest_fasta_database(self):
-        db_path_only = '/'.join(self.database_path.split('/')[:-1])+'/'
-        pickle_filename_tag = self.database_path.split('.')[0] + '_' + str(self.digest_type) + '_' + str(self.num_miss_cleavs)
-        if pickle_filename_tag.split('/')[-1]+'_pep_to_prot.pickle' not in os.listdir(db_path_only) or pickle_filename_tag.split('/')[-1]+'_prot_to_pep.pickle' not in os.listdir(db_path_only) or pickle_filename_tag.split('/')[-1]+'_sp_dict.pickle' not in os.listdir(db_path_only):
-            handle=SeqIO.parse(self.database_path,'fasta')
+        handle=SeqIO.parse(self.database_path,'fasta')
 
-            self.logger.info('Starting Standard Digest...')
-            pep_dict = collections.defaultdict(set)
-            prot_dict = collections.defaultdict(set)
-            sp_set = set()
+        self.logger.info('Starting Standard Digest...')
+        pep_dict = {}
+        prot_dict = {}
+        sp_set = set()
 
+        for record in handle:
+            if self.id_splitting == True:
+                identifier_stripped = self.UNIPROT_STR_REGEX.sub("",record.id)
+            if self.id_splitting == False:
+                identifier_stripped = record.id
 
+            if record.id.startswith(self.SP_STRING):
+                sp_set.add(identifier_stripped)
 
-
-
-            # We use [:2] because that is the first two letters of the protein identifier
-            # We use [3:] below also because we need to remove "sp|" or "tr|" to match what the search results show....
-            for record in handle:
-                if self.id_splitting == True:
-                    identifier_stripped = record.id[3:] # TODO instead of using [3:] we should replace sp| with nothing
-                if self.id_splitting == False:
-                    identifier_stripped = record.id
-
-                # TODO instead of using [3:] we should replace sp| with nothing
-                if record.id[:3] == self.reviewed_identifier_symbol:
-                    sp_set.add(identifier_stripped)
-                proseq = str(record.seq)
-                peptide_list = InSilicoDigest(self.database_path,self.parameter_file_object, self.id_splitting).digest(proseq, self.num_miss_cleavs)
-                for peptide in peptide_list:
-                    pep_dict[peptide].add(identifier_stripped)
-                    prot_dict[identifier_stripped].add(peptide)
-
-            handle.close()
+            proseq = str(record.seq)
+            peptide_list = self.digest(proseq, self.num_miss_cleavs)
+            prot_dict[identifier_stripped] = set(peptide_list)
+            for peptide in peptide_list:
+                pep_dict.setdefault(peptide, set()).add(identifier_stripped)
 
 
-            # print 'Starting to pickle dictionaries...'
-            #
-            # pickle_out = open(pickle_filename_tag + '_pep_to_prot.pickle', "wb")
-            # pickle.dump(pep_dict, pickle_out)
-            # pickle_out.close()
-            #
-            # print 'pep to prot dictionary has been pickled...'
-            #
-            # pickle_out = open(pickle_filename_tag + '_prot_to_pep.pickle', "wb")
-            # pickle.dump(prot_dict, pickle_out)
-            # pickle_out.close()
-            #
-            # print 'prot to pep dictionary has been pickled...'
-            #
-            # pickle_out = open(pickle_filename_tag + '_sp_dict.pickle', "wb")
-            # pickle.dump(sp_dict, pickle_out)
-            # pickle_out.close()
-            #
-            # print 'sp dictionary has been pickled...'
-
-            self.logger.info('Digest finished, peptide and protein dictionaries created based on the provided database')
+        handle.close()
 
 
-        else:
-            self.logger.info('Skipping Digest, Importing digest information from'+'\n'+pickle_filename_tag)
-
-            pickle_in = open(pickle_filename_tag + '_pep_to_prot.pickle', "rb")
-            pep_dict = pickle.load(pickle_in)
-            pickle_in.close()
-
-            pickle_in = open(pickle_filename_tag + '_prot_to_pep.pickle', "rb")
-            prot_dict = pickle.load(pickle_in)
-            pickle_in.close()
-
-            pickle_in = open(pickle_filename_tag + '_sp_dict.pickle', "rb")
-            sp_dict = pickle.load(pickle_in)
-            pickle_in.close()
-
-            self.logger.info('Pickle Files Loaded...')
-
-        pep_dict_res = collections.defaultdict(set)
-        prot_dict_res = collections.defaultdict(set)
-
-
+        self.logger.info('Digest finished, peptide and protein dictionaries created based on the provided database')
 
         self.swiss_prot_protein_set = sp_set
         self.peptide_to_protein_dictionary = pep_dict

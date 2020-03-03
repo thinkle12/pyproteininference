@@ -54,6 +54,7 @@ class InSilicoDigest(Digest):
             raise ValueError('digest_type must be equal to one of the following'+str(self.LIST_OF_DIGEST_TYPES)+' or... (List more digest types here in the future...)')
         self.parameter_file_object = parameter_file_object
         self.logger = getLogger('protein_inference.in_silico_digest.InSilicoDigest')
+        self.max_peptide_length = parameter_file_object.restrict_peptide_length
 
         
         

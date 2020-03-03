@@ -8,14 +8,25 @@ Created on Thu Nov 30 14:25:00 2017
 
 import collections
 from Bio import SeqIO
-import os
-import pickle as pickle
-from pyteomics import fasta, parser, mass, achrom, electrochem, auxiliary
+from pyteomics import fasta, parser
 from logging import getLogger
+import re
+
+
+class Digest(object):
+    LIST_OF_DIGEST_TYPES = ['trypsin', 'lysc']
+    AA_LIST = ['A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V']
+    UNIPROT_STRS = "sp\||tr\|"
+    UNIPROT_STR_REGEX = re.compile(UNIPROT_STRS)
+    SP_STRING = "sp|"
+    METHIONINE = "M"
+
+    def __init__(self):
+        pass
 
 
 
-class InSilicoDigest(object):
+class InSilicoDigest(Digest):
     """
     The following class creates protein to peptide, peptide to protein, and swissprot protein mappings.
     These mappings are essential for GlpkGrouper as an InSilicoDigest object is input for GlpkGrouper
@@ -287,7 +298,7 @@ class InSilicoDigest(object):
         self.logger.info('Standard Digest Finished...')
 
 
-class PyteomicsDigest(object):
+class PyteomicsDigest(Digest):
     """
     The following class creates protein to peptide, peptide to protein, and swissprot protein mappings.
     These mappings are essential for GlpkGrouper as an InSilicoDigest object is input for GlpkGrouper

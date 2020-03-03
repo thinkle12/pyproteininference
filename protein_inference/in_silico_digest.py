@@ -38,8 +38,6 @@ class InSilicoDigest(Digest):
     Exmample: Digest.insilicodigest.InSilicoDigest(database_path = "example_human_db.fasta", num_miss_cleavs=2, digest_type='trypsin')
     """
 
-    LIST_OF_DIGEST_TYPES = ['trypsin', 'lysc']
-    AA_LIST = ['A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V']
 
     def __init__(self,database_path,parameter_file_object,id_splitting=True):
         self.peptide_to_protein_dictionary = None
@@ -90,9 +88,6 @@ class InSilicoDigest(Digest):
                     else:
                         pass
 
-
-
-    
             elif miss_cleavage==1:
                 for j in range(0,len(cut_sites)-2):
                     peptides.append(proseq[cut_sites[j]:cut_sites[j+1]])
@@ -194,7 +189,6 @@ class InSilicoDigest(Digest):
             if proseq[0] == 'M':
                 peptides.append(proseq[1:])
 
-        self.peptides = peptides
         new_peptides = []
         if any('X' in x for x in peptides):
             for peps in peptides:
@@ -309,8 +303,6 @@ class PyteomicsDigest(Digest):
 
     """
 
-    LIST_OF_DIGEST_TYPES = ['trypsin', 'lysc']
-    AA_LIST = ['A','R','N','D','C','E','Q','G','H','I','L','K','M','F','P','S','T','W','Y','V']
 
     def __init__(self, database_path, parameter_file_object, id_splitting=True):
         self.peptide_to_protein_dictionary = None
@@ -320,7 +312,6 @@ class PyteomicsDigest(Digest):
         self.database_path = database_path
         self.num_miss_cleavs = parameter_file_object.missed_cleavages
         self.id_splitting = id_splitting
-        self.methionine = "M"
         self.reviewed_identifier_symbol = parameter_file_object.reviewed_identifier_symbol
         if parameter_file_object.digest_type in self.LIST_OF_DIGEST_TYPES:
             self.digest_type = parameter_file_object.digest_type

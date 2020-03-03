@@ -201,7 +201,9 @@ class InSilicoDigest(Digest):
                         new_pep = ''.join(peptide_list)
                         new_peptides.append(new_pep)
 
+
         peptides = peptides + new_peptides
+        # peptides = [x for x in peptides if len(x)>=self.max_peptide_length]
         return peptides
 
 

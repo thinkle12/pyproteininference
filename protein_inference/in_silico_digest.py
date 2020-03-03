@@ -271,19 +271,17 @@ class PyteomicsDigest(Digest):
             raise ValueError('digest_type must be equal to one of the following' + str(
                 self.LIST_OF_DIGEST_TYPES) + ' or... (List more digest types here in the future...)')
         self.logger = getLogger('protein_inference.in_silico_digest.PyteomicsDigest')
+        self.max_peptide_length = parameter_file_object.restrict_peptide_length
 
 
     def digest_fasta_database(self):
         self.logger.info('Starting Pyteomics Digest...')
-        pep_dict = collections.defaultdict(set)
-        prot_dict = collections.defaultdict(set)
+        pep_dict = {}
+        prot_dict = {}
         sp_set = set()
 
-        # We use [:2] because that is the first two letters of the protein identifier
-        # We use [3:] below also because we need to remove "sp|" or "tr|" to match what the search results show....
-
         for description, sequence in fasta.read(self.database_path):
-            new_peptides = parser.cleave(sequence, parser.expasy_rules[self.digest_type], self.num_miss_cleavs)
+            new_peptides = parser.cleave(sequence, parser.expasy_rules[self.digest_type], self.num_miss_cleavs, min_length=self.max_peptide_length)
 
             # Hopefully this splitting works...
             # IDK how robust this is...
@@ -291,24 +289,27 @@ class PyteomicsDigest(Digest):
 
             # Handle ID Splitting...
             if self.id_splitting == True:
-                identifier_stripped = identifier[3:] # TODO instead of using [3:] we should replace sp| with nothing
+                identifier_stripped = self.UNIPROT_STR_REGEX.sub("",identifier)
             if self.id_splitting == False:
                 identifier_stripped = identifier
 
             # TODO instead of using [:3] we should replace sp| with nothing
             # If SP add to
-            if identifier[:3] == self.reviewed_identifier_symbol:
+            if identifier.startswith(self.SP_STRING):
                 sp_set.add(identifier_stripped)
-            for peps in list(new_peptides):
-                pep_dict[peps].add(identifier_stripped)
-                prot_dict[identifier_stripped].add(peps)
+            prot_dict[identifier_stripped] = new_peptides
+            met_cleaved_peps = set()
+            for peptide in new_peptides:
+                pep_dict.setdefault(peptide, []).append(identifier_stripped)
                 # Need to account for potential N-term Methionine Cleavage
-                if sequence.startswith(peps) and peps.startswith(self.methionine):
+                if sequence.startswith(peptide) and peptide.startswith(self.METHIONINE):
                     # If our sequence starts with the current peptide... and our current peptide starts with methionine...
                     # Then we remove the methionine from the peptide and add it to our dicts...
-                    methionine_cleaved_peptide = peps[1:]
-                    pep_dict[methionine_cleaved_peptide].add(identifier_stripped)
-                    prot_dict[identifier_stripped].add(methionine_cleaved_peptide)
+                    methionine_cleaved_peptide = peptide[1:]
+                    met_cleaved_peps.add(methionine_cleaved_peptide)
+            for met_peps in met_cleaved_peps:
+                pep_dict.setdefault(met_peps, []).append(identifier_stripped)
+                prot_dict[identifier_stripped].add(met_peps)
 
 
         self.swiss_prot_protein_set = sp_set

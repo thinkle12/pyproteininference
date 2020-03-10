@@ -9,7 +9,7 @@ Created on Mon Dec  4 14:15:15 2017
 import collections
 from Bio import SeqIO
 from logging import getLogger
-from protein_inference.physical import Protein
+from protein_inference.physical import Protein, Psm
 
 
 

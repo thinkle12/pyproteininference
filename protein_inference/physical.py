@@ -47,7 +47,13 @@ class Psm(object):
     """
     __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins','psm_id','custom_score']
 
-    AMINO_ACID_SYMBOLS = re.compile('[^a-zA-Z]')
+    # The regex removes anything between parantheses including parenthases - \([^()]*\)
+    # The regex removes anything between brackets including parenthases - \[.*?\]
+    # And the regex removes anything that is not an A-Z character [^A-Z]
+    MOD_REGEX = re.compile('\([^()]*\)|\[.*?\]|[^A-Z]')
+
+    FRONT_FLANKING_REGEX = re.compile('^[A-Z|-][.]')
+    BACK_FLANKING_REGEX = re.compile('[.][A-Z|-]$')
     
     def __init__(self,identifier):
         self.identifier = identifier
@@ -60,8 +66,46 @@ class Psm(object):
 
     @classmethod
     def remove_peptide_mods(cls, peptide_string):
-        stripped_peptide = cls.AMINO_ACID_SYMBOLS.sub('', peptide_string)
+        stripped_peptide = cls.MOD_REGEX.sub('', peptide_string)
         return(stripped_peptide)
+
+    @classmethod
+    def split_peptide(cls, peptide_string, delimiter = "."):
+        peptide_split = peptide_string.split(delimiter)
+        if len(peptide_split)==3:
+            # If we get 3 chunks it will usually be ['A', 'ADGSDFGSS', 'F']
+            # So take index 1
+            peptide = peptide_split[1]
+        elif len(peptide_split)==1:
+            # If we get 1 chunk it should just be ['ADGSDFGSS']
+            # So take index 0
+            peptide = peptide_split[0]
+        else:
+            # If we split the peptide and it is not length 1 or 3 then try to split with pro
+            peptide = cls.split_peptide_pro(peptide_string=peptide_string, delimiter=delimiter)
+
+        return(peptide)
+
+    @classmethod
+    def split_peptide_pro(cls, peptide_string, delimiter = "."):
+
+        if delimiter!=".":
+            front_regex = '^[A-Z|-][{}]'.format(delimiter)
+            cls.FRONT_FLANKING_REGEX = re.compile(front_regex)
+            back_regex = '[{}][A-Z|-]$'.format(delimiter)
+            cls.BACK_FLANKING_REGEX = re.compile(back_regex)
+
+        # Replace the front flanking with nothing
+        peptide_string = cls.FRONT_FLANKING_REGEX.sub('', peptide_string)
+
+        # Replace the back flanking with nothing
+        peptide_string = cls.BACK_FLANKING_REGEX.sub('', peptide_string)
+
+        return(peptide_string)
+
+
+
+
 
 class ProteinGroup(object):
     """

@@ -113,36 +113,40 @@ class Inference(object):
                             list_of_peps_not_in_db.append(protein_objects.identifier)
                             logger.warning('Protein ' + str(protein_objects.identifier) + ' and Peptide ' + str(
                                 peptide) + ' is not in database...')
+
+
+                        ### TODO put in if statement here... if grouping_type==None then skip this...
                         # Assign proteins to groups based on shared peptide... unless the protein is equivalent to the current identifier
-                        for protein in potential_protein_list:
-                            # If statement below to avoid grouping the same protein twice and to not group the lead
-                            if protein not in current_grouped_proteins and protein != cur_protein_identifier and protein not in picked_removed and protein not in missing_proteins and inference_type!="none":
-                                try:
-                                    # Try to find its object using protein_finder (list of identifiers) and scored_proteins (list of Protein Objects)
-                                    cur_index = protein_finder.index(protein)
-                                    current_protein_object = scored_data[cur_index]
-                                    if not current_protein_object.peptides:
-                                        current_protein_object.peptides = set(
-                                            sorted([x for x in prot_pep_dict[current_protein_object.identifier] if
-                                                    x in restricted_peptides_set]))
-                                    if grouping_type=="shared_peptides":
-                                        current_grouped_proteins.add(current_protein_object)
-                                    elif grouping_type=="subset_peptides":
-                                        if current_protein_object.peptides.issubset(protein_objects.peptides):
+                        if inference_type!="none" and inference_type!="inclusion":
+                            for protein in potential_protein_list:
+                                # If statement below to avoid grouping the same protein twice and to not group the lead
+                                if protein not in current_grouped_proteins and protein != cur_protein_identifier and protein not in picked_removed and protein not in missing_proteins and inference_type!="none":
+                                    try:
+                                        # Try to find its object using protein_finder (list of identifiers) and scored_proteins (list of Protein Objects)
+                                        cur_index = protein_finder.index(protein)
+                                        current_protein_object = scored_data[cur_index]
+                                        if not current_protein_object.peptides:
+                                            current_protein_object.peptides = set(
+                                                sorted([x for x in prot_pep_dict[current_protein_object.identifier] if
+                                                        x in restricted_peptides_set]))
+                                        if grouping_type=="shared_peptides":
                                             current_grouped_proteins.add(current_protein_object)
-                                            # if inference_type!="inclusion":
-                                            protein_tracker.add(current_protein_object)
+                                        elif grouping_type=="subset_peptides":
+                                            if current_protein_object.peptides.issubset(protein_objects.peptides):
+                                                current_grouped_proteins.add(current_protein_object)
+                                                # if inference_type!="inclusion":
+                                                protein_tracker.add(current_protein_object)
+                                            else:
+                                                pass
                                         else:
                                             pass
-                                    else:
-                                        pass
-                                except ValueError:
-                                    logger.warning("Protein from DB {} not found with protein finder for peptide {}".format(protein,
-                                                                                                                   peptide))
-                                    missing_proteins.add(protein)
+                                    except ValueError:
+                                        logger.warning("Protein from DB {} not found with protein finder for peptide {}".format(protein,
+                                                                                                                       peptide))
+                                        missing_proteins.add(protein)
 
-                            else:
-                                pass
+                                else:
+                                    pass
                 # Add the proteins to the lead if they share peptides...
                 protein_list_group = protein_list_group + list(current_grouped_proteins)
                 # protein_list_group at first is just the lead protein object...

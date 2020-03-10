@@ -216,7 +216,7 @@ class Inference(object):
         list_of_group_objects = []
         for protein_group in grouped_protein_objects:
             # TODO, This split needs to get moved to an external function or method and should be backed by param file
-            protein_group.peptides = set([x.split(".")[1] for x in list(protein_group.raw_peptides)])
+            protein_group.peptides = set([Psm.split_peptide(peptide_string=x) for x in list(protein_group.raw_peptides)])
             protein_list = []
             group_id = group_id + 1
             pg = ProteinGroup(group_id)

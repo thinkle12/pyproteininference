@@ -69,6 +69,44 @@ class Psm(object):
         stripped_peptide = cls.MOD_REGEX.sub('', peptide_string)
         return(stripped_peptide)
 
+    @classmethod
+    def split_peptide(cls, peptide_string, delimiter = "."):
+        peptide_split = peptide_string.split(delimiter)
+        if len(peptide_split)==3:
+            # If we get 3 chunks it will usually be ['A', 'ADGSDFGSS', 'F']
+            # So take index 1
+            peptide = peptide_split[1]
+        elif len(peptide_split)==1:
+            # If we get 1 chunk it should just be ['ADGSDFGSS']
+            # So take index 0
+            peptide = peptide_split[0]
+        else:
+            # If we split the peptide and it is not length 1 or 3 then try to split with pro
+            peptide = cls.split_peptide_pro(peptide_string=peptide_string, delimiter=delimiter)
+
+        return(peptide)
+
+    @classmethod
+    def split_peptide_pro(cls, peptide_string, delimiter = "."):
+
+        if delimiter!=".":
+            front_regex = '^[A-Z|-][{}]'.format(delimiter)
+            cls.FRONT_FLANKING_REGEX = re.compile(front_regex)
+            back_regex = '[{}][A-Z|-]$'.format(delimiter)
+            cls.BACK_FLANKING_REGEX = re.compile(back_regex)
+
+        # Replace the front flanking with nothing
+        peptide_string = cls.FRONT_FLANKING_REGEX.sub('', peptide_string)
+
+        # Replace the back flanking with nothing
+        peptide_string = cls.BACK_FLANKING_REGEX.sub('', peptide_string)
+
+        return(peptide_string)
+
+
+
+
+
 class ProteinGroup(object):
     """
     The following class is a physical Protein Group class that stores characteristics of a Protein Group for the entire analysis.

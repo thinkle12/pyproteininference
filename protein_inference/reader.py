@@ -152,9 +152,9 @@ class PercolatorReader(Reader):
                 p.possible_proteins = poss_proteins # Restrict to 50 total possible proteins...
                 p.psm_id = psm_info[self.psmid_index]
 
-                if "." in current_peptide:
-                    # If we have full peptides split it and take the middle...
-                    current_peptide = current_peptide.split(".")[1]
+                # Split peptide if flanking
+                current_peptide = Psm.split_peptide(peptide_string=current_peptide)
+
                 if not current_peptide.isupper() or not current_peptide.isalpha():
                     # If we have mods remove them...
                     peptide_string = current_peptide.upper()
@@ -276,9 +276,9 @@ class ProteologicPostSearchReader(Reader):
                 p.possible_proteins = list(filter(None, p.possible_proteins))
                 p.psm_id = peps.spectrum.spectrum_identifier
 
-                if "." in current_peptide:
-                    # If we have full peptides split it and take the middle...
-                    current_peptide = current_peptide.split(".")[1]
+                # Split peptide if flanking
+                current_peptide = Psm.split_peptide(peptide_string=current_peptide)
+
                 if not current_peptide.isupper() or not current_peptide.isalpha():
                     # If we have mods remove them...
                     peptide_string = current_peptide.upper()
@@ -490,9 +490,9 @@ class GenericReader(Reader):
                 # Restrict to 50 total possible proteins...
                 p.psm_id = psm_info[self.PSMID]
 
-                if "." in current_peptide:
-                    # If we have full peptides split it and take the middle...
-                    current_peptide = current_peptide.split(".")[1]
+                # Split peptide if flanking
+                current_peptide = Psm.split_peptide(peptide_string=current_peptide)
+
                 if not current_peptide.isupper() or not current_peptide.isalpha():
                     # If we have mods remove them...
                     peptide_string = current_peptide.upper()

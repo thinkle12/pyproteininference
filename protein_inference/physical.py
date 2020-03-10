@@ -66,7 +66,7 @@ class Psm(object):
 
     @classmethod
     def remove_peptide_mods(cls, peptide_string):
-        stripped_peptide = cls.AMINO_ACID_SYMBOLS.sub('', peptide_string)
+        stripped_peptide = cls.MOD_REGEX.sub('', peptide_string)
         return(stripped_peptide)
 
 class ProteinGroup(object):

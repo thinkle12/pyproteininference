@@ -47,7 +47,10 @@ class Psm(object):
     """
     __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins','psm_id','custom_score']
 
-    AMINO_ACID_SYMBOLS = re.compile('[^a-zA-Z]')
+    # The regex removes anything between parantheses including parenthases - \([^()]*\)
+    # The regex removes anything between brackets including parenthases - \[.*?\]
+    # And the regex removes anything that is not an A-Z character [^A-Z]
+    MOD_REGEX = re.compile('\([^()]*\)|\[.*?\]|[^A-Z]')
     
     def __init__(self,identifier):
         self.identifier = identifier

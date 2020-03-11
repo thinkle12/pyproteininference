@@ -20,8 +20,11 @@ class Reader(object):
 
     MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
     
-    def __init__(self):
-        None
+    def __init__(self,target_file=None,decoy_file=None,files=None,directory=None):
+        self.target_file = target_file
+        self.decoy_file = decoy_file
+        self.files = files
+        self.directory = directory
 
     def remap(self, fieldnames):
         price_count = itertools.count(1)

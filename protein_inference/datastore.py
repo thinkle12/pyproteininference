@@ -196,7 +196,7 @@ class DataStore(object):
         main_psm_data = self.main_data_form
         logger.info('Length of main data: ' + str(len(self.main_data_form)))
         # If restrict_main_data is called, we automatically discard everything that has a PEP of 1
-        if remove1pep:
+        if remove1pep and posterior_error_prob_threshold:
             main_psm_data = [x for x in main_psm_data if x.pepvalue != 1]
 
         # Restrict peptide length and posterior error probability

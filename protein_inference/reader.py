@@ -17,6 +17,8 @@ class Reader(object):
     """
     Main Reader Class which is parent to all reader subclasses
     """
+
+    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
     
     def __init__(self):
         None

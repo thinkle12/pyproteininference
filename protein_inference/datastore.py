@@ -939,21 +939,22 @@ class DataStore(object):
         logger.info("Number of Reviewed Proteins in from Digest: {}".format(reviewed_proteins))
         logger.info("Number of Unreviewed Proteins in from Digest: {}".format(unreviewed_proteins))
 
-    def sort_protein_strings(self,protein_string_list, sp_proteins):
+    @classmethod
+    def sort_protein_strings(cls,protein_string_list, sp_proteins, decoy_symbol):
 
         our_target_sp_proteins = sorted(
             [x for x in protein_string_list if
-             x in sp_proteins and self.parameter_file_object.decoy_symbol not in x])
+             x in sp_proteins and decoy_symbol not in x])
         our_decoy_sp_proteins = sorted(
             [x for x in protein_string_list if
-             x in sp_proteins and self.parameter_file_object.decoy_symbol in x])
+             x in sp_proteins and decoy_symbol in x])
 
         our_target_tr_proteins = sorted(
             [x for x in protein_string_list if
-             x not in sp_proteins and self.parameter_file_object.decoy_symbol not in x])
+             x not in sp_proteins and decoy_symbol not in x])
         our_decoy_tr_proteins = sorted(
             [x for x in protein_string_list if
-             x not in sp_proteins and self.parameter_file_object.decoy_symbol in x])
+             x not in sp_proteins and decoy_symbol in x])
 
         identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 

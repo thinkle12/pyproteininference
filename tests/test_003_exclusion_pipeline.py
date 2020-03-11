@@ -38,7 +38,7 @@ logger = logging.getLogger("protein_inference.tests.test_003_exclusion_pipeline.
 
 class TestLoadExclusionWorkflow(TestCase):
 
-    def test_workflow3(self):
+    def test_workflow_exclusion(self):
 
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###

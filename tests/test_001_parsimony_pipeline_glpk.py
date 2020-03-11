@@ -41,7 +41,7 @@ logger = logging.getLogger("protein_inference.tests.test_001_parsimony_pipeline.
 
 class TestLoadParsimonyGlpkWorkflow(TestCase):
 
-    def test_workflow1(self):
+    def test_workflow_parsimony_glpk(self):
 
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###

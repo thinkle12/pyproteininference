@@ -6,7 +6,9 @@ Created on Thu Nov 30 12:52:14 2017
 @author: hinklet
 """
 
+import os
 from protein_inference.physical import Psm
+from protein_inference.datastore import DataStore
 import csv
 import itertools
 from logging import getLogger

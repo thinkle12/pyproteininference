@@ -592,7 +592,7 @@ class GenericReader(Reader):
                 if self.parameter_file_object.inference_type!="none":
                     p.possible_proteins = list(set(p.possible_proteins))
 
-                # Restrict to 50 total possible proteins...
+                # Get PSM ID
                 p.psm_id = psm_info[self.PSMID]
 
                 # Split peptide if flanking

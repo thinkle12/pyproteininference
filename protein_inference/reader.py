@@ -397,14 +397,14 @@ class GenericReader(Reader):
     PEPTIDE = "peptide"
     PROTEIN_IDS = "proteinIds"
     EXTRA_PROTEIN_IDS = "alternative_protein_{}"
-    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
 
-
-
-
-    def __init__(self, target_file, decoy_file, digest_class, parameter_file_object, append_alt_from_db=False):
+    def __init__(self, digest_class, parameter_file_object, append_alt_from_db=False, target_file=None,decoy_file=None,files=None,directory=None):
         self.target_file = target_file
         self.decoy_file = decoy_file
+        self.files = files
+        self.directory = directory
+        self._validate_input()
+
         self.psms = None
         self.search_id = None
         self.digest_class = digest_class

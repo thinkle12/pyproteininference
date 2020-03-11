@@ -41,7 +41,7 @@ logger = logging.getLogger("protein_inference.tests.test_006_peptide_centric_pip
 
 class TestLoadPeptideCentricWorkflow(TestCase):
 
-    def test_workflow1(self):
+    def test_workflow_peptide_centric(self):
 
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###

@@ -30,6 +30,12 @@ class Reader(object):
         price_count = itertools.count(1)
         return ['alternative_protein_{}'.format(next(price_count)) if f=="" else f
                 for f in fieldnames]
+
+    def _validate_input(self):
+        if not self.target_file and not self.decoy_file and not self.files and not self.directory:
+            raise ValueError("No input provided, please supply either target and decoy files, combined files, or a directory of combined target/decoy files")
+        else:
+            pass
         
 class PercolatorReader(Reader):
     """

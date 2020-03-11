@@ -436,61 +436,96 @@ class GenericReader(Reader):
         self.logger.info("Reading in Input Files using Generic Reader...")
         # Read in and split by line
         # If target_file is a list... read them all in and concatenate...
-        if isinstance(self.target_file, (list,)):
-            all_target = []
-            for t_files in self.target_file:
+        if self.target_file and self.decoy_file:
+            if isinstance(self.target_file, (list,)):
+                all_target = []
+                for t_files in self.target_file:
+                    ptarg = []
+                    with open(t_files, 'r') as psm_target_file:
+                        self.logger.info(self.target_file)
+                        spamreader = csv.reader(psm_target_file, delimiter='\t')
+                        fieldnames = self.remap(next(spamreader))
+                        for row in spamreader:
+                            ptarg.append(dict(zip(fieldnames, row)))
+                    all_target = all_target + ptarg
+            else:
+                # If not just read the file...
                 ptarg = []
-                with open(self.target_file, 'r') as perc_target_file:
+                with open(self.target_file, 'r') as psm_target_file:
                     self.logger.info(self.target_file)
-                    spamreader = csv.reader(perc_target_file, delimiter='\t')
+                    spamreader = csv.reader(psm_target_file, delimiter='\t')
                     fieldnames = self.remap(next(spamreader))
                     for row in spamreader:
                         ptarg.append(dict(zip(fieldnames, row)))
-                all_target = all_target + ptarg
-        else:
-            # If not just read the file...
-            ptarg = []
-            with open(self.target_file, 'r') as perc_target_file:
-                self.logger.info(self.target_file)
-                spamreader = csv.reader(perc_target_file, delimiter='\t')
-                fieldnames = self.remap(next(spamreader))
-                for row in spamreader:
-                    ptarg.append(dict(zip(fieldnames, row)))
-            all_target = ptarg
+                all_target = ptarg
 
-        # Repeat for decoy file
-        if isinstance(self.decoy_file, (list,)):
-            all_decoy = []
-            for d_files in self.decoy_file:
+            # Repeat for decoy file
+            if isinstance(self.decoy_file, (list,)):
+                all_decoy = []
+                for d_files in self.decoy_file:
+                    pdec = []
+                    with open(d_files, 'r') as psm_decoy_file:
+                        self.logger.info(self.decoy_file)
+                        spamreader = csv.reader(psm_decoy_file, delimiter='\t')
+                        fieldnames = self.remap(next(spamreader))
+                        for row in spamreader:
+                            pdec.append(dict(zip(fieldnames, row)))
+                    all_decoy = all_decoy + pdec
+            else:
                 pdec = []
-                with open(self.decoy_file, 'r') as perc_decoy_file:
+                with open(self.decoy_file, 'r') as psm_decoy_file:
                     self.logger.info(self.decoy_file)
-                    spamreader = csv.reader(perc_decoy_file, delimiter='\t')
+                    spamreader = csv.reader(psm_decoy_file, delimiter='\t')
                     fieldnames = self.remap(next(spamreader))
                     for row in spamreader:
                         pdec.append(dict(zip(fieldnames, row)))
-                all_decoy = all_decoy + pdec
-        else:
-            pdec = []
-            with open(self.decoy_file, 'r') as perc_decoy_file:
-                self.logger.info(self.decoy_file)
-                spamreader = csv.reader(perc_decoy_file, delimiter='\t')
-                fieldnames = self.remap(next(spamreader))
-                for row in spamreader:
-                    pdec.append(dict(zip(fieldnames, row)))
-            all_decoy = pdec
+                all_decoy = pdec
 
-        peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
-        # Combine the lists
-        perc_all = all_target + all_decoy
+            # Combine the lists
+            all_psms = all_target + all_decoy
 
-        perc_all_filtered = []
-        for psms in perc_all:
-            try:
-                float(psms[self.POSTERIOR_ERROR_PROB])
-                perc_all_filtered.append(psms)
-            except ValueError as e:
-                pass
+        elif self.files:
+            all = []
+            for files in self.files:
+                p = []
+                with open(files, 'r') as psm_file:
+                    self.logger.info(self.target_file)
+                    spamreader = csv.reader(psm_file, delimiter='\t')
+                    fieldnames = self.remap(next(spamreader))
+                    for row in spamreader:
+                        p.append(dict(zip(fieldnames, row)))
+                all = all + p
+            all_psms = all
+
+        elif self.directory:
+            all_files = os.listdir(self.directory)
+            all = []
+            for files in all_files:
+                p = []
+                with open(files, 'r') as psm_file:
+                    self.logger.info(self.target_file)
+                    spamreader = csv.reader(psm_file, delimiter='\t')
+                    fieldnames = self.remap(next(spamreader))
+                    for row in spamreader:
+                        p.append(dict(zip(fieldnames, row)))
+                all = all + p
+            all_psms = all
+
+
+        psms_all_filtered = []
+        for psms in all_psms:
+            if self.POSTERIOR_ERROR_PROB in psms.keys():
+                try:
+                    float(psms[self.POSTERIOR_ERROR_PROB])
+                    psms_all_filtered.append(psms)
+                except ValueError as e:
+                    pass
+            else:
+                try:
+                    float(psms[self.scoring_variable])
+                    psms_all_filtered.append(psms)
+                except ValueError as e:
+                    pass
 
         # Filter by pep
         perc_all = sorted(perc_all_filtered, key=lambda x: float(x[self.POSTERIOR_ERROR_PROB]), reverse=False)

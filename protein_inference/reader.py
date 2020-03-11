@@ -36,6 +36,29 @@ class Reader(object):
             raise ValueError("No input provided, please supply either target and decoy files, combined files, or a directory of combined target/decoy files")
         else:
             pass
+
+    @classmethod
+    def _fix_alternative_proteins(cls, append_alt_from_db, identifiers_sorted, max_proteins, psm, parameter_file_object):
+        # If we are appending alternative proteins from the db
+        if append_alt_from_db:
+            # Loop over the Identifiers from the DB These are identifiers that contain the current peptide
+            for alt_proteins in identifiers_sorted[:max_proteins]:
+                # If the identifier is not already in possible proteins and if then len of poss prot is less than the max...
+                # Then append
+                if alt_proteins not in psm.possible_proteins and len(
+                        psm.possible_proteins) < max_proteins:
+                    psm.possible_proteins.append(alt_proteins)
+        # Next if the len of possible proteins is greater than max then restrict the list length...
+        if len(psm.possible_proteins) > max_proteins:
+            psm.possible_proteins = [psm.possible_proteins[x] for x in range(max_proteins)]
+        else:
+            pass
+
+        # If no inference only select first poss protein
+        if parameter_file_object.inference_type == "none":
+            psm.possible_proteins = [psm.possible_proteins[0]]
+
+        return(psm)
         
 class PercolatorReader(Reader):
     """

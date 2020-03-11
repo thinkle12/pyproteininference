@@ -74,12 +74,15 @@ class PercolatorReader(Reader):
 
     """
 
-    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
 
-    def __init__(self,target_file,decoy_file,digest_class,parameter_file_object,append_alt_from_db=False):
+    def __init__(self,digest_class,parameter_file_object,append_alt_from_db=False,target_file=None,decoy_file=None,files=None,directory=None):
         self.target_file = target_file
         self.decoy_file = decoy_file
+        self.files = files
+        self.directory = directory
+        self._validate_input()
         #Define Indicies based on input
+
         self.psmid_index = 0
         self.perc_score_index = 1
         self.q_value_index = 2

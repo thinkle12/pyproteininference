@@ -242,17 +242,9 @@ class PercolatorReader(Reader):
                 # Add the other possible_proteins from insilicodigest here...
                 current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
                 # Sort Alt Proteins by Swissprot then Trembl...
-                our_target_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
-                our_decoy_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
-
-                our_target_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
-                our_decoy_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
-
-                identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
+                identifiers_sorted = DataStore.sort_protein_strings(protein_string_list=current_alt_proteins,
+                                                                    sp_proteins=all_sp_proteins,
+                                                                    decoy_symbol=self.parameter_file_object.decoy_symbol)
 
                 # Restrict to 50 possible proteins
                 if self.append_alt_from_db:

@@ -556,22 +556,30 @@ class GenericReader(Reader):
 
         # TODO
         # make this for loop a generator...
-
-        self.logger.info("Length of PSM Data: {}".format(len(perc_all)))
-        for psm_info in perc_all:
+        self.logger.info("Length of PSM Data: {}".format(len(all_psms)))
+        for psm_info in all_psms:
             current_peptide = psm_info[self.PEPTIDE]
             # Define the Psm...
             if current_peptide not in peptide_tracker:
                 p = Psm(identifier=current_peptide)
-                # Add all the attributes
-                p.percscore = float(psm_info[self.SCORE])
-                p.qvalue = float(psm_info[self.Q_VALUE])
-                p.pepvalue = float(psm_info[self.POSTERIOR_ERROR_PROB])
+                # Attempt to add variables from PSM info...
+                # If they do not exist in the psm info then we skip...
+                try:
+                    p.percscore = float(psm_info[self.SCORE])
+                except KeyError:
+                    pass
+                try:
+                    p.qvalue = float(psm_info[self.Q_VALUE])
+                except KeyError:
+                    pass
+                try:
+                    p.pepvalue = float(psm_info[self.POSTERIOR_ERROR_PROB])
+                except KeyError:
+                    pass
                 # If user has a custom score IE not q-value or pep_value...
                 if self.load_custom_score:
                     # Then we look for it...
                     p.custom_score = float(psm_info[self.scoring_variable])
-                #poss_proteins = list(set(psm_info[self.proteinIDs_index:self.proteinIDs_index + 50]))
                 p.possible_proteins = []
                 p.possible_proteins.append(psm_info[self.PROTEIN_IDS])
                 for alternative_protein_keys in self.MAX_ALTERNATIVE_PROTEIN_COLUMN_NAMES:

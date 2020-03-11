@@ -298,7 +298,7 @@ class DataStore(object):
             for psms in psm_data:
                 protein_set = self.peptide_protein_dictionary[Psm.split_peptide(peptide_string=psms.identifier)]
                 # Sort protein_set by sp-alpha, decoy-sp-alpha, tr-alpha, decoy-tr-alpha
-                sorted_protein_list = self.sort_protein_strings(protein_string_list=protein_set, sp_proteins=sp_proteins)
+                sorted_protein_list = self.sort_protein_strings(protein_string_list=protein_set, sp_proteins=sp_proteins, decoy_symbol=self.parameter_file_object.decoy_symbol)
                 # Restrict the number of identifiers by the value in param file max_identifiers_peptide_centric
                 sorted_protein_list = sorted_protein_list[:self.parameter_file_object.max_identifiers_peptide_centric]
                 protein_name = ";".join(sorted_protein_list)

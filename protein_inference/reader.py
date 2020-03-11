@@ -101,53 +101,93 @@ class PercolatorReader(Reader):
         
     def read_psms(self):
         #Read in and split by line
-        # If target_file is a list... read them all in and concatenate...
-        if isinstance(self.target_file, (list,)):
-            all_target = []
-            for t_files in self.target_file:
-                self.logger.info(t_files)
+        if self.target_file and self.decoy_file:
+            # If target_file is a list... read them all in and concatenate...
+            if isinstance(self.target_file, (list,)):
+                all_target = []
+                for t_files in self.target_file:
+                    self.logger.info(t_files)
+                    ptarg = []
+                    with open(t_files, 'r') as perc_target_file:
+                        spamreader = csv.reader(perc_target_file, delimiter='\t')
+                        for row in spamreader:
+                            ptarg.append(row)
+                    del ptarg[0]
+                    all_target = all_target + ptarg
+            elif self.target_file:
+                # If not just read the file...
                 ptarg = []
-                with open(t_files, 'r') as perc_target_file:
+                with open(self.target_file, 'r') as perc_target_file:
                     spamreader = csv.reader(perc_target_file, delimiter='\t')
                     for row in spamreader:
                         ptarg.append(row)
                 del ptarg[0]
-                all_target = all_target + ptarg
-        else:
-            # If not just read the file...
-            ptarg = []
-            with open(self.target_file, 'r') as perc_target_file:
-                spamreader = csv.reader(perc_target_file, delimiter='\t')
-                for row in spamreader:
-                    ptarg.append(row)
-            del ptarg[0]
-            all_target = ptarg
+                all_target = ptarg
 
-        
-        #Repeat for decoy file
-        if isinstance(self.decoy_file, (list,)):
-            all_decoy = []
-            for d_files in self.decoy_file:
-                self.logger.info(d_files)
+
+            #Repeat for decoy file
+            if isinstance(self.decoy_file, (list,)):
+                all_decoy = []
+                for d_files in self.decoy_file:
+                    self.logger.info(d_files)
+                    pdec = []
+                    with open(d_files, 'r') as perc_decoy_file:
+                        spamreader = csv.reader(perc_decoy_file, delimiter='\t')
+                        for row in spamreader:
+                            pdec.append(row)
+                    del pdec[0]
+                    all_decoy = all_decoy + pdec
+            elif self.decoy_file:
                 pdec = []
-                with open(d_files, 'r') as perc_decoy_file:
+                with open(self.decoy_file, 'r') as perc_decoy_file:
                     spamreader = csv.reader(perc_decoy_file, delimiter='\t')
                     for row in spamreader:
                         pdec.append(row)
                 del pdec[0]
-                all_decoy = all_decoy + pdec
-        else:
-            pdec = []
-            with open(self.decoy_file, 'r') as perc_decoy_file:
-                spamreader = csv.reader(perc_decoy_file, delimiter='\t')
-                for row in spamreader:
-                    pdec.append(row)
-            del pdec[0]
-            all_decoy = pdec
+                all_decoy = pdec
+
+            #Combine the lists
+            perc_all = all_target+all_decoy
+
+        elif self.files:
+            if isinstance(self.files, (list,)):
+                all = []
+                for f in self.files:
+                    self.logger.info(f)
+                    p = []
+                    with open(f, 'r') as perc_files:
+                        spamreader = csv.reader(perc_files, delimiter='\t')
+                        for row in spamreader:
+                            p.append(row)
+                    del p[0]
+                    all = all + p
+            elif self.files:
+                # If not just read the file...
+                p = []
+                with open(self.files, 'r') as perc_files:
+                    spamreader = csv.reader(perc_files, delimiter='\t')
+                    for row in spamreader:
+                        p.append(row)
+                del p[0]
+                all = p
+            perc_all = all
+
+        elif self.directory:
+
+            all_files = os.listdir(self.directory)
+            all = []
+            for files in all_files:
+                self.logger.info(files)
+                p = []
+                with open(files, 'r') as perc_file:
+                    spamreader = csv.reader(perc_file, delimiter='\t')
+                    for row in spamreader:
+                        p.append(row)
+                del p[0]
+                all = all + p
+            perc_all = all
 
         peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
-        #Combine the lists
-        perc_all = all_target+all_decoy
 
         perc_all_filtered = []
         for psms in perc_all:

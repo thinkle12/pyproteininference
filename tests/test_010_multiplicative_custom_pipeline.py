@@ -20,13 +20,15 @@ import logging
 TEST_DATABASE = resource_filename('protein_inference', '../tests/data/test_database.fasta')
 TARGET_FILE = resource_filename('protein_inference', '../tests/data/test_perc_data_target.txt')
 DECOY_FILE = resource_filename('protein_inference', '../tests/data/test_perc_data_decoy.txt')
-PARAMETER_FILE = resource_filename('protein_inference', '../tests/data/test_params_parsimony_pulp.yaml')
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('protein_inference', '../tests/output/')
-GLPKINOUT_PATH = resource_filename('protein_inference', '../tests/glpkinout/')
 
-LEAD_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/test_parsimony_q_value_leads_ml_posterior_error_prob.csv')
-ALL_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/test_parsimony_q_value_all_ml_posterior_error_prob.csv')
+TARGET_FILE_MULTIPLICATIVE = resource_filename('protein_inference', '../tests/data/test_perc_data_target_multiplicative.txt')
+DECOY_FILE_MULTIPLICATIVE = resource_filename('protein_inference', '../tests/data/test_perc_data_decoy_multiplicative.txt')
+
+PARAMETER_FILE_MULTIPLICATIVE = resource_filename('protein_inference', '../tests/data/test_params_multiplicative_custom_score.yaml')
+
+LEAD_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/test_multiplicative_q_value_leads_ml_example_multiplicative_score.csv')
 
 IDENTIFIER_INDEX = 0
 SCORE_INDEX = 1
@@ -35,40 +37,17 @@ GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("protein_inference.tests.test_001_parsimony_pipeline.py")
+logger = logging.getLogger("protein_inference.tests.test_008_generic_reader.py")
 
 
-class TestLoadParsimonyPulpWorkflow(TestCase):
+class TestMultiplicativeWorkflow(TestCase):
 
-    def test_workflow_parsimony_pulp(self):
+    def test_workflow_multiplicative_custom(self):
 
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
-        protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE)
-
-        # TODO check to make sure proper parameters are being loaded
-        self.assertEqual(protein_inference_parameters.digest_type, 'trypsin')
-        self.assertEqual(protein_inference_parameters.export, 'q_value')
-        self.assertEqual(protein_inference_parameters.fdr, 0.01)
-        self.assertEqual(protein_inference_parameters.glpk_path, 'glpsol')
-        self.assertEqual(protein_inference_parameters.missed_cleavages, 3)
-        self.assertEqual(protein_inference_parameters.picker, True)
-        self.assertEqual(protein_inference_parameters.restrict_pep, .9)
-        self.assertEqual(protein_inference_parameters.restrict_peptide_length, 7)
-        self.assertEqual(protein_inference_parameters.restrict_q, .9)
-        self.assertEqual(protein_inference_parameters.score_method, 'multiplicative_log')
-        self.assertEqual(protein_inference_parameters.score, 'posterior_error_prob')
-        self.assertEqual(protein_inference_parameters.score_type, 'multiplicative')
-        self.assertEqual(protein_inference_parameters.decoy_symbol, '##')
-        self.assertEqual(protein_inference_parameters.isoform_symbol, '-')
-        self.assertEqual(protein_inference_parameters.reviewed_identifier_symbol, 'sp|')
-        self.assertEqual(protein_inference_parameters.inference_type, 'parsimony')
-        self.assertEqual(protein_inference_parameters.tag, 'test_parsimony')
-        self.assertEqual(protein_inference_parameters.grouping_type, 'shared_peptides')
-        self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
-        self.assertEqual(protein_inference_parameters.lp_solver, 'pulp')
-
+        protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE_MULTIPLICATIVE)
 
 
         ### STEP 2: Start with running an In Silico Digestion ###
@@ -83,13 +62,14 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
-        pep_and_prot_data = protein_inference.reader.GenericReader(target_file=TARGET_FILE,
-                                                                      decoy_file=DECOY_FILE,
+        pep_and_prot_data = protein_inference.reader.GenericReader(target_file=TARGET_FILE_MULTIPLICATIVE,
+                                                                      decoy_file=DECOY_FILE_MULTIPLICATIVE,
                                                                       parameter_file_object=protein_inference_parameters,
                                                                       digest_class=digest)
         pep_and_prot_data.read_psms()
 
         self.assertEqual(len(pep_and_prot_data.psms), 27)
+
 
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
@@ -150,6 +130,15 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
             group = protein_inference.inference.Exclusion(data_class=data, digest_class=digest)
             group.infer_proteins()
 
+        if inference_type == "exclusion":
+            group = protein_inference.inference.Exclusion(data_class=data, digest_class=digest)
+            group.infer_proteins()
+
+        if inference_type == "peptide_centric":
+            group = protein_inference.inference.PeptideCentric(data_class=data, digest_class=digest)
+            group.infer_proteins()
+
+
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
@@ -186,8 +175,9 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
             self.assertAlmostEqual(lead_protein.score, float(lead_output[i][SCORE_INDEX]))
             self.assertEqual(protein_groups[i].q_value, float(lead_output[i][Q_VALUE_INDEX]))
             self.assertEqual(protein_groups[i].number_id, int(lead_output[i][GROUP_ID_INDEX]))
-            # TODO also, make the pulp inference code cleaner... TY
             self.assertEqual(lead_protein.peptides, set(lead_output[i][PEPTIDES_INDEX:]))
+
+
 
 
 

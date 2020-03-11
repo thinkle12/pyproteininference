@@ -6,7 +6,9 @@ Created on Thu Nov 30 12:52:14 2017
 @author: hinklet
 """
 
+import os
 from protein_inference.physical import Psm
+from protein_inference.datastore import DataStore
 import csv
 import itertools
 from logging import getLogger
@@ -15,14 +17,48 @@ class Reader(object):
     """
     Main Reader Class which is parent to all reader subclasses
     """
+
+    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
     
-    def __init__(self):
-        None
+    def __init__(self,target_file=None,decoy_file=None,files=None,directory=None):
+        self.target_file = target_file
+        self.decoy_file = decoy_file
+        self.files = files
+        self.directory = directory
 
     def remap(self, fieldnames):
         price_count = itertools.count(1)
         return ['alternative_protein_{}'.format(next(price_count)) if f=="" else f
                 for f in fieldnames]
+
+    def _validate_input(self):
+        if not self.target_file and not self.decoy_file and not self.files and not self.directory:
+            raise ValueError("No input provided, please supply either target and decoy files, combined files, or a directory of combined target/decoy files")
+        else:
+            pass
+
+    @classmethod
+    def _fix_alternative_proteins(cls, append_alt_from_db, identifiers_sorted, max_proteins, psm, parameter_file_object):
+        # If we are appending alternative proteins from the db
+        if append_alt_from_db:
+            # Loop over the Identifiers from the DB These are identifiers that contain the current peptide
+            for alt_proteins in identifiers_sorted[:max_proteins]:
+                # If the identifier is not already in possible proteins and if then len of poss prot is less than the max...
+                # Then append
+                if alt_proteins not in psm.possible_proteins and len(
+                        psm.possible_proteins) < max_proteins:
+                    psm.possible_proteins.append(alt_proteins)
+        # Next if the len of possible proteins is greater than max then restrict the list length...
+        if len(psm.possible_proteins) > max_proteins:
+            psm.possible_proteins = [psm.possible_proteins[x] for x in range(max_proteins)]
+        else:
+            pass
+
+        # If no inference only select first poss protein
+        if parameter_file_object.inference_type == "none":
+            psm.possible_proteins = [psm.possible_proteins[0]]
+
+        return(psm)
         
 class PercolatorReader(Reader):
     """
@@ -38,12 +74,15 @@ class PercolatorReader(Reader):
 
     """
 
-    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
 
-    def __init__(self,target_file,decoy_file,digest_class,parameter_file_object,append_alt_from_db=False):
+    def __init__(self,digest_class,parameter_file_object,append_alt_from_db=False,target_file=None,decoy_file=None,files=None,directory=None):
         self.target_file = target_file
         self.decoy_file = decoy_file
+        self.files = files
+        self.directory = directory
+        self._validate_input()
         #Define Indicies based on input
+
         self.psmid_index = 0
         self.perc_score_index = 1
         self.q_value_index = 2
@@ -62,53 +101,93 @@ class PercolatorReader(Reader):
         
     def read_psms(self):
         #Read in and split by line
-        # If target_file is a list... read them all in and concatenate...
-        if isinstance(self.target_file, (list,)):
-            all_target = []
-            for t_files in self.target_file:
-                self.logger.info(t_files)
+        if self.target_file and self.decoy_file:
+            # If target_file is a list... read them all in and concatenate...
+            if isinstance(self.target_file, (list,)):
+                all_target = []
+                for t_files in self.target_file:
+                    self.logger.info(t_files)
+                    ptarg = []
+                    with open(t_files, 'r') as perc_target_file:
+                        spamreader = csv.reader(perc_target_file, delimiter='\t')
+                        for row in spamreader:
+                            ptarg.append(row)
+                    del ptarg[0]
+                    all_target = all_target + ptarg
+            elif self.target_file:
+                # If not just read the file...
                 ptarg = []
-                with open(t_files, 'r') as perc_target_file:
+                with open(self.target_file, 'r') as perc_target_file:
                     spamreader = csv.reader(perc_target_file, delimiter='\t')
                     for row in spamreader:
                         ptarg.append(row)
                 del ptarg[0]
-                all_target = all_target + ptarg
-        else:
-            # If not just read the file...
-            ptarg = []
-            with open(self.target_file, 'r') as perc_target_file:
-                spamreader = csv.reader(perc_target_file, delimiter='\t')
-                for row in spamreader:
-                    ptarg.append(row)
-            del ptarg[0]
-            all_target = ptarg
+                all_target = ptarg
 
-        
-        #Repeat for decoy file
-        if isinstance(self.decoy_file, (list,)):
-            all_decoy = []
-            for d_files in self.decoy_file:
-                self.logger.info(d_files)
+
+            #Repeat for decoy file
+            if isinstance(self.decoy_file, (list,)):
+                all_decoy = []
+                for d_files in self.decoy_file:
+                    self.logger.info(d_files)
+                    pdec = []
+                    with open(d_files, 'r') as perc_decoy_file:
+                        spamreader = csv.reader(perc_decoy_file, delimiter='\t')
+                        for row in spamreader:
+                            pdec.append(row)
+                    del pdec[0]
+                    all_decoy = all_decoy + pdec
+            elif self.decoy_file:
                 pdec = []
-                with open(d_files, 'r') as perc_decoy_file:
+                with open(self.decoy_file, 'r') as perc_decoy_file:
                     spamreader = csv.reader(perc_decoy_file, delimiter='\t')
                     for row in spamreader:
                         pdec.append(row)
                 del pdec[0]
-                all_decoy = all_decoy + pdec
-        else:
-            pdec = []
-            with open(self.decoy_file, 'r') as perc_decoy_file:
-                spamreader = csv.reader(perc_decoy_file, delimiter='\t')
-                for row in spamreader:
-                    pdec.append(row)
-            del pdec[0]
-            all_decoy = pdec
+                all_decoy = pdec
+
+            #Combine the lists
+            perc_all = all_target+all_decoy
+
+        elif self.files:
+            if isinstance(self.files, (list,)):
+                all = []
+                for f in self.files:
+                    self.logger.info(f)
+                    p = []
+                    with open(f, 'r') as perc_files:
+                        spamreader = csv.reader(perc_files, delimiter='\t')
+                        for row in spamreader:
+                            p.append(row)
+                    del p[0]
+                    all = all + p
+            elif self.files:
+                # If not just read the file...
+                p = []
+                with open(self.files, 'r') as perc_files:
+                    spamreader = csv.reader(perc_files, delimiter='\t')
+                    for row in spamreader:
+                        p.append(row)
+                del p[0]
+                all = p
+            perc_all = all
+
+        elif self.directory:
+
+            all_files = os.listdir(self.directory)
+            all = []
+            for files in all_files:
+                self.logger.info(files)
+                p = []
+                with open(files, 'r') as perc_file:
+                    spamreader = csv.reader(perc_file, delimiter='\t')
+                    for row in spamreader:
+                        p.append(row)
+                del p[0]
+                all = all + p
+            perc_all = all
 
         peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
-        #Combine the lists
-        perc_all = all_target+all_decoy
 
         perc_all_filtered = []
         for psms in perc_all:
@@ -163,35 +242,22 @@ class PercolatorReader(Reader):
                 # Add the other possible_proteins from insilicodigest here...
                 current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
                 # Sort Alt Proteins by Swissprot then Trembl...
-                our_target_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
-                our_decoy_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
-
-                our_target_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
-                our_decoy_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
-
-                identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
+                identifiers_sorted = DataStore.sort_protein_strings(protein_string_list=current_alt_proteins,
+                                                                    sp_proteins=all_sp_proteins,
+                                                                    decoy_symbol=self.parameter_file_object.decoy_symbol)
 
                 # Restrict to 50 possible proteins
-                if self.append_alt_from_db:
-                    for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
-                        if alt_proteins not in p.possible_proteins and len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
-                            p.possible_proteins.append(alt_proteins)
-                if len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
-                    p.possible_proteins = [p.possible_proteins[x] for x in range(self.MAX_ALLOWED_ALTERNATIVE_PROTEINS)]
-                else:
-                    pass
+                p = self._fix_alternative_proteins(append_alt_from_db=self.append_alt_from_db,
+                                                identifiers_sorted = identifiers_sorted,
+                                                max_proteins = self.MAX_ALLOWED_ALTERNATIVE_PROTEINS,
+                                                psm = p,
+                                                parameter_file_object = self.parameter_file_object)
 
-                p.possible_proteins = [x for x in p.possible_proteins if x]
+                # Remove blank alt proteins
+                p.possible_proteins = [x for x in p.possible_proteins if x!='']
+
                 if not current_alt_proteins:
                     self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
-
-                # If no inference only select first poss protein
-                if self.parameter_file_object.inference_type=="none":
-                    p.possible_proteins = [p.possible_proteins[0]]
 
 
                 list_of_psm_objects.append(p)
@@ -213,8 +279,6 @@ class ProteologicPostSearchReader(Reader):
     Essentially it will just be a searchID and an LDA/Percolator ID
     """
 
-    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
-    
     def __init__(self, proteologic_object, search_id, postsearch_id, digest_class, parameter_file_object, append_alt_from_db=False):
         self.proteologic_object=proteologic_object
         self.search_id = search_id
@@ -287,34 +351,19 @@ class ProteologicPostSearchReader(Reader):
                 # Add the other possible_proteins from insilicodigest here...
                 current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
                 # Sort Alt Proteins by Swissprot then Trembl...
-                our_target_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
-                our_decoy_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
+                identifiers_sorted = DataStore.sort_protein_strings(protein_string_list=current_alt_proteins,
+                                                                    sp_proteins=all_sp_proteins,
+                                                                    decoy_symbol=self.parameter_file_object.decoy_symbol)
 
-                our_target_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
-                our_decoy_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
+                # Restrict to 50 possible proteins... and append alt proteins from db
+                p = self._fix_alternative_proteins(append_alt_from_db=self.append_alt_from_db,
+                                                identifiers_sorted = identifiers_sorted,
+                                                max_proteins = self.MAX_ALLOWED_ALTERNATIVE_PROTEINS,
+                                                psm = p,
+                                                parameter_file_object = self.parameter_file_object)
 
-                identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
-
-                # Restrict to 50 possible proteins...
-                if self.append_alt_from_db:
-                    for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
-                        if alt_proteins not in p.possible_proteins and len(p.possible_proteins)<self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
-                            p.possible_proteins.append(alt_proteins)
-                if len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
-                    p.possible_proteins = [p.possible_proteins[x] for x in range(self.MAX_ALLOWED_ALTERNATIVE_PROTEINS)]
-                else:
-                    pass
                 if not current_alt_proteins:
                     self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
-
-
-                # If no inference only select first poss protein
-                if self.parameter_file_object.inference_type=="none":
-                    p.possible_proteins = [p.possible_proteins[0]]
 
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)
@@ -348,14 +397,14 @@ class GenericReader(Reader):
     PEPTIDE = "peptide"
     PROTEIN_IDS = "proteinIds"
     EXTRA_PROTEIN_IDS = "alternative_protein_{}"
-    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
 
-
-
-
-    def __init__(self, target_file, decoy_file, digest_class, parameter_file_object, append_alt_from_db=False):
+    def __init__(self, digest_class, parameter_file_object, append_alt_from_db=False, target_file=None,decoy_file=None,files=None,directory=None):
         self.target_file = target_file
         self.decoy_file = decoy_file
+        self.files = files
+        self.directory = directory
+        self._validate_input()
+
         self.psms = None
         self.search_id = None
         self.digest_class = digest_class
@@ -387,64 +436,108 @@ class GenericReader(Reader):
         self.logger.info("Reading in Input Files using Generic Reader...")
         # Read in and split by line
         # If target_file is a list... read them all in and concatenate...
-        if isinstance(self.target_file, (list,)):
-            all_target = []
-            for t_files in self.target_file:
+        if self.target_file and self.decoy_file:
+            if isinstance(self.target_file, (list,)):
+                all_target = []
+                for t_files in self.target_file:
+                    ptarg = []
+                    with open(t_files, 'r') as psm_target_file:
+                        self.logger.info(self.target_file)
+                        spamreader = csv.reader(psm_target_file, delimiter='\t')
+                        fieldnames = self.remap(next(spamreader))
+                        for row in spamreader:
+                            ptarg.append(dict(zip(fieldnames, row)))
+                    all_target = all_target + ptarg
+            else:
+                # If not just read the file...
                 ptarg = []
-                with open(self.target_file, 'r') as perc_target_file:
+                with open(self.target_file, 'r') as psm_target_file:
                     self.logger.info(self.target_file)
-                    spamreader = csv.reader(perc_target_file, delimiter='\t')
+                    spamreader = csv.reader(psm_target_file, delimiter='\t')
                     fieldnames = self.remap(next(spamreader))
                     for row in spamreader:
                         ptarg.append(dict(zip(fieldnames, row)))
-                all_target = all_target + ptarg
-        else:
-            # If not just read the file...
-            ptarg = []
-            with open(self.target_file, 'r') as perc_target_file:
-                self.logger.info(self.target_file)
-                spamreader = csv.reader(perc_target_file, delimiter='\t')
-                fieldnames = self.remap(next(spamreader))
-                for row in spamreader:
-                    ptarg.append(dict(zip(fieldnames, row)))
-            all_target = ptarg
+                all_target = ptarg
 
-        # Repeat for decoy file
-        if isinstance(self.decoy_file, (list,)):
-            all_decoy = []
-            for d_files in self.decoy_file:
+            # Repeat for decoy file
+            if isinstance(self.decoy_file, (list,)):
+                all_decoy = []
+                for d_files in self.decoy_file:
+                    pdec = []
+                    with open(d_files, 'r') as psm_decoy_file:
+                        self.logger.info(self.decoy_file)
+                        spamreader = csv.reader(psm_decoy_file, delimiter='\t')
+                        fieldnames = self.remap(next(spamreader))
+                        for row in spamreader:
+                            pdec.append(dict(zip(fieldnames, row)))
+                    all_decoy = all_decoy + pdec
+            else:
                 pdec = []
-                with open(self.decoy_file, 'r') as perc_decoy_file:
+                with open(self.decoy_file, 'r') as psm_decoy_file:
                     self.logger.info(self.decoy_file)
-                    spamreader = csv.reader(perc_decoy_file, delimiter='\t')
+                    spamreader = csv.reader(psm_decoy_file, delimiter='\t')
                     fieldnames = self.remap(next(spamreader))
                     for row in spamreader:
                         pdec.append(dict(zip(fieldnames, row)))
-                all_decoy = all_decoy + pdec
-        else:
-            pdec = []
-            with open(self.decoy_file, 'r') as perc_decoy_file:
-                self.logger.info(self.decoy_file)
-                spamreader = csv.reader(perc_decoy_file, delimiter='\t')
-                fieldnames = self.remap(next(spamreader))
-                for row in spamreader:
-                    pdec.append(dict(zip(fieldnames, row)))
-            all_decoy = pdec
+                all_decoy = pdec
 
-        peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
-        # Combine the lists
-        perc_all = all_target + all_decoy
+            # Combine the lists
+            all_psms = all_target + all_decoy
 
-        perc_all_filtered = []
-        for psms in perc_all:
-            try:
-                float(psms[self.POSTERIOR_ERROR_PROB])
-                perc_all_filtered.append(psms)
-            except ValueError as e:
-                pass
+        elif self.files:
+            all = []
+            for files in self.files:
+                p = []
+                with open(files, 'r') as psm_file:
+                    self.logger.info(self.target_file)
+                    spamreader = csv.reader(psm_file, delimiter='\t')
+                    fieldnames = self.remap(next(spamreader))
+                    for row in spamreader:
+                        p.append(dict(zip(fieldnames, row)))
+                all = all + p
+            all_psms = all
+
+        elif self.directory:
+            all_files = os.listdir(self.directory)
+            all = []
+            for files in all_files:
+                p = []
+                with open(files, 'r') as psm_file:
+                    self.logger.info(self.target_file)
+                    spamreader = csv.reader(psm_file, delimiter='\t')
+                    fieldnames = self.remap(next(spamreader))
+                    for row in spamreader:
+                        p.append(dict(zip(fieldnames, row)))
+                all = all + p
+            all_psms = all
+
+
+        psms_all_filtered = []
+        for psms in all_psms:
+            if self.POSTERIOR_ERROR_PROB in psms.keys():
+                try:
+                    float(psms[self.POSTERIOR_ERROR_PROB])
+                    psms_all_filtered.append(psms)
+                except ValueError as e:
+                    pass
+            else:
+                try:
+                    float(psms[self.scoring_variable])
+                    psms_all_filtered.append(psms)
+                except ValueError as e:
+                    pass
 
         # Filter by pep
-        perc_all = sorted(perc_all_filtered, key=lambda x: float(x[self.POSTERIOR_ERROR_PROB]), reverse=False)
+        try:
+            self.logger.info("Sorting by {}".format(self.POSTERIOR_ERROR_PROB))
+            all_psms = sorted(psms_all_filtered, key=lambda x: float(x[self.POSTERIOR_ERROR_PROB]), reverse=False)
+        except KeyError:
+            self.logger.info("Cannot Sort by {} the values do not exist".format(self.POSTERIOR_ERROR_PROB))
+            self.logger.info("Sorting by {}".format(self.scoring_variable))
+            if self.parameter_file_object.score_type=="additive":
+                all_psms = sorted(psms_all_filtered, key=lambda x: float(x[self.scoring_variable]), reverse=True)
+            if self.parameter_file_object.score_type=="multiplicative":
+                all_psms = sorted(psms_all_filtered, key=lambda x: float(x[self.scoring_variable]), reverse=False)
 
         # TODO
         # TRY TO GET PERC_ALL AS A GENERATOR
@@ -457,24 +550,36 @@ class GenericReader(Reader):
         # We only want to get unique peptides... using all messes up scoring...
         # Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
 
+
+        peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
+
+
         # TODO
         # make this for loop a generator...
-
-        self.logger.info("Length of PSM Data: {}".format(len(perc_all)))
-        for psm_info in perc_all:
+        self.logger.info("Length of PSM Data: {}".format(len(all_psms)))
+        for psm_info in all_psms:
             current_peptide = psm_info[self.PEPTIDE]
             # Define the Psm...
             if current_peptide not in peptide_tracker:
                 p = Psm(identifier=current_peptide)
-                # Add all the attributes
-                p.percscore = float(psm_info[self.SCORE])
-                p.qvalue = float(psm_info[self.Q_VALUE])
-                p.pepvalue = float(psm_info[self.POSTERIOR_ERROR_PROB])
+                # Attempt to add variables from PSM info...
+                # If they do not exist in the psm info then we skip...
+                try:
+                    p.percscore = float(psm_info[self.SCORE])
+                except KeyError:
+                    pass
+                try:
+                    p.qvalue = float(psm_info[self.Q_VALUE])
+                except KeyError:
+                    pass
+                try:
+                    p.pepvalue = float(psm_info[self.POSTERIOR_ERROR_PROB])
+                except KeyError:
+                    pass
                 # If user has a custom score IE not q-value or pep_value...
                 if self.load_custom_score:
                     # Then we look for it...
                     p.custom_score = float(psm_info[self.scoring_variable])
-                #poss_proteins = list(set(psm_info[self.proteinIDs_index:self.proteinIDs_index + 50]))
                 p.possible_proteins = []
                 p.possible_proteins.append(psm_info[self.PROTEIN_IDS])
                 for alternative_protein_keys in self.MAX_ALTERNATIVE_PROTEIN_COLUMN_NAMES:
@@ -487,7 +592,7 @@ class GenericReader(Reader):
                 if self.parameter_file_object.inference_type!="none":
                     p.possible_proteins = list(set(p.possible_proteins))
 
-                # Restrict to 50 total possible proteins...
+                # Get PSM ID
                 p.psm_id = psm_info[self.PSMID]
 
                 # Split peptide if flanking
@@ -500,40 +605,20 @@ class GenericReader(Reader):
                     current_peptide = stripped_peptide
                 # Add the other possible_proteins from insilicodigest here...
                 current_alt_proteins = list(
-                    peptide_to_protein_dictionary[current_peptide])  # TODO This peptide needs to be scrubbed of Mods...
+                    peptide_to_protein_dictionary[current_peptide])  # This peptide needs to be scrubbed of Mods...
                 # Sort Alt Proteins by Swissprot then Trembl...
-                our_target_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if
-                     x in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
-                our_decoy_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if
-                     x in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
-
-                our_target_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if
-                     x not in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
-                our_decoy_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if
-                     x not in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
-
-                identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
+                identifiers_sorted = DataStore.sort_protein_strings(protein_string_list=current_alt_proteins,
+                                                                    sp_proteins=all_sp_proteins,
+                                                                    decoy_symbol=self.parameter_file_object.decoy_symbol)
 
                 # Restrict to 50 possible proteins
-                if self.append_alt_from_db:
-                    for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
-                        if alt_proteins not in p.possible_proteins and len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
-                            p.possible_proteins.append(alt_proteins)
-
-                if len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
-                    p.possible_proteins = [p.possible_proteins[x] for x in range(self.MAX_ALLOWED_ALTERNATIVE_PROTEINS)]
-                else:
-                    pass
+                p = self._fix_alternative_proteins(append_alt_from_db=self.append_alt_from_db,
+                                                identifiers_sorted = identifiers_sorted,
+                                                max_proteins = self.MAX_ALLOWED_ALTERNATIVE_PROTEINS,
+                                                psm = p,
+                                                parameter_file_object = self.parameter_file_object)
                 if not current_alt_proteins:
                     self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
-
-                # If no inference only select first poss protein
-                if self.parameter_file_object.inference_type=="none":
-                    p.possible_proteins = [p.possible_proteins[0]]
 
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)

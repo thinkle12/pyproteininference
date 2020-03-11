@@ -156,8 +156,11 @@ class ProteinInferenceParameter(object):
             else:
                 raise ValueError("PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(self.restrict_pep))
         except ValueError:
-            raise ValueError("PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(
-                self.restrict_pep))
+            if not self.restrict_pep or self.restrict_pep=="None":
+                self.restrict_pep=None
+            else:
+                raise ValueError("PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(
+                    self.restrict_pep))
 
         try:
             if 0<=float(self.restrict_q)<=1:
@@ -166,9 +169,12 @@ class ProteinInferenceParameter(object):
             else:
                 raise ValueError("Q Value restriction must be a decimal between 0 and 1, Q Value restriction provided: {}".format(self.restrict_q))
         except ValueError:
-            raise ValueError(
-                "Q Value restriction must be a decimal between 0 and 1, Q Value restriction provided: {}".format(
-                    self.restrict_q))
+            if not self.restrict_q or self.restrict_q=="None":
+                self.restrict_q=None
+            else:
+                raise ValueError(
+                    "Q Value restriction must be a decimal between 0 and 1, Q Value restriction provided: {}".format(
+                        self.restrict_q))
 
         try:
             int(self.missed_cleavages)

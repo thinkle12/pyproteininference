@@ -528,7 +528,16 @@ class GenericReader(Reader):
                     pass
 
         # Filter by pep
-        perc_all = sorted(perc_all_filtered, key=lambda x: float(x[self.POSTERIOR_ERROR_PROB]), reverse=False)
+        try:
+            self.logger.info("Sorting by {}".format(self.POSTERIOR_ERROR_PROB))
+            all_psms = sorted(psms_all_filtered, key=lambda x: float(x[self.POSTERIOR_ERROR_PROB]), reverse=False)
+        except KeyError:
+            self.logger.info("Cannot Sort by {} the values do not exist".format(self.POSTERIOR_ERROR_PROB))
+            self.logger.info("Sorting by {}".format(self.scoring_variable))
+            if self.parameter_file_object.score_type=="additive":
+                all_psms = sorted(psms_all_filtered, key=lambda x: float(x[self.scoring_variable]), reverse=True)
+            if self.parameter_file_object.score_type=="multiplicative":
+                all_psms = sorted(psms_all_filtered, key=lambda x: float(x[self.scoring_variable]), reverse=False)
 
         # TODO
         # TRY TO GET PERC_ALL AS A GENERATOR

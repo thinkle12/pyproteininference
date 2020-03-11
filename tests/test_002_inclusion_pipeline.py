@@ -38,7 +38,7 @@ logger = logging.getLogger("protein_inference.tests.test_002_inclusion_pipeline.
 
 class TestLoadInclusionWorkflow(TestCase):
 
-    def test_workflow2(self):
+    def test_workflow_inclusion(self):
 
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###

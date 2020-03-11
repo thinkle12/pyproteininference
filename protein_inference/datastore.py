@@ -196,7 +196,7 @@ class DataStore(object):
         main_psm_data = self.main_data_form
         logger.info('Length of main data: ' + str(len(self.main_data_form)))
         # If restrict_main_data is called, we automatically discard everything that has a PEP of 1
-        if remove1pep:
+        if remove1pep and posterior_error_prob_threshold:
             main_psm_data = [x for x in main_psm_data if x.pepvalue != 1]
 
         # Restrict peptide length and posterior error probability
@@ -298,7 +298,7 @@ class DataStore(object):
             for psms in psm_data:
                 protein_set = self.peptide_protein_dictionary[Psm.split_peptide(peptide_string=psms.identifier)]
                 # Sort protein_set by sp-alpha, decoy-sp-alpha, tr-alpha, decoy-tr-alpha
-                sorted_protein_list = self.sort_protein_strings(protein_string_list=protein_set, sp_proteins=sp_proteins)
+                sorted_protein_list = self.sort_protein_strings(protein_string_list=protein_set, sp_proteins=sp_proteins, decoy_symbol=self.parameter_file_object.decoy_symbol)
                 # Restrict the number of identifiers by the value in param file max_identifiers_peptide_centric
                 sorted_protein_list = sorted_protein_list[:self.parameter_file_object.max_identifiers_peptide_centric]
                 protein_name = ";".join(sorted_protein_list)
@@ -939,21 +939,22 @@ class DataStore(object):
         logger.info("Number of Reviewed Proteins in from Digest: {}".format(reviewed_proteins))
         logger.info("Number of Unreviewed Proteins in from Digest: {}".format(unreviewed_proteins))
 
-    def sort_protein_strings(self,protein_string_list, sp_proteins):
+    @classmethod
+    def sort_protein_strings(cls,protein_string_list, sp_proteins, decoy_symbol):
 
         our_target_sp_proteins = sorted(
             [x for x in protein_string_list if
-             x in sp_proteins and self.parameter_file_object.decoy_symbol not in x])
+             x in sp_proteins and decoy_symbol not in x])
         our_decoy_sp_proteins = sorted(
             [x for x in protein_string_list if
-             x in sp_proteins and self.parameter_file_object.decoy_symbol in x])
+             x in sp_proteins and decoy_symbol in x])
 
         our_target_tr_proteins = sorted(
             [x for x in protein_string_list if
-             x not in sp_proteins and self.parameter_file_object.decoy_symbol not in x])
+             x not in sp_proteins and decoy_symbol not in x])
         our_decoy_tr_proteins = sorted(
             [x for x in protein_string_list if
-             x not in sp_proteins and self.parameter_file_object.decoy_symbol in x])
+             x not in sp_proteins and decoy_symbol in x])
 
         identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
 

@@ -1,0 +1,21 @@
+Parameters:
+  Digest_Type: trypsin
+  Export: q_value
+  FDR: 0.01
+  GLPK_Path: glpsol
+  Missed_Cleavages: 3
+  Picker: True
+  Restrict_Pep: None
+  Restrict_Peptide_Length: 7
+  Restrict_Q: None
+  Score_Method: multiplicative_log
+  Score: example_multiplicative_score
+  Score_Type: multiplicative
+  Decoy_Symbol: "##"
+  Isoform_Symbol: "-"
+  Reviewed_Identifier_Symbol: "sp|"
+  Inference_Type: parsimony
+  Tag: test_multiplicative
+  Grouping_Type: shared_peptides
+  Max_Identifiers_Peptide_Centric: 5
+  LP_Solver: pulp

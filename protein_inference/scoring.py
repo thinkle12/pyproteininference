@@ -411,6 +411,6 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = 'iterative_downweighting2'
-        self.data_class.short_score_method = 'idw2'
+        self.data_class.score_method = 'additive'
+        self.data_class.short_score_method = 'add'
         self.data_class.scored_proteins = all_scores

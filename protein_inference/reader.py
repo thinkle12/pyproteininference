@@ -550,6 +550,10 @@ class GenericReader(Reader):
         # We only want to get unique peptides... using all messes up scoring...
         # Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
 
+
+        peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
+
+
         # TODO
         # make this for loop a generator...
 

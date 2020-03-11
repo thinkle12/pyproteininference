@@ -279,8 +279,6 @@ class ProteologicPostSearchReader(Reader):
     Essentially it will just be a searchID and an LDA/Percolator ID
     """
 
-    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
-    
     def __init__(self, proteologic_object, search_id, postsearch_id, digest_class, parameter_file_object, append_alt_from_db=False):
         self.proteologic_object=proteologic_object
         self.search_id = search_id

@@ -38,7 +38,7 @@ logger = logging.getLogger("protein_inference.tests.test_004_gfy_type_no_inferen
 
 class TestLoadNoInferenceWorkflow(TestCase):
 
-    def test_workflow4(self):
+    def test_workflow_no_inference(self):
 
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###

@@ -351,34 +351,19 @@ class ProteologicPostSearchReader(Reader):
                 # Add the other possible_proteins from insilicodigest here...
                 current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
                 # Sort Alt Proteins by Swissprot then Trembl...
-                our_target_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
-                our_decoy_sp_proteins = sorted(
-                    [x for x in current_alt_proteins if x in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
+                identifiers_sorted = DataStore.sort_protein_strings(protein_string_list=current_alt_proteins,
+                                                                    sp_proteins=all_sp_proteins,
+                                                                    decoy_symbol=self.parameter_file_object.decoy_symbol)
 
-                our_target_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol not in x])
-                our_decoy_tr_proteins = sorted(
-                    [x for x in current_alt_proteins if x not in all_sp_proteins and self.parameter_file_object.decoy_symbol in x])
+                # Restrict to 50 possible proteins... and append alt proteins from db
+                p = self._fix_alternative_proteins(append_alt_from_db=self.append_alt_from_db,
+                                                identifiers_sorted = identifiers_sorted,
+                                                max_proteins = self.MAX_ALLOWED_ALTERNATIVE_PROTEINS,
+                                                psm = p,
+                                                parameter_file_object = self.parameter_file_object)
 
-                identifiers_sorted = our_target_sp_proteins + our_decoy_sp_proteins + our_target_tr_proteins + our_decoy_tr_proteins
-
-                # Restrict to 50 possible proteins...
-                if self.append_alt_from_db:
-                    for alt_proteins in identifiers_sorted[:self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]:
-                        if alt_proteins not in p.possible_proteins and len(p.possible_proteins)<self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
-                            p.possible_proteins.append(alt_proteins)
-                if len(p.possible_proteins)>self.MAX_ALLOWED_ALTERNATIVE_PROTEINS:
-                    p.possible_proteins = [p.possible_proteins[x] for x in range(self.MAX_ALLOWED_ALTERNATIVE_PROTEINS)]
-                else:
-                    pass
                 if not current_alt_proteins:
                     self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
-
-
-                # If no inference only select first poss protein
-                if self.parameter_file_object.inference_type=="none":
-                    p.possible_proteins = [p.possible_proteins[0]]
 
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)

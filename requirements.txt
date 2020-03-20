@@ -3,3 +3,4 @@ pandas==0.25.0
 pyteomics
 biopython
 pulp
+yaml

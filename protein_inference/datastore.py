@@ -753,8 +753,8 @@ class DataStore(object):
         new_fdr_list = []
         for fdrs in fdr_list:
             new_fdr_list.append(fdrs)
-            # qvalue = min(new_fdr_list)
-            qvalue = fdrs
+            qvalue = min(new_fdr_list)
+            #qvalue = fdrs
             qvalue_list.append(qvalue)
 
         qvalue_list.reverse()

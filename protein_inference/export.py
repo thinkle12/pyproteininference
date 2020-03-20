@@ -20,6 +20,7 @@ class Export(object):
     
     def __init__(self,data_class):
         self.data_class = data_class
+        self.filepath = None
 
     def export_to_csv(self, directory, export_type = "q_value"):
 
@@ -66,6 +67,8 @@ class Export(object):
             logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
             self.csv_export_q_value_all(complete_filepath)
+
+        self.filepath = complete_filepath
 
     def csv_export_all_restricted(self, filename_out):
         """

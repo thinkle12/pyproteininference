@@ -7,7 +7,6 @@ setup(
     scripts=glob.glob("scripts/*.py"),
     name='protein_inference',
     version='0.2.5',
-    packages=['digest', 'protein_inference','scripts'],
     url='',
     license='',
     author='hinklet',

@@ -7,6 +7,7 @@ Created on Tue Dec  5 16:16:17 2017
 """
 import csv
 import tempfile
+import unittest
 from unittest import TestCase
 from pkg_resources import resource_filename
 
@@ -40,6 +41,7 @@ logger = logging.getLogger("protein_inference.tests.test_001_parsimony_pipeline.
 
 class TestLoadParsimonyPulpWorkflow(TestCase):
 
+    @unittest.skip("Skipping Pulp Test, No CBC executable in build env")
     def test_workflow_parsimony_pulp(self):
 
         ### STEP 1: Load parameter file ###

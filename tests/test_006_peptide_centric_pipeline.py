@@ -52,7 +52,7 @@ class TestLoadPeptideCentricWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.digest_type, 'trypsin')
         self.assertEqual(protein_inference_parameters.export, 'q_value')
         self.assertEqual(protein_inference_parameters.fdr, 0.01)
-        self.assertEqual(protein_inference_parameters.glpk_path, 'glpsol')
+        self.assertEqual(protein_inference_parameters.glpk_path, 'None')
         self.assertEqual(protein_inference_parameters.missed_cleavages, 3)
         self.assertEqual(protein_inference_parameters.picker, True)
         self.assertEqual(protein_inference_parameters.restrict_pep, .9)
@@ -66,9 +66,9 @@ class TestLoadPeptideCentricWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.reviewed_identifier_symbol, 'sp|')
         self.assertEqual(protein_inference_parameters.inference_type, 'peptide_centric')
         self.assertEqual(protein_inference_parameters.tag, 'test_peptide_centric')
-        self.assertEqual(protein_inference_parameters.grouping_type, 'none')
+        self.assertEqual(protein_inference_parameters.grouping_type, 'None')
         self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
-        self.assertEqual(protein_inference_parameters.lp_solver, "none")
+        self.assertEqual(protein_inference_parameters.lp_solver, "None")
 
 
 

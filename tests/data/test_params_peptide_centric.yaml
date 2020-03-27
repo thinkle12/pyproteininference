@@ -1,21 +1,30 @@
-Parameters:
-  Digest_Type: trypsin
-  Export: q_value
-  FDR: 0.01
-  GLPK_Path: glpsol
-  Missed_Cleavages: 3
-  Picker: True
-  Restrict_Pep: .9
-  Restrict_Peptide_Length: 7
-  Restrict_Q: .9
-  Score_Method: multiplicative_log
-  Score: posterior_error_prob
-  Score_Type: multiplicative
-  Decoy_Symbol: "##"
-  Isoform_Symbol: "-"
-  Reviewed_Identifier_Symbol: "sp|"
-  Inference_Type: peptide_centric
-  Tag: test_peptide_centric
-  Grouping_Type: none
-  Max_Identifiers_Peptide_Centric: 5
-  LP_Solver: none
+parameters:
+  general:
+    export: q_value
+    fdr: 0.01
+    picker: True
+    tag: test_peptide_centric
+  data_restriction:
+    pep_restriction: .9
+    peptide_length_restriction: 7
+    q_value_restriction: .9
+    custom_restriction: None
+  score:
+    score_method: multiplicative_log
+    score: posterior_error_prob
+    score_type: multiplicative
+  identifiers:
+    decoy_symbol: "##"
+    isoform_symbol: "-"
+    reviewed_identifier_symbol: "sp|"
+  inference:
+    inference_type: peptide_centric
+    grouping_type: None
+  digest:
+    digest_type: trypsin
+    missed_cleavages: 3
+  parsimony:
+    lp_solver: None
+    glpk_path: None
+  peptide_centric:
+    max_identifiers: 5

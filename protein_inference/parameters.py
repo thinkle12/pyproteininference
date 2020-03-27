@@ -99,11 +99,11 @@ class ProteinInferenceParameter(object):
             self.restrict_peptide_length = 7
             self.restrict_q = 0.005
             self.score_method = "multiplicative_log"
-            self.score = "pep_value"
+            self.score = "posterior_error_prob"
             self.decoy_symbol = "##"
             self.isoform_symbol = "-"
             self.reviewed_identifier_symbol = "sp|"
-            self.inference_type = "parsimony"
+            self.inference_type = "peptide_centric"
             self.tag = "Test"
             self.score_type = "multiplicative"
             self.grouping_type = "shared_peptides"

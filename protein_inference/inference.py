@@ -24,9 +24,9 @@ class Inference(object):
     Parent Inference class for all grouper subset classes
     """
 
-    INFERENCE_TYPES = ["parsimony", "inclusion", "exclusion", "none", "peptide_centric", None]
-    GROUPING_TYPES = ["subset_peptides", "shared_peptides", "none", None]
-    LP_SOLVERS = ["pulp", "glpk", "none", "None"]
+    INFERENCE_TYPES = ["parsimony", "inclusion", "exclusion", "none", "peptide_centric", None, "None"]
+    GROUPING_TYPES = ["subset_peptides", "shared_peptides", "none", None, "None"]
+    LP_SOLVERS = ["pulp", "glpk", "none", "None", None]
     
     def __init__(self):
         None

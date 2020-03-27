@@ -280,3 +280,7 @@ class ProteinInferenceParameter(object):
             raise ValueError(
                 "LP Solver '{}' not supported, please use one of the following LP Solvers: '{}'".format(
                     self.lp_solver, ", ".join(Inference.LP_SOLVERS)))
+
+    def _override_inference_none(self):
+        if self.inference_type in ["None", "none", None]:
+            self.inference_type="none"

@@ -49,6 +49,8 @@ class ProteinInferenceParameter(object):
         if validate:
             self.validate_parameters()
 
+        self._override_inference_none()
+
 
 
     def convert_to_object(self):
@@ -65,26 +67,27 @@ class ProteinInferenceParameter(object):
             with open(self.yaml_param_filepath, 'r') as stream:
                 yaml_params = yaml.load(stream)
 
-            self.digest_type = yaml_params['Parameters']['Digest_Type']
-            self.export = yaml_params['Parameters']['Export']
-            self.fdr = yaml_params['Parameters']['FDR']
-            self.glpk_path = yaml_params['Parameters']['GLPK_Path']
-            self.missed_cleavages = yaml_params['Parameters']['Missed_Cleavages']
-            self.picker = yaml_params['Parameters']['Picker']
-            self.restrict_pep = yaml_params['Parameters']['Restrict_Pep']
-            self.restrict_peptide_length = yaml_params['Parameters']['Restrict_Peptide_Length']
-            self.restrict_q = yaml_params['Parameters']['Restrict_Q']
-            self.score_method = yaml_params['Parameters']['Score_Method']
-            self.score_type = yaml_params['Parameters']['Score_Type']
-            self.decoy_symbol = yaml_params['Parameters']['Decoy_Symbol']
-            self.isoform_symbol = yaml_params['Parameters']['Isoform_Symbol']
-            self.reviewed_identifier_symbol = yaml_params['Parameters']['Reviewed_Identifier_Symbol']
-            self.inference_type = yaml_params['Parameters']['Inference_Type']
-            self.tag = yaml_params['Parameters']["Tag"]
-            self.score = yaml_params["Parameters"]["Score"]
-            self.grouping_type = yaml_params["Parameters"]["Grouping_Type"]
-            self.max_identifiers_peptide_centric = yaml_params["Parameters"]["Max_Identifiers_Peptide_Centric"]
-            self.lp_solver = yaml_params["Parameters"]["LP_Solver"]
+            self.digest_type = yaml_params['parameters']['digest']['digest_type']
+            self.export = yaml_params['parameters']['general']['export']
+            self.fdr = yaml_params['parameters']['general']['fdr']
+            self.glpk_path = yaml_params['parameters']['parsimony']['glpk_path']
+            self.missed_cleavages = yaml_params['parameters']['digest']['missed_cleavages']
+            self.picker = yaml_params['parameters']['general']['picker']
+            self.restrict_pep = yaml_params['parameters']['data_restriction']['pep_restriction']
+            self.restrict_peptide_length = yaml_params['parameters']['data_restriction']['peptide_length_restriction']
+            self.restrict_q = yaml_params['parameters']['data_restriction']['q_value_restriction']
+            self.restrict_custom = yaml_params['parameters']['data_restriction']['custom_restriction']
+            self.score_method = yaml_params['parameters']['score']['score_method']
+            self.score_type = yaml_params['parameters']['score']['score_type']
+            self.decoy_symbol = yaml_params['parameters']['identifiers']['decoy_symbol']
+            self.isoform_symbol = yaml_params['parameters']['identifiers']['isoform_symbol']
+            self.reviewed_identifier_symbol = yaml_params['parameters']['identifiers']['reviewed_identifier_symbol']
+            self.inference_type = yaml_params['parameters']['inference']['inference_type']
+            self.tag = yaml_params['parameters']['general']["tag"]
+            self.score = yaml_params["parameters"]['score']["score"]
+            self.grouping_type = yaml_params["parameters"]['inference']["grouping_type"]
+            self.max_identifiers_peptide_centric = yaml_params["parameters"]['peptide_centric']["max_identifiers"]
+            self.lp_solver = yaml_params["parameters"]['parsimony']["lp_solver"]
 
         else:
             self.logger.info("Yaml parameter file not found, parameters set to default")
@@ -98,11 +101,11 @@ class ProteinInferenceParameter(object):
             self.restrict_peptide_length = 7
             self.restrict_q = 0.005
             self.score_method = "multiplicative_log"
-            self.score = "pep_value"
+            self.score = "posterior_error_prob"
             self.decoy_symbol = "##"
             self.isoform_symbol = "-"
             self.reviewed_identifier_symbol = "sp|"
-            self.inference_type = "parsimony"
+            self.inference_type = "peptide_centric"
             self.tag = "Test"
             self.score_type = "multiplicative"
             self.grouping_type = "shared_peptides"
@@ -279,3 +282,7 @@ class ProteinInferenceParameter(object):
             raise ValueError(
                 "LP Solver '{}' not supported, please use one of the following LP Solvers: '{}'".format(
                     self.lp_solver, ", ".join(Inference.LP_SOLVERS)))
+
+    def _override_inference_none(self):
+        if self.inference_type in ["None", "none", None]:
+            self.inference_type="none"

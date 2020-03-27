@@ -49,7 +49,7 @@ class TestLoadNoInferenceWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.digest_type, 'trypsin')
         self.assertEqual(protein_inference_parameters.export, 'q_value')
         self.assertEqual(protein_inference_parameters.fdr, 0.01)
-        self.assertEqual(protein_inference_parameters.glpk_path, 'glpsol')
+        self.assertEqual(protein_inference_parameters.glpk_path, 'None')
         self.assertEqual(protein_inference_parameters.missed_cleavages, 3)
         self.assertEqual(protein_inference_parameters.picker, True)
         self.assertEqual(protein_inference_parameters.restrict_pep, .9)
@@ -65,7 +65,7 @@ class TestLoadNoInferenceWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.tag, 'test_no_inference')
         self.assertEqual(protein_inference_parameters.grouping_type, 'subset_peptides')
         self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
-        self.assertEqual(protein_inference_parameters.lp_solver, "none")
+        self.assertEqual(protein_inference_parameters.lp_solver, "None")
 
 
 

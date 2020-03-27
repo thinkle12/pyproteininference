@@ -49,6 +49,8 @@ class ProteinInferenceParameter(object):
         if validate:
             self.validate_parameters()
 
+        self._override_inference_none()
+
 
 
     def convert_to_object(self):

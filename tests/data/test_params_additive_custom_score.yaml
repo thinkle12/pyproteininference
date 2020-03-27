@@ -1,21 +1,30 @@
-Parameters:
-  Digest_Type: trypsin
-  Export: q_value
-  FDR: 0.01
-  GLPK_Path: glpsol
-  Missed_Cleavages: 3
-  Picker: True
-  Restrict_Pep: None
-  Restrict_Peptide_Length: 7
-  Restrict_Q: None
-  Score_Method: additive
-  Score: example_additive_score
-  Score_Type: additive
-  Decoy_Symbol: "##"
-  Isoform_Symbol: "-"
-  Reviewed_Identifier_Symbol: "sp|"
-  Inference_Type: peptide_centric
-  Tag: test_additive
-  Grouping_Type: shared_peptides
-  Max_Identifiers_Peptide_Centric: 5
-  LP_Solver: pulp
+parameters:
+  general:
+    export: q_value
+    fdr: 0.01
+    picker: True
+    tag: test_additive
+  data_restriction:
+    pep_restriction: None
+    peptide_length_restriction: 7
+    q_value_restriction: None
+    custom_restriction: None
+  score:
+    score_method: additive
+    score: example_additive_score
+    score_type: additive
+  identifiers:
+    decoy_symbol: "##"
+    isoform_symbol: "-"
+    reviewed_identifier_symbol: "sp|"
+  inference:
+    inference_type: peptide_centric
+    grouping_type: shared_peptides
+  digest:
+    digest_type: trypsin
+    missed_cleavages: 3
+  parsimony:
+    lp_solver: None
+    glpk_path: None
+  peptide_centric:
+    max_identifiers: 5

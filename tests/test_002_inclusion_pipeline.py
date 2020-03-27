@@ -63,9 +63,9 @@ class TestLoadInclusionWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.reviewed_identifier_symbol, 'sp|')
         self.assertEqual(protein_inference_parameters.inference_type, 'inclusion')
         self.assertEqual(protein_inference_parameters.tag, 'test_inclusion')
-        self.assertEqual(protein_inference_parameters.grouping_type, 'none')
+        self.assertEqual(protein_inference_parameters.grouping_type, 'None')
         self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
-        self.assertEqual(protein_inference_parameters.lp_solver, "none")
+        self.assertEqual(protein_inference_parameters.lp_solver, "None")
 
 
         ### STEP 2: Start with running an In Silico Digestion ###

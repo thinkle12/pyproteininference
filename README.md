@@ -1,4 +1,5 @@
-﻿## Py Protein Inference
+﻿
+# Py Protein Inference
 ## Requirements
 
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__

@@ -28,7 +28,7 @@ Py Protein Inference is an independent Python package that has the ability to ru
  4. Peptide Centric (Protein Group Level)
  5. No Inference (Selects first protein per peptide)
  
- Please see the [__Inference Types__](#inference-types) section for more information on Inference Types
+ Please see the [__Inference Types__](#markdown-header-inference-types) section for more information on Inference Types
  
  In Addition to these inference types Py Protein Inference can also score proteins with a variety of methods:
  

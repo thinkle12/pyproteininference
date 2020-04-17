@@ -1,4 +1,4 @@
-﻿# Py Protein Inference
+﻿## Py Protein Inference
 ## Requirements
 
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__
@@ -28,7 +28,7 @@ Py Protein Inference is an independent Python package that has the ability to ru
  4. Peptide Centric (Protein Group Level)
  5. No Inference (Selects first protein per peptide)
  
- Please see the [__Inference Types__](#markdown-header-inference-types) section for more information on Inference Types
+ Please see the [__Inference Types__](#inference-types) section for more information on Inference Types
  
  In Addition to these inference types Py Protein Inference can also score proteins with a variety of methods:
  
@@ -49,7 +49,7 @@ Please go through each section below. The sections highlight how to set everythi
  3. [Fasta Database](#fasta-file-example)
  4. [Running Py Protein Inference](#running-py-protein-inference)
 
-# Yaml Parameter File Outline
+## Yaml Parameter File Outline
 The Yaml Parameter File is the central location for all configurations for a given Protein Inference run and are summarized below:
 For a sample parameter file please see the `parameters/` folder.
 ## General:
@@ -74,7 +74,7 @@ For a sample parameter file please see the `parameters/` folder.
 | score_method | One of any of the following: __multiplicative_log__, __best_peptide_per_protein__, __top_two_combined__, __additive__, __iterative_downweighted_log__, __downweighted_multiplicative_log__, __geometric_mean__. Recommended: __multiplicative_log__ | String |
 | score | PSM score to use for Protein Scoring. If using Percolator output as input this would either be __posterior_error_prob__ or __q-value__. The string typed here should match the column in your input files __EXACTLY__. If using a custom score it will be filtered accordingly with the value in [__custom_restriction__](#data-restriction) | String |
 | score_type | The Type of score that __score__ parameter is. Either __multiplicative__ or __additive__. See [below](#extra-score-information) for more information| String |
-### Extra Score information:
+#### Extra Score information:
 
  1. The __score_method__, __score__, and __score_type__ methods must be compatible.
  2. If using a PSM score (__score__ parameter) where the lower the score the better IE (__posterior_error_prob__ or __q-value__) then any  __score_method__ can be used except __additive__. __score_type__ must also be set to __multiplicative__
@@ -86,7 +86,7 @@ For a sample parameter file please see the `parameters/` folder.
 | decoy_symbol | Symbol within Decoy Identifiers to distinguish between targets. IE "__##__" or "__decoy___". This is important for Protein [Picker](#protein-picker) and FDR calculation | String |
 | isoform_symbol | Symbol that is present in isoform proteins only. IE "__-__". See [below](#extra-identifier-information) for more information | String |
 | reviewed_identifier_symbol | Identifier to determine a reviewed vs unreviewed identifier. IE "__sp\|__". See [below](#extra-identifier-information) for more information | String |
-### Extra Identifier information:
+#### Extra Identifier information:
 
  1. For the __decoy_symbol__ an example of a target protein -> __ex|protein__ and its decoy counterpart could be any of the following: __##ex|##protein__, __##ex|protein__, __decoy_ex|protein__. The decoy symbol just needs to be present within the string to be determined decoy/target
  2. For __isoform_symbol__ and __reviewed_identifier_symbol__, these are used to assign priority in certain algorithms such as parsimony. For example if we have canonical proteins, isoform proteins, and reviewed/unreviewed proteins in a given analysis the priority would be established as followed: Reviewed Canonical, Reviewed Isoform, Unreviewed. What this means is that if two proteins map to the same peptides the algorithm has to make a decision on which to pick. It would use the previous mentioned priority to pick the protein lead to report. 
@@ -118,9 +118,9 @@ These parameters are only used if __peptide_centric__ is selected as
 |---|---|---|
 | max_identifiers | The maximum number of proteins a peptide is allowed to map to. IE __5__. This serves to limit the number of protein groups that can be created due to highly homologous peptides. | Int |
 
-# Input File Examples
+## Input File Examples
 As previously mentioned the standard input filetype is the tab delimited output from the percolator algorithm. Please see below for examples of input files:
-### Standard Percolator Output as Input
+#### Standard Percolator Output as Input
 | PSMid | score | q-value | posterior_error_prob | peptide | proteinIds |  |  |  |
 |---|---|---|---|---|---|---|---|---|
 | 1.1 | 7.5 | 0.0048 | 0.0007 | R.NYIQSLTQMPK.M | MK14_HUMAN\|Q16539 | MK14_HUMAN\|Q16539-2 | MK14_HUMAN\|Q16539-3 |  |
@@ -131,7 +131,7 @@ For example standard input files please see any of the following:
 `tests/data/test_perc_data_target.txt`
 `tests/data/test_perc_data_decoy.txt`
 
-### Custom Input
+#### Custom Input
 | PSMid | custom_score | peptide | proteinIds |  | 
 |---|---|---|---|---|
 | 1.1 | 7.5 | R.NYIQSLTQMPK.M | MK14_HUMAN\|Q16539 | MK14_HUMAN\|Q16539-2 | MK14_HUMAN\|Q16539-3 |  |
@@ -144,7 +144,7 @@ For example custom input files please see any of the following:
 `tests/data/test_perc_data_target_multiplicative.txt`
 `tests/data/test_perc_data_decoy_multiplicative.txt`
 
-# Fasta File Example
+## Fasta File Example
 This package was developed using standard fasta files from [Uniprot](https://www.uniprot.org/).
 Please see an example entry in a fasta database below:
 ```
@@ -155,7 +155,7 @@ KYTSSKLIGPILWK
 ```
 Please see `tests/data/test_database.fasta` for an example fasta database file.
 
-# Running Py Protein Inference
+## Running Py Protein Inference
 There are two ways to run Py Protein Inference:
 
  1. [__Command Line__](#running-via-command-line)
@@ -218,21 +218,21 @@ pipeline = ProteinInferencePipeline(parameter_file=yaml_params,
 pipeline.execute()
 ```
 
-# Extra Information
-## Inference Types
-### Inclusion Notes
+## Extra Information
+### Inference Types
+#### Inclusion Notes
 Inclusion simply maps all peptides to all possible proteins. In this model we allow peptides to map to multiple proteins.
 ![images/inclusion.png](images/inclusion.png)
-### Parsimony Notes
+#### Parsimony Notes
 Parsimony is the process of taking the list of peptides and mapping them to the minimal set of protein identifiers avaliable. 
 ![images/parsimony.png](images/parsimony.png)
-### Exclusion Notes
+#### Exclusion Notes
 Exclusion maps all peptides to all possible proteins but removes any peptide from the search that is not distinguishing. This means that if a peptide maps to more than one protein it will be removed. With this inference model the database selection is very important. Ideally the database selected for searches should have limited redundancy.
 ![images/exclusion.png](images/exclusion.png)
-### Peptide Centric Notes
+#### Peptide Centric Notes
 For Peptide Centric inference all peptides are assigned to all possible proteins. Each peptide is then assigned a protein group based on the mentioned possible protein map. For protein group naming, the possible proteins for the peptides in the group are concatenated to a list separated by a semi-colon. 
 ![images/peptide_centric.jpeg](images/peptide_centric.jpeg)
-## Parsimony Dependancies 
+### Parsimony Dependancies 
 Parsimony currently has potential external dependancies depending on the __lp_solver__ that is selected in the parameter file.
 
  1. For __Pulp__:
@@ -246,9 +246,9 @@ Parsimony currently has potential external dependancies depending on the __lp_so
 	 Linux: Check [here](https://en.wikibooks.org/wiki/GLPK/Linux_packages)
 	 Other: Check the main [GLPK website](https://www.gnu.org/software/glpk/)
 	 Anaconda: [Anaconda](https://anaconda.org/conda-forge/glpk) also offers an installation
-## Protein Picker
+### Protein Picker
 [Protein Picker](https://www.ncbi.nlm.nih.gov/pubmed/25987413) is an algorithm that treats target and decoy proteins as pairs and is essentially target/decoy competition. If both the target and decoy proteins are identified from the searches when protein picker is ran the target and decoy scores are compared with one another. The one with the larger score is kept to continue on in the analysis while the one with the lower score gets filtered out of the analysis. This algorithm is integrated into other tools such as [Percolator Protein Inference](https://www.ncbi.nlm.nih.gov/pubmed/27572102)
-## Score Types
+### Score Types
 |Score Type| Description |
 |---|---|
 | Best Peptide Per Protein | Uses the best scoring PSM as the overall score for a given protein |

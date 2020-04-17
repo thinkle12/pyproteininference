@@ -54,7 +54,7 @@ The Yaml Parameter File is the central location for all configurations for a giv
 For a sample parameter file please see the `parameters/` folder.
 ## General:
 | Parameter | Description |Type|
-|--|--|--|
+|---|---|---|
 | export | Export Type can be one of: __q_value__, __q_value_all__, __q_value_comma_sep__, __leads__, __all__, __comma_sep__. Standard type is __q_value__ | String |
 | fdr | False Discovery Rate to be marked as significant. Ex. __0.01__ for 1% FDR | Numeric |
 | picker | __True__/__False__ on whether to run the Protein Picker algorithm. For more info click [here](#protein-picker) | Bool |
@@ -62,7 +62,7 @@ For a sample parameter file please see the `parameters/` folder.
 
 ## Data Restriction:
 | Parameter | Description |Type|
-|--|--|--|
+|---|---|---|
 | pep_restriction | Posterior Error Probability values to filter. IE __0.9__. In this case PSMs with PEP values greater than __0.9__ would be removed from the input. If PEP values not in input please use __None__  | Numeric |
 | peptide_length_restriction | Peptide Length to filter on. IE __7__. If no filter wanted please use __None__ | Int |
 | q_value_restriction | Q Values to filter. IE __0.2__. In this case PSMs with Q Values greater than __0.2__ would be removed from the input. If Q Values not in input please use __None__  | Numeric |
@@ -70,7 +70,7 @@ For a sample parameter file please see the `parameters/` folder.
 
 ## Score:
 | Parameter | Description |Type|
-|--|--|--|
+|---|---|---|
 | score_method | One of any of the following: __multiplicative_log__, __best_peptide_per_protein__, __top_two_combined__, __additive__, __iterative_downweighted_log__, __downweighted_multiplicative_log__, __geometric_mean__. Recommended: __multiplicative_log__ | String |
 | score | PSM score to use for Protein Scoring. If using Percolator output as input this would either be __posterior_error_prob__ or __q-value__. The string typed here should match the column in your input files __EXACTLY__. If using a custom score it will be filtered accordingly with the value in [__custom_restriction__](#data-restriction) | String |
 | score_type | The Type of score that __score__ parameter is. Either __multiplicative__ or __additive__. See [below](#extra-score-information) for more information| String |
@@ -82,7 +82,7 @@ For a sample parameter file please see the `parameters/` folder.
 
 ## Identifiers:
 | Parameter | Description |Type|
-|--|--|--|
+|---|---|---|
 | decoy_symbol | Symbol within Decoy Identifiers to distinguish between targets. IE "__##__" or "__decoy___". This is important for Protein [Picker](#protein-picker) and FDR calculation | String |
 | isoform_symbol | Symbol that is present in isoform proteins only. IE "__-__". See [below](#extra-identifier-information) for more information | String |
 | reviewed_identifier_symbol | Identifier to determine a reviewed vs unreviewed identifier. IE "__sp\|__". See [below](#extra-identifier-information) for more information | String |
@@ -93,34 +93,36 @@ For a sample parameter file please see the `parameters/` folder.
 
 ## Inference:
 | Parameter | Description |Type|
-|--|--|--|
+|---|---|---|
 | inference_type | The Inference procedure to apply to the analysis. This can be __parsimony__, __inclusion__, __exclusion__, __peptide_centric__, or __None__. Please see [here](#inference-types) for more information on the inference types.  | String |
 | grouping_type | How to group proteins for a given __inference_type__. This can be __subset_peptides__,  __shared_peptides__, or __None__. Typically __subset_peptides__ is used. This parameter only effects grouped proteins and has no impact on protein leads. | String |
 
 ## Digest:
 | Parameter | Description |Type|
-|--|--|--|
+|---|---|---|
 | digest_type | The enzyme used for digestion for the MS searches. Can be either __trypsin__ or __lysc__. Other digest types can be implemented upon request | String |
 | missed_cleavages | The number of missed cleavages allowed for the MS searches. IE __2__ | Int |
 
 ## Parsimony:
 These parameters are only used if __parsimony__ is selected as __inference_type__
+
 | Parameter | Description |Type|
-|--|--|--|
+|---|---|---|
 | lp_solver | This can be one of: __pulp__, __glpk__, __None__. This determines which linear program solver is used. Please see [here](#parsimony-dependancies) for more information on lp solvers. Both options have external dependency requirements. Input __None__ if not running __parsimony__ | String |
 | glpk_path | If glpk is selected as __lp_solver__ input the path to the commandline tool __glpsol__. This is typically just __glpsol__ | String |
 
 ## Peptide Centric:
 These parameters are only used if __peptide_centric__ is selected as 
-| Parameter | Description |Type|
-|--|--|--|
+
+| Parameter | Description | Type |
+|---|---|---|
 | max_identifiers | The maximum number of proteins a peptide is allowed to map to. IE __5__. This serves to limit the number of protein groups that can be created due to highly homologous peptides. | Int |
 
 # Input File Examples
 As previously mentioned the standard input filetype is the tab delimited output from the percolator algorithm. Please see below for examples of input files:
 ### Standard Percolator Output as Input
 | PSMid | score | q-value | posterior_error_prob | peptide | proteinIds |  |  |  |
-|--|--|--|--|--|--|--|--|--|
+|---|---|---|---|---|---|---|---|---|
 | 1.1 | 7.5 | 0.0048 | 0.0007 | R.NYIQSLTQMPK.M | MK14_HUMAN\|Q16539 | MK14_HUMAN\|Q16539-2 | MK14_HUMAN\|Q16539-3 |  |
 | 1.2 | 6.2 | 0.0035 | 0.0006 | R.NTVASSSRSM*R.T | FHDC1_HUMAN\|Q9C0D6 |  |  |  |
 With the above standard input one could use __q-value__ or __posterior_error_prob__ as the PSM score see [Score Section](#score) with __multiplicative__ as __score_type__ and any of the multiplicative options for __score_method__. Also, one could use __score__ as the PSM __score__ with __additive__ as the __score_type__ and __score_method__
@@ -131,7 +133,7 @@ For example standard input files please see any of the following:
 
 ### Custom Input
 | PSMid | custom_score | peptide | proteinIds |  | 
-|--|--|--|--|--|
+|---|---|---|---|---|
 | 1.1 | 7.5 | R.NYIQSLTQMPK.M | MK14_HUMAN\|Q16539 | MK14_HUMAN\|Q16539-2 | MK14_HUMAN\|Q16539-3 |  |
 | 1.2 | 6.2 |  R.NTVASSSRSM*R.T | FHDC1_HUMAN\|Q9C0D6 |  |  | 
 With the above custom input one could use one could use __custom_score__ as the PSM __score__ with __additive__ as the __score_type__ and __score_method__
@@ -248,13 +250,11 @@ Parsimony currently has potential external dependancies depending on the __lp_so
 [Protein Picker](https://www.ncbi.nlm.nih.gov/pubmed/25987413) is an algorithm that treats target and decoy proteins as pairs and is essentially target/decoy competition. If both the target and decoy proteins are identified from the searches when protein picker is ran the target and decoy scores are compared with one another. The one with the larger score is kept to continue on in the analysis while the one with the lower score gets filtered out of the analysis. This algorithm is integrated into other tools such as [Percolator Protein Inference](https://www.ncbi.nlm.nih.gov/pubmed/27572102)
 ## Score Types
 |Score Type| Description |
-|--|--|
+|---|---|
 | Best Peptide Per Protein | Uses the best scoring PSM as the overall score for a given protein |
 | Multiplicative Log | Multiplies all of the PSM scores together and then takes the log of the value (This only works for scores where lower is better) |
 | Top Two Combined | Takes the two best scoring peptides and applies Multiplicative Log to them to get the protein score |
 | Additive | Adds all of the PSM scores together (This only works for scores where higher is better) |
 | Downweighted Multiplicative Log | Multiplicative Log but normalizes by the number of PSMs per protein. This method attempts to normalize small and large proteins. In a typical multiplicative log a larger protein would have an advantage at having a higher score than a small protein |
 | Geometric Mean | Takes the geometric mean of the PSMs per protein |
-
-
 

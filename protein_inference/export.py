@@ -91,14 +91,9 @@ class Export(object):
     def csv_export_all_restricted(self, filename_out):
         """
         Class that outputs a subset of the passing proteins based on FDR.
-        Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
         Only Proteins that pass FDR will be output and ALL proteins
         will be output not just leads
 
-        Example: protein_inference.export.CsvOutAll(data_class = data, filename_out = "example.csv")
-
-        if we assume data = datastore.Datastore(reader_class = reader)
-        and if we assume reader is a class object from reader.Reader()
         """
         data_to_write = self.data_class.fdr_restricted_grouped_scored_proteins
         ungrouped_list = [['Protein', 'Score', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
@@ -125,10 +120,6 @@ class Export(object):
         Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
         Only Proteins that pass FDR will be output and only Lead proteins will be output
 
-        Example: protein_inference.export.CsvOutLeads(data_class = data, filename_out = "example.csv")
-
-        if we assume data = datastore.Datastore(reader_class = reader)
-        and if we assume reader is a class object from reader.Reader()
         """
         ungrouped_list = [['Protein', 'Score', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
         for groups in self.data_class.fdr_restricted_grouped_scored_proteins:
@@ -140,7 +131,7 @@ class Export(object):
             else:
                 ungrouped_list[-1].append('Unreviewed')
             ungrouped_list[-1].append(groups[0].group_identification)
-            for peps in groups[0].peptides:
+            for peps in sorted(groups[0].peptides):
                 ungrouped_list[-1].append(peps)
 
         with open(filename_out, "w") as f:
@@ -155,10 +146,6 @@ class Export(object):
         Only Proteins that pass FDR will be output and only Lead proteins will be output.
         Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-        Example: protein_inference.export.CsvOutCommaSep(data_class = data, filename_out = "example.csv")
-
-        if we assume data = datastore.Datastore(reader_class = reader)
-        and if we assume reader is a class object from reader.Reader()
         """
         ungrouped_list = [['Protein','Score','Number_of_Peptides','Identifier_Type','GroupID','Other_Potential_Identifiers']]
         for groups in self.data_class.fdr_restricted_grouped_scored_proteins:
@@ -182,10 +169,6 @@ class Export(object):
         """
         Class that outputs all lead proteins with Q values.
 
-        Example: protein_inference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
-        if we assume data = datastore.Datastore(reader_class = reader)
-
-        and if we assume reader is a class object from reader.Reader()
         """
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
         for groups in self.data_class.protein_group_objects:
@@ -212,10 +195,6 @@ class Export(object):
         Class that outputs all lead proteins with Q values.
         Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-        Example: protein_inference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
-        if we assume data = datastore.Datastore(reader_class = reader)
-
-        and if we assume reader is a class object from reader.Reader()
         """
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Other_Potential_Identifiers']]
         for groups in self.data_class.protein_group_objects:
@@ -243,10 +222,6 @@ class Export(object):
         Non Lead proteins are also output - entire group gets output
         Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-        Example: protein_inference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
-
-        if we assume data = datastore.Datastore(reader_class = reader)
-        and if we assume reader is a class object from reader.Reader()
         """
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
         for groups in self.data_class.protein_group_objects:
@@ -281,7 +256,7 @@ class Export(object):
                 else:
                     ungrouped_list[-1].append('Unreviewed')
                 ungrouped_list[-1].append(groups.number_id)
-                for peps in proteins.peptides:
+                for peps in sorted(proteins.peptides):
                     ungrouped_list[-1].append(peps)
 
         with open(filename_out, "w") as f:
@@ -292,10 +267,6 @@ class Export(object):
         """
         Class that outputs all lead proteins with Q values.
 
-        Example: protein_inference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
-        if we assume data = datastore.Datastore(reader_class = reader)
-
-        and if we assume reader is a class object from reader.Reader()
         """
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
         for groups in self.data_class.protein_group_objects:

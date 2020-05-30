@@ -297,3 +297,74 @@ class Export(object):
         with open(filename_out, "w") as f:
             writer = csv.writer(f)
             writer.writerows(ungrouped_list)
+
+    def csv_export_q_value_leads_peptides(self, filename_out, peptide_delimiter = " "):
+        """
+        Class that outputs all lead proteins with Q values in rectangular format.
+        """
+        ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
+        for groups in self.data_class.protein_group_objects:
+            lead_protein = groups.proteins[0]
+            ungrouped_list.append([lead_protein.identifier])
+            ungrouped_list[-1].append(lead_protein.score)
+            ungrouped_list[-1].append(groups.q_value)
+            ungrouped_list[-1].append(lead_protein.num_peptides)
+            if lead_protein.reviewed == True:
+                ungrouped_list[-1].append('Reviewed')
+            else:
+                ungrouped_list[-1].append('Unreviewed')
+            ungrouped_list[-1].append(groups.number_id)
+            peptides = peptide_delimiter.join(list(sorted(lead_protein.peptides)))
+            ungrouped_list[-1].append(peptides)
+
+        with open(filename_out, "w") as f:
+            writer = csv.writer(f)
+            writer.writerows(ungrouped_list)
+
+
+    def csv_export_q_value_leads_psms(self, filename_out, peptide_delimiter = " "):
+        """
+        Class that outputs all lead proteins with Q values in rectangular format.
+        """
+        ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
+        for groups in self.data_class.protein_group_objects:
+            lead_protein = groups.proteins[0]
+            ungrouped_list.append([lead_protein.identifier])
+            ungrouped_list[-1].append(lead_protein.score)
+            ungrouped_list[-1].append(groups.q_value)
+            ungrouped_list[-1].append(lead_protein.num_peptides)
+            if lead_protein.reviewed == True:
+                ungrouped_list[-1].append('Reviewed')
+            else:
+                ungrouped_list[-1].append('Unreviewed')
+            ungrouped_list[-1].append(groups.number_id)
+            psms = peptide_delimiter.join(sorted([x['peptide'] for x in lead_protein.psmid_peptide_dictionary]))
+            ungrouped_list[-1].append(psms)
+
+        with open(filename_out, "w") as f:
+            writer = csv.writer(f)
+            writer.writerows(ungrouped_list)
+
+
+    def csv_export_q_value_leads_psm_ids(self, filename_out, peptide_delimiter = " "):
+        """
+        Class that outputs all lead proteins with Q values in rectangular format.
+        """
+        ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
+        for groups in self.data_class.protein_group_objects:
+            lead_protein = groups.proteins[0]
+            ungrouped_list.append([lead_protein.identifier])
+            ungrouped_list[-1].append(lead_protein.score)
+            ungrouped_list[-1].append(groups.q_value)
+            ungrouped_list[-1].append(lead_protein.num_peptides)
+            if lead_protein.reviewed == True:
+                ungrouped_list[-1].append('Reviewed')
+            else:
+                ungrouped_list[-1].append('Unreviewed')
+            ungrouped_list[-1].append(groups.number_id)
+            psms = peptide_delimiter.join(sorted([x['psm_id'] for x in lead_protein.psmid_peptide_dictionary]))
+            ungrouped_list[-1].append(psms)
+
+        with open(filename_out, "w") as f:
+            writer = csv.writer(f)
+            writer.writerows(ungrouped_list)

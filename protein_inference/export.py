@@ -16,7 +16,7 @@ class Export(object):
     Main Class for exporting sorted protein lists to CSV
     """
 
-    EXPORT_TYPES = ['leads', 'all', 'comma_sep', 'q_value_comma_sep', 'q_value', 'q_value_all']
+    EXPORT_TYPES = ['leads', 'all', 'comma_sep', 'q_value_comma_sep', 'q_value', 'q_value_all', 'peptides', 'psms', 'psm_ids']
     
     def __init__(self,data_class):
         self.data_class = data_class

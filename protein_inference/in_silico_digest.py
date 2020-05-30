@@ -232,9 +232,6 @@ class InSilicoDigest(Digest):
                 pep_dict.setdefault(peptide, set()).add(identifier_stripped)
 
 
-        handle.close()
-
-
         self.logger.info('Digest finished, peptide and protein dictionaries created based on the provided database')
 
         self.swiss_prot_protein_set = sp_set

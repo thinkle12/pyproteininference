@@ -32,40 +32,40 @@ class Export(object):
         data = self.data_class
         tag = data.parameter_file_object.tag
 
-        if 'leads' in export_type:
+        if 'leads' == export_type:
             filename = '{}_leads_{}_{}.csv'.format(tag, data.short_score_method, data.score)
-            logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_leads_restricted(filename_out=complete_filepath)
 
-        if 'all' in export_type:
+        if 'all' == export_type:
             filename = '{}_all_{}_{}.csv'.format(tag, data.short_score_method, data.score)
-            logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_all_restricted(complete_filepath)
 
-        if 'comma_sep' in export_type:
+        if 'comma_sep' == export_type:
             filename = '{}_comma_sep_{}_{}.csv'.format(tag, data.short_score_method, data.score)
-            logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_comma_sep_restricted(complete_filepath)
 
-        if 'q_value_comma_sep' in export_type:
+        if 'q_value_comma_sep' == export_type:
             filename = '{}_q_value_comma_sep_{}_{}.csv'.format(tag, data.short_score_method, data.score)
-            logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_comma_sep(complete_filepath)
 
-        if 'q_value' in export_type:
+        if 'q_value' == export_type:
             filename = '{}_q_value_leads_{}_{}.csv'.format(tag, data.short_score_method, data.score)
-            logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads(complete_filepath)
 
-        if 'q_value_all' in export_type:
+        if 'q_value_all' == export_type:
             filename = '{}_q_value_all_{}_{}.csv'.format(tag, data.short_score_method, data.score)
-            logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_all(complete_filepath)
 
         if "peptides" == export_type:

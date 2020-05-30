@@ -1,6 +1,6 @@
 parameters:
   general:
-    export: q_value
+    export: peptides
     fdr: 0.01
     picker: True
     tag: example_tag

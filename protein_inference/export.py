@@ -68,6 +68,24 @@ class Export(object):
             complete_filepath = os.path.join(directory, filename)
             self.csv_export_q_value_all(complete_filepath)
 
+        if "peptides" == export_type:
+            filename = '{}_q_value_leads_peptides_{}_{}.csv'.format(tag, data.short_score_method, data.score)
+            complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
+            self.csv_export_q_value_leads_peptides(complete_filepath)
+
+        if "psms" == export_type:
+            filename = '{}_q_value_leads_psms_{}_{}.csv'.format(tag, data.short_score_method, data.score)
+            complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
+            self.csv_export_q_value_leads_psms(complete_filepath)
+
+        if "psm_ids" == export_type:
+            filename = '{}_q_value_leads_psm_ids_{}_{}.csv'.format(tag, data.short_score_method, data.score)
+            complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
+            self.csv_export_q_value_leads_psm_ids(complete_filepath)
+
         self.filepath = complete_filepath
 
     def csv_export_all_restricted(self, filename_out):

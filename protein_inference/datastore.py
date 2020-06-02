@@ -31,20 +31,6 @@ class DataStore(object):
         if reader_class.psms:
             self.main_data_form = reader_class.psms
             self.restricted_peptides = [Psm.split_peptide(peptide_string=x.identifier) for x in self.main_data_form]
-            if not reader_class.search_id:
-                if "Bioplex" in reader_class.target_file:
-                    self.search_id = reader_class.target_file.split('_')[0]
-                if "Bioplex" not in reader_class.target_file:
-                    try:
-                        self.search_id = reader_class.target_file.split('_')[0]
-                    except AttributeError:
-                        self.search_id = 'Custom'
-            else:
-                self.search_id = reader_class.search_id
-
-
-
-            #This is bad because default GLPK_Path is glpsol... on rescomp this will not work...
 
         self.parameter_file_object = reader_class.parameter_file_object
         self.protein_info_dict = None

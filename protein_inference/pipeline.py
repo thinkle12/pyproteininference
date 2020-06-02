@@ -140,8 +140,47 @@ class ProteinInferencePipeline(object):
 
 
     def _validate_input(self):
-        # TODO write an internal function to validate the input
-        pass
+
+        if self.target_files and self.decoy_files and not self.combined_files and not self.target_directory and not self.decoy_directory and not self.combined_directory:
+            self.logger.info("Validating input as target_files and decoy_files")
+        elif self.combined_files and not self.target_files and not self.decoy_files and not self.decoy_directory and not self.target_directory and not self.combined_directory:
+            self.logger.info("Validating input as combined_files")
+        elif self.target_directory and self.decoy_directory and not self.target_files and not self.decoy_files and not self.combined_directory and not self.combined_files:
+            self.logger.info("Validating input as target_directory and decoy_directory")
+            self._transform_directory_to_files()
+        elif self.combined_directory and not self.combined_files and not self.decoy_files and not self.decoy_directory and not self.target_files and not self.target_directory:
+            self.logger.info("Validating input as combined_directory")
+            self._transform_directory_to_files()
+        else:
+            raise ValueError("To run Protein inference please supply either: "
+                             "(1) either one or multiple target_files and decoy_files, "
+                             "(2) either one or multiple combined_files that include target and decoy data"
+                             "(3) a directory that contains target files (target_directory) as well as a directory that contains decoy files (decoy_directory)"
+                             "(4) a directory that contains combined target/decoy files (combined_directory)")
 
 
+    def _transform_directory_to_files(self):
 
+        if self.target_directory and self.decoy_directory:
+            self.logger.info("Transforming target_directory and decoy_directory into files")
+            target_files = os.listdir(self.target_directory)
+            target_files_full = [os.path.join(self.target_directory,x) for x in target_files if x.endswith(".txt") or x.endswith(".tsv")]
+
+            decoy_files = os.listdir(self.decoy_directory)
+            decoy_files_full = [os.path.join(self.decoy_directory,x) for x in decoy_files if x.endswith(".txt") or x.endswith(".tsv")]
+
+            self.target_files = target_files_full
+            self.decoy_files = decoy_files_full
+
+        elif self.combined_directory:
+            self.logger.info("Transforming combined_directory into files")
+            combined_files = os.listdir(self.combined_directory)
+            combined_files_full = [os.path.join(self.combined_directory,x) for x in combined_files if x.endswith(".txt") or x.endswith(".tsv")]
+            self.combined_files = combined_files_full
+
+
+    def _set_output_directory(self):
+        if not self.output_directory:
+            self.output_directory = os.getcwd()
+        else:
+            pass

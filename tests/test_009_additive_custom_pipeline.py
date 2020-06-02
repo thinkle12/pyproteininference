@@ -37,7 +37,7 @@ GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("protein_inference.tests.test_008_generic_reader.py")
+logger = logging.getLogger("protein_inference.tests.test_009_additive_custom_pipeline.py")
 
 
 class TestAdditiveWorkflow(TestCase):

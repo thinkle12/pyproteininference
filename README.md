@@ -164,37 +164,77 @@ There are two ways to run Py Protein Inference:
 ### Running Via Command Line
 Upon proper installation of the package, the command line tool should be installed and _should_ be available from any location on the system.
 The command line tool can be called as follows:
-`Command_Line_PI_runner_Yaml.py --help`
+`protein_inference_cli.py --help`
 This will return the help prompt for the tool.
-If this does not work download `Command_Line_PI_runner_Yaml.py` and write the full path to the script while also calling `python`
-`python /path/to/directory/protein_inference/scripts/Command_Line_PI_runner_Yaml.py --help`
+If this does not work download `protein_inference_cli.py` from our repository and write the full path to the script while also calling `python`
+`python /path/to/directory/protein_inference/scripts/protein_inference_cli.py --help`
 
 Command line options are as follows:
 ```
--h, --help  show this help message and exit
+cli$ protein_inference_cli.py --help
+usage: protein_inference_cli.py [-h] [-t FILE [FILE ...]] [-d FILE [FILE ...]]
+                                [-f FILE [FILE ...]] [-o DIR] [-a DIR]
+                                [-b DIR] [-c DIR] -db FILE -y FILE
 
--t FILE, --target FILE
-Input target psm output from percolator
+Protein Inference
 
--d FILE, --decoy FILE
-Input decoy psm output from percolator
-
--o FILE, --output FILE
-protein_inference Result Directory to write to - Name
-of file will be determined by parameters selected and
-searchID
-
--db FILE, --database FILE
-Provide the database used in the MS search
-
--ym FILE, --yaml_params FILE
-Provide a Protein Inference Yaml Parameter File... If
-none given, default parameters will be ran
+optional arguments:
+  -h, --help            show this help message and exit
+  -t FILE [FILE ...], --target FILE [FILE ...]
+                        Input target psm output from percolator. Can either
+                        input one file or a list of files
+  -d FILE [FILE ...], --decoy FILE [FILE ...]
+                        Input decoy psm output from percolator. Can either
+                        input one file or a list of files
+  -f FILE [FILE ...], --combined_files FILE [FILE ...]
+                        Input combined psm output from percolator. This should
+                        contain Target and Decoy PSMS. Can either input one
+                        file or a list of files
+  -o DIR, --output DIR  protein_inference Result Directory to write to - Name
+                        of file will be determined by parameters selected and
+                        parameter tag
+  -a DIR, --target_directory DIR
+                        Directory that contains either .txt or .tsv input
+                        target psm data. Make sure the directory ONLY contains
+                        result files
+  -b DIR, --decoy_directory DIR
+                        Directory that contains either .txt or .tsv input
+                        decoy psm data. Make sure the directory ONLY contains
+                        result files
+  -c DIR, --combined_directory DIR
+                        Directory that contains either .txt or .tsv input data
+                        with targets/decoys combined. Make sure the directory
+                        ONLY contains result files
+  -db FILE, --database FILE
+                        Provide the fasta formatted database used in the MS
+                        search
+  -y FILE, --yaml_params FILE
+                        Provide a Protein Inference Yaml Parameter File
 ```
+
+The following flags are necessary:
+
+1) `-db` Path to Fasta Database file
+2) `-y` Path to Protein Inference Yaml Parameter file
+3) `-o` Output  Directoryis not necessary but if it is left blank files will be written to the current working directory
+
+The following combinations of input are allowed and at least one combination is required:
+
+1) `-t -d` Path to input target (`-t`) and decoy (`-d`) files. This can be one target and one decoy file or multiple files separated by spaces (" ")
+2) `-a -b` Path to input target (`-a`) and decoy (`-b`) directories that contain target and decoy files. This is one directory each and all .txt and .tsv files will be read in as input
+3) `-f` Path to input combined target/decoy (`-f`) files. This can be one file file or multiple files separated by spaces (" ")
+4) `-c` Path to input combined target/decoy (`-a`) directory that contain combined target/decoy files. This is one directory each and all .txt and .tsv files will be read in as input
+
+Any other combinations will result in an Error raised.
+Please do not attempt to load separate target and decoy files with combined files. Also, do not load from directory as well as file as this is not supported.
 
 If this works then you are ready to run the protein inference tool on your data.
 You can run the tool as follows:
-`Command_Line_PI_runner_Yaml.py -t /path/to/target/file.txt -d /path/to/decoy/file.txt -db /path/to/database/file.fasta -ym /path/to/parameter/file.yaml -o /path/to/output/directory/`
+`protein_inference_cli.py -t /path/to/target/file.txt -d /path/to/decoy/file.txt -db /path/to/database/file.fasta -y /path/to/parameter/file.yaml -o /path/to/output/directory/`
+
+Running with multiple input target/decoy files:
+`protein_inference_cli.py -t /path/to/target/file1.txt /path/to/target/file2.txt -d /path/to/decoy/file1.txt /path/to/decoy/file2.txt -db /path/to/database/file.fasta -y /path/to/parameter/file.yaml -o /path/to/output/directory/`
+
 
 ### Running Within Python
 To run within a python console please see the following example:
@@ -213,7 +253,7 @@ pipeline = ProteinInferencePipeline(parameter_file=yaml_params,
 									database_file=database,  
                                     target_files=target_files,  
                                     decoy_files=decoy_files,  
-                                    files=None,  
+                                    combined_files=None,  
                                     output_directory=output_directory_name)  
 # Calling .execute() will initiate the pipeline with the given data                                                               
 pipeline.execute()
@@ -308,7 +348,7 @@ The tables below represent what the output of each export type will look like. E
 | HNRPU_HUMAN\|Q00839     | 15.316094065486292 | 0.0                | 2                  | Reviewed        | 5       | AEGGGGGGRPGAPAAGDGK LQAALDDEEAGGRPAMEPGNGSLDLGGDSAGR                                                                                                          | 
 | ##TCAF2_HUMAN\|##A6NFQ2 | 2.4079456086518722 | 0.3333333333333333 | 1                  | Reviewed        | 6       | MEPTPVPFCGAK                                                                                                                                                  | 
 
-3 __psm_ids__: This is a standard export type that reports back Protein, Score, Qvalue, and PSM Identifiers in a square format. By default PSM IDs are separated by a space " "
+3 __psm_ids__: This is a standard export type that reports back Protein, Score, Qvalue, and PSM Identifiers in a square format. By default PSM IDs are separated by a space " ". Values in Peptides column will be the `PSMid` values from data input.
 
 | Protein                 | Score              | Q_Value            | Number_of_Peptides | Identifier_Type | GroupID | Peptides                            | 
 |-------------------------|--------------------|--------------------|--------------------|-----------------|---------|-------------------------------------| 

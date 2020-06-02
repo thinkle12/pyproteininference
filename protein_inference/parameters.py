@@ -65,7 +65,7 @@ class ProteinInferenceParameter(object):
         """
         if self.yaml_param_filepath:
             with open(self.yaml_param_filepath, 'r') as stream:
-                yaml_params = yaml.load(stream)
+                yaml_params = yaml.load(stream, Loader=yaml.Loader)
 
             self.digest_type = yaml_params['parameters']['digest']['digest_type']
             self.export = yaml_params['parameters']['general']['export']

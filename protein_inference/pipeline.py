@@ -6,6 +6,14 @@ import protein_inference
 class ProteinInferencePipeline(object):
 
     def __init__(self, parameter_file, database_file, target_files=None, decoy_files=None, combined_files=None, target_directory=None, decoy_directory=None, combined_directory=None, output_directory=None):
+
+
+        self.logger = logging.getLogger("protein_inference.pipeline.ProteinInferencePipeline")
+
+        # set up our logger
+        logging.basicConfig(stream=sys.stderr, level=logging.INFO,
+                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
         self.parameter_file = parameter_file
         self.database_file = database_file
         self.target_files = target_files

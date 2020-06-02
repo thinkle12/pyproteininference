@@ -26,11 +26,11 @@ class ProteinInferencePipeline(object):
         self.data = None
         self.digest = None
 
+        self._validate_input()
+
+        self._set_output_directory()
+
     def execute(self):
-
-        logging.basicConfig(level=logging.INFO)
-
-        logger = logging.getLogger("protein_inference.scripts.Command_Line_PI_Runner_Yaml")
 
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
@@ -47,11 +47,11 @@ class ProteinInferencePipeline(object):
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
-        # TODO for the Reader functions add an option to have a combined target/decoy input file instead of having target/decoy files separate
         pep_and_prot_data = protein_inference.reader.GenericReader(target_file=self.target_files,
-                                                                      decoy_file=self.decoy_files,
-                                                                      parameter_file_object=protein_inference_parameters,
-                                                                      digest_class=digest)
+                                                                   decoy_file=self.decoy_files,
+                                                                   combined_files=self.combined_files,
+                                                                   parameter_file_object=protein_inference_parameters,
+                                                                   digest_class=digest)
         pep_and_prot_data.read_psms()
 
         ### STEP 4: Initiate the datastore class ###
@@ -123,7 +123,7 @@ class ProteinInferencePipeline(object):
         data.calculate_q_values()
 
         # Print the len of restricted data... which is how many protein groups pass FDR threshold
-        logger.info('Number of Proteins passing an FDR of' + str(protein_inference_parameters.fdr) + ' = ' + str(
+        self.logger.info('Number of Proteins passing an FDR of ' + str(protein_inference_parameters.fdr) + ' = ' + str(
             len(data.fdr_restricted_grouped_scored_proteins)))
 
         ### STEP 12: Export to CSV
@@ -136,7 +136,7 @@ class ProteinInferencePipeline(object):
         self.data = data
         self.digest = digest
 
-        logger.info('Protein Inference Finished')
+        self.logger.info('Protein Inference Finished')
 
 
     def _validate_input(self):

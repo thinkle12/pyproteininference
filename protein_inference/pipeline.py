@@ -10,8 +10,10 @@ class ProteinInferencePipeline(object):
         self.database_file = database_file
         self.target_files = target_files
         self.decoy_files = decoy_files
-        # Add an option to just have files... which is target/decoy already combined...
-        self.files = files
+        self.combined_files = combined_files
+        self.target_directory = target_directory
+        self.decoy_directory = decoy_directory
+        self.combined_directory = combined_directory
         self.output_directory = output_directory
         self.data = None
         self.digest = None

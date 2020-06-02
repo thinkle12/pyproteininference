@@ -5,7 +5,7 @@ import protein_inference
 
 class ProteinInferencePipeline(object):
 
-    def __init__(self, parameter_file, database_file, target_files=None, decoy_files=None, files=None, output_directory=None):
+    def __init__(self, parameter_file, database_file, target_files=None, decoy_files=None, combined_files=None, target_directory=None, decoy_directory=None, combined_directory=None, output_directory=None):
         self.parameter_file = parameter_file
         self.database_file = database_file
         self.target_files = target_files

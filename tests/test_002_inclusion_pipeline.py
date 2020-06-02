@@ -187,3 +187,22 @@ class TestLoadInclusionWorkflow(TestCase):
             self.assertEqual(protein_groups[i].number_id, int(lead_output[i][GROUP_ID_INDEX]))
             self.assertEqual(lead_protein.peptides, set(lead_output[i][PEPTIDES_INDEX:]))
 
+        pipeline = protein_inference.pipeline.ProteinInferencePipeline(parameter_file=PARAMETER_FILE,
+                                                                       database_file=TEST_DATABASE,
+                                                                       target_files=TARGET_FILE,
+                                                                       decoy_files=DECOY_FILE,
+                                                                       files=None,
+                                                                       output_directory=OUTPUT_DIR)
+
+        pipeline.execute()
+
+        pipeline_protein_groups = pipeline.data.protein_group_objects
+
+        for i in range(len(pipeline_protein_groups)):
+            lead_protein_pipeline = pipeline_protein_groups[i].proteins[0]
+            lead_protein = protein_groups[i].proteins[0]
+            self.assertEqual(lead_protein_pipeline.identifier, lead_protein.identifier)
+            self.assertAlmostEqual(lead_protein_pipeline.score, lead_protein.score)
+            self.assertEqual(pipeline_protein_groups[i].q_value, protein_groups[i].q_value)
+            self.assertEqual(pipeline_protein_groups[i].number_id, protein_groups[i].number_id)
+            self.assertEqual(lead_protein_pipeline.peptides, lead_protein.peptides)

@@ -24,7 +24,7 @@ GLPKINOUT_PATH = resource_filename('protein_inference', '../tests/glpkinout/')
 SKIP_RUNNING_GLPK = True
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("protein_inference.tests.test_001_parsimony_pipeline.py")
+logger = logging.getLogger("protein_inference.tests.test_011_test_exports.py")
 
 
 class TestExportTypes(TestCase):

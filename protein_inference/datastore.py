@@ -31,20 +31,6 @@ class DataStore(object):
         if reader_class.psms:
             self.main_data_form = reader_class.psms
             self.restricted_peptides = [Psm.split_peptide(peptide_string=x.identifier) for x in self.main_data_form]
-            if not reader_class.search_id:
-                if "Bioplex" in reader_class.target_file:
-                    self.search_id = reader_class.target_file.split('_')[0]
-                if "Bioplex" not in reader_class.target_file:
-                    try:
-                        self.search_id = reader_class.target_file.split('_')[0]
-                    except AttributeError:
-                        self.search_id = 'Custom'
-            else:
-                self.search_id = reader_class.search_id
-
-
-
-            #This is bad because default GLPK_Path is glpsol... on rescomp this will not work...
 
         self.parameter_file_object = reader_class.parameter_file_object
         self.protein_info_dict = None
@@ -872,10 +858,10 @@ class DataStore(object):
         peptides = [Psm.split_peptide(peptide_string=x.identifier) for x in self.main_data_form]
         peptides_in_digest = set(digest_class.peptide_to_protein_dictionary.keys())
         peptides_from_search_in_digest = [x for x in peptides if x in peptides_in_digest]
-        percentage = float(len(peptides))/float(len(peptides_from_search_in_digest))
+        percentage = float(len(set(peptides)))/float(len(set(peptides_from_search_in_digest)))
         logger.info("{} PSMs identified from input files".format(len(peptides)))
         logger.info("{} PSMs identified from input files that are also present in database digestion".format(len(peptides_from_search_in_digest)))
-        logger.info("{} percent of PSMs identified from input files that are also present in database digestion".format(percentage))
+        logger.info("{}; ratio of PSMs identified from input files to those that are present in the search and in the database digestion".format(percentage))
 
     def _check_data_digest_overlap_proteins(self, digest_class):
         logger = getLogger('protein_inference.datastore.DataStore._check_data_digest_overlap_proteins')
@@ -887,7 +873,7 @@ class DataStore(object):
         percentage = float(len(flat_proteins))/float(len(proteins_from_search_in_digest))
         logger.info("{} proteins identified from input files".format(len(flat_proteins)))
         logger.info("{} proteins identified from input files that are also present in database digestion".format(len(proteins_from_search_in_digest)))
-        logger.info("{} percent of proteins identified from input files that are also present in database digestion".format(percentage))
+        logger.info("{}; ratio of proteins identified from input files that are also present in database digestion".format(percentage))
 
     def _check_target_decoy_split(self, digest_class):
         logger = getLogger('protein_inference.datastore.DataStore._check_target_decoy_split')

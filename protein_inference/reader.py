@@ -20,10 +20,10 @@ class Reader(object):
 
     MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
     
-    def __init__(self,target_file=None,decoy_file=None,files=None,directory=None):
+    def __init__(self,target_file=None,decoy_file=None,combined_files=None,directory=None):
         self.target_file = target_file
         self.decoy_file = decoy_file
-        self.files = files
+        self.combined_files = combined_files
         self.directory = directory
 
     def remap(self, fieldnames):
@@ -32,7 +32,7 @@ class Reader(object):
                 for f in fieldnames]
 
     def _validate_input(self):
-        if not self.target_file and not self.decoy_file and not self.files and not self.directory:
+        if not self.target_file and not self.decoy_file and not self.combined_files and not self.directory:
             raise ValueError("No input provided, please supply either target and decoy files, combined files, or a directory of combined target/decoy files")
         else:
             pass
@@ -75,10 +75,10 @@ class PercolatorReader(Reader):
     """
 
 
-    def __init__(self,digest_class,parameter_file_object,append_alt_from_db=False,target_file=None,decoy_file=None,files=None,directory=None):
+    def __init__(self,digest_class,parameter_file_object,append_alt_from_db=False,target_file=None,decoy_file=None,combined_files=None,directory=None):
         self.target_file = target_file
         self.decoy_file = decoy_file
-        self.files = files
+        self.combined_files = combined_files
         self.directory = directory
         self._validate_input()
         #Define Indicies based on input
@@ -149,10 +149,10 @@ class PercolatorReader(Reader):
             #Combine the lists
             perc_all = all_target+all_decoy
 
-        elif self.files:
-            if isinstance(self.files, (list,)):
+        elif self.combined_files:
+            if isinstance(self.combined_files, (list,)):
                 all = []
-                for f in self.files:
+                for f in self.combined_files:
                     self.logger.info(f)
                     p = []
                     with open(f, 'r') as perc_files:
@@ -161,10 +161,10 @@ class PercolatorReader(Reader):
                             p.append(row)
                     del p[0]
                     all = all + p
-            elif self.files:
+            elif self.combined_files:
                 # If not just read the file...
                 p = []
-                with open(self.files, 'r') as perc_files:
+                with open(self.combined_files, 'r') as perc_files:
                     spamreader = csv.reader(perc_files, delimiter='\t')
                     for row in spamreader:
                         p.append(row)
@@ -398,10 +398,10 @@ class GenericReader(Reader):
     PROTEIN_IDS = "proteinIds"
     EXTRA_PROTEIN_IDS = "alternative_protein_{}"
 
-    def __init__(self, digest_class, parameter_file_object, append_alt_from_db=False, target_file=None,decoy_file=None,files=None,directory=None):
+    def __init__(self, digest_class, parameter_file_object, append_alt_from_db=False, target_file=None,decoy_file=None,combined_files=None,directory=None):
         self.target_file = target_file
         self.decoy_file = decoy_file
-        self.files = files
+        self.combined_files = combined_files
         self.directory = directory
         self._validate_input()
 
@@ -442,7 +442,7 @@ class GenericReader(Reader):
                 for t_files in self.target_file:
                     ptarg = []
                     with open(t_files, 'r') as psm_target_file:
-                        self.logger.info(self.target_file)
+                        self.logger.info(t_files)
                         spamreader = csv.reader(psm_target_file, delimiter='\t')
                         fieldnames = self.remap(next(spamreader))
                         for row in spamreader:
@@ -465,7 +465,7 @@ class GenericReader(Reader):
                 for d_files in self.decoy_file:
                     pdec = []
                     with open(d_files, 'r') as psm_decoy_file:
-                        self.logger.info(self.decoy_file)
+                        self.logger.info(d_files)
                         spamreader = csv.reader(psm_decoy_file, delimiter='\t')
                         fieldnames = self.remap(next(spamreader))
                         for row in spamreader:
@@ -484,17 +484,27 @@ class GenericReader(Reader):
             # Combine the lists
             all_psms = all_target + all_decoy
 
-        elif self.files:
-            all = []
-            for files in self.files:
-                p = []
-                with open(files, 'r') as psm_file:
-                    self.logger.info(self.target_file)
+        elif self.combined_files:
+            if isinstance(self.combined_files, (list,)):
+                all = []
+                for c_files in self.combined_files:
+                    c_all = []
+                    with open(c_files, 'r') as psm_file:
+                        self.logger.info(c_files)
+                        spamreader = csv.reader(psm_file, delimiter='\t')
+                        fieldnames = self.remap(next(spamreader))
+                        for row in spamreader:
+                            c_all.append(dict(zip(fieldnames, row)))
+                    all = all + c_all
+            else:
+                c_all = []
+                with open(self.combined_files, 'r') as psm_file:
+                    self.logger.info(self.combined_files)
                     spamreader = csv.reader(psm_file, delimiter='\t')
                     fieldnames = self.remap(next(spamreader))
                     for row in spamreader:
-                        p.append(dict(zip(fieldnames, row)))
-                all = all + p
+                        c_all.append(dict(zip(fieldnames, row)))
+                all = c_all
             all_psms = all
 
         elif self.directory:

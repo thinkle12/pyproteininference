@@ -16,7 +16,7 @@ class Export(object):
     Main Class for exporting sorted protein lists to CSV
     """
 
-    EXPORT_TYPES = ['leads', 'all', 'comma_sep', 'q_value_comma_sep', 'q_value', 'q_value_all']
+    EXPORT_TYPES = ['leads', 'all', 'comma_sep', 'q_value_comma_sep', 'q_value', 'q_value_all', 'peptides', 'psms', 'psm_ids']
     
     def __init__(self,data_class):
         self.data_class = data_class
@@ -32,55 +32,68 @@ class Export(object):
         data = self.data_class
         tag = data.parameter_file_object.tag
 
-        if 'leads' in export_type:
+        if 'leads' == export_type:
             filename = '{}_leads_{}_{}.csv'.format(tag, data.short_score_method, data.score)
-            logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_leads_restricted(filename_out=complete_filepath)
 
-        if 'all' in export_type:
+        if 'all' == export_type:
             filename = '{}_all_{}_{}.csv'.format(tag, data.short_score_method, data.score)
-            logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_all_restricted(complete_filepath)
 
-        if 'comma_sep' in export_type:
+        if 'comma_sep' == export_type:
             filename = '{}_comma_sep_{}_{}.csv'.format(tag, data.short_score_method, data.score)
-            logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_comma_sep_restricted(complete_filepath)
 
-        if 'q_value_comma_sep' in export_type:
+        if 'q_value_comma_sep' == export_type:
             filename = '{}_q_value_comma_sep_{}_{}.csv'.format(tag, data.short_score_method, data.score)
-            logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_comma_sep(complete_filepath)
 
-        if 'q_value' in export_type:
+        if 'q_value' == export_type:
             filename = '{}_q_value_leads_{}_{}.csv'.format(tag, data.short_score_method, data.score)
-            logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads(complete_filepath)
 
-        if 'q_value_all' in export_type:
+        if 'q_value_all' == export_type:
             filename = '{}_q_value_all_{}_{}.csv'.format(tag, data.short_score_method, data.score)
-            logger.info("Exporting Protein Inference Data to File: {}".format(filename))
             complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_all(complete_filepath)
+
+        if "peptides" == export_type:
+            filename = '{}_q_value_leads_peptides_{}_{}.csv'.format(tag, data.short_score_method, data.score)
+            complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
+            self.csv_export_q_value_leads_peptides(complete_filepath)
+
+        if "psms" == export_type:
+            filename = '{}_q_value_leads_psms_{}_{}.csv'.format(tag, data.short_score_method, data.score)
+            complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
+            self.csv_export_q_value_leads_psms(complete_filepath)
+
+        if "psm_ids" == export_type:
+            filename = '{}_q_value_leads_psm_ids_{}_{}.csv'.format(tag, data.short_score_method, data.score)
+            complete_filepath = os.path.join(directory, filename)
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
+            self.csv_export_q_value_leads_psm_ids(complete_filepath)
 
         self.filepath = complete_filepath
 
     def csv_export_all_restricted(self, filename_out):
         """
         Class that outputs a subset of the passing proteins based on FDR.
-        Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
         Only Proteins that pass FDR will be output and ALL proteins
         will be output not just leads
 
-        Example: protein_inference.export.CsvOutAll(data_class = data, filename_out = "example.csv")
-
-        if we assume data = datastore.Datastore(reader_class = reader)
-        and if we assume reader is a class object from reader.Reader()
         """
         data_to_write = self.data_class.fdr_restricted_grouped_scored_proteins
         ungrouped_list = [['Protein', 'Score', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
@@ -107,10 +120,6 @@ class Export(object):
         Output proteins will be proteins that pass fdrcalc.SetBasedFdr(data_class = data,false_discovery_rate=.XX)
         Only Proteins that pass FDR will be output and only Lead proteins will be output
 
-        Example: protein_inference.export.CsvOutLeads(data_class = data, filename_out = "example.csv")
-
-        if we assume data = datastore.Datastore(reader_class = reader)
-        and if we assume reader is a class object from reader.Reader()
         """
         ungrouped_list = [['Protein', 'Score', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
         for groups in self.data_class.fdr_restricted_grouped_scored_proteins:
@@ -122,7 +131,7 @@ class Export(object):
             else:
                 ungrouped_list[-1].append('Unreviewed')
             ungrouped_list[-1].append(groups[0].group_identification)
-            for peps in groups[0].peptides:
+            for peps in sorted(groups[0].peptides):
                 ungrouped_list[-1].append(peps)
 
         with open(filename_out, "w") as f:
@@ -137,10 +146,6 @@ class Export(object):
         Only Proteins that pass FDR will be output and only Lead proteins will be output.
         Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-        Example: protein_inference.export.CsvOutCommaSep(data_class = data, filename_out = "example.csv")
-
-        if we assume data = datastore.Datastore(reader_class = reader)
-        and if we assume reader is a class object from reader.Reader()
         """
         ungrouped_list = [['Protein','Score','Number_of_Peptides','Identifier_Type','GroupID','Other_Potential_Identifiers']]
         for groups in self.data_class.fdr_restricted_grouped_scored_proteins:
@@ -164,10 +169,6 @@ class Export(object):
         """
         Class that outputs all lead proteins with Q values.
 
-        Example: protein_inference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
-        if we assume data = datastore.Datastore(reader_class = reader)
-
-        and if we assume reader is a class object from reader.Reader()
         """
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
         for groups in self.data_class.protein_group_objects:
@@ -194,10 +195,6 @@ class Export(object):
         Class that outputs all lead proteins with Q values.
         Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-        Example: protein_inference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
-        if we assume data = datastore.Datastore(reader_class = reader)
-
-        and if we assume reader is a class object from reader.Reader()
         """
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Other_Potential_Identifiers']]
         for groups in self.data_class.protein_group_objects:
@@ -225,10 +222,6 @@ class Export(object):
         Non Lead proteins are also output - entire group gets output
         Proteins in the groups of lead proteins will also be output in the same row as the lead
 
-        Example: protein_inference.export.CsvOutCommaSepQValues(data_class = data, filename_out = "example.csv")
-
-        if we assume data = datastore.Datastore(reader_class = reader)
-        and if we assume reader is a class object from reader.Reader()
         """
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
         for groups in self.data_class.protein_group_objects:
@@ -263,7 +256,7 @@ class Export(object):
                 else:
                     ungrouped_list[-1].append('Unreviewed')
                 ungrouped_list[-1].append(groups.number_id)
-                for peps in proteins.peptides:
+                for peps in sorted(proteins.peptides):
                     ungrouped_list[-1].append(peps)
 
         with open(filename_out, "w") as f:
@@ -274,10 +267,6 @@ class Export(object):
         """
         Class that outputs all lead proteins with Q values.
 
-        Example: protein_inference.export.CsvOutLeadsQValues(data_class = data, filename_out = "example.csv")
-        if we assume data = datastore.Datastore(reader_class = reader)
-
-        and if we assume reader is a class object from reader.Reader()
         """
         ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
         for groups in self.data_class.protein_group_objects:
@@ -293,6 +282,77 @@ class Export(object):
                     ungrouped_list[-1].append('Unreviewed')
                 ungrouped_list[-1].append(groups.number_id)
                 ungrouped_list[-1].append(peps)
+
+        with open(filename_out, "w") as f:
+            writer = csv.writer(f)
+            writer.writerows(ungrouped_list)
+
+    def csv_export_q_value_leads_peptides(self, filename_out, peptide_delimiter = " "):
+        """
+        Class that outputs all lead proteins with Q values in rectangular format.
+        """
+        ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
+        for groups in self.data_class.protein_group_objects:
+            lead_protein = groups.proteins[0]
+            ungrouped_list.append([lead_protein.identifier])
+            ungrouped_list[-1].append(lead_protein.score)
+            ungrouped_list[-1].append(groups.q_value)
+            ungrouped_list[-1].append(lead_protein.num_peptides)
+            if lead_protein.reviewed == True:
+                ungrouped_list[-1].append('Reviewed')
+            else:
+                ungrouped_list[-1].append('Unreviewed')
+            ungrouped_list[-1].append(groups.number_id)
+            peptides = peptide_delimiter.join(list(sorted(lead_protein.peptides)))
+            ungrouped_list[-1].append(peptides)
+
+        with open(filename_out, "w") as f:
+            writer = csv.writer(f)
+            writer.writerows(ungrouped_list)
+
+
+    def csv_export_q_value_leads_psms(self, filename_out, peptide_delimiter = " "):
+        """
+        Class that outputs all lead proteins with Q values in rectangular format.
+        """
+        ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
+        for groups in self.data_class.protein_group_objects:
+            lead_protein = groups.proteins[0]
+            ungrouped_list.append([lead_protein.identifier])
+            ungrouped_list[-1].append(lead_protein.score)
+            ungrouped_list[-1].append(groups.q_value)
+            ungrouped_list[-1].append(lead_protein.num_peptides)
+            if lead_protein.reviewed == True:
+                ungrouped_list[-1].append('Reviewed')
+            else:
+                ungrouped_list[-1].append('Unreviewed')
+            ungrouped_list[-1].append(groups.number_id)
+            psms = peptide_delimiter.join(sorted([x['peptide'] for x in lead_protein.psmid_peptide_dictionary]))
+            ungrouped_list[-1].append(psms)
+
+        with open(filename_out, "w") as f:
+            writer = csv.writer(f)
+            writer.writerows(ungrouped_list)
+
+
+    def csv_export_q_value_leads_psm_ids(self, filename_out, peptide_delimiter = " "):
+        """
+        Class that outputs all lead proteins with Q values in rectangular format.
+        """
+        ungrouped_list = [['Protein', 'Score', 'Q_Value', 'Number_of_Peptides', 'Identifier_Type', 'GroupID', 'Peptides']]
+        for groups in self.data_class.protein_group_objects:
+            lead_protein = groups.proteins[0]
+            ungrouped_list.append([lead_protein.identifier])
+            ungrouped_list[-1].append(lead_protein.score)
+            ungrouped_list[-1].append(groups.q_value)
+            ungrouped_list[-1].append(lead_protein.num_peptides)
+            if lead_protein.reviewed == True:
+                ungrouped_list[-1].append('Reviewed')
+            else:
+                ungrouped_list[-1].append('Unreviewed')
+            ungrouped_list[-1].append(groups.number_id)
+            psms = peptide_delimiter.join(sorted([x['psm_id'] for x in lead_protein.psmid_peptide_dictionary]))
+            ungrouped_list[-1].append(psms)
 
         with open(filename_out, "w") as f:
             writer = csv.writer(f)

@@ -191,7 +191,7 @@ class TestLoadInclusionWorkflow(TestCase):
                                                                        database_file=TEST_DATABASE,
                                                                        target_files=TARGET_FILE,
                                                                        decoy_files=DECOY_FILE,
-                                                                       files=None,
+                                                                       combined_files=None,
                                                                        output_directory=OUTPUT_DIR)
 
         pipeline.execute()

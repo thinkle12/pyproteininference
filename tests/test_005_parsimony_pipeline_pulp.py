@@ -188,7 +188,6 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
             self.assertAlmostEqual(lead_protein.score, float(lead_output[i][SCORE_INDEX]))
             self.assertEqual(protein_groups[i].q_value, float(lead_output[i][Q_VALUE_INDEX]))
             self.assertEqual(protein_groups[i].number_id, int(lead_output[i][GROUP_ID_INDEX]))
-            # TODO also, make the pulp inference code cleaner... TY
             self.assertEqual(lead_protein.peptides, set(lead_output[i][PEPTIDES_INDEX:]))
 
 

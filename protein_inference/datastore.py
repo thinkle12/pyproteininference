@@ -159,7 +159,7 @@ class DataStore(object):
     def get_pep_values(self):
         psm_data = self.get_psm_data()
 
-        pep_values = [x.qvalue for x in psm_data]
+        pep_values = [x.pepvalue for x in psm_data]
 
         return(pep_values)
 
@@ -417,7 +417,7 @@ class DataStore(object):
         if data_form == 'fdr_restricted':
             # Proteins that pass fdr restriction...
             data_to_select = self.fdr_restricted_grouped_scored_proteins
-            prots = [x.identifier for x in data_to_select]
+            prots = [x[0].identifier for x in data_to_select]
             proteins = prots
 
         return(proteins)

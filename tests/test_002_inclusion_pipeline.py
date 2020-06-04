@@ -192,7 +192,8 @@ class TestLoadInclusionWorkflow(TestCase):
                                                                        target_files=TARGET_FILE,
                                                                        decoy_files=DECOY_FILE,
                                                                        combined_files=None,
-                                                                       output_directory=OUTPUT_DIR)
+                                                                       output_directory=OUTPUT_DIR,
+                                                                       id_splitting=True)
 
         pipeline.execute()
 

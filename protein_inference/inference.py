@@ -56,6 +56,10 @@ class Inference(object):
             group = FirstProtein(data_class=data_class, digest_class=digest_class)
             group.infer_proteins()
 
+        if inference_type == "peptide_centric":
+            group = PeptideCentric(data_class=data_class, digest_class=digest_class)
+            group.infer_proteins()
+
     def _group_by_peptides(self, scored_data, data_class, digest_class, inference_type="parsimony", lead_protein_objects=None, grouping_type="shared_peptides"):
 
         logger = getLogger('protein_inference.inference.Inference._group_by_peptides')

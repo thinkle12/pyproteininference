@@ -313,7 +313,7 @@ class DataStore(object):
         dd_prots = collections.defaultdict(set)
         for peptide_objects in psm_data:
             for prots in peptide_objects.possible_proteins:
-                cur_peptide = Psm.split_peptide(peptide_string=peptide_objects.identifier)
+                cur_peptide = peptide_objects.non_flanking_peptide
                 if cur_peptide in res_pep_set:
                     dd_prots[prots].add(cur_peptide)
 
@@ -328,7 +328,7 @@ class DataStore(object):
         dd_peps = collections.defaultdict(set)
         for peptide_objects in psm_data:
             for prots in peptide_objects.possible_proteins:
-                cur_peptide = Psm.split_peptide(peptide_string=peptide_objects.identifier)
+                cur_peptide = peptide_objects.non_flanking_peptide
                 if cur_peptide in res_pep_set:
                     dd_peps[cur_peptide].add(prots)
                 else:
@@ -853,7 +853,7 @@ class DataStore(object):
         logger = getLogger('protein_inference.datastore.DataStore._check_data_digest_overlap_psms')
 
         ## TODO write a function here that looks at the peptides we have and checks how many of these peptides we do not find in our Digest...
-        peptides = [Psm.split_peptide(peptide_string=x.identifier) for x in self.main_data_form]
+        peptides = [x.stripped_peptide for x in self.main_data_form]
         peptides_in_digest = set(digest_class.peptide_to_protein_dictionary.keys())
         peptides_from_search_in_digest = [x for x in peptides if x in peptides_in_digest]
         percentage = float(len(set(peptides)))/float(len(set(peptides_from_search_in_digest)))

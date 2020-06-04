@@ -75,7 +75,7 @@ class Psm(object):
     Example: Psm(identifier = "K.DLIDEGHAATQLVNQLHDVVVENNLSDK.Q")
     # TODO need to be able to handle identifiers with and without trailing/leading AA with the .'s
     """
-    __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins','psm_id','custom_score']
+    __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins','psm_id','custom_score', 'main_score', 'stripped_peptide', 'non_flanking_peptide']
 
     # The regex removes anything between parantheses including parenthases - \([^()]*\)
     # The regex removes anything between brackets including parenthases - \[.*?\]
@@ -93,6 +93,23 @@ class Psm(object):
         self.possible_proteins = None
         self.psm_id = None
         self.custom_score = None
+        self.main_score = None
+        self.stripped_peptide = None
+        self.non_flanking_peptide = None
+
+        # Add logic to split the peptide and strip it of mods
+        current_peptide = Psm.split_peptide(peptide_string=self.identifier)
+
+        self.non_flanking_peptide = current_peptide
+
+        if not current_peptide.isupper() or not current_peptide.isalpha():
+            # If we have mods remove them...
+            peptide_string = current_peptide.upper()
+            stripped_peptide = Psm.remove_peptide_mods(peptide_string)
+            current_peptide = stripped_peptide
+
+        # Set stripped_peptide variable
+        self.stripped_peptide = current_peptide
 
     @classmethod
     def remove_peptide_mods(cls, peptide_string):
@@ -132,6 +149,13 @@ class Psm(object):
         peptide_string = cls.BACK_FLANKING_REGEX.sub('', peptide_string)
 
         return(peptide_string)
+
+    def assign_main_score(self, score):
+        # Assign a main score based on user input
+        if score not in set(["pepvalue","qvalue","percscore","custom_score"]):
+            raise ValueError("Scores must either be pepvalue, qvalue, percscore, or custom_score")
+        else:
+            self.main_score = getattr(self, score)
 
 
 

@@ -257,18 +257,16 @@ class DataStore(object):
 
         logger.info('Length of restricted data: ' + str(len(restricted_data)))
 
-        self.restricted_peptides = [Psm.split_peptide(peptide_string=x.identifier) for x in restricted_data]
-    
+        self.restricted_peptides = [x.non_flanking_peptide for x in restricted_data]
+
     def create_scoring_input(self, score_input="posterior_error_prob"):
 
-        logger = getLogger('protein_inference.datastore.DataStore.create_scoring_input')
-
+        logger = getLogger('protein_inference.datastore.DataStore.create_scoring_input2')
         logger.info("Creating Scoring Input")
+
         psm_data = self.get_psm_data()
 
-        protein_psm_score_dictionary = collections.defaultdict(list)
-        raw_peptide_dictionary = collections.defaultdict(list)
-        psmid_peptide_dictionary = collections.defaultdict(list)
+        protein_psm_dict = collections.defaultdict(list)
 
         try:
             score_key = self.SCORE_MAPPER[score_input]
@@ -278,42 +276,31 @@ class DataStore(object):
         if self.parameter_file_object.inference_type!="peptide_centric":
             # Loop through all Psms
             for psms in psm_data:
+                psms.assign_main_score(score=score_key)
                 # Loop through all proteins
                 for prots in psms.possible_proteins:
-                    # Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
-                    protein_psm_score_dictionary[prots].append(
-                        {'peptide': Psm.split_peptide(peptide_string=psms.identifier), 'score': getattr(psms, score_key)})
-                    raw_peptide_dictionary[prots].append({'complete_peptide': psms.identifier})
-                    psmid_peptide_dictionary[prots].append(
-                        {'peptide': Psm.split_peptide(peptide_string=psms.identifier), 'psm_id': psms.psm_id})
-
+                    protein_psm_dict[prots].append(psms)
 
         else:
             self.peptide_to_protein_dictionary()
-
             sp_proteins = self.digest_class.swiss_prot_protein_set
             for psms in psm_data:
-                protein_set = self.peptide_protein_dictionary[Psm.split_peptide(peptide_string=psms.identifier)]
+
+                # Assign main score
+                psms.assign_main_score(score=score_key)
+                protein_set = self.peptide_protein_dictionary[psms.non_flanking_peptide]
                 # Sort protein_set by sp-alpha, decoy-sp-alpha, tr-alpha, decoy-tr-alpha
                 sorted_protein_list = self.sort_protein_strings(protein_string_list=protein_set, sp_proteins=sp_proteins, decoy_symbol=self.parameter_file_object.decoy_symbol)
                 # Restrict the number of identifiers by the value in param file max_identifiers_peptide_centric
                 sorted_protein_list = sorted_protein_list[:self.parameter_file_object.max_identifiers_peptide_centric]
                 protein_name = ";".join(sorted_protein_list)
-
-                # Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
-                protein_psm_score_dictionary[protein_name].append(
-                    {'peptide': Psm.split_peptide(peptide_string=psms.identifier), 'score': getattr(psms, score_key)})
-                raw_peptide_dictionary[protein_name].append({'complete_peptide': psms.identifier})
-                psmid_peptide_dictionary[protein_name].append(
-                    {'peptide': Psm.split_peptide(peptide_string=psms.identifier), 'psm_id': psms.psm_id})
+                protein_psm_dict[protein_name].append(psms)
 
         protein_list = []
-        # TODO Sort the protein_psm_score_dictionary by SP, Then ##SP then TR then ##TR
-        for pkeys in sorted(protein_psm_score_dictionary.keys()):
+        for pkeys in sorted(protein_psm_dict.keys()):
             p = Protein(identifier=pkeys)
-            p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
-            p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
-            p.raw_peptides = set(sorted([x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]))
+            p.psms = protein_psm_dict[pkeys]
+            p.raw_peptides = set([x.identifier for x in protein_psm_dict[pkeys]])
             protein_list.append(p)
 
         self.score = score_input

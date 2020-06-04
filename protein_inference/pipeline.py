@@ -5,7 +5,7 @@ import protein_inference
 
 class ProteinInferencePipeline(object):
 
-    def __init__(self, parameter_file, database_file, target_files=None, decoy_files=None, combined_files=None, target_directory=None, decoy_directory=None, combined_directory=None, output_directory=None):
+    def __init__(self, parameter_file, database_file, target_files=None, decoy_files=None, combined_files=None, target_directory=None, decoy_directory=None, combined_directory=None, output_directory=None, id_splitting=False):
 
 
         self.logger = logging.getLogger("protein_inference.pipeline.ProteinInferencePipeline")
@@ -23,6 +23,7 @@ class ProteinInferencePipeline(object):
         self.decoy_directory = decoy_directory
         self.combined_directory = combined_directory
         self.output_directory = output_directory
+        self.id_splitting = id_splitting
         self.data = None
         self.digest = None
 
@@ -41,7 +42,7 @@ class ProteinInferencePipeline(object):
         ### STEP 2: Start with running an In Silico Digestion ###
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = protein_inference.in_silico_digest.InSilicoDigest(database_path=self.database_file,
-                                                 parameter_file_object=protein_inference_parameters, id_splitting=True)
+                                                 parameter_file_object=protein_inference_parameters, id_splitting=self.id_splitting)
         digest.digest_fasta_database()
 
         ### STEP 3: Read PSM Data ###
@@ -93,28 +94,8 @@ class ProteinInferencePipeline(object):
         ### STEP 10: Apply Inference
         ### STEP 10: Apply Inference
         ### STEP 10: Apply Inference
-        inference_type = protein_inference_parameters.inference_type
-
-        # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == 'parsimony':
-            group = protein_inference.inference.Parsimony(data_class=data, digest_class=digest)
-            group.infer_proteins()
-
-        if inference_type == "inclusion":
-            group = protein_inference.inference.Inclusion(data_class=data, digest_class=digest)
-            group.infer_proteins()
-
-        if inference_type == "exclusion":
-            group = protein_inference.inference.Exclusion(data_class=data, digest_class=digest)
-            group.infer_proteins()
-
-        if inference_type == "none":
-            group = protein_inference.inference.FirstProtein(data_class=data, digest_class=digest)
-            group.infer_proteins()
-
-        if inference_type == "peptide_centric":
-            group = protein_inference.inference.PeptideCentric(data_class=data, digest_class=digest)
-            group.infer_proteins()
+        inference = protein_inference.inference.Inference()
+        inference.run_inference(data_class=data, digest_class=digest)
 
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations

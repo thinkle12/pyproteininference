@@ -97,22 +97,33 @@ class DataStore(object):
         return(our_proteins_sorted)
 
     @classmethod
-    def sort_proteins(cls):
-        # TODO make a method that sorts entire lists of proteins or leads...
-        pass
+    def sort_protein_lists(cls, list_of_group_objects, higher_or_lower):
+        if higher_or_lower == 'lower':
+
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: (
+                float(k.proteins[0].score), -float(k.proteins[0].num_peptides)),
+                                           reverse=False)
+        elif higher_or_lower == 'higher':
+
+            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: (
+                float(k.proteins[0].score), float(k.proteins[0].num_peptides)),
+                                           reverse=True)
+
+        return list_of_group_objects
+
+    @classmethod
+    def sort_protein_groups(cls, scores_grouped, higher_or_lower):
+        if higher_or_lower == 'lower':
+            scores_grouped = sorted(scores_grouped, key=lambda k: (float(k[0].score), -float(k[0].num_peptides)),
+                                    reverse=False)
+        if higher_or_lower == 'higher':
+            scores_grouped = sorted(scores_grouped, key=lambda k: (float(k[0].score), float(k[0].num_peptides)),
+                                    reverse=True)
+        return scores_grouped
 
     @classmethod
     def sort_protein_sub_groups(cls):
         # TODO make a method that sorts one protein group
-        pass
-
-    @classmethod
-    def sort_protein_groups(cls):
-        # TODO make a method that sorts physical protein groups by their leads...
-        pass
-
-    def higher_or_lower(self):
-        # TODO make this an instance method of the datastore class...
         pass
 
     def get_psm_data(self):
@@ -148,7 +159,7 @@ class DataStore(object):
     def get_pep_values(self):
         psm_data = self.get_psm_data()
 
-        pep_values = [x.qvalue for x in psm_data]
+        pep_values = [x.pepvalue for x in psm_data]
 
         return(pep_values)
 
@@ -406,7 +417,7 @@ class DataStore(object):
         if data_form == 'fdr_restricted':
             # Proteins that pass fdr restriction...
             data_to_select = self.fdr_restricted_grouped_scored_proteins
-            prots = [x.identifier for x in data_to_select]
+            prots = [x[0].identifier for x in data_to_select]
             proteins = prots
 
         return(proteins)

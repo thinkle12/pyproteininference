@@ -94,28 +94,8 @@ class ProteinInferencePipeline(object):
         ### STEP 10: Apply Inference
         ### STEP 10: Apply Inference
         ### STEP 10: Apply Inference
-        inference_type = protein_inference_parameters.inference_type
-
-        # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == 'parsimony':
-            group = protein_inference.inference.Parsimony(data_class=data, digest_class=digest)
-            group.infer_proteins()
-
-        if inference_type == "inclusion":
-            group = protein_inference.inference.Inclusion(data_class=data, digest_class=digest)
-            group.infer_proteins()
-
-        if inference_type == "exclusion":
-            group = protein_inference.inference.Exclusion(data_class=data, digest_class=digest)
-            group.infer_proteins()
-
-        if inference_type == "none":
-            group = protein_inference.inference.FirstProtein(data_class=data, digest_class=digest)
-            group.infer_proteins()
-
-        if inference_type == "peptide_centric":
-            group = protein_inference.inference.PeptideCentric(data_class=data, digest_class=digest)
-            group.infer_proteins()
+        inference = protein_inference.inference.Inference()
+        inference.run_inference(data_class=data, digest_class=digest)
 
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations

@@ -16,26 +16,56 @@ class Protein(object):
 
     Example: protein_inference.physical.Protein(identifier = "PRKDC_HUMAN|P78527")
     """
-    __slots__ = ['identifier','score', 'group_identification', 'reviewed', 'unreviewed', 'peptides', 'peptide_scores', 'picked', 'psm_score_dictionary',
-                 'num_peptides','unique_peptides','num_unique_peptides','raw_peptides','psmid_peptide_dictionary']
+    __slots__ = ['identifier','score', 'psms', 'group_identification', 'reviewed', 'unreviewed', 'peptides', 'peptide_scores', 'picked',
+                 'num_peptides','unique_peptides','num_unique_peptides','raw_peptides']
     
     def __init__(self,identifier):
         self.identifier = identifier
         self.score = None
+        self.psms = [] # List of psm objects
         self.group_identification = set()
         self.reviewed = False
         self.unreviewed = False
-        self.peptides = None
-        self.peptide_scores = None
+        self.peptides = None # Keep this
+        self.peptide_scores = None # TODO remove
         self.picked = True
-        self.psm_score_dictionary = None
-        self.num_peptides = None
-        self.unique_peptides = None
-        self.num_unique_peptides = None
-        self.raw_peptides = set()
-        self.psmid_peptide_dictionary = None
-        
-        
+        self.num_peptides = None # TODO remove
+        self.unique_peptides = None # TODO remove
+        self.num_unique_peptides = None # TODO remove
+        self.raw_peptides = set() # Keep this
+
+    def get_psm_scores(self):
+        score_list = [x.main_score for x in self.psms]
+        return(score_list)
+
+    def get_psm_identifiers(self):
+        psms = [x.identifier for x in self.psms]
+        return psms
+
+    def get_stripped_psm_identifiers(self):
+        psms = [x.stripped_peptide for x in self.psms]
+        return psms
+
+    def get_unique_peptide_identifiers(self):
+        unique_peptides = set(self.get_psm_identifiers())
+        return unique_peptides
+
+    def get_unique_stripped_peptide_identifiers(self):
+        stripped_peptide_identifiers = set(self.get_stripped_psm_identifiers())
+        return stripped_peptide_identifiers
+
+    def get_num_psms(self):
+        num_psms = len(self.get_psm_identifiers())
+        return num_psms
+
+    def get_num_peptides(self):
+        num_peptides = len(self.get_unique_peptide_identifiers())
+        return num_peptides
+
+    def get_psm_ids(self):
+        psm_ids = [x.psm_id for x in self.psms]
+        return(psm_ids)
+
 class Psm(object):
     """
     The following class is a physical Psm class that stores characteristics of a psm for the entire analysis.

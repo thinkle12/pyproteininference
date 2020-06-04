@@ -519,7 +519,7 @@ class DataStore(object):
             current_raw_peptides = current_score_input[j].raw_peptides
 
             for psm_scores in current_psms:
-                if psm_scores.stripped_peptide in raw_peps_good:
+                if psm_scores.non_flanking_peptide in raw_peps_good:
                     psm_list.append(psm_scores)
 
             for rp in current_raw_peptides:

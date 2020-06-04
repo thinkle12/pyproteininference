@@ -513,27 +513,20 @@ class DataStore(object):
         current_score_input = list(self.scoring_input)
         for j in range(len(current_score_input)):
             k = j + 1
-            new_psm_score_dictionary = []
-            new_psmid_peptide_dictionary = []
+            psm_list = []
             new_raw_peptides = []
-            current_psm_score_dictionary = current_score_input[j].psm_score_dictionary
-            current_psmid_peptide_dictionary = current_score_input[j].psmid_peptide_dictionary
+            current_psms = current_score_input[j].psms
             current_raw_peptides = current_score_input[j].raw_peptides
 
-            for psm_scores in current_psm_score_dictionary:
-                if psm_scores['peptide'] in raw_peps_good:
-                    new_psm_score_dictionary.append(psm_scores)
-
-            for psm_id in current_psmid_peptide_dictionary:
-                if psm_id['peptide'] in raw_peps_good:
-                    new_psmid_peptide_dictionary.append(psm_id)
+            for psm_scores in current_psms:
+                if psm_scores.stripped_peptide in raw_peps_good:
+                    psm_list.append(psm_scores)
 
             for rp in current_raw_peptides:
                 if Psm.split_peptide(peptide_string=rp) in raw_peps_good:
                     new_raw_peptides.append(rp)
 
-            current_score_input[j].psm_score_dictionary = new_psm_score_dictionary
-            current_score_input[j].psmid_peptide_dictionary = new_psmid_peptide_dictionary
+            current_score_input[j].psms = psm_list
             current_score_input[j].raw_peptides = new_raw_peptides
 
             if k % 10000 == 0:
@@ -541,7 +534,7 @@ class DataStore(object):
 
         logger.info("Redefined {} Peptide Sets".format(j))
 
-        filtered_score_input = [x for x in current_score_input if x.psm_score_dictionary]
+        filtered_score_input = [x for x in current_score_input if x.psms]
 
         self.scoring_input = filtered_score_input
 
@@ -551,7 +544,7 @@ class DataStore(object):
         # Make the raw peptides a flat list
         new_flat_peptides = set([Psm.split_peptide(peptide_string=item) for sublist in raw_peps for item in sublist])
 
-        self.scoring_input = [x for x in self.scoring_input if x.psm_score_dictionary]
+        self.scoring_input = [x for x in self.scoring_input if x.psms]
 
         self.restricted_peptides = [x for x in self.restricted_peptides if x in new_flat_peptides]
 

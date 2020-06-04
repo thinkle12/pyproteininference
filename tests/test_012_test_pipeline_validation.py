@@ -31,13 +31,14 @@ shutil.copyfile(DECOY_FILE, os.path.join(DECOY_DIRECTORY,"decoy_file.txt"))
 COMBINED_DIRECTORY = resource_filename('protein_inference', '../tests/data/combined_files')
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("protein_inference.tests.test_012_test_pipeline_validation.py")
+logger = logging.getLogger("protein_inference.tests.test_012_test_pipeline_validation")
 
 
 class TestPipelineValidation(TestCase):
 
     def test_validation(self):
 
+        # Test target and decoy file
         pipeline1 = protein_inference.pipeline.ProteinInferencePipeline(parameter_file=PARAMETER_FILE,
                                                                        database_file=TEST_DATABASE,
                                                                        target_files=TARGET_FILE,
@@ -46,10 +47,14 @@ class TestPipelineValidation(TestCase):
                                                                        target_directory=None,
                                                                        decoy_directory=None,
                                                                        combined_directory=None,
-                                                                       output_directory=OUTPUT_DIR)
+                                                                       output_directory=OUTPUT_DIR,
+                                                                       id_splitting=True)
 
         pipeline1.execute()
 
+        self.assertEqual(len(pipeline1.data.main_data_form),27)
+
+        # Test combined file
         pipeline2 = protein_inference.pipeline.ProteinInferencePipeline(parameter_file=PARAMETER_FILE,
                                                                        database_file=TEST_DATABASE,
                                                                        target_files=None,
@@ -58,10 +63,14 @@ class TestPipelineValidation(TestCase):
                                                                        target_directory=None,
                                                                        decoy_directory=None,
                                                                        combined_directory=None,
-                                                                       output_directory=OUTPUT_DIR)
+                                                                       output_directory=OUTPUT_DIR,
+                                                                       id_splitting=True)
 
         pipeline2.execute()
 
+        self.assertEqual(len(pipeline2.data.main_data_form),27)
+
+        # Test target and decoy directories
         pipeline3 = protein_inference.pipeline.ProteinInferencePipeline(parameter_file=PARAMETER_FILE,
                                                                        database_file=TEST_DATABASE,
                                                                        target_files=None,
@@ -70,13 +79,17 @@ class TestPipelineValidation(TestCase):
                                                                        target_directory=TARGET_DIRECTORY,
                                                                        decoy_directory=DECOY_DIRECTORY,
                                                                        combined_directory=None,
-                                                                       output_directory=OUTPUT_DIR)
+                                                                       output_directory=OUTPUT_DIR,
+                                                                       id_splitting=True)
 
         self.assertTrue(os.path.exists(pipeline3.target_files[0]))
         self.assertTrue(os.path.exists(pipeline3.decoy_files[0]))
 
         pipeline3.execute()
 
+        self.assertEqual(len(pipeline3.data.main_data_form), 27)
+
+        # Test combined directory
         pipeline4 = protein_inference.pipeline.ProteinInferencePipeline(parameter_file=PARAMETER_FILE,
                                                                         database_file=TEST_DATABASE,
                                                                         target_files=None,
@@ -85,12 +98,16 @@ class TestPipelineValidation(TestCase):
                                                                         target_directory=None,
                                                                         decoy_directory=None,
                                                                         combined_directory=COMBINED_DIRECTORY,
-                                                                       output_directory=OUTPUT_DIR)
+                                                                        output_directory=OUTPUT_DIR,
+                                                                        id_splitting=True)
 
         self.assertTrue(os.path.exists(pipeline4.combined_files[0]))
 
         pipeline4.execute()
 
+        self.assertEqual(len(pipeline4.data.main_data_form), 27)
+
+        # Test Proper error reporting
         with self.assertRaises(ValueError):
             pipeline5 = protein_inference.pipeline.ProteinInferencePipeline(parameter_file=PARAMETER_FILE,
                                                                            database_file=TEST_DATABASE,
@@ -100,7 +117,8 @@ class TestPipelineValidation(TestCase):
                                                                            target_directory=TARGET_DIRECTORY,
                                                                            decoy_directory=DECOY_DIRECTORY,
                                                                            combined_directory=None,
-                                                                           output_directory=OUTPUT_DIR)
+                                                                           output_directory=OUTPUT_DIR,
+                                                                           id_splitting=True)
 
         with self.assertRaises(ValueError):
             pipeline6 = protein_inference.pipeline.ProteinInferencePipeline(parameter_file=PARAMETER_FILE,
@@ -111,7 +129,8 @@ class TestPipelineValidation(TestCase):
                                                                            target_directory=None,
                                                                            decoy_directory=None,
                                                                            combined_directory=COMBINED_DIRECTORY,
-                                                                           output_directory=OUTPUT_DIR)
+                                                                           output_directory=OUTPUT_DIR,
+                                                                           id_splitting=True)
 
         with self.assertRaises(ValueError):
             pipeline7 = protein_inference.pipeline.ProteinInferencePipeline(parameter_file=PARAMETER_FILE,
@@ -122,7 +141,8 @@ class TestPipelineValidation(TestCase):
                                                                            target_directory=TARGET_DIRECTORY,
                                                                            decoy_directory=DECOY_DIRECTORY,
                                                                            combined_directory=COMBINED_DIRECTORY,
-                                                                           output_directory=OUTPUT_DIR)
+                                                                           output_directory=OUTPUT_DIR,
+                                                                           id_splitting=True)
 
 
 

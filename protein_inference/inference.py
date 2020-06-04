@@ -56,6 +56,10 @@ class Inference(object):
             group = FirstProtein(data_class=data_class, digest_class=digest_class)
             group.infer_proteins()
 
+        if inference_type == "peptide_centric":
+            group = PeptideCentric(data_class=data_class, digest_class=digest_class)
+            group.infer_proteins()
+
     def _group_by_peptides(self, scored_data, data_class, digest_class, inference_type="parsimony", lead_protein_objects=None, grouping_type="shared_peptides"):
 
         logger = getLogger('protein_inference.inference.Inference._group_by_peptides')
@@ -517,14 +521,9 @@ class Inclusion(Inference):
         list_of_group_objects = regrouped_proteins["group_objects"]
 
         logger.info('Sorting Results based on lead Protein Score')
-        if higher_or_lower == 'lower':
-            scores_grouped = sorted(scores_grouped, key=lambda k: (float(k[0].score), -float(k[0].num_peptides)), reverse=False)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: (float(k.proteins[0].score), -float(k.proteins[0].num_peptides)),
-                                           reverse=False)
-        if higher_or_lower == 'higher':
-            scores_grouped = sorted(scores_grouped, key=lambda k: (float(k[0].score),float(k[0].num_peptides)), reverse=True)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: (float(k.proteins[0].score),float(k.proteins[0].num_peptides)),
-                                           reverse=True)
+        scores_grouped = datastore.DataStore.sort_protein_groups(scores_grouped=scores_grouped, higher_or_lower=higher_or_lower)
+        list_of_group_objects = datastore.DataStore.sort_protein_lists(list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower)
+
 
         self.data_class.grouped_scored_proteins = scores_grouped
         self.data_class.protein_group_objects = list_of_group_objects
@@ -563,14 +562,9 @@ class Exclusion(Inference):
         list_of_group_objects = regrouped_proteins["group_objects"]
 
         logger.info('Sorting Results based on lead Protein Score')
-        if higher_or_lower == 'lower':
-            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
-                                           reverse=False)
-        if higher_or_lower == 'higher':
-            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=True)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
-                                           reverse=True)
+        scores_grouped = datastore.DataStore.sort_protein_groups(scores_grouped=scores_grouped, higher_or_lower=higher_or_lower)
+        list_of_group_objects = datastore.DataStore.sort_protein_lists(list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower)
+
 
         self.data_class.grouped_scored_proteins = scores_grouped
         self.data_class.protein_group_objects = list_of_group_objects
@@ -872,26 +866,16 @@ class Parsimony(Inference):
             higher_or_lower = self.data_class.high_low_better
 
         logger.info('Sorting Results based on lead Protein Score')
-        if higher_or_lower == 'lower':
-            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
-                                           reverse=False)
-        if higher_or_lower == 'higher':
-            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=True)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
-                                           reverse=True)
+        scores_grouped = datastore.DataStore.sort_protein_groups(scores_grouped=scores_grouped, higher_or_lower=higher_or_lower)
+        list_of_group_objects = datastore.DataStore.sort_protein_lists(list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower)
+
 
         list_of_group_objects = self._reassign_leads(list_of_group_objects, data_class=self.data_class)
 
         logger.info('Re Sorting Results based on lead Protein Score')
-        if higher_or_lower == 'lower':
-            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
-                                           reverse=False)
-        if higher_or_lower == 'higher':
-            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=True)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
-                                           reverse=True)
+        scores_grouped = datastore.DataStore.sort_protein_groups(scores_grouped=scores_grouped, higher_or_lower=higher_or_lower)
+        list_of_group_objects = datastore.DataStore.sort_protein_lists(list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower)
+
 
         self.data_class.grouped_scored_proteins = scores_grouped
         self.data_class.protein_group_objects = list_of_group_objects
@@ -1035,26 +1019,14 @@ class Parsimony(Inference):
             higher_or_lower = self.data_class.high_low_better
 
         logger.info('Sorting Results based on lead Protein Score')
-        if higher_or_lower == 'lower':
-            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
-                                           reverse=False)
-        if higher_or_lower == 'higher':
-            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=True)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
-                                           reverse=True)
+        scores_grouped = datastore.DataStore.sort_protein_groups(scores_grouped=scores_grouped, higher_or_lower=higher_or_lower)
+        list_of_group_objects = datastore.DataStore.sort_protein_lists(list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower)
 
         list_of_group_objects = self._reassign_leads(list_of_group_objects, data_class=self.data_class)
 
         logger.info('Re Sorting Results based on lead Protein Score')
-        if higher_or_lower == 'lower':
-            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
-                                           reverse=False)
-        if higher_or_lower == 'higher':
-            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=True)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
-                                           reverse=True)
+        scores_grouped = datastore.DataStore.sort_protein_groups(scores_grouped=scores_grouped, higher_or_lower=higher_or_lower)
+        list_of_group_objects = datastore.DataStore.sort_protein_lists(list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower)
 
         self.data_class.grouped_scored_proteins = scores_grouped
         self.data_class.protein_group_objects = list_of_group_objects
@@ -1119,14 +1091,9 @@ class FirstProtein(Inference):
         list_of_group_objects = regrouped_proteins["group_objects"]
 
         logger.info('Sorting Results based on lead Protein Score')
-        if higher_or_lower == 'lower':
-            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=False)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
-                                           reverse=False)
-        if higher_or_lower == 'higher':
-            scores_grouped = sorted(scores_grouped, key=lambda k: float(k[0].score), reverse=True)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: float(k.proteins[0].score),
-                                           reverse=True)
+        scores_grouped = datastore.DataStore.sort_protein_groups(scores_grouped=scores_grouped, higher_or_lower=higher_or_lower)
+        list_of_group_objects = datastore.DataStore.sort_protein_lists(list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower)
+
 
         self.data_class.grouped_scored_proteins = scores_grouped
         self.data_class.protein_group_objects = list_of_group_objects
@@ -1162,18 +1129,8 @@ class PeptideCentric(Inference):
         list_of_group_objects = regrouped_proteins["group_objects"]
 
         logger.info('Sorting Results based on lead Protein Score')
-        if higher_or_lower == 'lower':
-            scores_grouped = sorted(scores_grouped, key=lambda k: (float(k[0].score), -float(k[0].num_peptides)),
-                                    reverse=False)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: (
-            float(k.proteins[0].score), -float(k.proteins[0].num_peptides)),
-                                           reverse=False)
-        if higher_or_lower == 'higher':
-            scores_grouped = sorted(scores_grouped, key=lambda k: (float(k[0].score), float(k[0].num_peptides)),
-                                    reverse=True)
-            list_of_group_objects = sorted(list_of_group_objects, key=lambda k: (
-            float(k.proteins[0].score), float(k.proteins[0].num_peptides)),
-                                           reverse=True)
+        scores_grouped = datastore.DataStore.sort_protein_groups(scores_grouped=scores_grouped, higher_or_lower=higher_or_lower)
+        list_of_group_objects = datastore.DataStore.sort_protein_lists(list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower)
 
         self.data_class.grouped_scored_proteins = scores_grouped
         self.data_class.protein_group_objects = list_of_group_objects

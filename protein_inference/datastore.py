@@ -30,7 +30,7 @@ class DataStore(object):
         #main_data_form is the starting point for all other analyses
         if reader_class.psms:
             self.main_data_form = reader_class.psms
-            self.restricted_peptides = [Psm.split_peptide(peptide_string=x.identifier) for x in self.main_data_form]
+            self.restricted_peptides = [x.non_flanking_peptide for x in self.main_data_form]
 
         self.parameter_file_object = reader_class.parameter_file_object
         self.protein_info_dict = None
@@ -200,7 +200,7 @@ class DataStore(object):
         if peptide_length and posterior_error_prob_threshold and not q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:
-                if len(Psm.split_peptide(peptide_string=psms.identifier)) >= peptide_length and psms.pepvalue < float(
+                if len(psms.stripped_peptide) >= peptide_length and psms.pepvalue < float(
                         posterior_error_prob_threshold):
                     restricted_data.append(psms)
 
@@ -208,14 +208,14 @@ class DataStore(object):
         if peptide_length and not posterior_error_prob_threshold and not q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:
-                if len(Psm.split_peptide(peptide_string=psms.identifier)) >= peptide_length:
+                if len(psms.stripped_peptide) >= peptide_length:
                     restricted_data.append(psms)
 
         # Restrict peptide length, posterior error probability, and qvalue
         if peptide_length and posterior_error_prob_threshold and q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:
-                if len(Psm.split_peptide(peptide_string=psms.identifier)) >= peptide_length and psms.pepvalue < float(
+                if len(psms.stripped_peptide) >= peptide_length and psms.pepvalue < float(
                         posterior_error_prob_threshold) and psms.qvalue < float(q_value_threshold):
                     restricted_data.append(psms)
 
@@ -223,7 +223,7 @@ class DataStore(object):
         if peptide_length and not posterior_error_prob_threshold and q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:
-                if len(Psm.split_peptide(peptide_string=psms.identifier)) >= peptide_length and psms.qvalue < float(
+                if len(psms.stripped_peptide) >= peptide_length and psms.qvalue < float(
                         q_value_threshold):
                     restricted_data.append(psms)
 

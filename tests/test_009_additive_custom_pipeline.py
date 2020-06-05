@@ -21,12 +21,20 @@ TEST_DATABASE = resource_filename('protein_inference', '../tests/data/test_datab
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('protein_inference', '../tests/output/')
 
+for sub_dir in ["leads","all","peptides","psms","psm_ids"]:
+    if not os.path.exists(os.path.join(OUTPUT_DIR,sub_dir)):
+        os.makedirs(os.path.join(OUTPUT_DIR,sub_dir))
+
 TARGET_FILE_ADDITIVE = resource_filename('protein_inference', '../tests/data/test_perc_data_target_additive.txt')
 DECOY_FILE_ADDITIVE = resource_filename('protein_inference', '../tests/data/test_perc_data_decoy_additive.txt')
 
 PARAMETER_FILE_ADDITIVE = resource_filename('protein_inference', '../tests/data/test_params_additive_custom_score.yaml')
 
-LEAD_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/test_additive_q_value_leads_add_example_additive_score.csv')
+LEAD_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/leads/test_additive_q_value_leads_add_example_additive_score.csv')
+ALL_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/all/test_additive_q_value_all_add_example_additive_score.csv')
+PEPTIDE_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/peptides/test_additive_q_value_leads_peptides_add_example_additive_score.csv')
+PSM_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/psms/test_additive_q_value_leads_psms_add_example_additive_score.csv')
+PSM_ID_OUTPUT_FILE = resource_filename('protein_inference', '../tests/output/psm_ids/test_additive_q_value_leads_psm_ids_add_example_additive_score.csv')
 
 IDENTIFIER_INDEX = 0
 SCORE_INDEX = 1
@@ -152,8 +160,7 @@ class TestAdditiveWorkflow(TestCase):
         ### STEP 12: Export to CSV
         export_type = protein_inference_parameters.export
         export = protein_inference.export.Export(data_class = data)
-        export.export_to_csv(directory=OUTPUT_DIR, export_type=export_type)
-
+        export.export_to_csv(directory=os.path.join(OUTPUT_DIR,"leads"), export_type=export_type)
 
         logger.info('Protein Inference Finished')
 
@@ -175,12 +182,112 @@ class TestAdditiveWorkflow(TestCase):
             self.assertEqual(protein_groups[i].number_id, int(lead_output[i][GROUP_ID_INDEX]))
             self.assertEqual(lead_protein.peptides, set(lead_output[i][PEPTIDES_INDEX:]))
 
+        export.export_to_csv(directory=os.path.join(OUTPUT_DIR, "all"), export_type="q_value_all")
+
+        all_output = []
+        with open(ALL_OUTPUT_FILE, 'r') as all_output_file:
+            reader = csv.reader(all_output_file, delimiter=',')
+            for row in reader:
+                all_output.append(row)
+
+        del all_output[0]
+
+        all_output_new = []
+        with open(export.filepath, 'r') as all_output_file_new:
+            reader = csv.reader(all_output_file_new, delimiter=',')
+            for row in reader:
+                all_output_new.append(row)
+
+        del all_output_new[0]
+
+        for i in range(len(all_output)):
+            self.assertEqual(all_output_new[i][IDENTIFIER_INDEX], all_output[i][IDENTIFIER_INDEX])
+            self.assertAlmostEqual(float(all_output_new[i][SCORE_INDEX]), float(all_output[i][SCORE_INDEX]))
+            self.assertEqual(float(all_output_new[i][Q_VALUE_INDEX]), float(all_output[i][Q_VALUE_INDEX]))
+            self.assertEqual(int(all_output_new[i][GROUP_ID_INDEX]), int(all_output[i][GROUP_ID_INDEX]))
+            self.assertEqual(set(all_output_new[i][PEPTIDES_INDEX:]), set(all_output[i][PEPTIDES_INDEX:]))
+
+        export.export_to_csv(directory=os.path.join(OUTPUT_DIR, "peptides"), export_type="peptides")
+
+        peptide_output = []
+        with open(PEPTIDE_OUTPUT_FILE, 'r') as peptide_output_file:
+            reader = csv.reader(peptide_output_file, delimiter=',')
+            for row in reader:
+                peptide_output.append(row)
+
+        del peptide_output[0]
+
+        peptide_output_new = []
+        with open(export.filepath, 'r') as peptide_output_file_new:
+            reader = csv.reader(peptide_output_file_new, delimiter=',')
+            for row in reader:
+                peptide_output_new.append(row)
+
+        del peptide_output_new[0]
+
+        for i in range(len(peptide_output)):
+            self.assertEqual(peptide_output_new[i][IDENTIFIER_INDEX], peptide_output[i][IDENTIFIER_INDEX])
+            self.assertAlmostEqual(float(peptide_output_new[i][SCORE_INDEX]), float(peptide_output[i][SCORE_INDEX]))
+            self.assertEqual(float(peptide_output_new[i][Q_VALUE_INDEX]), float(peptide_output[i][Q_VALUE_INDEX]))
+            self.assertEqual(int(peptide_output_new[i][GROUP_ID_INDEX]), int(peptide_output[i][GROUP_ID_INDEX]))
+            self.assertEqual(set(peptide_output_new[i][PEPTIDES_INDEX:]), set(peptide_output[i][PEPTIDES_INDEX:]))
+
+        export.export_to_csv(directory=os.path.join(OUTPUT_DIR, "psms"), export_type="psms")
+
+        psm_output = []
+        with open(PSM_OUTPUT_FILE, 'r') as psm_output_file:
+            reader = csv.reader(psm_output_file, delimiter=',')
+            for row in reader:
+                psm_output.append(row)
+
+        del psm_output[0]
+
+        psm_output_new = []
+        with open(export.filepath, 'r') as psm_output_file_new:
+            reader = csv.reader(psm_output_file_new, delimiter=',')
+            for row in reader:
+                psm_output_new.append(row)
+
+        del psm_output_new[0]
+
+        for i in range(len(psm_output)):
+            self.assertEqual(psm_output_new[i][IDENTIFIER_INDEX], psm_output[i][IDENTIFIER_INDEX])
+            self.assertAlmostEqual(float(psm_output_new[i][SCORE_INDEX]), float(psm_output[i][SCORE_INDEX]))
+            self.assertEqual(float(psm_output_new[i][Q_VALUE_INDEX]), float(psm_output[i][Q_VALUE_INDEX]))
+            self.assertEqual(int(psm_output_new[i][GROUP_ID_INDEX]), int(psm_output[i][GROUP_ID_INDEX]))
+            self.assertEqual(set(psm_output_new[i][PEPTIDES_INDEX:]), set(psm_output[i][PEPTIDES_INDEX:]))
+
+        export.export_to_csv(directory=os.path.join(OUTPUT_DIR, "psm_ids"), export_type="psm_ids")
+
+        psm_id_output = []
+        with open(PSM_ID_OUTPUT_FILE, 'r') as psm_id_output_file:
+            reader = csv.reader(psm_id_output_file, delimiter=',')
+            for row in reader:
+                psm_id_output.append(row)
+
+        del psm_id_output[0]
+
+        psm_id_output_new = []
+        with open(export.filepath, 'r') as psm_id_output_file_new:
+            reader = csv.reader(psm_id_output_file_new, delimiter=',')
+            for row in reader:
+                psm_id_output_new.append(row)
+
+        del psm_id_output_new[0]
+
+        for i in range(len(psm_id_output)):
+            self.assertEqual(psm_id_output_new[i][IDENTIFIER_INDEX], psm_id_output[i][IDENTIFIER_INDEX])
+            self.assertAlmostEqual(float(psm_id_output_new[i][SCORE_INDEX]), float(psm_id_output[i][SCORE_INDEX]))
+            self.assertEqual(float(psm_id_output_new[i][Q_VALUE_INDEX]), float(psm_id_output[i][Q_VALUE_INDEX]))
+            self.assertEqual(int(psm_id_output_new[i][GROUP_ID_INDEX]), int(psm_id_output[i][GROUP_ID_INDEX]))
+            self.assertEqual(set(psm_id_output_new[i][PEPTIDES_INDEX:]), set(psm_id_output[i][PEPTIDES_INDEX:]))
+
         pipeline = protein_inference.pipeline.ProteinInferencePipeline(parameter_file=PARAMETER_FILE_ADDITIVE,
                                                                        database_file=TEST_DATABASE,
                                                                        target_files=TARGET_FILE_ADDITIVE,
                                                                        decoy_files=DECOY_FILE_ADDITIVE,
                                                                        combined_files=None,
-                                                                       output_directory=OUTPUT_DIR,
+                                                                       output_directory=os.path.join(OUTPUT_DIR,"leads"),
                                                                        id_splitting=True)
 
         pipeline.execute()

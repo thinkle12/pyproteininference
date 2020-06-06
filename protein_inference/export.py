@@ -327,7 +327,7 @@ class Export(object):
             else:
                 ungrouped_list[-1].append('Unreviewed')
             ungrouped_list[-1].append(groups.number_id)
-            psms = peptide_delimiter.join(sorted([x['peptide'] for x in lead_protein.psmid_peptide_dictionary]))
+            psms = peptide_delimiter.join(sorted([x.non_flanking_peptide for x in lead_protein.psms]))
             ungrouped_list[-1].append(psms)
 
         with open(filename_out, "w") as f:
@@ -351,7 +351,7 @@ class Export(object):
             else:
                 ungrouped_list[-1].append('Unreviewed')
             ungrouped_list[-1].append(groups.number_id)
-            psms = peptide_delimiter.join(sorted([x['psm_id'] for x in lead_protein.psmid_peptide_dictionary]))
+            psms = peptide_delimiter.join(sorted(lead_protein.get_psm_ids()))
             ungrouped_list[-1].append(psms)
 
         with open(filename_out, "w") as f:

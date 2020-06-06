@@ -67,11 +67,7 @@ class Score(object):
 
         logger.info('Scoring Proteins with BPPP')
         for protein in self.pre_score_data:
-            val_list = []
-            temp_peps = []
-            for vals in protein.psm_score_dictionary:
-                temp_peps.append(vals['peptide'])
-                val_list.append(float(vals['score']))
+            val_list = protein.get_psm_scores()
             score = min([float(x) for x in val_list])
 
             protein.score = score
@@ -100,7 +96,7 @@ class Score(object):
         all_scores = []
         logger.info('Scoring Proteins with fishers method')
         for protein in self.pre_score_data:
-            val_list = (x['score'] for x in protein.psm_score_dictionary)
+            val_list = protein.get_psm_scores()
             score = -2 * sum([math.log(x) for x in val_list])
 
             protein.score = score
@@ -133,7 +129,7 @@ class Score(object):
         logger.info('Using Generators')
         for protein in self.pre_score_data:
             # We create a generator of val_list...
-            val_list = (x['score'] for x in protein.psm_score_dictionary)
+            val_list = protein.get_psm_scores()
 
             combine = reduce(lambda x, y: x * y, val_list)
             if combine == 0:
@@ -168,15 +164,15 @@ class Score(object):
 
         score_list = []
         for proteins in self.pre_score_data:
-            cur_score_dict = proteins.psm_score_dictionary
-            for scores in cur_score_dict:
-                score_list.append(float(scores['score']))
+            cur_scores = proteins.get_psm_scores()
+            for scores in cur_scores:
+                score_list.append(scores)
         score_mean = numpy.mean(score_list)
 
         all_scores = []
         logger.info('Scoring Proteins with DWML method')
         for protein in self.pre_score_data:
-            val_list = [x['score'] for x in protein.psm_score_dictionary]
+            val_list = protein.get_psm_scores()
             # Divide by the score mean raised to the length of the number of unique peptides for the protein
             # This is an attempt to normalize for number of peptides per protein
             combine = reduce(lambda x, y: x * y, val_list)
@@ -213,9 +209,8 @@ class Score(object):
         all_scores = []
         logger.info('Scoring Proteins with Top Two Method')
         for protein in self.pre_score_data:
-            val_list = []
-            for vals in protein.psm_score_dictionary:
-                val_list.append(float(vals['score']))
+            val_list = protein.get_psm_scores()
+
             try:
                 # Try to combine the top two scores
                 # Divide by 2 to attempt to normalize the value
@@ -255,9 +250,8 @@ class Score(object):
         all_scores = []
         logger.info('Scoring Proteins with down weighted v2 method')
         for protein in self.pre_score_data:
-            val_list = []
-            for vals in protein.psm_score_dictionary:
-                val_list.append(float(vals['score']))
+            val_list = protein.get_psm_scores()
+
             # Here take each score and raise it to the power of (1/(1+index_number)).
             # This downweights each successive score by reducing its weight in a decreasing fashion
             # Basically, each score for a protein will provide less and less weight iteratively
@@ -297,9 +291,8 @@ class Score(object):
         all_scores = []
         logger.info('Scoring Proteins with IDWL method')
         for protein in self.pre_score_data:
-            val_list = []
-            for vals in protein.psm_score_dictionary:
-                val_list.append(float(vals['score']))
+            val_list = protein.get_psm_scores()
+
             mean = numpy.mean(val_list)
             # Here take each score and multiply it by its index number).
             # This downweights each successive score by reducing its weight in a decreasing fashion
@@ -341,9 +334,10 @@ class Score(object):
         all_scores = []
         logger.info('Scoring Proteins. with GML method')
         for protein in self.pre_score_data:
+            psm_scores = protein.get_psm_scores()
             val_list = []
-            for vals in protein.psm_score_dictionary:
-                val_list.append(float(vals['score']))
+            for vals in psm_scores:
+                val_list.append(float(vals))
                 combine = reduce(lambda x, y: x * y, val_list)
                 if combine == 0:
                     combine = sys.float_info.min
@@ -369,9 +363,8 @@ class Score(object):
         all_scores = []
         logger.info('Scoring Proteins with iterative down weighted v2 method')
         for protein in self.pre_score_data:
-            val_list = []
-            for vals in protein.psm_score_dictionary:
-                val_list.append(float(vals['score']))
+            val_list = protein.get_psm_scores()
+
             # Here take each score and raise it to the power of (1/(1+index_number)).
             # This downweights each successive score by reducing its weight in a decreasing fashion
             # Basically, each score for a protein will provide less and less weight iteratively
@@ -399,9 +392,8 @@ class Score(object):
         all_scores = []
         logger.info('Scoring Proteins with additive method')
         for protein in self.pre_score_data:
-            val_list = []
-            for vals in protein.psm_score_dictionary:
-                val_list.append(float(vals['score']))
+            val_list = protein.get_psm_scores()
+
             # Take the sum of our scores
             score = sum(val_list)
 

@@ -16,26 +16,56 @@ class Protein(object):
 
     Example: protein_inference.physical.Protein(identifier = "PRKDC_HUMAN|P78527")
     """
-    __slots__ = ['identifier','score', 'group_identification', 'reviewed', 'unreviewed', 'peptides', 'peptide_scores', 'picked', 'psm_score_dictionary',
-                 'num_peptides','unique_peptides','num_unique_peptides','raw_peptides','psmid_peptide_dictionary']
+    __slots__ = ['identifier','score', 'psms', 'group_identification', 'reviewed', 'unreviewed', 'peptides', 'peptide_scores', 'picked',
+                 'num_peptides','unique_peptides','num_unique_peptides','raw_peptides']
     
     def __init__(self,identifier):
         self.identifier = identifier
         self.score = None
+        self.psms = [] # List of psm objects
         self.group_identification = set()
         self.reviewed = False
         self.unreviewed = False
-        self.peptides = None
-        self.peptide_scores = None
+        self.peptides = None # Keep this
+        self.peptide_scores = None # TODO remove
         self.picked = True
-        self.psm_score_dictionary = None
-        self.num_peptides = None
-        self.unique_peptides = None
-        self.num_unique_peptides = None
-        self.raw_peptides = set()
-        self.psmid_peptide_dictionary = None
-        
-        
+        self.num_peptides = None # TODO remove
+        self.unique_peptides = None # TODO remove
+        self.num_unique_peptides = None # TODO remove
+        self.raw_peptides = set() # Keep this
+
+    def get_psm_scores(self):
+        score_list = [x.main_score for x in self.psms]
+        return(score_list)
+
+    def get_psm_identifiers(self):
+        psms = [x.identifier for x in self.psms]
+        return psms
+
+    def get_stripped_psm_identifiers(self):
+        psms = [x.stripped_peptide for x in self.psms]
+        return psms
+
+    def get_unique_peptide_identifiers(self):
+        unique_peptides = set(self.get_psm_identifiers())
+        return unique_peptides
+
+    def get_unique_stripped_peptide_identifiers(self):
+        stripped_peptide_identifiers = set(self.get_stripped_psm_identifiers())
+        return stripped_peptide_identifiers
+
+    def get_num_psms(self):
+        num_psms = len(self.get_psm_identifiers())
+        return num_psms
+
+    def get_num_peptides(self):
+        num_peptides = len(self.get_unique_peptide_identifiers())
+        return num_peptides
+
+    def get_psm_ids(self):
+        psm_ids = [x.psm_id for x in self.psms]
+        return(psm_ids)
+
 class Psm(object):
     """
     The following class is a physical Psm class that stores characteristics of a psm for the entire analysis.
@@ -45,7 +75,7 @@ class Psm(object):
     Example: Psm(identifier = "K.DLIDEGHAATQLVNQLHDVVVENNLSDK.Q")
     # TODO need to be able to handle identifiers with and without trailing/leading AA with the .'s
     """
-    __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins','psm_id','custom_score']
+    __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins','psm_id','custom_score', 'main_score', 'stripped_peptide', 'non_flanking_peptide']
 
     # The regex removes anything between parantheses including parenthases - \([^()]*\)
     # The regex removes anything between brackets including parenthases - \[.*?\]
@@ -63,6 +93,23 @@ class Psm(object):
         self.possible_proteins = None
         self.psm_id = None
         self.custom_score = None
+        self.main_score = None
+        self.stripped_peptide = None
+        self.non_flanking_peptide = None
+
+        # Add logic to split the peptide and strip it of mods
+        current_peptide = Psm.split_peptide(peptide_string=self.identifier)
+
+        self.non_flanking_peptide = current_peptide
+
+        if not current_peptide.isupper() or not current_peptide.isalpha():
+            # If we have mods remove them...
+            peptide_string = current_peptide.upper()
+            stripped_peptide = Psm.remove_peptide_mods(peptide_string)
+            current_peptide = stripped_peptide
+
+        # Set stripped_peptide variable
+        self.stripped_peptide = current_peptide
 
     @classmethod
     def remove_peptide_mods(cls, peptide_string):
@@ -102,6 +149,13 @@ class Psm(object):
         peptide_string = cls.BACK_FLANKING_REGEX.sub('', peptide_string)
 
         return(peptide_string)
+
+    def assign_main_score(self, score):
+        # Assign a main score based on user input
+        if score not in set(["pepvalue","qvalue","percscore","custom_score"]):
+            raise ValueError("Scores must either be pepvalue, qvalue, percscore, or custom_score")
+        else:
+            self.main_score = getattr(self, score)
 
 
 

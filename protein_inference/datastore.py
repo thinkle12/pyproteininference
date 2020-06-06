@@ -30,7 +30,7 @@ class DataStore(object):
         #main_data_form is the starting point for all other analyses
         if reader_class.psms:
             self.main_data_form = reader_class.psms
-            self.restricted_peptides = [Psm.split_peptide(peptide_string=x.identifier) for x in self.main_data_form]
+            self.restricted_peptides = [x.non_flanking_peptide for x in self.main_data_form]
 
         self.parameter_file_object = reader_class.parameter_file_object
         self.protein_info_dict = None
@@ -200,7 +200,7 @@ class DataStore(object):
         if peptide_length and posterior_error_prob_threshold and not q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:
-                if len(Psm.split_peptide(peptide_string=psms.identifier)) >= peptide_length and psms.pepvalue < float(
+                if len(psms.stripped_peptide) >= peptide_length and psms.pepvalue < float(
                         posterior_error_prob_threshold):
                     restricted_data.append(psms)
 
@@ -208,14 +208,14 @@ class DataStore(object):
         if peptide_length and not posterior_error_prob_threshold and not q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:
-                if len(Psm.split_peptide(peptide_string=psms.identifier)) >= peptide_length:
+                if len(psms.stripped_peptide) >= peptide_length:
                     restricted_data.append(psms)
 
         # Restrict peptide length, posterior error probability, and qvalue
         if peptide_length and posterior_error_prob_threshold and q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:
-                if len(Psm.split_peptide(peptide_string=psms.identifier)) >= peptide_length and psms.pepvalue < float(
+                if len(psms.stripped_peptide) >= peptide_length and psms.pepvalue < float(
                         posterior_error_prob_threshold) and psms.qvalue < float(q_value_threshold):
                     restricted_data.append(psms)
 
@@ -223,7 +223,7 @@ class DataStore(object):
         if peptide_length and not posterior_error_prob_threshold and q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:
-                if len(Psm.split_peptide(peptide_string=psms.identifier)) >= peptide_length and psms.qvalue < float(
+                if len(psms.stripped_peptide) >= peptide_length and psms.qvalue < float(
                         q_value_threshold):
                     restricted_data.append(psms)
 
@@ -257,18 +257,16 @@ class DataStore(object):
 
         logger.info('Length of restricted data: ' + str(len(restricted_data)))
 
-        self.restricted_peptides = [Psm.split_peptide(peptide_string=x.identifier) for x in restricted_data]
-    
+        self.restricted_peptides = [x.non_flanking_peptide for x in restricted_data]
+
     def create_scoring_input(self, score_input="posterior_error_prob"):
 
-        logger = getLogger('protein_inference.datastore.DataStore.create_scoring_input')
-
+        logger = getLogger('protein_inference.datastore.DataStore.create_scoring_input2')
         logger.info("Creating Scoring Input")
+
         psm_data = self.get_psm_data()
 
-        protein_psm_score_dictionary = collections.defaultdict(list)
-        raw_peptide_dictionary = collections.defaultdict(list)
-        psmid_peptide_dictionary = collections.defaultdict(list)
+        protein_psm_dict = collections.defaultdict(list)
 
         try:
             score_key = self.SCORE_MAPPER[score_input]
@@ -278,42 +276,31 @@ class DataStore(object):
         if self.parameter_file_object.inference_type!="peptide_centric":
             # Loop through all Psms
             for psms in psm_data:
+                psms.assign_main_score(score=score_key)
                 # Loop through all proteins
                 for prots in psms.possible_proteins:
-                    # Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
-                    protein_psm_score_dictionary[prots].append(
-                        {'peptide': Psm.split_peptide(peptide_string=psms.identifier), 'score': getattr(psms, score_key)})
-                    raw_peptide_dictionary[prots].append({'complete_peptide': psms.identifier})
-                    psmid_peptide_dictionary[prots].append(
-                        {'peptide': Psm.split_peptide(peptide_string=psms.identifier), 'psm_id': psms.psm_id})
-
+                    protein_psm_dict[prots].append(psms)
 
         else:
             self.peptide_to_protein_dictionary()
-
             sp_proteins = self.digest_class.swiss_prot_protein_set
             for psms in psm_data:
-                protein_set = self.peptide_protein_dictionary[Psm.split_peptide(peptide_string=psms.identifier)]
+
+                # Assign main score
+                psms.assign_main_score(score=score_key)
+                protein_set = self.peptide_protein_dictionary[psms.non_flanking_peptide]
                 # Sort protein_set by sp-alpha, decoy-sp-alpha, tr-alpha, decoy-tr-alpha
                 sorted_protein_list = self.sort_protein_strings(protein_string_list=protein_set, sp_proteins=sp_proteins, decoy_symbol=self.parameter_file_object.decoy_symbol)
                 # Restrict the number of identifiers by the value in param file max_identifiers_peptide_centric
                 sorted_protein_list = sorted_protein_list[:self.parameter_file_object.max_identifiers_peptide_centric]
                 protein_name = ";".join(sorted_protein_list)
-
-                # Generate a protein psm score dictionary for each protein... here peptides are listed as well as the selected score
-                protein_psm_score_dictionary[protein_name].append(
-                    {'peptide': Psm.split_peptide(peptide_string=psms.identifier), 'score': getattr(psms, score_key)})
-                raw_peptide_dictionary[protein_name].append({'complete_peptide': psms.identifier})
-                psmid_peptide_dictionary[protein_name].append(
-                    {'peptide': Psm.split_peptide(peptide_string=psms.identifier), 'psm_id': psms.psm_id})
+                protein_psm_dict[protein_name].append(psms)
 
         protein_list = []
-        # TODO Sort the protein_psm_score_dictionary by SP, Then ##SP then TR then ##TR
-        for pkeys in sorted(protein_psm_score_dictionary.keys()):
+        for pkeys in sorted(protein_psm_dict.keys()):
             p = Protein(identifier=pkeys)
-            p.psm_score_dictionary = protein_psm_score_dictionary[pkeys]
-            p.psmid_peptide_dictionary = psmid_peptide_dictionary[pkeys]
-            p.raw_peptides = set(sorted([x['complete_peptide'] for x in raw_peptide_dictionary[pkeys]]))
+            p.psms = protein_psm_dict[pkeys]
+            p.raw_peptides = set([x.identifier for x in protein_psm_dict[pkeys]])
             protein_list.append(p)
 
         self.score = score_input
@@ -326,7 +313,7 @@ class DataStore(object):
         dd_prots = collections.defaultdict(set)
         for peptide_objects in psm_data:
             for prots in peptide_objects.possible_proteins:
-                cur_peptide = Psm.split_peptide(peptide_string=peptide_objects.identifier)
+                cur_peptide = peptide_objects.non_flanking_peptide
                 if cur_peptide in res_pep_set:
                     dd_prots[prots].add(cur_peptide)
 
@@ -341,7 +328,7 @@ class DataStore(object):
         dd_peps = collections.defaultdict(set)
         for peptide_objects in psm_data:
             for prots in peptide_objects.possible_proteins:
-                cur_peptide = Psm.split_peptide(peptide_string=peptide_objects.identifier)
+                cur_peptide = peptide_objects.non_flanking_peptide
                 if cur_peptide in res_pep_set:
                     dd_peps[cur_peptide].add(prots)
                 else:
@@ -526,27 +513,20 @@ class DataStore(object):
         current_score_input = list(self.scoring_input)
         for j in range(len(current_score_input)):
             k = j + 1
-            new_psm_score_dictionary = []
-            new_psmid_peptide_dictionary = []
+            psm_list = []
             new_raw_peptides = []
-            current_psm_score_dictionary = current_score_input[j].psm_score_dictionary
-            current_psmid_peptide_dictionary = current_score_input[j].psmid_peptide_dictionary
+            current_psms = current_score_input[j].psms
             current_raw_peptides = current_score_input[j].raw_peptides
 
-            for psm_scores in current_psm_score_dictionary:
-                if psm_scores['peptide'] in raw_peps_good:
-                    new_psm_score_dictionary.append(psm_scores)
-
-            for psm_id in current_psmid_peptide_dictionary:
-                if psm_id['peptide'] in raw_peps_good:
-                    new_psmid_peptide_dictionary.append(psm_id)
+            for psm_scores in current_psms:
+                if psm_scores.non_flanking_peptide in raw_peps_good:
+                    psm_list.append(psm_scores)
 
             for rp in current_raw_peptides:
                 if Psm.split_peptide(peptide_string=rp) in raw_peps_good:
                     new_raw_peptides.append(rp)
 
-            current_score_input[j].psm_score_dictionary = new_psm_score_dictionary
-            current_score_input[j].psmid_peptide_dictionary = new_psmid_peptide_dictionary
+            current_score_input[j].psms = psm_list
             current_score_input[j].raw_peptides = new_raw_peptides
 
             if k % 10000 == 0:
@@ -554,7 +534,7 @@ class DataStore(object):
 
         logger.info("Redefined {} Peptide Sets".format(j))
 
-        filtered_score_input = [x for x in current_score_input if x.psm_score_dictionary]
+        filtered_score_input = [x for x in current_score_input if x.psms]
 
         self.scoring_input = filtered_score_input
 
@@ -564,7 +544,7 @@ class DataStore(object):
         # Make the raw peptides a flat list
         new_flat_peptides = set([Psm.split_peptide(peptide_string=item) for sublist in raw_peps for item in sublist])
 
-        self.scoring_input = [x for x in self.scoring_input if x.psm_score_dictionary]
+        self.scoring_input = [x for x in self.scoring_input if x.psms]
 
         self.restricted_peptides = [x for x in self.restricted_peptides if x in new_flat_peptides]
 
@@ -866,7 +846,7 @@ class DataStore(object):
         logger = getLogger('protein_inference.datastore.DataStore._check_data_digest_overlap_psms')
 
         ## TODO write a function here that looks at the peptides we have and checks how many of these peptides we do not find in our Digest...
-        peptides = [Psm.split_peptide(peptide_string=x.identifier) for x in self.main_data_form]
+        peptides = [x.stripped_peptide for x in self.main_data_form]
         peptides_in_digest = set(digest_class.peptide_to_protein_dictionary.keys())
         peptides_from_search_in_digest = [x for x in peptides if x in peptides_in_digest]
         percentage = float(len(set(peptides)))/float(len(set(peptides_from_search_in_digest)))

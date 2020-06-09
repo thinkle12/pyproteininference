@@ -5,7 +5,7 @@ import protein_inference
 
 class ProteinInferencePipeline(object):
 
-    def __init__(self, parameter_file, database_file, target_files=None, decoy_files=None, combined_files=None, target_directory=None, decoy_directory=None, combined_directory=None, output_directory=None, id_splitting=False):
+    def __init__(self, parameter_file, database_file=None, target_files=None, decoy_files=None, combined_files=None, target_directory=None, decoy_directory=None, combined_directory=None, output_directory=None, id_splitting=False, append_alt_from_db=False):
 
 
         self.logger = logging.getLogger("protein_inference.pipeline.ProteinInferencePipeline")
@@ -24,6 +24,7 @@ class ProteinInferencePipeline(object):
         self.combined_directory = combined_directory
         self.output_directory = output_directory
         self.id_splitting = id_splitting
+        self.append_alt_from_db = append_alt_from_db
         self.data = None
         self.digest = None
 
@@ -52,7 +53,8 @@ class ProteinInferencePipeline(object):
                                                                    decoy_file=self.decoy_files,
                                                                    combined_files=self.combined_files,
                                                                    parameter_file_object=protein_inference_parameters,
-                                                                   digest_class=digest)
+                                                                   digest_class=digest,
+                                                                   append_alt_from_db=self.append_alt_from_db)
         pep_and_prot_data.read_psms()
 
         ### STEP 4: Initiate the datastore class ###

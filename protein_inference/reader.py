@@ -239,8 +239,19 @@ class PercolatorReader(Reader):
                     peptide_string = current_peptide.upper()
                     stripped_peptide = Psm.remove_peptide_mods(peptide_string)
                     current_peptide = stripped_peptide
+
                 # Add the other possible_proteins from insilicodigest here...
-                current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
+                try:
+                    current_alt_proteins = list(
+                        peptide_to_protein_dictionary[current_peptide])  # This peptide needs to be scrubbed of Mods...
+                except KeyError:
+                    current_alt_proteins = []
+                    self.logger.warning("Peptide {} was not found in the supplied DB".format(current_peptide,";".join(p.possible_proteins)))
+                    for poss_prot in p.possible_proteins:
+                        self.digest_class.peptide_to_protein_dictionary.setdefault(current_peptide, set()).add(poss_prot)
+                        self.digest_class.protein_to_peptide_dictionary.setdefault(poss_prot, set()).add(current_peptide)
+                        self.logger.info("Adding Peptide {} and Protein {} to Digest dictionaries".format(current_peptide,poss_prot))
+
                 # Sort Alt Proteins by Swissprot then Trembl...
                 identifiers_sorted = DataStore.sort_protein_strings(protein_string_list=current_alt_proteins,
                                                                     sp_proteins=all_sp_proteins,
@@ -255,9 +266,6 @@ class PercolatorReader(Reader):
 
                 # Remove blank alt proteins
                 p.possible_proteins = [x for x in p.possible_proteins if x!='']
-
-                if not current_alt_proteins:
-                    self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
 
 
                 list_of_psm_objects.append(p)
@@ -348,8 +356,19 @@ class ProteologicPostSearchReader(Reader):
                     peptide_string = current_peptide.upper()
                     stripped_peptide = Psm.remove_peptide_mods(peptide_string)
                     current_peptide = stripped_peptide
+
                 # Add the other possible_proteins from insilicodigest here...
-                current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
+                try:
+                    current_alt_proteins = list(
+                        peptide_to_protein_dictionary[current_peptide])  # This peptide needs to be scrubbed of Mods...
+                except KeyError:
+                    current_alt_proteins = []
+                    self.logger.warning("Peptide {} was not found in the supplied DB".format(current_peptide,";".join(p.possible_proteins)))
+                    for poss_prot in p.possible_proteins:
+                        self.digest_class.peptide_to_protein_dictionary.setdefault(current_peptide, set()).add(poss_prot)
+                        self.digest_class.protein_to_peptide_dictionary.setdefault(poss_prot, set()).add(current_peptide)
+                        self.logger.info("Adding Peptide {} and Protein {} to Digest dictionaries".format(current_peptide,poss_prot))
+
                 # Sort Alt Proteins by Swissprot then Trembl...
                 identifiers_sorted = DataStore.sort_protein_strings(protein_string_list=current_alt_proteins,
                                                                     sp_proteins=all_sp_proteins,
@@ -362,8 +381,6 @@ class ProteologicPostSearchReader(Reader):
                                                 psm = p,
                                                 parameter_file_object = self.parameter_file_object)
 
-                if not current_alt_proteins:
-                    self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
 
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)
@@ -614,8 +631,18 @@ class GenericReader(Reader):
                     stripped_peptide = Psm.remove_peptide_mods(peptide_string)
                     current_peptide = stripped_peptide
                 # Add the other possible_proteins from insilicodigest here...
-                current_alt_proteins = list(
-                    peptide_to_protein_dictionary[current_peptide])  # This peptide needs to be scrubbed of Mods...
+
+                try:
+                    current_alt_proteins = list(
+                        peptide_to_protein_dictionary[current_peptide])  # This peptide needs to be scrubbed of Mods...
+                except KeyError:
+                    current_alt_proteins = []
+                    self.logger.warning("Peptide {} was not found in the supplied DB for Proteins {}".format(current_peptide,";".join(p.possible_proteins)))
+                    for poss_prot in p.possible_proteins:
+                        self.digest_class.peptide_to_protein_dictionary.setdefault(current_peptide, set()).add(poss_prot)
+                        self.digest_class.protein_to_peptide_dictionary.setdefault(poss_prot, set()).add(current_peptide)
+                        self.logger.info("Adding Peptide {} and Protein {} to Digest dictionaries".format(current_peptide,poss_prot))
+
                 # Sort Alt Proteins by Swissprot then Trembl...
                 identifiers_sorted = DataStore.sort_protein_strings(protein_string_list=current_alt_proteins,
                                                                     sp_proteins=all_sp_proteins,
@@ -627,8 +654,6 @@ class GenericReader(Reader):
                                                 max_proteins = self.MAX_ALLOWED_ALTERNATIVE_PROTEINS,
                                                 psm = p,
                                                 parameter_file_object = self.parameter_file_object)
-                if not current_alt_proteins:
-                    self.logger.info("Peptide {} was not found in the supplied DB".format(current_peptide))
 
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)

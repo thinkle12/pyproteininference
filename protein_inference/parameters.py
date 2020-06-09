@@ -90,7 +90,7 @@ class ProteinInferenceParameter(object):
             self.lp_solver = yaml_params["parameters"]['parsimony']["lp_solver"]
 
         else:
-            self.logger.info("Yaml parameter file not found, parameters set to default")
+            self.logger.warning("Yaml parameter file not found, parameters set to default")
             self.digest_type = "trypsin"
             self.export = "q_value"
             self.fdr = 0.01
@@ -100,13 +100,14 @@ class ProteinInferenceParameter(object):
             self.restrict_pep = 0.9
             self.restrict_peptide_length = 7
             self.restrict_q = 0.005
+            self.restrict_custom = None
             self.score_method = "multiplicative_log"
             self.score = "posterior_error_prob"
             self.decoy_symbol = "##"
             self.isoform_symbol = "-"
             self.reviewed_identifier_symbol = "sp|"
             self.inference_type = "peptide_centric"
-            self.tag = "Test"
+            self.tag = "example_tag"
             self.score_type = "multiplicative"
             self.grouping_type = "shared_peptides"
             self.max_identifiers_peptide_centric = 5

@@ -16,8 +16,8 @@ class Protein(object):
 
     Example: protein_inference.physical.Protein(identifier = "PRKDC_HUMAN|P78527")
     """
-    __slots__ = ['identifier','score', 'psms', 'group_identification', 'reviewed', 'unreviewed', 'peptides', 'peptide_scores', 'picked',
-                 'num_peptides','unique_peptides','num_unique_peptides','raw_peptides']
+    __slots__ = ('identifier','score', 'psms', 'group_identification', 'reviewed', 'unreviewed', 'peptides', 'peptide_scores', 'picked',
+                 'num_peptides','unique_peptides','num_unique_peptides','raw_peptides')
     
     def __init__(self,identifier):
         self.identifier = identifier
@@ -75,7 +75,7 @@ class Psm(object):
     Example: Psm(identifier = "K.DLIDEGHAATQLVNQLHDVVVENNLSDK.Q")
     # TODO need to be able to handle identifiers with and without trailing/leading AA with the .'s
     """
-    __slots__ = ['identifier','percscore','qvalue','pepvalue','possible_proteins','psm_id','custom_score', 'main_score', 'stripped_peptide', 'non_flanking_peptide']
+    __slots__ = ('identifier','percscore','qvalue','pepvalue','possible_proteins','psm_id','custom_score', 'main_score', 'stripped_peptide', 'non_flanking_peptide')
 
     # The regex removes anything between parantheses including parenthases - \([^()]*\)
     # The regex removes anything between brackets including parenthases - \[.*?\]
@@ -158,9 +158,6 @@ class Psm(object):
             self.main_score = getattr(self, score)
 
 
-
-
-
 class ProteinGroup(object):
     """
     The following class is a physical Protein Group class that stores characteristics of a Protein Group for the entire analysis.
@@ -169,7 +166,7 @@ class ProteinGroup(object):
 
     Example: ProteinGroup(number_id = 1)
     """
-    __slots__ = ['proteins','number_id','q_value']
+    __slots__ = ('proteins','number_id','q_value')
 
     def __init__(self,number_id):
         self.proteins = []

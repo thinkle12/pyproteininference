@@ -55,9 +55,6 @@ class TestMissingDatabasePipeline(TestCase):
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = in_silico_digest.InSilicoDigest(database_path=None,parameter_file_object=protein_inference_parameters, id_splitting=True)
 
-        # TODO dont test digest... test this in a separate test
-
-
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###

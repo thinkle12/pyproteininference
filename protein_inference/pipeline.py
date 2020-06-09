@@ -44,7 +44,11 @@ class ProteinInferencePipeline(object):
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = protein_inference.in_silico_digest.InSilicoDigest(database_path=self.database_file,
                                                  parameter_file_object=protein_inference_parameters, id_splitting=self.id_splitting)
-        digest.digest_fasta_database()
+        if self.database_file:
+            self.logger.info("Running In Silico Database Digest on file {}".format(self.database_file))
+            digest.digest_fasta_database()
+        else:
+            self.logger.warning("No Database File provided, Skipping database digest and only taking protein-peptide mapping from the input files.")
 
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###

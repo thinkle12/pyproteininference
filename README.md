@@ -210,6 +210,11 @@ optional arguments:
                         search
   -y FILE, --yaml_params FILE
                         Provide a Protein Inference Yaml Parameter File
+  -p BOOL, --append_alt BOOL
+                        Whether or not to add alternative proteins to each PSM
+                        from the database digest. If False the peptide/protein
+                        mapping will be taken from the input files only.If
+                        this is left blank it will default to True
 ```
 
 The following flags are necessary:

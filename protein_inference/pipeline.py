@@ -5,7 +5,7 @@ import protein_inference
 
 class ProteinInferencePipeline(object):
 
-    def __init__(self, parameter_file, database_file, target_files=None, decoy_files=None, combined_files=None, target_directory=None, decoy_directory=None, combined_directory=None, output_directory=None, id_splitting=False):
+    def __init__(self, parameter_file, database_file=None, target_files=None, decoy_files=None, combined_files=None, target_directory=None, decoy_directory=None, combined_directory=None, output_directory=None, id_splitting=False, append_alt_from_db=False):
 
 
         self.logger = logging.getLogger("protein_inference.pipeline.ProteinInferencePipeline")
@@ -24,6 +24,7 @@ class ProteinInferencePipeline(object):
         self.combined_directory = combined_directory
         self.output_directory = output_directory
         self.id_splitting = id_splitting
+        self.append_alt_from_db = append_alt_from_db
         self.data = None
         self.digest = None
 
@@ -43,7 +44,11 @@ class ProteinInferencePipeline(object):
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = protein_inference.in_silico_digest.InSilicoDigest(database_path=self.database_file,
                                                  parameter_file_object=protein_inference_parameters, id_splitting=self.id_splitting)
-        digest.digest_fasta_database()
+        if self.database_file:
+            self.logger.info("Running In Silico Database Digest on file {}".format(self.database_file))
+            digest.digest_fasta_database()
+        else:
+            self.logger.warning("No Database File provided, Skipping database digest and only taking protein-peptide mapping from the input files.")
 
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
@@ -52,7 +57,8 @@ class ProteinInferencePipeline(object):
                                                                    decoy_file=self.decoy_files,
                                                                    combined_files=self.combined_files,
                                                                    parameter_file_object=protein_inference_parameters,
-                                                                   digest_class=digest)
+                                                                   digest_class=digest,
+                                                                   append_alt_from_db=self.append_alt_from_db)
         pep_and_prot_data.read_psms()
 
         ### STEP 4: Initiate the datastore class ###

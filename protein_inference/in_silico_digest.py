@@ -40,10 +40,9 @@ class InSilicoDigest(Digest):
 
 
     def __init__(self,database_path,parameter_file_object,id_splitting=True):
-        self.peptide_to_protein_dictionary = None
-        self.protein_to_peptide_dictionary = None
-        self.protein_peptide_complete_set = None
-        self.swiss_prot_protein_set = None
+        self.peptide_to_protein_dictionary = {}
+        self.protein_to_peptide_dictionary = {}
+        self.swiss_prot_protein_set = set()
         self.database_path = database_path
         self.num_miss_cleavs = parameter_file_object.missed_cleavages
         self.id_splitting = id_splitting
@@ -254,10 +253,9 @@ class PyteomicsDigest(Digest):
 
 
     def __init__(self, database_path, parameter_file_object, id_splitting=True):
-        self.peptide_to_protein_dictionary = None
-        self.protein_to_peptide_dictionary = None
-        self.protein_peptide_complete_set = None
-        self.swiss_prot_protein_set = None
+        self.peptide_to_protein_dictionary = {}
+        self.protein_to_peptide_dictionary = {}
+        self.swiss_prot_protein_set = set()
         self.database_path = database_path
         self.num_miss_cleavs = parameter_file_object.missed_cleavages
         self.id_splitting = id_splitting

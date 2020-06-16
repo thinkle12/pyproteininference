@@ -186,9 +186,15 @@ class DataStore(object):
 
         logger.info('Restricting PSM data')
 
+        # Override parameter file variables based on the input data
+        parameter_file_object.override_q_restrict(data_class = self)
+        parameter_file_object.override_pep_restrict(data_class = self)
+        parameter_file_object.override_custom_restrict(data_class = self)
+
         peptide_length = parameter_file_object.restrict_peptide_length
         posterior_error_prob_threshold = parameter_file_object.restrict_pep
         q_value_threshold = parameter_file_object.restrict_q
+        custom_threshold = parameter_file_object.restrict_custom
 
         main_psm_data = self.main_data_form
         logger.info('Length of main data: ' + str(len(self.main_data_form)))
@@ -235,14 +241,14 @@ class DataStore(object):
                         q_value_threshold):
                     restricted_data.append(psms)
 
-                    # Restrict qvalue only
+        # Restrict qvalue only
         if not peptide_length and not posterior_error_prob_threshold and q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:
                 if psms.qvalue < float(q_value_threshold):
                     restricted_data.append(psms)
 
-                    # Restrict posterior error probability only
+        # Restrict posterior error probability only
         if not peptide_length and posterior_error_prob_threshold and not q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:
@@ -252,6 +258,21 @@ class DataStore(object):
         # Restrict nothing... (only PEP gets restricted - takes everything less than 1)
         if not peptide_length and not posterior_error_prob_threshold and not q_value_threshold:
             restricted_data = main_psm_data
+
+        if custom_threshold:
+            custom_restricted = []
+            if parameter_file_object.score_type == "multiplicative":
+                for psms in restricted_data:
+                    if psms.custom_score <= custom_threshold:
+                        custom_restricted.append(psms)
+
+            if parameter_file_object.score_type == "additive":
+                for psms in restricted_data:
+                    if psms.custom_score >= custom_threshold:
+                        custom_restricted.append(psms)
+
+            restricted_data = custom_restricted
+
 
         self.main_data_restricted = restricted_data
 
@@ -937,3 +958,40 @@ class DataStore(object):
 
         return(identifiers_sorted)
 
+    def input_has_q(self):
+        len_q = len([x.qvalue for x in self.main_data_form if x.qvalue])
+        len_all = len(self.main_data_form)
+        if len_q==len_all:
+            status = True
+            self.logger.info("Input has Q value; Can restrict by Q value")
+        else:
+            status = False
+            self.logger.warning("Input does not have Q value; Cannot restrict by Q value")
+
+        return(status)
+
+
+    def input_has_pep(self):
+        len_pep = len([x.pepvalue for x in self.main_data_form if x.pepvalue])
+        len_all = len(self.main_data_form)
+        if len_pep == len_all:
+            status = True
+            self.logger.info("Input has Pep value; Can restrict by Pep value")
+        else:
+            status = False
+            self.logger.warning("Input does not have Pep value; Cannot restrict by Pep value")
+
+        return (status)
+
+    def input_has_custom(self):
+        len_c = len([x.custom_score for x in self.main_data_form if x.custom_score])
+        len_all = len(self.main_data_form)
+        if len_c == len_all:
+            status = True
+            self.logger.info("Input has Custom value; Can restrict by Custom value")
+
+        else:
+            status = False
+            self.logger.warning("Input does not have Custom value; Cannot restrict by Custom value")
+
+        return(status)

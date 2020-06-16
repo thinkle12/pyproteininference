@@ -42,7 +42,9 @@ class ProteinInferenceParameter(object):
         self.tag = None
         self.score = None
         self.max_identifiers_peptide_centric = None
-        self.logger = getLogger('protein_inference.parameters.ProteinInferenceParameter.validate_parameters')
+        self.logger = getLogger(
+            "protein_inference.parameters.ProteinInferenceParameter.validate_parameters"
+        )
 
         self.convert_to_object()
 
@@ -50,8 +52,6 @@ class ProteinInferenceParameter(object):
             self.validate_parameters()
 
         self._override_inference_none()
-
-
 
     def convert_to_object(self):
         """Function that takes a Percolator parameter file and converts it into a PercolatorParameter object
@@ -64,33 +64,53 @@ class ProteinInferenceParameter(object):
 
         """
         if self.yaml_param_filepath:
-            with open(self.yaml_param_filepath, 'r') as stream:
+            with open(self.yaml_param_filepath, "r") as stream:
                 yaml_params = yaml.load(stream, Loader=yaml.Loader)
 
-            self.digest_type = yaml_params['parameters']['digest']['digest_type']
-            self.export = yaml_params['parameters']['general']['export']
-            self.fdr = yaml_params['parameters']['general']['fdr']
-            self.glpk_path = yaml_params['parameters']['parsimony']['glpk_path']
-            self.missed_cleavages = yaml_params['parameters']['digest']['missed_cleavages']
-            self.picker = yaml_params['parameters']['general']['picker']
-            self.restrict_pep = yaml_params['parameters']['data_restriction']['pep_restriction']
-            self.restrict_peptide_length = yaml_params['parameters']['data_restriction']['peptide_length_restriction']
-            self.restrict_q = yaml_params['parameters']['data_restriction']['q_value_restriction']
-            self.restrict_custom = yaml_params['parameters']['data_restriction']['custom_restriction']
-            self.score_method = yaml_params['parameters']['score']['score_method']
-            self.score_type = yaml_params['parameters']['score']['score_type']
-            self.decoy_symbol = yaml_params['parameters']['identifiers']['decoy_symbol']
-            self.isoform_symbol = yaml_params['parameters']['identifiers']['isoform_symbol']
-            self.reviewed_identifier_symbol = yaml_params['parameters']['identifiers']['reviewed_identifier_symbol']
-            self.inference_type = yaml_params['parameters']['inference']['inference_type']
-            self.tag = yaml_params['parameters']['general']["tag"]
-            self.score = yaml_params["parameters"]['score']["score"]
-            self.grouping_type = yaml_params["parameters"]['inference']["grouping_type"]
-            self.max_identifiers_peptide_centric = yaml_params["parameters"]['peptide_centric']["max_identifiers"]
-            self.lp_solver = yaml_params["parameters"]['parsimony']["lp_solver"]
+            self.digest_type = yaml_params["parameters"]["digest"]["digest_type"]
+            self.export = yaml_params["parameters"]["general"]["export"]
+            self.fdr = yaml_params["parameters"]["general"]["fdr"]
+            self.glpk_path = yaml_params["parameters"]["parsimony"]["glpk_path"]
+            self.missed_cleavages = yaml_params["parameters"]["digest"][
+                "missed_cleavages"
+            ]
+            self.picker = yaml_params["parameters"]["general"]["picker"]
+            self.restrict_pep = yaml_params["parameters"]["data_restriction"][
+                "pep_restriction"
+            ]
+            self.restrict_peptide_length = yaml_params["parameters"][
+                "data_restriction"
+            ]["peptide_length_restriction"]
+            self.restrict_q = yaml_params["parameters"]["data_restriction"][
+                "q_value_restriction"
+            ]
+            self.restrict_custom = yaml_params["parameters"]["data_restriction"][
+                "custom_restriction"
+            ]
+            self.score_method = yaml_params["parameters"]["score"]["score_method"]
+            self.score_type = yaml_params["parameters"]["score"]["score_type"]
+            self.decoy_symbol = yaml_params["parameters"]["identifiers"]["decoy_symbol"]
+            self.isoform_symbol = yaml_params["parameters"]["identifiers"][
+                "isoform_symbol"
+            ]
+            self.reviewed_identifier_symbol = yaml_params["parameters"]["identifiers"][
+                "reviewed_identifier_symbol"
+            ]
+            self.inference_type = yaml_params["parameters"]["inference"][
+                "inference_type"
+            ]
+            self.tag = yaml_params["parameters"]["general"]["tag"]
+            self.score = yaml_params["parameters"]["score"]["score"]
+            self.grouping_type = yaml_params["parameters"]["inference"]["grouping_type"]
+            self.max_identifiers_peptide_centric = yaml_params["parameters"][
+                "peptide_centric"
+            ]["max_identifiers"]
+            self.lp_solver = yaml_params["parameters"]["parsimony"]["lp_solver"]
 
         else:
-            self.logger.warning("Yaml parameter file not found, parameters set to default")
+            self.logger.warning(
+                "Yaml parameter file not found, parameters set to default"
+            )
             self.digest_type = "trypsin"
             self.export = "q_value"
             self.fdr = 0.01
@@ -127,80 +147,128 @@ class ProteinInferenceParameter(object):
         self._validate_max_id()
         self._validate_lp_solver()
 
-
     def _validate_digest_type(self):
         # Make sure we have a valid digest type
         if self.digest_type in InSilicoDigest.LIST_OF_DIGEST_TYPES:
             self.logger.info("Using digest type '{}'".format(self.digest_type))
         else:
-            raise ValueError("Digest Type '{}' not supported, please use one of the following enyzme digestions: '{}'".format(self.digest_type, ", ".join(InSilicoDigest.LIST_OF_DIGEST_TYPES)))
+            raise ValueError(
+                "Digest Type '{}' not supported, please use one of the following enyzme digestions: '{}'".format(
+                    self.digest_type, ", ".join(InSilicoDigest.LIST_OF_DIGEST_TYPES)
+                )
+            )
 
     def _validate_export_type(self):
         # Make sure we have a valid export type
         if self.export in Export.EXPORT_TYPES:
             self.logger.info("Using Export type '{}'".format(self.export))
         else:
-            raise ValueError("Export Type '{}' not supported, please use one of the following export types: '{}'".format(self.export, ", ".join(Export.EXPORT_TYPES)))
+            raise ValueError(
+                "Export Type '{}' not supported, please use one of the following export types: '{}'".format(
+                    self.export, ", ".join(Export.EXPORT_TYPES)
+                )
+            )
         pass
 
     def _validate_floats(self):
         # Validate that FDR, cleavages, and restrict values are all floats and or ints if they need to be
 
         try:
-            if 0<=float(self.fdr)<=1:
+            if 0 <= float(self.fdr) <= 1:
                 self.logger.info("FDR Input {}".format(self.fdr))
             else:
-                raise ValueError("FDR must be a decimal between 0 and 1, FDR provided: {}".format(self.fdr))
+                raise ValueError(
+                    "FDR must be a decimal between 0 and 1, FDR provided: {}".format(
+                        self.fdr
+                    )
+                )
         except ValueError:
-            raise ValueError("FDR must be a decimal between 0 and 1, FDR provided: {}".format(self.fdr))
+            raise ValueError(
+                "FDR must be a decimal between 0 and 1, FDR provided: {}".format(
+                    self.fdr
+                )
+            )
 
         try:
-            if 0<=float(self.restrict_pep)<=1:
+            if 0 <= float(self.restrict_pep) <= 1:
                 self.logger.info("PEP restriction {}".format(self.restrict_pep))
             else:
-                raise ValueError("PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(self.restrict_pep))
+                raise ValueError(
+                    "PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(
+                        self.restrict_pep
+                    )
+                )
         except ValueError:
-            if not self.restrict_pep or self.restrict_pep=="None":
-                self.restrict_pep=None
+            if not self.restrict_pep or self.restrict_pep == "None":
+                self.restrict_pep = None
             else:
-                raise ValueError("PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(
-                    self.restrict_pep))
+                raise ValueError(
+                    "PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(
+                        self.restrict_pep
+                    )
+                )
 
         try:
-            if 0<=float(self.restrict_q)<=1:
+            if 0 <= float(self.restrict_q) <= 1:
                 self.logger.info("Q Value restriction {}".format(self.restrict_q))
 
             else:
-                raise ValueError("Q Value restriction must be a decimal between 0 and 1, Q Value restriction provided: {}".format(self.restrict_q))
+                raise ValueError(
+                    "Q Value restriction must be a decimal between 0 and 1, Q Value restriction provided: {}".format(
+                        self.restrict_q
+                    )
+                )
         except ValueError:
-            if not self.restrict_q or self.restrict_q=="None":
-                self.restrict_q=None
+            if not self.restrict_q or self.restrict_q == "None":
+                self.restrict_q = None
             else:
                 raise ValueError(
                     "Q Value restriction must be a decimal between 0 and 1, Q Value restriction provided: {}".format(
-                        self.restrict_q))
+                        self.restrict_q
+                    )
+                )
 
         try:
             int(self.missed_cleavages)
         except ValueError:
-            raise ValueError("Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
-                self.missed_cleavages))
-        if type(self.missed_cleavages)==int:
-            self.logger.info("Missed Cleavages selected: {}".format(self.missed_cleavages))
+            raise ValueError(
+                "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
+                    self.missed_cleavages
+                )
+            )
+        if type(self.missed_cleavages) == int:
+            self.logger.info(
+                "Missed Cleavages selected: {}".format(self.missed_cleavages)
+            )
 
         else:
-            raise ValueError("Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(self.missed_cleavages))
+            raise ValueError(
+                "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
+                    self.missed_cleavages
+                )
+            )
 
         if self.restrict_peptide_length:
             try:
                 int(self.restrict_peptide_length)
             except ValueError:
-                raise ValueError("Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
-                    self.restrict_peptide_length))
-            if type(self.restrict_peptide_length)==int:
-                self.logger.info("Peptide Length Restriction: Len {}".format(self.restrict_peptide_length))
+                raise ValueError(
+                    "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
+                        self.restrict_peptide_length
+                    )
+                )
+            if type(self.restrict_peptide_length) == int:
+                self.logger.info(
+                    "Peptide Length Restriction: Len {}".format(
+                        self.restrict_peptide_length
+                    )
+                )
             else:
-                raise ValueError("Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(self.restrict_peptide_length))
+                raise ValueError(
+                    "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
+                        self.restrict_peptide_length
+                    )
+                )
         else:
             self.logger.info("Not Restricting by Peptide Length")
 
@@ -208,59 +276,85 @@ class ProteinInferenceParameter(object):
             if float(self.restrict_custom):
                 self.logger.info("Custom restriction {}".format(self.restrict_custom))
             else:
-                raise ValueError("Custom restriction must be a numeric: {}".format(self.restrict_custom))
+                raise ValueError(
+                    "Custom restriction must be a numeric: {}".format(
+                        self.restrict_custom
+                    )
+                )
         except ValueError:
-            if not self.restrict_custom or self.restrict_custom=="None":
-                self.restrict_custom=None
+            if not self.restrict_custom or self.restrict_custom == "None":
+                self.restrict_custom = None
             else:
-                raise ValueError("Custom restriction must be a number, Custom restriction provided: {}".format(
-                    self.restrict_custom))
+                raise ValueError(
+                    "Custom restriction must be a number, Custom restriction provided: {}".format(
+                        self.restrict_custom
+                    )
+                )
 
     def _validate_bools(self):
         # Make sure picker is a bool
-        if type(self.picker)==bool:
+        if type(self.picker) == bool:
             if self.picker:
                 self.logger.info("Parameters loaded to run Picker")
             else:
                 self.logger.info("Parameters loaded to NOT run Picker")
         else:
-            raise ValueError("Picker Variable must be set to True or False, Picker Variable provided: {}".format(self.picker))
-
+            raise ValueError(
+                "Picker Variable must be set to True or False, Picker Variable provided: {}".format(
+                    self.picker
+                )
+            )
 
     def _validate_score_method(self):
         # Make sure we have the score method defined in code to use...
         if self.score_method in Score.SCORE_METHODS:
             self.logger.info("Using Score Method '{}'".format(self.score_method))
         else:
-            raise ValueError("Score Method '{}' not supported, "
-                             "please use one of the following Score Methods: '{}'".format(self.score_method, ", ".join(Score.SCORE_METHODS)))
+            raise ValueError(
+                "Score Method '{}' not supported, "
+                "please use one of the following Score Methods: '{}'".format(
+                    self.score_method, ", ".join(Score.SCORE_METHODS)
+                )
+            )
         pass
-
 
     def _validate_score_type(self):
         # Make sure score type is multiplicative or additive
         if self.score_type in Score.SCORE_TYPES:
             self.logger.info("Using Score Type '{}'".format(self.score_type))
         else:
-            raise ValueError("Score Type '{}' not supported, "
-                             "please use one of the following Score Types: '{}'".format(self.score_type,
-                                                                                      ", ".join(Score.SCORE_TYPES)))
+            raise ValueError(
+                "Score Type '{}' not supported, "
+                "please use one of the following Score Types: '{}'".format(
+                    self.score_type, ", ".join(Score.SCORE_TYPES)
+                )
+            )
         pass
 
     def _validate_score_combination(self):
         # Check to see if combination of score (column), method(multiplicative log, additive), and score type (multiplicative/additive) is possible...
         # This will be super custom
 
-        if self.score_type=="additive" and self.score_method!= "additive":
-            raise ValueError("If Score type is 'additive' (Higher PSM score is better) then you must use the 'additive' score method")
+        if self.score_type == "additive" and self.score_method != "additive":
+            raise ValueError(
+                "If Score type is 'additive' (Higher PSM score is better) then you must use the 'additive' score method"
+            )
 
-        elif self.score_type=="multiplicative" and self.score_method=="additive":
-            raise ValueError("If Score type is 'multiplicative' (Lower PSM score is better) "
-                             "then you must NOT use the 'additive' score method please "
-                             "select one of the following score methods: {}".format(", ".join([x for x in Score.SCORE_METHODS if x!="additive"])))
+        elif self.score_type == "multiplicative" and self.score_method == "additive":
+            raise ValueError(
+                "If Score type is 'multiplicative' (Lower PSM score is better) "
+                "then you must NOT use the 'additive' score method please "
+                "select one of the following score methods: {}".format(
+                    ", ".join([x for x in Score.SCORE_METHODS if x != "additive"])
+                )
+            )
 
         else:
-            self.logger.info("Combination of Score Type: '{}' and Score Method: '{}' is Ok".format(self.score_type, self.score_method))
+            self.logger.info(
+                "Combination of Score Type: '{}' and Score Method: '{}' is Ok".format(
+                    self.score_type, self.score_method
+                )
+            )
 
     def _validate_inference_type(self):
         # Check if its parsimony, exclusion, inclusion, none
@@ -269,7 +363,9 @@ class ProteinInferenceParameter(object):
         else:
             raise ValueError(
                 "Inferece Type '{}' not supported, please use one of the following Inferece Types: '{}'".format(
-                    self.inference_type, ", ".join(Inference.INFERENCE_TYPES)))
+                    self.inference_type, ", ".join(Inference.INFERENCE_TYPES)
+                )
+            )
 
     def _validate_grouping_type(self):
         # Check if its parsimony, exclusion, inclusion, none
@@ -278,14 +374,24 @@ class ProteinInferenceParameter(object):
         else:
             raise ValueError(
                 "Grouping Type '{}' not supported, please use one of the following Grouping Types: '{}'".format(
-                    self.grouping_type, ", ".join(Inference.GROUPING_TYPES)))
+                    self.grouping_type, ", ".join(Inference.GROUPING_TYPES)
+                )
+            )
 
     def _validate_max_id(self):
         # Check if max_identifiers_peptide_centric param is an INT
-        if type(self.max_identifiers_peptide_centric)==int:
-            self.logger.info("Max Number of Indentifiers for Peptide Centric Inference: '{}'".format(self.max_identifiers_peptide_centric))
+        if type(self.max_identifiers_peptide_centric) == int:
+            self.logger.info(
+                "Max Number of Indentifiers for Peptide Centric Inference: '{}'".format(
+                    self.max_identifiers_peptide_centric
+                )
+            )
         else:
-            raise ValueError("Max Number of Indentifiers for Peptide Centric Inference must be an integer, provided value: {}".format(self.max_identifiers_peptide_centric))
+            raise ValueError(
+                "Max Number of Indentifiers for Peptide Centric Inference must be an integer, provided value: {}".format(
+                    self.max_identifiers_peptide_centric
+                )
+            )
 
     def _validate_lp_solver(self):
         # Check if its pulp or glpk
@@ -294,11 +400,13 @@ class ProteinInferenceParameter(object):
         else:
             raise ValueError(
                 "LP Solver '{}' not supported, please use one of the following LP Solvers: '{}'".format(
-                    self.lp_solver, ", ".join(Inference.LP_SOLVERS)))
+                    self.lp_solver, ", ".join(Inference.LP_SOLVERS)
+                )
+            )
 
     def _override_inference_none(self):
         if self.inference_type in ["None", "none", None]:
-            self.inference_type="none"
+            self.inference_type = "none"
 
     def override_q_restrict(self, data_class):
         data_has_q = data_class.input_has_q()
@@ -306,7 +414,9 @@ class ProteinInferenceParameter(object):
             pass
         else:
             if self.restrict_q:
-                self.logger.warning("No Q values found in the input data, overriding parameters to not filter on Q value")
+                self.logger.warning(
+                    "No Q values found in the input data, overriding parameters to not filter on Q value"
+                )
                 self.restrict_q = None
 
     def override_pep_restrict(self, data_class):
@@ -315,7 +425,9 @@ class ProteinInferenceParameter(object):
             pass
         else:
             if self.restrict_pep:
-                self.logger.warning("No Pep values found in the input data, overriding parameters to not filter on Pep value")
+                self.logger.warning(
+                    "No Pep values found in the input data, overriding parameters to not filter on Pep value"
+                )
                 self.restrict_pep = None
 
     def override_custom_restrict(self, data_class):
@@ -324,6 +436,7 @@ class ProteinInferenceParameter(object):
             pass
         else:
             if self.restrict_custom:
-                self.logger.warning("No Custom values found in the input data, overriding parameters to not filter on Custom value")
+                self.logger.warning(
+                    "No Custom values found in the input data, overriding parameters to not filter on Custom value"
+                )
                 self.restrict_custom = None
-

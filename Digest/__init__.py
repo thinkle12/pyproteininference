@@ -6,4 +6,4 @@ Created on Fri Dec  1 11:07:11 2017
 @author: hinklet
 """
 
-#from InSilicoDigest import inscilicodigest
+# from InSilicoDigest import inscilicodigest

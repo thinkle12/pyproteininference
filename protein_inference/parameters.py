@@ -213,7 +213,7 @@ class ProteinInferenceParameter(object):
             if not self.restrict_custom or self.restrict_custom=="None":
                 self.restrict_custom=None
             else:
-                raise ValueError("PEP restriction must be a number, Custom restriction provided: {}".format(
+                raise ValueError("Custom restriction must be a number, Custom restriction provided: {}".format(
                     self.restrict_custom))
 
     def _validate_bools(self):

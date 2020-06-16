@@ -88,6 +88,7 @@ class TestLoadParsimonyGlpkWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.grouping_type, 'shared_peptides')
         self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
         self.assertEqual(protein_inference_parameters.lp_solver, 'glpk')
+        self.assertEqual(protein_inference_parameters.restrict_custom, None)
 
 
 

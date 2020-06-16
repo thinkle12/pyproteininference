@@ -204,6 +204,18 @@ class ProteinInferenceParameter(object):
         else:
             self.logger.info("Not Restricting by Peptide Length")
 
+        try:
+            if float(self.restrict_custom):
+                self.logger.info("Custom restriction {}".format(self.restrict_custom))
+            else:
+                raise ValueError("Custom restriction must be a numeric: {}".format(self.restrict_custom))
+        except ValueError:
+            if not self.restrict_custom or self.restrict_custom=="None":
+                self.restrict_custom=None
+            else:
+                raise ValueError("PEP restriction must be a number, Custom restriction provided: {}".format(
+                    self.restrict_custom))
+
     def _validate_bools(self):
         # Make sure picker is a bool
         if type(self.picker)==bool:

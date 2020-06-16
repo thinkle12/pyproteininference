@@ -186,9 +186,15 @@ class DataStore(object):
 
         logger.info('Restricting PSM data')
 
+        # Override parameter file variables based on the input data
+        parameter_file_object.override_q_restrict(data_class = self)
+        parameter_file_object.override_pep_restrict(data_class = self)
+        parameter_file_object.override_custom_restrict(data_class = self)
+
         peptide_length = parameter_file_object.restrict_peptide_length
         posterior_error_prob_threshold = parameter_file_object.restrict_pep
         q_value_threshold = parameter_file_object.restrict_q
+        custom_threshold = parameter_file_object.restrict_custom
 
         main_psm_data = self.main_data_form
         logger.info('Length of main data: ' + str(len(self.main_data_form)))
@@ -211,7 +217,7 @@ class DataStore(object):
                 if len(psms.stripped_peptide) >= peptide_length:
                     restricted_data.append(psms)
 
-        # Restrict peptide length, posterior error probability, and qvalue
+        # Restrict peptide length, posterior error probability, and qvaluere
         if peptide_length and posterior_error_prob_threshold and q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:
@@ -235,14 +241,14 @@ class DataStore(object):
                         q_value_threshold):
                     restricted_data.append(psms)
 
-                    # Restrict qvalue only
+        # Restrict qvalue only
         if not peptide_length and not posterior_error_prob_threshold and q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:
                 if psms.qvalue < float(q_value_threshold):
                     restricted_data.append(psms)
 
-                    # Restrict posterior error probability only
+        # Restrict posterior error probability only
         if not peptide_length and posterior_error_prob_threshold and not q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:

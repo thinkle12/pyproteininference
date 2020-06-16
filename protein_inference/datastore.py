@@ -937,3 +937,40 @@ class DataStore(object):
 
         return(identifiers_sorted)
 
+    def input_has_q(self):
+        len_q = len([x.qvalue for x in self.main_data_form if x.qvalue])
+        len_all = len(self.main_data_form)
+        if len_q==len_all:
+            status = True
+            self.logger.info("Input has Q value; Can restrict by Q value")
+        else:
+            status = False
+            self.logger.warning("Input does not have Q value; Cannot restrict by Q value")
+
+        return(status)
+
+
+    def input_has_pep(self):
+        len_pep = len([x.pepvalue for x in self.main_data_form if x.pepvalue])
+        len_all = len(self.main_data_form)
+        if len_pep == len_all:
+            status = True
+            self.logger.info("Input has Pep value; Can restrict by Pep value")
+        else:
+            status = False
+            self.logger.warning("Input does not have Pep value; Cannot restrict by Pep value")
+
+        return (status)
+
+    def input_has_custom(self):
+        len_c = len([x.custom_score for x in self.main_data_form if x.custom_score])
+        len_all = len(self.main_data_form)
+        if len_c == len_all:
+            status = True
+            self.logger.info("Input has Custom value; Can restrict by Custom value")
+
+        else:
+            status = False
+            self.logger.warning("Input does not have Custom value; Cannot restrict by Custom value")
+
+        return(status)

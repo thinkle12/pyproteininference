@@ -12,43 +12,51 @@ import sys
 from functools import reduce
 from logging import getLogger
 
+
 class Score(object):
     """
     Parent Score class for all scoring subset classes
     """
 
-    SCORE_METHODS = ['best_peptide_per_protein', 'iterative_downweighted_log',
-                     'multiplicative_log', 'downweighted_multiplicative_log',
-                     'downweighted_version2', 'top_two_combined', 'geometric_mean',
-                     'additive']
+    SCORE_METHODS = [
+        "best_peptide_per_protein",
+        "iterative_downweighted_log",
+        "multiplicative_log",
+        "downweighted_multiplicative_log",
+        "downweighted_version2",
+        "top_two_combined",
+        "geometric_mean",
+        "additive",
+    ]
 
-    SCORE_TYPES = ['multiplicative', 'additive']
-    
-    def __init__(self,data_class):
+    SCORE_TYPES = ["multiplicative", "additive"]
+
+    def __init__(self, data_class):
         if data_class.scoring_input:
             self.pre_score_data = data_class.scoring_input
         else:
-            raise ValueError('scoring input not found in data class - Please run PreScoreQValue of PreScorePepValue from DataStore to run any scoring type')
+            raise ValueError(
+                "scoring input not found in data class - Please run PreScoreQValue of PreScorePepValue from DataStore to run any scoring type"
+            )
         self.data_class = data_class
-        
+
     def score_psms(self, score_method="multiplicative_log"):
-        if score_method == 'best_peptide_per_protein':
+        if score_method == "best_peptide_per_protein":
             self.best_peptide_per_protein()
-        if score_method == 'iterative_downweighted_log':
+        if score_method == "iterative_downweighted_log":
             self.iterative_down_weighted_log()
-        if score_method == 'multiplicative_log':
+        if score_method == "multiplicative_log":
             self.multiplicative_log()
-        if score_method == 'downweighted_multiplicative_log':
+        if score_method == "downweighted_multiplicative_log":
             self.down_weighted_multiplicative_log()
-        if score_method == 'downweighted_version2':
+        if score_method == "downweighted_version2":
             self.down_weighted_v2()
-        if score_method == 'top_two_combined':
+        if score_method == "top_two_combined":
             self.top_two_combied()
-        if score_method == 'geometric_mean':
+        if score_method == "geometric_mean":
             self.geometric_mean_log()
         if score_method == "additive":
             self.additive()
-
 
     def best_peptide_per_protein(self):
         """
@@ -61,11 +69,11 @@ class Score(object):
 
         Where data is a DataStore Object
          """
-        logger = getLogger('protein_inference.scoring.Score.best_peptide_per_protein')
+        logger = getLogger("protein_inference.scoring.Score.best_peptide_per_protein")
 
         all_scores = []
 
-        logger.info('Scoring Proteins with BPPP')
+        logger.info("Scoring Proteins with BPPP")
         for protein in self.pre_score_data:
             val_list = protein.get_psm_scores()
             score = min([float(x) for x in val_list])
@@ -76,10 +84,10 @@ class Score(object):
         # Here do ascending sorting because a lower pep or q value is better
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=False)
 
-        self.data_class.score_method = 'best_peptide_per_protein'
-        self.data_class.short_score_method = 'bppp'
+        self.data_class.score_method = "best_peptide_per_protein"
+        self.data_class.short_score_method = "bppp"
         self.data_class.scored_proteins = all_scores
-        
+
     def fishers_method(self):
         """
         Class scores all proteins from data_class.scoring_input.
@@ -91,10 +99,10 @@ class Score(object):
 
         Where data is a DataStore Object
          """
-        logger = getLogger('protein_inference.scoring.Score.fishers_method')
+        logger = getLogger("protein_inference.scoring.Score.fishers_method")
 
         all_scores = []
-        logger.info('Scoring Proteins with fishers method')
+        logger.info("Scoring Proteins with fishers method")
         for protein in self.pre_score_data:
             val_list = protein.get_psm_scores()
             score = -2 * sum([math.log(x) for x in val_list])
@@ -104,8 +112,8 @@ class Score(object):
             all_scores.append(protein)
         # Here reverse the sorting to descending because a higher score is better
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
-        self.data_class.score_method = 'fishers_method'
-        self.data_class.short_score_method = 'fm'
+        self.data_class.score_method = "fishers_method"
+        self.data_class.short_score_method = "fm"
         self.data_class.scored_proteins = all_scores
 
     def multiplicative_log(self):
@@ -120,13 +128,13 @@ class Score(object):
 
         Where data is a DataStore Object
          """
-        logger = getLogger('protein_inference.scoring.Score.multiplicative_log')
+        logger = getLogger("protein_inference.scoring.Score.multiplicative_log")
 
         # Instead of making all_scores a list... make it a generator??
 
         all_scores = []
-        logger.info('Scoring Proteins with Multiplicative Log Method')
-        logger.info('Using Generators')
+        logger.info("Scoring Proteins with Multiplicative Log Method")
+        logger.info("Using Generators")
         for protein in self.pre_score_data:
             # We create a generator of val_list...
             val_list = protein.get_psm_scores()
@@ -142,8 +150,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = 'multiplicative_log'
-        self.data_class.short_score_method = 'ml'
+        self.data_class.score_method = "multiplicative_log"
+        self.data_class.short_score_method = "ml"
         self.data_class.scored_proteins = all_scores
 
     def down_weighted_multiplicative_log(self):
@@ -160,7 +168,9 @@ class Score(object):
 
         Where data is a DataStore Object
          """
-        logger = getLogger('protein_inference.scoring.Score.down_weighted_multiplicative_log')
+        logger = getLogger(
+            "protein_inference.scoring.Score.down_weighted_multiplicative_log"
+        )
 
         score_list = []
         for proteins in self.pre_score_data:
@@ -170,7 +180,7 @@ class Score(object):
         score_mean = numpy.mean(score_list)
 
         all_scores = []
-        logger.info('Scoring Proteins with DWML method')
+        logger.info("Scoring Proteins with DWML method")
         for protein in self.pre_score_data:
             val_list = protein.get_psm_scores()
             # Divide by the score mean raised to the length of the number of unique peptides for the protein
@@ -186,8 +196,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = 'downweighted_multiplicative_log'
-        self.data_class.short_score_method = 'dwml'
+        self.data_class.score_method = "downweighted_multiplicative_log"
+        self.data_class.short_score_method = "dwml"
         self.data_class.scored_proteins = all_scores
 
     def top_two_combied(self):
@@ -203,11 +213,10 @@ class Score(object):
 
         Where data is a DataStore Object
          """
-        logger = getLogger('protein_inference.scoring.Score.top_two_combied')
-
+        logger = getLogger("protein_inference.scoring.Score.top_two_combied")
 
         all_scores = []
-        logger.info('Scoring Proteins with Top Two Method')
+        logger.info("Scoring Proteins with Top Two Method")
         for protein in self.pre_score_data:
             val_list = protein.get_psm_scores()
 
@@ -225,8 +234,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = 'top_two_combined'
-        self.data_class.short_score_method = 'ttc'
+        self.data_class.score_method = "top_two_combined"
+        self.data_class.short_score_method = "ttc"
         self.data_class.scored_proteins = all_scores
 
     def down_weighted_v2(self):
@@ -245,10 +254,10 @@ class Score(object):
 
         Where data is a DataStore Object
          """
-        logger = getLogger('protein_inference.scoring.Score.down_weighted_v2')
+        logger = getLogger("protein_inference.scoring.Score.down_weighted_v2")
 
         all_scores = []
-        logger.info('Scoring Proteins with down weighted v2 method')
+        logger.info("Scoring Proteins with down weighted v2 method")
         for protein in self.pre_score_data:
             val_list = protein.get_psm_scores()
 
@@ -265,11 +274,10 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = 'downweighted_version2'
-        self.data_class.short_score_method = 'dw2'
+        self.data_class.score_method = "downweighted_version2"
+        self.data_class.short_score_method = "dw2"
         self.data_class.scored_proteins = all_scores
 
-    
     def iterative_down_weighted_log(self):
         """
         Function scores all proteins from data_class.scoring_input.
@@ -286,10 +294,12 @@ class Score(object):
 
         Where data is a DataStore Object
          """
-        logger = getLogger('protein_inference.scoring.Score.iterative_down_weighted_log')
+        logger = getLogger(
+            "protein_inference.scoring.Score.iterative_down_weighted_log"
+        )
 
         all_scores = []
-        logger.info('Scoring Proteins with IDWL method')
+        logger.info("Scoring Proteins with IDWL method")
         for protein in self.pre_score_data:
             val_list = protein.get_psm_scores()
 
@@ -299,9 +309,9 @@ class Score(object):
             # Basically, each score for a protein will provide less and less weight iteratively
             val_list = [val_list[x] * (float(1 + x)) for x in range(len(val_list))]
             # val_list = [val_list[x]**(1/float(1+(float(x)/10))) for x in range(len(val_list))]
-            combine = reduce(lambda x, y: x*y, val_list)
-            if combine==0:
-                combine=sys.float_info.min
+            combine = reduce(lambda x, y: x * y, val_list)
+            if combine == 0:
+                combine = sys.float_info.min
             score = -math.log(combine)
             protein.score = score
 
@@ -311,10 +321,9 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = 'iterative_downweighted_log'
-        self.data_class.short_score_method = 'idwl'
+        self.data_class.score_method = "iterative_downweighted_log"
+        self.data_class.short_score_method = "idwl"
         self.data_class.scored_proteins = all_scores
-
 
     def geometric_mean_log(self):
         """
@@ -329,10 +338,10 @@ class Score(object):
 
         Where data is a DataStore Object
          """
-        logger = getLogger('protein_inference.scoring.Score.geometric_mean_log')
+        logger = getLogger("protein_inference.scoring.Score.geometric_mean_log")
 
         all_scores = []
-        logger.info('Scoring Proteins. with GML method')
+        logger.info("Scoring Proteins. with GML method")
         for protein in self.pre_score_data:
             psm_scores = protein.get_psm_scores()
             val_list = []
@@ -341,7 +350,7 @@ class Score(object):
                 combine = reduce(lambda x, y: x * y, val_list)
                 if combine == 0:
                     combine = sys.float_info.min
-                pre_log_score = combine**(1/float(len(val_list)))
+                pre_log_score = combine ** (1 / float(len(val_list)))
             score = -math.log(pre_log_score)
 
             protein.score = score
@@ -350,18 +359,18 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = 'geometric_mean_log'
-        self.data_class.short_score_method = 'gm'
+        self.data_class.score_method = "geometric_mean_log"
+        self.data_class.short_score_method = "gm"
         self.data_class.scored_proteins = all_scores
 
     def iterative_down_weighted_v2(self):
         """
         The following class is an experimental class essentially used for future development of potential scoring schemes
         """
-        logger = getLogger('protein_inference.scoring.Score.iterative_down_weighted_v2')
+        logger = getLogger("protein_inference.scoring.Score.iterative_down_weighted_v2")
 
         all_scores = []
-        logger.info('Scoring Proteins with iterative down weighted v2 method')
+        logger.info("Scoring Proteins with iterative down weighted v2 method")
         for protein in self.pre_score_data:
             val_list = protein.get_psm_scores()
 
@@ -378,19 +387,18 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = 'iterative_downweighting2'
-        self.data_class.short_score_method = 'idw2'
+        self.data_class.score_method = "iterative_downweighting2"
+        self.data_class.short_score_method = "idw2"
         self.data_class.scored_proteins = all_scores
-
 
     def additive(self):
         """
         The following class is an experimental class essentially used for future development of potential scoring schemes
         """
-        logger = getLogger('protein_inference.scoring.Score.additive')
+        logger = getLogger("protein_inference.scoring.Score.additive")
 
         all_scores = []
-        logger.info('Scoring Proteins with additive method')
+        logger.info("Scoring Proteins with additive method")
         for protein in self.pre_score_data:
             val_list = protein.get_psm_scores()
 
@@ -403,6 +411,6 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = 'additive'
-        self.data_class.short_score_method = 'add'
+        self.data_class.score_method = "additive"
+        self.data_class.short_score_method = "add"
         self.data_class.scored_proteins = all_scores

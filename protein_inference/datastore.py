@@ -259,6 +259,21 @@ class DataStore(object):
         if not peptide_length and not posterior_error_prob_threshold and not q_value_threshold:
             restricted_data = main_psm_data
 
+        if custom_threshold:
+            custom_restricted = []
+            if parameter_file_object.score_type == "multiplicative":
+                for psms in restricted_data:
+                    if psms.custom_score <= custom_threshold:
+                        custom_restricted.append(psms)
+
+            if parameter_file_object.score_type == "additive":
+                for psms in restricted_data:
+                    if psms.custom_score >= custom_threshold:
+                        custom_restricted.append(psms)
+
+            restricted_data = custom_restricted
+
+
         self.main_data_restricted = restricted_data
 
         logger.info('Length of restricted data: ' + str(len(restricted_data)))

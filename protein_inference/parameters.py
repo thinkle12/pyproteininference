@@ -204,6 +204,18 @@ class ProteinInferenceParameter(object):
         else:
             self.logger.info("Not Restricting by Peptide Length")
 
+        try:
+            if float(self.restrict_custom):
+                self.logger.info("Custom restriction {}".format(self.restrict_custom))
+            else:
+                raise ValueError("Custom restriction must be a numeric: {}".format(self.restrict_custom))
+        except ValueError:
+            if not self.restrict_custom or self.restrict_custom=="None":
+                self.restrict_custom=None
+            else:
+                raise ValueError("Custom restriction must be a number, Custom restriction provided: {}".format(
+                    self.restrict_custom))
+
     def _validate_bools(self):
         # Make sure picker is a bool
         if type(self.picker)==bool:
@@ -287,3 +299,31 @@ class ProteinInferenceParameter(object):
     def _override_inference_none(self):
         if self.inference_type in ["None", "none", None]:
             self.inference_type="none"
+
+    def override_q_restrict(self, data_class):
+        data_has_q = data_class.input_has_q()
+        if data_has_q:
+            pass
+        else:
+            if self.restrict_q:
+                self.logger.warning("No Q values found in the input data, overriding parameters to not filter on Q value")
+                self.restrict_q = None
+
+    def override_pep_restrict(self, data_class):
+        data_has_pep = data_class.input_has_pep()
+        if data_has_pep:
+            pass
+        else:
+            if self.restrict_pep:
+                self.logger.warning("No Pep values found in the input data, overriding parameters to not filter on Pep value")
+                self.restrict_pep = None
+
+    def override_custom_restrict(self, data_class):
+        data_has_custom = data_class.input_has_custom()
+        if data_has_custom:
+            pass
+        else:
+            if self.restrict_custom:
+                self.logger.warning("No Custom values found in the input data, overriding parameters to not filter on Custom value")
+                self.restrict_custom = None
+

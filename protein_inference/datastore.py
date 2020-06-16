@@ -217,7 +217,7 @@ class DataStore(object):
                 if len(psms.stripped_peptide) >= peptide_length:
                     restricted_data.append(psms)
 
-        # Restrict peptide length, posterior error probability, and qvaluere
+        # Restrict peptide length, posterior error probability, and qvalue
         if peptide_length and posterior_error_prob_threshold and q_value_threshold:
             restricted_data = []
             for psms in main_psm_data:

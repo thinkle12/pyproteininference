@@ -38,8 +38,8 @@ class DataStore(object):
         self.main_data_restricted = None
         self.qvalues = None
         self.pepvalues = None
-        self.scored_proteins = None
-        self.grouped_scored_proteins = None
+        self.scored_proteins = []
+        self.grouped_scored_proteins = []
         self.fdr_restricted_grouped_scored_proteins = None
         self.scoring_input = None
         self.picked_proteins_scored = None
@@ -53,8 +53,14 @@ class DataStore(object):
         self.score = None
         self.score_method = None
         self.picked_proteins_removed = None
-        self.protein_group_objects = None
+        self.protein_group_objects = []
         self.qvality_output = None
+        self.peptide_protein_dictionary = None
+        self.non_subset_proteins = None
+        self.counted_peptides = None
+        self.fdr_list = None
+        self.entrapment_proteins = None
+        self.restricted_proteins = None
         self.decoy_symbol = self.parameter_file_object.decoy_symbol
         self.digest_class = digest_class
         self.SCORE_MAPPER = {

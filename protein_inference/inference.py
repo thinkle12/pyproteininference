@@ -10,11 +10,9 @@ import os
 import subprocess
 import collections
 
-###Should I just import ProteinInference instead?
 from protein_inference import datastore
 from protein_inference.physical import ProteinGroup
 from protein_inference.physical import Psm
-import re
 from collections import OrderedDict
 from logging import getLogger
 import pulp
@@ -38,7 +36,7 @@ class Inference(object):
     LP_SOLVERS = ["pulp", "glpk", "none", "None", None]
 
     def __init__(self):
-        None
+        pass
 
     def run_inference(self, data_class, digest_class):
 
@@ -249,8 +247,6 @@ class Inference(object):
         sp_protein_set = set(digest_class.swiss_prot_protein_set)
 
         prot_pep_dict = data_class.protein_to_peptide_dictionary()
-
-        score_dd = collections.defaultdict(list)
 
         # Here we create group ID's
         group_id = 0
@@ -674,6 +670,8 @@ class Inclusion(Inference):
         self.scored_data = self.data_class.get_protein_data()
         self.data_class = data_class
         self.lead_protein_set = None
+        self.list_of_prots_not_in_db = None
+        self.list_of_peps_not_in_db = None
 
     def infer_proteins(self):
 
@@ -730,6 +728,8 @@ class Exclusion(Inference):
         self.scored_data = self.data_class.get_protein_data()
         self.data_class = data_class
         self.lead_protein_set = None
+        self.list_of_prots_not_in_db = None
+        self.list_of_peps_not_in_db = None
 
     def infer_proteins(self):
         logger = getLogger("protein_inference.inference.Exclusion.infer_proteins")

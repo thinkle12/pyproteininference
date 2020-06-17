@@ -731,7 +731,7 @@ class Exclusion(Inference):
         self.list_of_prots_not_in_db = None
         self.list_of_peps_not_in_db = None
 
-def infer_proteins(self):
+    def infer_proteins(self):
         logger = getLogger("protein_inference.inference.Exclusion.infer_proteins")
 
         group_dict = self._group_by_peptides(

@@ -290,7 +290,7 @@ class PercolatorReader(Reader):
                 except KeyError:
                     current_alt_proteins = []
                     self.logger.warning(
-                        "Peptide {} was not found in the supplied DB".format(
+                        "Peptide {} was not found in the supplied DB with the following proteins {}".format(
                             current_peptide, ";".join(p.possible_proteins)
                         )
                     )
@@ -426,7 +426,7 @@ class ProteologicPostSearchReader(Reader):
                 except KeyError:
                     current_alt_proteins = []
                     self.logger.warning(
-                        "Peptide {} was not found in the supplied DB".format(
+                        "Peptide {} was not found in the supplied DB with the following proteins {}".format(
                             current_peptide, ";".join(p.possible_proteins)
                         )
                     )

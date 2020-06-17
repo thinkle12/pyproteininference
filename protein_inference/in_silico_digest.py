@@ -6,7 +6,6 @@ Created on Thu Nov 30 14:25:00 2017
 @author: hinklet
 """
 
-import collections
 from Bio import SeqIO
 from pyteomics import fasta, parser
 from logging import getLogger

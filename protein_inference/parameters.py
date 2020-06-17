@@ -316,7 +316,6 @@ class ProteinInferenceParameter(object):
                     self.score_method, ", ".join(Score.SCORE_METHODS)
                 )
             )
-        pass
 
     def _validate_score_type(self):
         # Make sure score type is multiplicative or additive
@@ -329,7 +328,6 @@ class ProteinInferenceParameter(object):
                     self.score_type, ", ".join(Score.SCORE_TYPES)
                 )
             )
-        pass
 
     def _validate_score_combination(self):
         # Check to see if combination of score (column), method(multiplicative log, additive), and score type (multiplicative/additive) is possible...

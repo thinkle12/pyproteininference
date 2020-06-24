@@ -16,9 +16,6 @@ from protein_inference.parameters import ProteinInferenceParameter
 import os
 import logging
 
-TEST_DATABASE = resource_filename(
-    "protein_inference", "../tests/data/test_database.fasta"
-)
 TARGET_FILE = resource_filename(
     "protein_inference", "../tests/data/test_perc_data_target.txt"
 )
@@ -26,7 +23,7 @@ DECOY_FILE = resource_filename(
     "protein_inference", "../tests/data/test_perc_data_decoy.txt"
 )
 PARAMETER_FILE = resource_filename(
-    "protein_inference", "../tests/data/test_params_exclusion.yaml"
+    "protein_inference", "../tests/data/test_params_inclusion.yaml"
 )
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('protein_inference', '../tests/output/')
@@ -36,23 +33,23 @@ for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
 
 LEAD_OUTPUT_FILE = resource_filename(
     "protein_inference",
-    "../tests/output/leads/test_exclusion_q_value_leads_ml_posterior_error_prob.csv",
+    "../tests/output/leads/test_inclusion_q_value_leads_ml_posterior_error_prob.csv",
 )
 ALL_OUTPUT_FILE = resource_filename(
     "protein_inference",
-    "../tests/output/all/test_exclusion_q_value_all_ml_posterior_error_prob.csv",
+    "../tests/output/all/test_inclusion_q_value_all_ml_posterior_error_prob.csv",
 )
 PEPTIDE_OUTPUT_FILE = resource_filename(
     "protein_inference",
-    "../tests/output/peptides/test_exclusion_q_value_leads_peptides_ml_posterior_error_prob.csv",
+    "../tests/output/peptides/test_inclusion_q_value_leads_peptides_ml_posterior_error_prob.csv",
 )
 PSM_OUTPUT_FILE = resource_filename(
     "protein_inference",
-    "../tests/output/psms/test_exclusion_q_value_leads_psms_ml_posterior_error_prob.csv",
+    "../tests/output/psms/test_inclusion_q_value_leads_psms_ml_posterior_error_prob.csv",
 )
 PSM_ID_OUTPUT_FILE = resource_filename(
     "protein_inference",
-    "../tests/output/psm_ids/test_exclusion_q_value_leads_psm_ids_ml_posterior_error_prob.csv",
+    "../tests/output/psm_ids/test_inclusion_q_value_leads_psm_ids_ml_posterior_error_prob.csv",
 )
 
 IDENTIFIER_INDEX = 0
@@ -62,11 +59,13 @@ GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("protein_inference.tests.test_003_exclusion_pipeline.py")
+logger = logging.getLogger(
+    "protein_inference.tests.test_017_test_missing_database_pipeline"
+)
 
 
-class TestLoadExclusionWorkflow(TestCase):
-    def test_workflow_exclusion(self):
+class TestMissingDatabasePipeline(TestCase):
+    def test_missing_database_pipeline(self):
 
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
@@ -75,43 +74,14 @@ class TestLoadExclusionWorkflow(TestCase):
             yaml_param_filepath=PARAMETER_FILE
         )
 
-        # TODO check to make sure proper parameters are being loaded
-        self.assertEqual(protein_inference_parameters.digest_type, "trypsin")
-        self.assertEqual(protein_inference_parameters.export, "q_value")
-        self.assertEqual(protein_inference_parameters.fdr, 0.01)
-        self.assertEqual(protein_inference_parameters.glpk_path, "None")
-        self.assertEqual(protein_inference_parameters.missed_cleavages, 3)
-        self.assertEqual(protein_inference_parameters.picker, True)
-        self.assertEqual(protein_inference_parameters.restrict_pep, 0.9)
-        self.assertEqual(protein_inference_parameters.restrict_peptide_length, 7)
-        self.assertEqual(protein_inference_parameters.restrict_q, 0.9)
-        self.assertEqual(
-            protein_inference_parameters.score_method, "multiplicative_log"
-        )
-        self.assertEqual(protein_inference_parameters.score, "posterior_error_prob")
-        self.assertEqual(protein_inference_parameters.score_type, "multiplicative")
-        self.assertEqual(protein_inference_parameters.decoy_symbol, "##")
-        self.assertEqual(protein_inference_parameters.isoform_symbol, "-")
-        self.assertEqual(protein_inference_parameters.reviewed_identifier_symbol, "sp|")
-        self.assertEqual(protein_inference_parameters.inference_type, "exclusion")
-        self.assertEqual(protein_inference_parameters.tag, "test_exclusion")
-        self.assertEqual(protein_inference_parameters.grouping_type, "None")
-        self.assertEqual(
-            protein_inference_parameters.max_identifiers_peptide_centric, 5
-        )
-        self.assertEqual(protein_inference_parameters.lp_solver, "None")
-
         ### STEP 2: Start with running an In Silico Digestion ###
         ### STEP 2: Start with running an In Silico Digestion ###
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = in_silico_digest.InSilicoDigest(
-            database_path=TEST_DATABASE,
+            database_path=None,
             parameter_file_object=protein_inference_parameters,
             id_splitting=True,
         )
-        digest.digest_fasta_database()
-
-        # TODO dont test digest... test this in a separate test
 
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
@@ -121,10 +91,101 @@ class TestLoadExclusionWorkflow(TestCase):
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
             digest_class=digest,
+            append_alt_from_db=False,
         )
         pep_and_prot_data.read_psms()
 
+        # Make sure we still have 27 psms even without a database digest
         self.assertEqual(len(pep_and_prot_data.psms), 27)
+
+        self.assertDictEqual(
+            digest.peptide_to_protein_dictionary,
+            {
+                "CQTCGYKFHEHCSTK": {"RAF1_HUMAN|P04049"},
+                "WHGDVAVKILK": {"RAF1_HUMAN|P04049"},
+                "QTAQGMDYLHAK": {
+                    "ARAF_HUMAN|P10398",
+                    "BRAF_HUMAN|P15056",
+                    "RAF1_HUMAN|P04049",
+                },
+                "SASEPSLHR": {"ARAF_HUMAN|P10398", "RAF1_HUMAN|P04049"},
+                "VFLPNKQR": {"BRAF_HUMAN|P15056", "RAF1_HUMAN|P04049"},
+                "GYLSPDLSK": {"ARAF_HUMAN|P10398", "BRAF_HUMAN|P15056"},
+                "TFFSLAFCDFCLK": {"ARAF_HUMAN|P10398"},
+                "FQMFQLIDIAR": {"RAF1_HUMAN|P04049"},
+                "LYLLTQMPH": {"TCAF1_HUMAN|Q9Y4C2"},
+                "YCWMSTGLYIPGR": {"TCAF1_HUMAN|Q9Y4C2"},
+                "AEGGGGGGRPGAPAAGDGK": {"HNRPU_HUMAN|Q00839", "B3KX72_HUMAN|B3KX72"},
+                "LQAALDDEEAGGRPAMEPGNGSLDLGGDSAGR": {
+                    "Q96BA7_HUMAN|Q96BA7",
+                    "HNRPU_HUMAN|Q00839",
+                    "B3KX72_HUMAN|B3KX72",
+                },
+                "CGVEVTQTK": {"RPOC_SHIF8|Q0SY12"},
+                "IALASPDMIR": {"RPOC_SHIF8|Q0SY12"},
+                "MGAEAIQALLK": {"RPOC_SHIF8|Q0SY12"},
+                "RVDYSGR": {"RPOC_SHIF8|Q0SY12"},
+                "VIDIWAAANDR": {"RPOC_SHIF8|Q0SY12"},
+                "EGLNVLQYFISTHGAR": {"RPOC_SHIF8|Q0SY12"},
+                "FATSDLNDLYR": {"RPOC_SHIF8|Q0SY12"},
+                "IPQESGGTK": {"RPOC_SHIF8|Q0SY12"},
+                "LIPAGTGYAYHQDR": {"RPOC_SHIF8|Q0SY12"},
+                "NTLLHEQWCDLLEENSVDAVK": {"RPOC_SHIF8|Q0SY12"},
+                "VADLFEAR": {"RPOC_SHIF8|Q0SY12"},
+                "VTAEDVLKPGTADILVPR": {"RPOC_SHIF8|Q0SY12"},
+                "HPMQTLLYLK": {"##TCAF1_HUMAN|##Q9Y4C2"},
+                "MEPTPVPFCGAK": {"##TCAF2_HUMAN|##A6NFQ2"},
+                "TVVNVR": {"RAF1_HUMAN|P04049"},
+            },
+        )
+
+        self.assertDictEqual(
+            digest.protein_to_peptide_dictionary,
+            {
+                "RAF1_HUMAN|P04049": {
+                    "CQTCGYKFHEHCSTK",
+                    "FQMFQLIDIAR",
+                    "SASEPSLHR",
+                    "VFLPNKQR",
+                    "TVVNVR",
+                    "WHGDVAVKILK",
+                    "QTAQGMDYLHAK",
+                },
+                "ARAF_HUMAN|P10398": {
+                    "GYLSPDLSK",
+                    "SASEPSLHR",
+                    "TFFSLAFCDFCLK",
+                    "QTAQGMDYLHAK",
+                },
+                "BRAF_HUMAN|P15056": {"GYLSPDLSK", "VFLPNKQR", "QTAQGMDYLHAK"},
+                "TCAF1_HUMAN|Q9Y4C2": {"LYLLTQMPH", "YCWMSTGLYIPGR"},
+                "HNRPU_HUMAN|Q00839": {
+                    "LQAALDDEEAGGRPAMEPGNGSLDLGGDSAGR",
+                    "AEGGGGGGRPGAPAAGDGK",
+                },
+                "B3KX72_HUMAN|B3KX72": {
+                    "LQAALDDEEAGGRPAMEPGNGSLDLGGDSAGR",
+                    "AEGGGGGGRPGAPAAGDGK",
+                },
+                "Q96BA7_HUMAN|Q96BA7": {"LQAALDDEEAGGRPAMEPGNGSLDLGGDSAGR"},
+                "RPOC_SHIF8|Q0SY12": {
+                    "RVDYSGR",
+                    "VIDIWAAANDR",
+                    "IPQESGGTK",
+                    "EGLNVLQYFISTHGAR",
+                    "LIPAGTGYAYHQDR",
+                    "IALASPDMIR",
+                    "FATSDLNDLYR",
+                    "VADLFEAR",
+                    "VTAEDVLKPGTADILVPR",
+                    "CGVEVTQTK",
+                    "NTLLHEQWCDLLEENSVDAVK",
+                    "MGAEAIQALLK",
+                },
+                "##TCAF1_HUMAN|##Q9Y4C2": {"HPMQTLLYLK"},
+                "##TCAF2_HUMAN|##A6NFQ2": {"MEPTPVPFCGAK"},
+            },
+        )
 
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
@@ -132,6 +193,10 @@ class TestLoadExclusionWorkflow(TestCase):
         data = protein_inference.datastore.DataStore(
             pep_and_prot_data, digest_class=digest
         )
+
+        # Make sure we have data in the data dictionaries.
+        self.assertEqual(len(data.peptide_to_protein_dictionary().keys()), 27)
+        self.assertEqual(len(data.protein_to_peptide_dictionary().keys()), 10)
 
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
@@ -407,7 +472,7 @@ class TestLoadExclusionWorkflow(TestCase):
 
         pipeline = protein_inference.pipeline.ProteinInferencePipeline(
             parameter_file=PARAMETER_FILE,
-            database_file=TEST_DATABASE,
+            database_file=None,
             target_files=TARGET_FILE,
             decoy_files=DECOY_FILE,
             combined_files=None,

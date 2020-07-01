@@ -52,7 +52,7 @@ Please go through each section below. The sections highlight how to set everythi
 
 ## Yaml Parameter File Outline
 The Yaml Parameter File is the central location for all configurations for a given Protein Inference run and are summarized below:
-For a sample parameter file please see the `parameters/` folder.
+For a sample parameter file please see the `parameters/` or `tests/data/` folder and look for `.yaml` files.
 ## General:
 | Parameter | Description |Type|
 |---|---|---|
@@ -161,6 +161,7 @@ There are two ways to run Py Protein Inference:
 
  1. [__Command Line__](#running-via-command-line)
  2. [__Within Python__](#running-within-python)
+ 3. [__Docker__](#running-with-docker)
 ### Running Via Command Line
 Upon proper installation of the package, the command line tool should be installed and _should_ be available from any location on the system.
 The command line tool can be called as follows:
@@ -263,6 +264,26 @@ pipeline = ProteinInferencePipeline(parameter_file=yaml_params,
 # Calling .execute() will initiate the pipeline with the given data                                                               
 pipeline.execute()
 ```
+
+### Running with Docker
+Py Protein Inference can also be ran via a docker container. To access the docker container requires:
+1. An Installation of Docker locally
+2. Ability to pull the docker image from docker hub
+
+Pulling the image from docker hub:
+`docker pull pyproteininference:0.4.3`
+
+It is recommended to pull the image with the highest version number. Currently this is 0.4.3.
+
+Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
+Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
+See the example below:
+`docker run -v /path/to/data/:/data pyproteininference:0.4.3 protein_inference_cli.py --help -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+
+#### Building the Docker image from source
+Use the following command from the root directory of the source code:
+Here we use version `0.4.3` and tag as that version as well.
+`docker build . -f Dockerfile -t pyproteininference:0.4.3 --build-arg VERSION=0.4.3`
 
 ## Extra Information
 

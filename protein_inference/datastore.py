@@ -6,59 +6,76 @@ from protein_inference.physical import Protein, Psm
 
 class DataStore(object):
     """
-    The following Class stores data at every step of the PI analysis.
+    The following Class serves as the data storage object for a protein inference analysis
     The class serves as a central point that is accessed at virtually every PI processing step
 
-    Example: protein_inference.datastore.DataStore(reader_class = reader)
 
-    Where reader is a Reader class object
+    Attributes:
+        main_data_form (list): List of unrestricted Psm objects
+        parameter_file_object (protein_inference.parameters.ProteinInferenceParameter): protein inference parameter object
+        restricted_peptides (list): List of non flaking peptide strings present in the current analysis
+        main_data_restricted (list): List of restricted :py:class:`protein_inference.physical.Psm` objects. Restriction is based on the parameter_file_object and the object is created by function :py:meth:`protein_inference.datastore.DataStore.restrict_psm_data`
+        scored_proteins (list): List of scored :py:class:`protein_inference.physical.Protein` objects. Output from scoring methods from :py:mod:`protein_inference.scoring`
+        grouped_scored_proteins (list): List of scored :py:class:`protein_inference.physical.Protein` objects that have been grouped and sorted. Output from :py:meth:`protein_inference.inference.Inference.run_inference` method
+        fdr_restricted_grouped_scored_proteins (list): grouped_scored_proteins that have been filtered based on FDR in parameter_file_object. Object created with :py:meth:`protein_inference.datastore.DataStore.set_based_fdr`
+        scoring_input (list): List of non-scored :py:class:`protein_inference.physical.Protein` objects. Output from :py:meth:`protein_inference.datastore.DataStore.create_scoring_input`
+        picked_proteins_scored (list): List of :py:class:`protein_inference.physical.Protein` objects that pass the protein picker algorithm (:py:meth:`protein_inference.datastore.DataStore.protein_picker`)
+        picked_proteins_removed (list): List of :py:class:`protein_inference.physical.Protein` objects that do not pass the protein picker algorithm (:py:meth:`protein_inference.datastore.DataStore.protein_picker`)
+        protein_peptide_dictionary (collections.defaultdict): Dictionary of protein strings (keys) that map to sets of peptide strings based on the peptides and proteins found in the search. Protein -> set(Peptides)
+        peptide_protein_dictionary (collections.defaultdict): Dictionary of peptide strings (keys) that map to sets of protein strings based on the peptides and proteins found in the search. Peptide -> set(Proteins)
+        high_low_better (str): Variable that indicates whether a higher or a lower protein score is better. This is necessary to sort Protein objects by score properly. Can either be "higher" or "lower"
+        score (str): Variable that indicates the :py:class:`protein_inference.physical.Psm` score being used in the analysis to generate :py:class:`protein_inference.physical.Protein` scores
+        protein_group_objects (list): List of scored :py:class:`protein_inference.physical.ProteinGroup` objects that have been grouped and sorted. Output from :py:meth:`protein_inference.inference.Inference.run_inference` method
+        decoy_symbol (str): String that is used to differentiate between decoy proteins and target proteins. Ex: "##"
+        digest_class (protein_inference.in_silico_digest.Digest): Digest object :py:class:`protein_inference.in_silico_digest.Digest`
+        SCORE_MAPPER (dict): Dictionary that maps potential scores in input files to internal score names
+        CUSTOM_SCORE_KEY (str): String that indicates a custom score is being used
+        logger (logger.logging): Logger object for logging
+
     """
 
     # Feed data_store instance the reader class...
     def __init__(self, reader_class, digest_class, validate=True):
+        """
+
+        Args:
+            reader_class (protein_inference.reader.Reader): Reader class object
+            digest_class (protein_inference.in_silico_digest.Digest): Digest object :py:class:`protein_infernece.in_silico_digest.Digest`
+            validate (bool): True/False to indicate if the input data should be validated
+
+        Example:
+            >>> protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+
+
+        """
         # If the reader class is from a percolator.psms then define main_data_form as reader_class.psms
         # main_data_form is the starting point for all other analyses
         if reader_class.psms:
-            self.main_data_form = reader_class.psms
+            self.main_data_form = reader_class.psms # Unrestricted PSM data
             self.restricted_peptides = [
                 x.non_flanking_peptide for x in self.main_data_form
             ]
 
-        self.parameter_file_object = reader_class.parameter_file_object
-        self.protein_info_dict = None
-        self.potential_proteins = None
-        self.main_data_restricted = None
-        self.qvalues = None
-        self.pepvalues = None
-        self.scored_proteins = []
-        self.grouped_scored_proteins = []
-        self.fdr_restricted_grouped_scored_proteins = None
-        self.scoring_input = None
-        self.picked_proteins_scored = None
+        self.parameter_file_object = reader_class.parameter_file_object # Parameter object
+        self.main_data_restricted = None # PSM data post restriction
+        self.scored_proteins = [] # List of scored Protein objects
+        self.grouped_scored_proteins = [] # List of sorted scored Protein objects
+        self.fdr_restricted_grouped_scored_proteins = None # List of Protein objects restricted by FDR
+        self.scoring_input = None # List of non scored Protein objects
+        self.picked_proteins_scored = None # List of Protein objects after picker algorithm
+        self.picked_proteins_removed = None # Protein objects removed via picker
         self.protein_peptide_dictionary = None
-        self.high_low_better = None
-        self.glpk_protein_number_dictionary = None
-        self.glpk_number_protein_dictionary = None
-        self.glpk_lead_proteins = None
-        self.in_silico_digest = None
-        self.max_youdens_data = None
-        self.score = None
-        self.score_method = None
-        self.picked_proteins_removed = None
-        self.protein_group_objects = []
-        self.qvality_output = None
         self.peptide_protein_dictionary = None
-        self.non_subset_proteins = None
-        self.counted_peptides = None
-        self.fdr_list = None
-        self.entrapment_proteins = None
-        self.restricted_proteins = None
-        self.decoy_symbol = self.parameter_file_object.decoy_symbol
-        self.digest_class = digest_class
+        self.high_low_better = None # Variable that indicates whether a higher or lower protein score is better
+        self.score = None # PSM Score used
+        self.protein_group_objects = [] # List of sorted protein group objects
+        self.decoy_symbol = self.parameter_file_object.decoy_symbol # Decoy symbol from parameter file
+        self.digest_class = digest_class # Digest class object
         self.SCORE_MAPPER = {
             "q_value": "qvalue",
             "pep_value": "pepvalue",
             "perc_score": "percscore",
+            "score": "percscore",
             "q-value": "qvalue",
             "posterior_error_prob": "pepvalue",
             "posterior_error_probability": "pepvalue",

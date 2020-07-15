@@ -138,7 +138,7 @@ class TestDataStoreMethods(TestCase):
         # Start datastore tests
 
         scored_identifiers = data.get_sorted_identifiers(
-            digest_class=digest, scored=True
+            scored=True
         )
         self.assertListEqual(
             scored_identifiers,
@@ -155,7 +155,7 @@ class TestDataStoreMethods(TestCase):
             ],
         )
 
-        identifiers = data.get_sorted_identifiers(digest_class=digest, scored=False)
+        identifiers = data.get_sorted_identifiers(scored=False)
         self.assertListEqual(
             identifiers,
             [

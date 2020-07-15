@@ -1,11 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Dec  4 14:15:15 2017
-
-@author: hinklet
-"""
-
 import collections
 from Bio import SeqIO
 from logging import getLogger

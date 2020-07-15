@@ -83,4 +83,3 @@ class CalculateQandPepValues(Qvality):
         qo = qo.split("\n")
         qvality_output = [x.split("\t") for x in qo]
         self.qvality_output = qvality_output
-        self.data_class.qvality_output = qvality_output

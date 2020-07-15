@@ -583,7 +583,7 @@ class DataStore(object):
         logger.info("Applying Exclusion Model")
 
         our_proteins_sorted = self.get_sorted_identifiers(
-            digest_class=digest_class, scored=False
+            scored=False
         )
 
         if protein_subset_type == "hard":

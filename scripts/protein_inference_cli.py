@@ -1,11 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec  5 16:16:17 2017
-
-@author: hinklet
-"""
-
 import protein_inference
 import argparse
 
@@ -101,6 +93,8 @@ parser.add_argument(
     default=True,
     type=bool,
 )
+
+# TODO Add if main
 args = parser.parse_args()
 
 

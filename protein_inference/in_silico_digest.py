@@ -1,11 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Nov 30 14:25:00 2017
-
-@author: hinklet
-"""
-
 from Bio import SeqIO
 from pyteomics import fasta, parser
 from logging import getLogger
@@ -13,6 +5,25 @@ import re
 
 
 class Digest(object):
+    """
+    The following class handles data storage of in silico digest data from a fasta formatted sequence database
+
+    Attributes:
+        peptide_to_protein_dictionary (dict): Dictionary of peptides (keys) to protein sets (values)
+        protein_to_peptide_dictionary (dict): Dictionary of proteins (keys) to peptide sets (values)
+        swiss_prot_protein_set (set): Set of reviewed proteins if they are able to be distinguished from unreviewed proteins
+        database_path (str): Path to fasta database file to digest
+        num_miss_cleavs (int): The number of missed cleavages to allow
+        id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
+            from the database protein strings as sometimes the database will contain those strings while the input data will have the strings split already.
+            Keep as False unless you know what you are doing
+        reviewed_identifier_symbol (str): Identifier that distinguishes reviewed from unreviewed proteins. Typically this is "sp|"
+        digest_type (str): can be any value in :attr:`LIST_OF_DIGEST_TYPES`
+        parameter_file_object (protein_inference.parameter.ProteinInferenceParameter): Protein Inference Parameter Object
+        logger (logger.logging): Logger object
+        max_peptide_length (int): Max peptide length to keep for analysis.
+
+    """
     LIST_OF_DIGEST_TYPES = ["trypsin", "lysc"]
     AA_LIST = [
         "A",
@@ -47,17 +58,33 @@ class Digest(object):
 
 class InSilicoDigest(Digest):
     """
-    The following class creates protein to peptide, peptide to protein, and swissprot protein mappings.
-    These mappings are essential for GlpkGrouper as an InSilicoDigest object is input for GlpkGrouper
-
-    The input is a fasta database, number of missed cleavages, as well as a digestion type ("trypsin").
-
-    Further digestion types need to be added in the future other than just trypsin
-
-    Exmample: Digest.insilicodigest.InSilicoDigest(database_path = "example_human_db.fasta", num_miss_cleavs=2, digest_type='trypsin')
+    This class represents a custom written in silico digest
     """
 
     def __init__(self, database_path, parameter_file_object, id_splitting=True):
+        """
+        The following class creates protein to peptide, peptide to protein, and reviewed protein mappings.
+
+        The input is a fasta database, a protein inference parameter object, and whether or not to split IDs.
+
+        Further digestion types need to be added in the future other than just trypsin/lysc
+
+        This class sets important attributes for the Digest object such as: :attr:`peptide_to_protein_dictionary`, :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
+
+        Args:
+            database_path (str): Path to fasta database file to digest
+            parameter_file_object (protein_inference.parameter.ProteinInferenceParameter): Protein Inference Parameter Object
+            id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
+                from the database protein strings as sometimes the database will contain those strings while the input data will have the strings split already.
+                Keep as False unless you know what you are doing
+
+        Example:
+            >>> digest = protein_inference.in_silico_digest.InSilicoDigest(
+            >>>     database_path=database_file,
+            >>>     parameter_file_object=protein_inference_parameters,
+            >>>     id_splitting=False,
+            >>> )
+        """
         self.peptide_to_protein_dictionary = {}
         self.protein_to_peptide_dictionary = {}
         self.swiss_prot_protein_set = set()
@@ -80,6 +107,18 @@ class InSilicoDigest(Digest):
         self.max_peptide_length = parameter_file_object.restrict_peptide_length
 
     def digest(self, proseq, miss_cleavage):
+        """
+        This method takes a protein sequence and a certain number of missed cleavages and performs
+        the in silico digestion based on pre-specified rules (digest_type)
+
+        Args:
+            proseq (str): Protein Sequence
+            miss_cleavage (int): Number of missed cleavages
+
+        Returns:
+            list: List of digested peptides
+
+        """
         peptides = []
         cut_sites = [0]
         if self.digest_type == "trypsin":
@@ -223,6 +262,22 @@ class InSilicoDigest(Digest):
         return peptides
 
     def digest_fasta_database(self):
+        """
+        This method reads in and prepares the fasta database for database digestion and assigns
+        the several attributes for the Digest object: :attr:`peptide_to_protein_dictionary`, :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
+
+        Returns:
+            None
+
+        Example:
+            >>> digest = protein_inference.in_silico_digest.InSilicoDigest(
+            >>>     database_path=database_file,
+            >>>     parameter_file_object=protein_inference_parameters,
+            >>>     id_splitting=False,
+            >>> )
+            >>> digest.digest_fasta_database()
+
+        """
         handle = SeqIO.parse(self.database_path, "fasta")
 
         self.logger.info("Starting Standard Digest...")
@@ -258,16 +313,33 @@ class InSilicoDigest(Digest):
 
 class PyteomicsDigest(Digest):
     """
-    The following class creates protein to peptide, peptide to protein, and swissprot protein mappings.
-    These mappings are essential for GlpkGrouper as an InSilicoDigest object is input for GlpkGrouper
-
-    The input is a fasta database, number of missed cleavages, as well as a digestion type ("trypsin").
-
-    Further digestion types need to be added in the future other than just trypsin
-
+    This class represents a pyteomics implementation of an in silico digest
     """
 
     def __init__(self, database_path, parameter_file_object, id_splitting=True):
+        """
+        The following class creates protein to peptide, peptide to protein, and reviewed protein mappings.
+
+        The input is a fasta database, a protein inference parameter object, and whether or not to split IDs.
+
+        Further digestion types need to be added in the future other than just trypsin/lysc
+
+        This class sets important attributes for the Digest object such as: :attr:`peptide_to_protein_dictionary`, :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
+
+        Args:
+            database_path (str): Path to fasta database file to digest
+            parameter_file_object (protein_inference.parameter.ProteinInferenceParameter): Protein Inference Parameter Object
+            id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
+                from the database protein strings as sometimes the database will contain those strings while the input data will have the strings split already.
+                Keep as False unless you know what you are doing
+
+        Example:
+            >>> digest = protein_inference.in_silico_digest.PyteomicsDigest(
+            >>>     database_path=database_file,
+            >>>     parameter_file_object=protein_inference_parameters,
+            >>>     id_splitting=False,
+            >>> )
+        """
         self.peptide_to_protein_dictionary = {}
         self.protein_to_peptide_dictionary = {}
         self.swiss_prot_protein_set = set()
@@ -289,6 +361,22 @@ class PyteomicsDigest(Digest):
         self.max_peptide_length = parameter_file_object.restrict_peptide_length
 
     def digest_fasta_database(self):
+        """
+        This method reads in and prepares the fasta database for database digestion and assigns
+        the several attributes for the Digest object: :attr:`peptide_to_protein_dictionary`, :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
+
+        Returns:
+            None
+
+        Example:
+            >>> digest = protein_inference.in_silico_digest.PyteomicsDigest(
+            >>>     database_path=database_file,
+            >>>     parameter_file_object=protein_inference_parameters,
+            >>>     id_splitting=False,
+            >>> )
+            >>> digest.digest_fasta_database()
+
+        """
         self.logger.info("Starting Pyteomics Digest...")
         pep_dict = {}
         prot_dict = {}

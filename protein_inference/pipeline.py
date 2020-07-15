@@ -5,6 +5,28 @@ import protein_inference
 
 
 class ProteinInferencePipeline(object):
+    """
+    This is the main Protein Inference class which houses the logic of the entire data analysis pipeline.
+    Logic is executed in the :py:meth:`protein_inference.pipeline.ProteinInferencePipeline.execute` method
+
+    Attributes:
+        parameter_file (str): Path to Protein Inference Yaml Parameter File
+        database_file (str): Path to Fasta database used in proteomics search
+        target_files (str/list): Path to Target Psm File (Or a list of files)
+        decoy_files (str/list): Path to Decoy Psm File (Or a list of files)
+        combined_files (str/list): Path to Combined Psm File (Or a list of files)
+        target_directory (str): Path to Directory containing Target Psm Files
+        decoy_directory (str): Path to Directory containing Decoy Psm Files
+        combined_directory (str): Path to Directory containing Combined Psm Files
+        output_directory (str): Path to Directory where output will be written
+        id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
+        append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
+        logger (logging.logger): Logger object for logging
+        data_class (protein_inference.datastore.DataStore): Data Class
+        digest_class (protein_inference.in_silico_digest.Digest): Digest Class
+
+    """
+
     def __init__(
         self,
         parameter_file,
@@ -19,7 +41,38 @@ class ProteinInferencePipeline(object):
         id_splitting=False,
         append_alt_from_db=False,
     ):
+        """
 
+        Args:
+            parameter_file (str): Path to Protein Inference Yaml Parameter File
+            database_file (str): Path to Fasta database used in proteomics search
+            target_files (str/list): Path to Target Psm File (Or a list of files)
+            decoy_files (str/list): Path to Decoy Psm File (Or a list of files)
+            combined_files (str/list): Path to Combined Psm File (Or a list of files)
+            target_directory (str): Path to Directory containing Target Psm Files
+            decoy_directory (str): Path to Directory containing Decoy Psm Files
+            combined_directory (str): Path to Directory containing Combined Psm Files
+            output_directory (str): Path to Directory where output will be written
+            id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
+            append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
+
+        Returns:
+            object:
+
+        Example:
+            >>> pipeline = protein_inference.pipeline.ProteinInferencePipeline(
+            >>>     parameter_file=yaml_params,
+            >>>     database_file=database,
+            >>>     target_files=target,
+            >>>     decoy_files=decoy,
+            >>>     combined_files=combined_files,
+            >>>     target_directory=target_directory,
+            >>>     decoy_directory=decoy_directory,
+            >>>     combined_directory=combined_directory,
+            >>>     output_directory=dir_name,
+            >>>     append_alt_from_db=append_alt,
+            >>> )
+        """
         self.logger = logging.getLogger(
             "protein_inference.pipeline.ProteinInferencePipeline"
         )
@@ -50,7 +103,41 @@ class ProteinInferencePipeline(object):
         self._set_output_directory()
 
     def execute(self):
+        """
+        This method is the main driver of the data analysis for the protein inference package.
+        This method calls other classes and methods that make up the protein inference pipeline
+        This includes but is not limited to:
 
+        This method sets the data :py:class:`protein_inference.datastore.DataStore` and digest :py:class:`protein_inference.in_silico_digest.Digest` objects.
+
+        1. Parameter file management
+        2. Digesting Fasta Database (Optional)
+        3. Reading in input Psm Files
+        4. Initializing the :py:class:`protein_inference.datastore.DataStore` object
+        5. Restricting Psms
+        6. Creating Protein objects/scoring input
+        7. Scoring Proteins
+        8. Running Protein Picker
+        9. Running Inference Methods/Grouping
+        10. Calculating Q Values
+        11. Exporting Proteins to filesystem
+
+        Example:
+            >>> pipeline = protein_inference.pipeline.ProteinInferencePipeline(
+            >>>     parameter_file=yaml_params,
+            >>>     database_file=database,
+            >>>     target_files=target,
+            >>>     decoy_files=decoy,
+            >>>     combined_files=combined_files,
+            >>>     target_directory=target_directory,
+            >>>     decoy_directory=decoy_directory,
+            >>>     combined_directory=combined_directory,
+            >>>     output_directory=dir_name,
+            >>>     append_alt_from_db=append_alt,
+            >>> )
+            >>> pipeline.execute()
+
+        """
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
@@ -81,7 +168,7 @@ class ProteinInferencePipeline(object):
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
-        pep_and_prot_data = protein_inference.reader.GenericReader(
+        reader = protein_inference.reader.GenericReader(
             target_file=self.target_files,
             decoy_file=self.decoy_files,
             combined_files=self.combined_files,
@@ -89,13 +176,13 @@ class ProteinInferencePipeline(object):
             digest_class=digest,
             append_alt_from_db=self.append_alt_from_db,
         )
-        pep_and_prot_data.read_psms()
+        reader.read_psms()
 
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
         data = protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest_class=digest
+            reader_class=reader, digest_class=digest
         )
 
         ### Step 5: Restrict the PSM data
@@ -132,8 +219,8 @@ class ProteinInferencePipeline(object):
         ### STEP 10: Apply Inference
         ### STEP 10: Apply Inference
         ### STEP 10: Apply Inference
-        inference = protein_inference.inference.Inference()
-        inference.run_inference(data_class=data, digest_class=digest)
+        inference = protein_inference.inference.Inference(data_class=data, digest_class=digest)
+        inference.run_inference()
 
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
@@ -162,7 +249,19 @@ class ProteinInferencePipeline(object):
         self.logger.info("Protein Inference Finished")
 
     def _validate_input(self):
+        """
+        Internal method that validates whether the proper input files have been defined.
 
+        One of the following combinations must be selected as input. No more and no less:
+
+        1. either one or multiple target_files and decoy_files,
+        2. either one or multiple combined_files that include target and decoy data
+        3. a directory that contains target files (target_directory) as well as a directory that contains decoy files (decoy_directory)
+        4. a directory that contains combined target/decoy files (combined_directory)
+
+        Raises:
+            ValueError: ValueError will occur if an improper combination of
+        """
         if (
             self.target_files
             and self.decoy_files
@@ -211,7 +310,10 @@ class ProteinInferencePipeline(object):
             )
 
     def _transform_directory_to_files(self):
-
+        """
+        This internal method takes files that are in the target_directory, decoy_directory, or combined_directory and
+        reassigns these files to the target_files, decoy_files, and combined_files to be used in :py:class:`protein_inference.reader.Reader` object
+        """
         if self.target_directory and self.decoy_directory:
             self.logger.info(
                 "Transforming target_directory and decoy_directory into files"
@@ -244,6 +346,10 @@ class ProteinInferencePipeline(object):
             self.combined_files = combined_files_full
 
     def _set_output_directory(self):
+        """
+        Internal method for setting the output directory.
+        If the output_directory argument is not supplied the output directory is set as the cwd
+        """
         if not self.output_directory:
             self.output_directory = os.getcwd()
         else:

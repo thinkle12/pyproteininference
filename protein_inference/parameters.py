@@ -9,18 +9,49 @@ from protein_inference.inference import Inference
 
 class ProteinInferenceParameter(object):
     """
-    Class that handles Percolator Parameters
+    Class that handles data retrieval, storage, and validation of Protein Inference Parameters
+
+    Attributes:
+        yaml_param_filepath (str): path to properly formatted parameter file specific to Protein Inference
+        digest_type (str): String that determines that type of in silico digestion for :py:class:`protein_inference.in_silico_digest.Digest`. Typically "trypsin"
+        export (str): String to indicate the export type for :py:class:`protein_inference.export.Export`. Typically this is "psms", "peptides", or "psm_ids"
+        fdr (float): Float to indicate FDR filtering
+        glpk_path (str): Path to local installation of glpsol if inference_type="parsimony" and lp_solver="glpk"
+        missed_cleavages (int): Integer to determine the number of missed cleavages in the database digestion :py:class:`protein_inference.in_silico_digest.Digest`
+        picker (bool): True/False on whether or not to run the protein picker algorithm :py:meth:protein_inference.datastore.DataStore.protein_picker`
+        restrict_pep (float): Float to restrict the posterior error probability values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_peptide_length (int): Float to restrict the peptide length values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_q (float): Float to restrict the q values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
+        score_method (str): String to determine the way in which Proteins are scored can be any of the SCORE_METHODS in :py:class:`protein_inference.scoring.Score`
+        score_type (str): String to determine the type of score that the PSM scores are (Additive or Multiplicative) can be any of the SCORE_TYPES in :py:class:`protein_inference.scoring.Score`
+        decoy_symbol (str): String to denote decoy proteins from target proteins. IE "##"
+        isoform_symbol (str): String to denote isoforms from regular proteins. IE "-". Can also be None
+        reviewed_identifier_symbol (str): String to denote a "Reviewed" Protein. Typically this is: "sp|" if using Uniprot Fasta database
+        inference_type (str): String to determine the inference procedure. Can be any value of INFERENCE_TYPES of :py:class:`protein_inference.inference.Inference` object
+        tag (str): String to be added to output files
+        score (str): String that indicates the PSM input score. The value should match the string in the input data of the score you want to use for PSM score. This score will be used in scoring methods here: :py:class:`protein_inference.scoring.Score`
+        grouping_type (str): String to determine the grouping procedure. Can be any value of GROUPING_TYPES of :py:class:`protein_inference.inference.Inference` object
+        max_identifiers_peptide_centric (int): Maximum number of identifiers to assign to a group when running peptide_centric inference. Typically this is 10 or 5.
+        lp_solver (str): The LP solver to use if inference_type="Parsimony". Can be any value in LP_SOLVERS in the :py:class:`protein_inference.inference.Inference` object
+        logger (logger.logging): Logger object
 
     """
 
     def __init__(self, yaml_param_filepath, validate=True):
-        """ Class to store percolator parameter information as an object
+        """ Class to store Protein Inference parameter information as an object
 
         Args:
-            yaml_param_filepath (str): path to properly formatted parameter file specific to percoaltor
+            yaml_param_filepath (str): path to properly formatted parameter file specific to Protein Inference
+            validate (bool): True/False on whether to validate the parameter file of interest
 
         Returns:
             None
+
+        Example:
+            >>> protein_inference.parameters.ProteinInferenceParameter(
+            >>>     yaml_param_filepath = "/path/to/protein_inference_params.yaml", validate=True
+            >>> )
+
 
         """
         self.yaml_param_filepath = yaml_param_filepath
@@ -41,7 +72,9 @@ class ProteinInferenceParameter(object):
         self.inference_type = None
         self.tag = None
         self.score = None
+        self.grouping_type = None
         self.max_identifiers_peptide_centric = None
+        self.lp_solver = None
         self.logger = getLogger(
             "protein_inference.parameters.ProteinInferenceParameter.validate_parameters"
         )
@@ -54,7 +87,13 @@ class ProteinInferenceParameter(object):
         self._override_inference_none()
 
     def convert_to_object(self):
-        """Function that takes a Percolator parameter file and converts it into a PercolatorParameter object
+        """
+        Function that takes a Protein Inference parameter file and converts it into a ProteinInferenceParameter object
+        by assigning all Attributes of the ProteinInferenceParameter object
+
+        If no parameter filepath is supplied the parameter object will be loaded with default params
+
+        This function gets ran in the initilization of the ProteinInferenceParameter object
 
         Args:
             None
@@ -134,6 +173,13 @@ class ProteinInferenceParameter(object):
             self.lp_solver = "pulp"
 
     def validate_parameters(self):
+        """
+        Class method to validate all parameters
+
+        Returns:
+            None
+
+        """
         # Run all of the parameter validations
         self._validate_digest_type()
         self._validate_export_type()
@@ -148,6 +194,9 @@ class ProteinInferenceParameter(object):
         self._validate_lp_solver()
 
     def _validate_digest_type(self):
+        """
+        Internal ProteinInferenceParameter method to validate the digest type
+        """
         # Make sure we have a valid digest type
         if self.digest_type in InSilicoDigest.LIST_OF_DIGEST_TYPES:
             self.logger.info("Using digest type '{}'".format(self.digest_type))
@@ -159,6 +208,9 @@ class ProteinInferenceParameter(object):
             )
 
     def _validate_export_type(self):
+        """
+        Internal ProteinInferenceParameter method to validate the export type
+        """
         # Make sure we have a valid export type
         if self.export in Export.EXPORT_TYPES:
             self.logger.info("Using Export type '{}'".format(self.export))
@@ -171,6 +223,9 @@ class ProteinInferenceParameter(object):
         pass
 
     def _validate_floats(self):
+        """
+        Internal ProteinInferenceParameter method to validate floats
+        """
         # Validate that FDR, cleavages, and restrict values are all floats and or ints if they need to be
 
         try:
@@ -292,6 +347,9 @@ class ProteinInferenceParameter(object):
                 )
 
     def _validate_bools(self):
+        """
+        Internal ProteinInferenceParameter method to validate the bools
+        """
         # Make sure picker is a bool
         if type(self.picker) == bool:
             if self.picker:
@@ -306,6 +364,9 @@ class ProteinInferenceParameter(object):
             )
 
     def _validate_score_method(self):
+        """
+        Internal ProteinInferenceParameter method to validate the score method
+        """
         # Make sure we have the score method defined in code to use...
         if self.score_method in Score.SCORE_METHODS:
             self.logger.info("Using Score Method '{}'".format(self.score_method))
@@ -318,6 +379,9 @@ class ProteinInferenceParameter(object):
             )
 
     def _validate_score_type(self):
+        """
+        Internal ProteinInferenceParameter method to validate the score type
+        """
         # Make sure score type is multiplicative or additive
         if self.score_type in Score.SCORE_TYPES:
             self.logger.info("Using Score Type '{}'".format(self.score_type))
@@ -330,6 +394,9 @@ class ProteinInferenceParameter(object):
             )
 
     def _validate_score_combination(self):
+        """
+        Internal ProteinInferenceParameter method to validate combination of score method and score type
+        """
         # Check to see if combination of score (column), method(multiplicative log, additive), and score type (multiplicative/additive) is possible...
         # This will be super custom
 
@@ -355,6 +422,9 @@ class ProteinInferenceParameter(object):
             )
 
     def _validate_inference_type(self):
+        """
+        Internal ProteinInferenceParameter method to validate the inference type
+        """
         # Check if its parsimony, exclusion, inclusion, none
         if self.inference_type in Inference.INFERENCE_TYPES:
             self.logger.info("Using inference type '{}'".format(self.inference_type))
@@ -366,6 +436,9 @@ class ProteinInferenceParameter(object):
             )
 
     def _validate_grouping_type(self):
+        """
+        Internal ProteinInferenceParameter method to validate the grouping type
+        """
         # Check if its parsimony, exclusion, inclusion, none
         if self.grouping_type in Inference.GROUPING_TYPES:
             self.logger.info("Using Grouping type '{}'".format(self.grouping_type))
@@ -377,6 +450,9 @@ class ProteinInferenceParameter(object):
             )
 
     def _validate_max_id(self):
+        """
+        Internal ProteinInferenceParameter method to validate the max peptide centric id
+        """
         # Check if max_identifiers_peptide_centric param is an INT
         if type(self.max_identifiers_peptide_centric) == int:
             self.logger.info(
@@ -392,6 +468,9 @@ class ProteinInferenceParameter(object):
             )
 
     def _validate_lp_solver(self):
+        """
+        Internal ProteinInferenceParameter method to validate the lp solver
+        """
         # Check if its pulp or glpk
         if self.lp_solver in Inference.LP_SOLVERS:
             self.logger.info("Using LP Solver '{}'".format(self.lp_solver))
@@ -403,10 +482,20 @@ class ProteinInferenceParameter(object):
             )
 
     def _override_inference_none(self):
+        """
+        Internal ProteinInferenceParameter method to override inference type for None value
+        """
         if self.inference_type in ["None", "none", None]:
             self.inference_type = "none"
 
     def override_q_restrict(self, data_class):
+        """
+        ProteinInferenceParameter method to override restrict_q if the input data does not contain q values.
+
+        Args:
+            data_class (protein_inference.datastore.DataStore): Data class
+
+        """
         data_has_q = data_class.input_has_q()
         if data_has_q:
             pass
@@ -418,6 +507,13 @@ class ProteinInferenceParameter(object):
                 self.restrict_q = None
 
     def override_pep_restrict(self, data_class):
+        """
+        ProteinInferenceParameter method to override restrict_pep if the input data does not contain pep values.
+
+        Args:
+            data_class (protein_inference.datastore.DataStore): Data class
+
+        """
         data_has_pep = data_class.input_has_pep()
         if data_has_pep:
             pass
@@ -429,6 +525,13 @@ class ProteinInferenceParameter(object):
                 self.restrict_pep = None
 
     def override_custom_restrict(self, data_class):
+        """
+        ProteinInferenceParameter method to override restrict_custom if the input data does not contain custom score values.
+
+        Args:
+            data_class (protein_inference.datastore.DataStore): Data class
+
+        """
         data_has_custom = data_class.input_has_custom()
         if data_has_custom:
             pass

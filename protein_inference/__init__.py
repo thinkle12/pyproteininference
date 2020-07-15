@@ -1,11 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Dec  1 11:07:11 2017
-
-@author: hinklet
-"""
-
 from protein_inference import reader
 from protein_inference import scoring
 from protein_inference import inference

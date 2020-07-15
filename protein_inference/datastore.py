@@ -1,11 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Dec  4 14:15:15 2017
-
-@author: hinklet
-"""
-
 import collections
 from Bio import SeqIO
 from logging import getLogger
@@ -14,59 +6,76 @@ from protein_inference.physical import Protein, Psm
 
 class DataStore(object):
     """
-    The following Class stores data at every step of the PI analysis.
+    The following Class serves as the data storage object for a protein inference analysis
     The class serves as a central point that is accessed at virtually every PI processing step
 
-    Example: protein_inference.datastore.DataStore(reader_class = reader)
 
-    Where reader is a Reader class object
+    Attributes:
+        main_data_form (list): List of unrestricted Psm objects
+        parameter_file_object (protein_inference.parameters.ProteinInferenceParameter): protein inference parameter object
+        restricted_peptides (list): List of non flaking peptide strings present in the current analysis
+        main_data_restricted (list): List of restricted :py:class:`protein_inference.physical.Psm` objects. Restriction is based on the parameter_file_object and the object is created by function :py:meth:`protein_inference.datastore.DataStore.restrict_psm_data`
+        scored_proteins (list): List of scored :py:class:`protein_inference.physical.Protein` objects. Output from scoring methods from :py:mod:`protein_inference.scoring`
+        grouped_scored_proteins (list): List of scored :py:class:`protein_inference.physical.Protein` objects that have been grouped and sorted. Output from :py:meth:`protein_inference.inference.Inference.run_inference` method
+        fdr_restricted_grouped_scored_proteins (list): grouped_scored_proteins that have been filtered based on FDR in parameter_file_object. Object created with :py:meth:`protein_inference.datastore.DataStore.set_based_fdr`
+        scoring_input (list): List of non-scored :py:class:`protein_inference.physical.Protein` objects. Output from :py:meth:`protein_inference.datastore.DataStore.create_scoring_input`
+        picked_proteins_scored (list): List of :py:class:`protein_inference.physical.Protein` objects that pass the protein picker algorithm (:py:meth:`protein_inference.datastore.DataStore.protein_picker`)
+        picked_proteins_removed (list): List of :py:class:`protein_inference.physical.Protein` objects that do not pass the protein picker algorithm (:py:meth:`protein_inference.datastore.DataStore.protein_picker`)
+        protein_peptide_dictionary (collections.defaultdict): Dictionary of protein strings (keys) that map to sets of peptide strings based on the peptides and proteins found in the search. Protein -> set(Peptides)
+        peptide_protein_dictionary (collections.defaultdict): Dictionary of peptide strings (keys) that map to sets of protein strings based on the peptides and proteins found in the search. Peptide -> set(Proteins)
+        high_low_better (str): Variable that indicates whether a higher or a lower protein score is better. This is necessary to sort Protein objects by score properly. Can either be "higher" or "lower"
+        score (str): Variable that indicates the :py:class:`protein_inference.physical.Psm` score being used in the analysis to generate :py:class:`protein_inference.physical.Protein` scores
+        protein_group_objects (list): List of scored :py:class:`protein_inference.physical.ProteinGroup` objects that have been grouped and sorted. Output from :py:meth:`protein_inference.inference.Inference.run_inference` method
+        decoy_symbol (str): String that is used to differentiate between decoy proteins and target proteins. Ex: "##"
+        digest_class (protein_inference.in_silico_digest.Digest): Digest object :py:class:`protein_inference.in_silico_digest.Digest`
+        SCORE_MAPPER (dict): Dictionary that maps potential scores in input files to internal score names
+        CUSTOM_SCORE_KEY (str): String that indicates a custom score is being used
+        logger (logger.logging): Logger object for logging
+
     """
 
     # Feed data_store instance the reader class...
     def __init__(self, reader_class, digest_class, validate=True):
+        """
+
+        Args:
+            reader_class (protein_inference.reader.Reader): Reader class object
+            digest_class (protein_inference.in_silico_digest.Digest): Digest object :py:class:`protein_infernece.in_silico_digest.Digest`
+            validate (bool): True/False to indicate if the input data should be validated
+
+        Example:
+            >>> protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+
+
+        """
         # If the reader class is from a percolator.psms then define main_data_form as reader_class.psms
         # main_data_form is the starting point for all other analyses
         if reader_class.psms:
-            self.main_data_form = reader_class.psms
+            self.main_data_form = reader_class.psms # Unrestricted PSM data
             self.restricted_peptides = [
                 x.non_flanking_peptide for x in self.main_data_form
             ]
 
-        self.parameter_file_object = reader_class.parameter_file_object
-        self.protein_info_dict = None
-        self.potential_proteins = None
-        self.main_data_restricted = None
-        self.qvalues = None
-        self.pepvalues = None
-        self.scored_proteins = []
-        self.grouped_scored_proteins = []
-        self.fdr_restricted_grouped_scored_proteins = None
-        self.scoring_input = None
-        self.picked_proteins_scored = None
+        self.parameter_file_object = reader_class.parameter_file_object # Parameter object
+        self.main_data_restricted = None # PSM data post restriction
+        self.scored_proteins = [] # List of scored Protein objects
+        self.grouped_scored_proteins = [] # List of sorted scored Protein objects
+        self.fdr_restricted_grouped_scored_proteins = None # List of Protein objects restricted by FDR
+        self.scoring_input = None # List of non scored Protein objects
+        self.picked_proteins_scored = None # List of Protein objects after picker algorithm
+        self.picked_proteins_removed = None # Protein objects removed via picker
         self.protein_peptide_dictionary = None
-        self.high_low_better = None
-        self.glpk_protein_number_dictionary = None
-        self.glpk_number_protein_dictionary = None
-        self.glpk_lead_proteins = None
-        self.in_silico_digest = None
-        self.max_youdens_data = None
-        self.score = None
-        self.score_method = None
-        self.picked_proteins_removed = None
-        self.protein_group_objects = []
-        self.qvality_output = None
         self.peptide_protein_dictionary = None
-        self.non_subset_proteins = None
-        self.counted_peptides = None
-        self.fdr_list = None
-        self.entrapment_proteins = None
-        self.restricted_proteins = None
-        self.decoy_symbol = self.parameter_file_object.decoy_symbol
-        self.digest_class = digest_class
+        self.high_low_better = None # Variable that indicates whether a higher or lower protein score is better
+        self.score = None # PSM Score used
+        self.protein_group_objects = [] # List of sorted protein group objects
+        self.decoy_symbol = self.parameter_file_object.decoy_symbol # Decoy symbol from parameter file
+        self.digest_class = digest_class # Digest class object
         self.SCORE_MAPPER = {
             "q_value": "qvalue",
             "pep_value": "pepvalue",
             "perc_score": "percscore",
+            "score": "percscore",
             "q-value": "qvalue",
             "posterior_error_prob": "pepvalue",
             "posterior_error_probability": "pepvalue",
@@ -81,7 +90,20 @@ class DataStore(object):
             self.validate_digest(digest_class)
             self.check_data_consistency(digest_class)
 
-    def get_sorted_identifiers(self, digest_class, scored=True):
+    def get_sorted_identifiers(self, scored=True):
+        """
+        Retrieves a sorted list of protein strings present in the analysis
+
+        Args:
+            scored (bool): True/False to indicate if we should return scored or non-scored identifiers
+
+        Returns:
+            list: List of sorted protein identifier strings
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> sorted_proteins = data.get_sorted_identifiers(scored=True)
+        """
 
         if scored:
             if self.picked_proteins_scored:
@@ -91,7 +113,7 @@ class DataStore(object):
         else:
             proteins = [x.identifier for x in self.scoring_input]
 
-        all_sp_proteins = set(digest_class.swiss_prot_protein_set)
+        all_sp_proteins = set(self.digest_class.swiss_prot_protein_set)
 
         our_target_sp_proteins = sorted(
             [x for x in proteins if x in all_sp_proteins and self.decoy_symbol not in x]
@@ -122,6 +144,21 @@ class DataStore(object):
 
     @classmethod
     def sort_protein_lists(cls, list_of_group_objects, higher_or_lower):
+        """
+        Class Method to sort a list of :py:class:`protein_inferenece.physical.ProteinGroup` objects by score and number of peptides
+
+        Args:
+            list_of_group_objects (list): list of :py:class:`protein_inferenece.physical.ProteinGroup` objects
+            higher_or_lower (str): String to indicate if a higher or lower protein score is "better"
+
+        Returns:
+            list: list of sorted :py:class:`protein_inferenece.physical.ProteinGroup` objects
+
+        Example:
+            >>> list_of_group_objects = protein_inference.datastore.DataStore.sort_protein_lists(
+            >>>     list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
+            >>> )
+        """
         if higher_or_lower == "lower":
 
             list_of_group_objects = sorted(
@@ -147,6 +184,21 @@ class DataStore(object):
 
     @classmethod
     def sort_protein_groups(cls, scores_grouped, higher_or_lower):
+        """
+        Class Method to sort a list of :py:class:`protein_inferenece.physical.Protein` objects by score and number of peptides
+
+        Args:
+            scores_grouped (list): list of :py:class:`protein_inferenece.physical.Protein` objects
+            higher_or_lower (str): String to indicate if a higher or lower protein score is "better"
+
+        Returns:
+            list: list of sorted :py:class:`protein_inferenece.physical.Protein` objects
+
+        Example:
+            >>> scores_grouped = protein_inference.datastore.DataStore.sort_protein_groups(
+            >>>     scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
+            >>> )
+        """
         if higher_or_lower == "lower":
             scores_grouped = sorted(
                 scores_grouped,
@@ -167,6 +219,18 @@ class DataStore(object):
         pass
 
     def get_psm_data(self):
+        """
+        Method to retrieve a list of :py:class:`protein_inference.physical.Psm` objects.
+        Retrieves restricted data if the data has been restricted or all of the data if the data has not been restricted
+
+        Returns:
+            list: list of :py:class:`protein_inference.physical.Psm` objects
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> psm_data = data.get_psm_data()
+        """
+
         if self.main_data_restricted:
             psm_data = self.main_data_restricted
         else:
@@ -175,6 +239,19 @@ class DataStore(object):
         return psm_data
 
     def get_protein_data(self):
+        """
+        Method to retrieve a list of :py:class:`protein_inference.physical.Protein` objects.
+        Retrieves picked and scored data if the data has been picked and scored or just the scored data if the data has not been picked.
+
+        Returns:
+            list: list of :py:class:`protein_inference.physical.Protein` objects
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> # Data must ben ran through a protein_inference.scoring.Score method
+            >>> protein_data = data.get_protein_data()
+        """
+
         if self.picked_proteins_scored:
             scored_proteins = self.picked_proteins_scored
         else:
@@ -183,6 +260,16 @@ class DataStore(object):
         return scored_proteins
 
     def get_protein_identifiers_from_psm_data(self):
+        """
+        Method to retrieve a list of lists of all possible protein identifiers from the psm data
+
+        Returns:
+            list: list of lists of protein strings
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> protein_strings = data.get_protein_identifiers_from_psm_data()
+        """
         psm_data = self.get_psm_data()
 
         proteins = [x.possible_proteins for x in psm_data]
@@ -190,6 +277,16 @@ class DataStore(object):
         return proteins
 
     def get_q_values(self):
+        """
+        Method to retrieve a list of all q values for all PSMs
+
+        Returns:
+            list: list of floats (q values)
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> q = data.get_q_values()
+        """
         psm_data = self.get_psm_data()
 
         q_values = [x.qvalue for x in psm_data]
@@ -197,6 +294,16 @@ class DataStore(object):
         return q_values
 
     def get_pep_values(self):
+        """
+        Method to retrieve a list of all posterior error probabilities for all PSMs
+
+        Returns:
+            list: list of floats (pep values)
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> pep = data.get_pep_values()
+        """
         psm_data = self.get_psm_data()
 
         pep_values = [x.pepvalue for x in psm_data]
@@ -204,6 +311,16 @@ class DataStore(object):
         return pep_values
 
     def get_protein_information_dictionary(self):
+        """
+        Method to retrieve a dictionary of scores for each peptide
+
+        Returns:
+            dict: dictionary of scores for each protein
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> protein_dict = data.get_protein_information_dictionary()
+        """
         psm_data = self.get_psm_data()
 
         protein_psm_score_dictionary = collections.defaultdict(list)
@@ -221,11 +338,27 @@ class DataStore(object):
                     }
                 )
 
-        self.protein_info_dict = protein_psm_score_dictionary
-
         return protein_psm_score_dictionary
 
     def restrict_psm_data(self, parameter_file_object, remove1pep=True):
+        """
+        Method to restrict the input of PSM data (:py:class:`protein_inference.physical.Psm`) objects.
+        This method is central to the protein_inference module and is able to restrict the Psm data by:
+        Q value, Pep Value, Percolator Score, Peptide Length, and Custom Score Input
+
+        This method sets the :attr:`main_data_restricted` and :attr:`restricted_peptides` Attributes for the DataStore object
+
+        Args:
+            parameter_file_object (protein_inference.parameters.ProteinInferenceParameter): :py:class:`protein_inference.parameters.ProteinInferenceParameter` object
+            remove1pep (bool): True/False on whether or not to remove PEP values that equal 1 even if other restrictions are set to not restrict.
+
+        Returns:
+            None
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> data.restrict_psm_data(parameter_file_object=pi_params,remove1pep=True)
+        """
 
         logger = getLogger("protein_inference.datastore.DataStore.restrict_psm_data")
 
@@ -349,9 +482,26 @@ class DataStore(object):
         self.restricted_peptides = [x.non_flanking_peptide for x in restricted_data]
 
     def create_scoring_input(self, score_input="posterior_error_prob"):
+        """
+        Method to create the scoring input.
+        This method initializes a list of :py:class:`protein_inference.physical.Protein` objects to get them ready to be scored by :py:mod:`protein_inference.scoring.Score` methods
+        This method also takes into account the inference type and aggregates peptides -> proteins accordingly.
+
+        This method sets the :attr:`scoring_input` and :attr:`score` Attributes for the DataStore object
+
+        Args:
+            score_input (str): String that denotes which :py:class:`protein_inference.physical.Psm` score to use as the score to aggregate to the Protein level
+
+        Returns:
+            None
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> data.create_scoring_input(score_input="posterior_error_prob")
+        """
 
         logger = getLogger(
-            "protein_inference.datastore.DataStore.create_scoring_input2"
+            "protein_inference.datastore.DataStore.create_scoring_input"
         )
         logger.info("Creating Scoring Input")
 
@@ -404,6 +554,17 @@ class DataStore(object):
         self.scoring_input = protein_list
 
     def protein_to_peptide_dictionary(self):
+        """
+        Method that returns a map of protein strings to sets of peptide strings and is essentially half of a BiPartite graph
+        This method sets the :attr:`protein_peptide_dictionary` Attribute for the :py:class:`protein_inference.datastore.DataStore` object
+
+        Returns:
+            collections.defaultdict: Dictionary of protein strings (keys) that map to sets of peptide strings based on the peptides and proteins found in the search. Protein -> set(Peptides)
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> protein_peptide_dict = data.protein_to_peptide_dictionary()
+        """
         psm_data = self.get_psm_data()
 
         res_pep_set = set(self.restricted_peptides)
@@ -419,6 +580,17 @@ class DataStore(object):
         return dd_prots
 
     def peptide_to_protein_dictionary(self):
+        """
+        Method that returns a map of peptide strings to sets of protein strings and is essentially half of a BiPartite graph
+        This method sets the :attr:`peptide_protein_dictionary` Attribute for the :py:class:`protein_inference.datastore.DataStore` object
+
+        Returns:
+            collections.defaultdict: Dictionary of peptide strings (keys) that map to sets of protein strings based on the peptides and proteins found in the search. Peptide -> set(Proteins)
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> peptide_protein_dict = data.peptide_to_protein_dictionary()
+        """
         psm_data = self.get_psm_data()
 
         res_pep_set = set(self.restricted_peptides)
@@ -436,6 +608,16 @@ class DataStore(object):
         return dd_peps
 
     def unique_to_leads_peptides(self):
+        """
+        Method to retrieve peptides that are unique based on the data from the searches (Not based on the database digestion)
+
+        Returns:
+            set
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> unique_peps = data.unique_to_leads_peptides()
+        """
         if self.grouped_scored_proteins:
             lead_peptides = [list(x[0].peptides) for x in self.grouped_scored_proteins]
             flat_peptides = [item for sublist in lead_peptides for item in sublist]
@@ -449,6 +631,19 @@ class DataStore(object):
         return unique_to_leads_peptides
 
     def higher_or_lower(self):
+        """
+        Method to determine if a higher or lower score is better for a given combination of score input and score type
+
+        This method sets the :attr:`high_low_better` Attribute for the DataStore object
+
+        Returns:
+            str: String indicating "higher" or "lower" depending on if a higher or lower score is a better protein score
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> high_low = data.higher_or_lower()
+        """
+
 
         logger = getLogger("protein_inference.datastore.DataStore.higher_or_lower")
 
@@ -481,6 +676,19 @@ class DataStore(object):
         return higher_or_lower
 
     def get_protein_identifiers(self, data_form):
+        """
+        Method to retrieve the protein string identifiers
+
+        Args:
+            data_form (str): Can be one of the following: "main", "restricted", "picked", "picked_removed", "fdr_restricted"
+
+        Returns:
+            list: list of protein identifier strings
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> protein_strings = data.get_protein_identifiers(data_form="main")
+        """
         if data_form == "main":
             # All the data (unrestricted)
             data_to_select = self.main_data_form
@@ -514,6 +722,19 @@ class DataStore(object):
         return proteins
 
     def get_protein_information(self, protein_string):
+        """
+        Method to retrieve attributes for a specific scored protein
+
+        Args:
+            protein_string (str): Protein Identifier String
+
+        Returns:
+            list: list of protein attributes
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> protein_attr = data.get_protein_information(protein_string="RAF1_HUMAN|P04049")
+        """
         all_scored_protein_data = self.scored_proteins
         identifiers = [x.identifier for x in all_scored_protein_data]
         protein_scores = [x.score for x in all_scored_protein_data]
@@ -553,6 +774,22 @@ class DataStore(object):
     def exclude_non_distinguishing_peptides(
         self, digest_class, protein_subset_type="hard"
     ):
+        """
+        Method to Exclude peptides that are not distinguishing on either the search or database level
+
+        The method sets the :attr:`scoring_input` and :attr:`restricted_peptides` variables for the :py:class:`protein_inference.datastore.DataStore` object
+
+        Args:
+            digest_class (protein_inference.in_silico_digest.Digest): Digest object
+            protein_subset_type (str): Either "hard" or "soft". Hard will select distinguishing peptides based on the database digestion. "soft" will only use peptides identified in the search.
+
+        Returns:
+            None
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> data.exclude_non_distinguishing_peptides(digest_class=digest,protein_subset_type="hard")
+        """
 
         logger = getLogger(
             "protein_inference.datastore.DataStore.exclude_non_distinguishing_peptides"
@@ -561,7 +798,7 @@ class DataStore(object):
         logger.info("Applying Exclusion Model")
 
         our_proteins_sorted = self.get_sorted_identifiers(
-            digest_class=digest_class, scored=False
+            scored=False
         )
 
         if protein_subset_type == "hard":
@@ -611,8 +848,6 @@ class DataStore(object):
 
         non_subset_proteins = set([our_proteins_sorted[x] for x in list_of_indeces])
 
-        self.non_subset_proteins = non_subset_proteins
-
         logger.info("Removing direct subset Proteins from the data")
         # Remove all proteins from scoring input that are a subset of another protein...
         self.scoring_input = [
@@ -642,8 +877,6 @@ class DataStore(object):
         # Count the number of peptides in this list...
         # This is the number of proteins this peptide maps to....
         counted_peptides = collections.Counter(flat_peptides)
-
-        self.counted_peptides = counted_peptides
 
         # If the count is greater than 1... exclude the protein entirely from scoring input... :)
         raw_peps_good = set(
@@ -701,6 +934,24 @@ class DataStore(object):
         ]
 
     def protein_picker(self):
+        """
+        Method to run the protein picker algorithm.
+
+        Proteins must be scored first with :py:meth:`protein_inference.scoring.Score.score_psms`
+
+        The algorithm will match target and decoy proteins identified from the PSMs from the search.
+        If a target and matching decoy is found then target/decoy competition is performed.
+        In the Target/Decoy pair the protein with the better score is kept and the one with the worse score is discarded from the analysis
+
+        The method sets the :attr:`picked_proteins_scored` and :attr:`picked_proteins_removed` variables for the :py:class:`protein_inference.datastore.DataStore` object
+
+        Returns:
+            None
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> data.protein_picker()
+        """
 
         logger = getLogger("protein_inference.datastore.DataStore.protein_picker")
 
@@ -720,8 +971,6 @@ class DataStore(object):
             if self.decoy_symbol in x.identifier
         ]
         # Create a list of all potential matching targets (some of these may not exist in the search)
-        # TODO change this to being a .replace('##','')
-        # TODO we should also really put the decoy symbol in the param file...
         matching_targets = [x.replace(self.decoy_symbol, "") for x in decoy_proteins]
 
         # Create a list of all the proteins from the scored data
@@ -792,12 +1041,22 @@ class DataStore(object):
 
     def set_based_fdr(self, false_discovery_rate=0.01, regular=True):
         """
-        function calculates set based FDR on the lead protein in the group
-        Input is a DataStore object as well as an integer false discovery rate
+        Method calculates set based FDR on the lead protein in the group on the :attr:`grouped_scored_proteins` instance variable
+        FDR is calculated As (2*decoys)/total if regular is set to True and is (decoys)/total if regular is set to False
 
-        Example: protein_inference.fdrcalc.SetBasedFDR(data_class = data,false_discovery_rate=XX))
+        This method sets the :attr:`fdr_restricted_grouped_scored_proteins` for the :py:class:`protein_inference.datastore.DataStore` object
 
-        FDR is calculated As (2*decoys)/total
+        Args:
+            false_discovery_rate (float): FDR to restrict by
+            regular (bool): True/False on how to calculate FDR. (2*decoys)/total if regular is set to True and is (decoys)/total if regular is set to False
+
+        Returns:
+            None
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> # Data must be scored first
+            >>> data.set_based_fdr(false_discovery_rate=0.01, regular=True)
         """
 
         logger = getLogger("protein_inference.datastore.DataStore.set_based_fdr")
@@ -833,8 +1092,6 @@ class DataStore(object):
 
         lead_proteins.reverse()
 
-        self.fdr_list = fdr_list
-
         fdr_restricted_set = [
             self.grouped_scored_proteins[x] for x in range(len(lead_proteins))
         ]
@@ -867,12 +1124,18 @@ class DataStore(object):
 
     def calculate_q_values(self):
         """
-        Class calculates Q values on the lead protein in the groups
-        Input is a DataStore object
+        Method calculates Q values FDR on the lead protein in the group on the :attr:`protein_group_objects` instance variable
+        FDR is calculated As (2*decoys)/total if regular is set to True and is (decoys)/total if regular is set to False
 
-        Example: protein_inference.fdrcalc.SetBasedFDR(data_class = data)
+        This method updates the :attr:`protein_group_objects` for the :py:class:`protein_inference.datastore.DataStore` object by updating the q_value variable of the :py:class:`protein_inference.physical.ProteinGroup` objects
 
-        Q values are calculated As (2*decoys)/total
+        Returns:
+            None
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> # Data must be scored first
+            >>> data.calculate_q_values()
         """
 
         logger = getLogger("protein_inference.datastore.DataStore.calculate_q_values")
@@ -919,7 +1182,10 @@ class DataStore(object):
         Class calculates Entrapment FDR on the lead protein in the groups.
         Input is a DataStore object, an entrapment database, and a false discovery rate
 
-        Example: protein_inference.fdrcalc.EntrapFdr(data_class = data, entrapment_database = "example_entrap.fasta", other_database = None, false_discovery_rate=.05)
+        Example:
+             >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> # Data must be scored first
+            >>> data.entrapment_fdr(true_database = "example_entrap.fasta",false_discovery_rate=0.1)
 
         FDR values are calculated As (entrapped proteins)/total
 
@@ -986,8 +1252,6 @@ class DataStore(object):
             self.grouped_scored_proteins[x] for x in range(len(lead_proteins))
         ]
 
-        self.fdr_list = fdr_list
-
         onehitwonders = []
         for groups in fdr_restricted_set:
             if int(groups[0].num_peptides) == 1:
@@ -1014,23 +1278,33 @@ class DataStore(object):
         )
         self.fdr_restricted_grouped_scored_proteins = fdr_restricted_set
 
-        self.restricted_proteins = fdr_restricted_set
-
-        self.entrapment_proteins = false_true_positives
+        return(fdr_restricted_set)
 
     def validate_psm_data(self):
+        """
+        Method that validates the PSM data
+        """
         self._validate_decoys_from_data()
         self._validate_isoform_from_data()
 
     def validate_digest(self, digest_class):
+        """
+        Method that validates the :py:class:`protein_inference.in_silico_digest.Digest` object
+        """
         self._validate_reviewed_v_unreviewed(digest_class)
         self._check_target_decoy_split(digest_class)
 
     def check_data_consistency(self, digest_class):
+        """
+        Method that checks for data consistency
+        """
         self._check_data_digest_overlap_psms(digest_class)
         self._check_data_digest_overlap_proteins(digest_class)
 
     def _check_data_digest_overlap_psms(self, digest_class):
+        """
+        Method that logs the overlap between the digested fasta file and the input files on the PSM level
+        """
         logger = getLogger(
             "protein_inference.datastore.DataStore._check_data_digest_overlap_psms"
         )
@@ -1057,6 +1331,9 @@ class DataStore(object):
         )
 
     def _check_data_digest_overlap_proteins(self, digest_class):
+        """
+        Method that logs the overlap between the digested fasta file and the input files on the Protein level
+        """
         logger = getLogger(
             "protein_inference.datastore.DataStore._check_data_digest_overlap_proteins"
         )
@@ -1085,6 +1362,9 @@ class DataStore(object):
         )
 
     def _check_target_decoy_split(self, digest_class):
+        """
+        Method that logs the number of target and decoy proteins from the digest
+        """
         logger = getLogger(
             "protein_inference.datastore.DataStore._check_target_decoy_split"
         )
@@ -1110,6 +1390,9 @@ class DataStore(object):
         pass
 
     def _validate_decoys_from_data(self):
+        """
+        Method that checks to make sure that target and decoy proteins exist in the data files
+        """
         logger = getLogger(
             "protein_inference.datastore.DataStore._validate_decoys_from_data"
         )
@@ -1127,6 +1410,9 @@ class DataStore(object):
         logger.info("Number of Decoy Proteins in Data Files: {}".format(len(decoys)))
 
     def _validate_isoform_from_data(self):
+        """
+        Method that validates whether or not isoforms are able to be identified in the data files
+        """
         logger = getLogger(
             "protein_inference.datastore.DataStore._validate_isoform_from_data"
         )
@@ -1152,6 +1438,9 @@ class DataStore(object):
         )
 
     def _validate_reviewed_v_unreviewed(self, digest_class):
+        """
+        Method that logs whether or not we can distinguish from reviewed and unreviewd protein identifiers in the digest
+        """
         logger = getLogger(
             "protein_inference.datastore.DataStore._validate_reviewed_v_unreviewed"
         )
@@ -1174,6 +1463,22 @@ class DataStore(object):
 
     @classmethod
     def sort_protein_strings(cls, protein_string_list, sp_proteins, decoy_symbol):
+        """
+        Method that sorts protein strings in the following order: Target Reviewed, Decoy Reviewed, Target Unreviewed, Decoy Unreviewed
+
+        Args:
+            protein_string_list (list): List of Protein Strings
+            sp_proteins (set): Set of Reviewed Protein Strings
+            decoy_symbol (str): Symbol to denote a decoy protein identifier IE "##"
+
+        Returns:
+            list: List of sorted protein strings
+
+        Example:
+            >>> list_of_group_objects = datastore.DataStore.sort_protein_strings(
+            >>>     protein_string_list=protein_string_list, sp_proteins=sp_proteins, decoy_symbol="##"
+            >>> )
+        """
 
         our_target_sp_proteins = sorted(
             [
@@ -1211,6 +1516,9 @@ class DataStore(object):
         return identifiers_sorted
 
     def input_has_q(self):
+        """
+        Method that checks to see if the input data has q values
+        """
         len_q = len([x.qvalue for x in self.main_data_form if x.qvalue])
         len_all = len(self.main_data_form)
         if len_q == len_all:
@@ -1225,6 +1533,9 @@ class DataStore(object):
         return status
 
     def input_has_pep(self):
+        """
+        Method that checks to see if the input data has pep values
+        """
         len_pep = len([x.pepvalue for x in self.main_data_form if x.pepvalue])
         len_all = len(self.main_data_form)
         if len_pep == len_all:
@@ -1239,6 +1550,9 @@ class DataStore(object):
         return status
 
     def input_has_custom(self):
+        """
+        Method that checks to see if the input data has custom score values
+        """
         len_c = len([x.custom_score for x in self.main_data_form if x.custom_score])
         len_all = len(self.main_data_form)
         if len_c == len_all:

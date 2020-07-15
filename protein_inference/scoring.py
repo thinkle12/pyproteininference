@@ -1,11 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Nov 30 14:25:00 2017
-
-@author: hinklet
-"""
-
 import math
 import numpy
 import sys
@@ -15,7 +7,24 @@ from logging import getLogger
 
 class Score(object):
     """
-    Parent Score class for all scoring subset classes
+    Score class that contains methods to do a variety of scoring methods on the :py:class:`protein_inference.physical.Psm` objects
+    contained inside of :py:class:`protein_inference.physical.Protein` objects
+
+    Methods in the class loop over each Protein object and creates a protein "score" variable using the Psm object scores.
+
+    Methods score all proteins from :attr:`scoring_input` from :py:class:`protein_inference.datastore.DataStore`.
+    The PSM score that is used is determined from :py:meth:`protein_inference.datastore.DataStore.create_scoring_input`
+
+    Each scoring method will set the following attributes for :py:class:`protein_inference.datastore.DataStore`
+
+    1. attr:`score_method`; This is the full name of the score method
+    2. attr:`short_score_method`; This is the short name of the score method
+    3. attr:`scored_proteins`; This is a list of :py:class:`protein_inference.physical.Protein` objects that have been scored
+
+    Attributes:
+        pre_score_data (list): This is a list of :py:class:`protein_inference.physical.Protein` objects that contain :py:class:`protein_inference.physical.Psm` objects
+        data_class (protein_inference.datastore.DataStore): Data class object
+
     """
 
     SCORE_METHODS = [
@@ -32,6 +41,18 @@ class Score(object):
     SCORE_TYPES = ["multiplicative", "additive"]
 
     def __init__(self, data_class):
+        """
+        Initialization method for the Score class
+
+        Args:
+            data_class (protein_inference.datastore.DataStore): Data class object
+
+        Raises:
+            ValueError: If the variable :attr:`scoring_input` for :py:class:`protein_inference.datastore.DataStore` is Empty "[]" or does not exist "None"
+
+        Examples:
+            >>> score = protein_inference.scoring.Score(data_class=data)
+        """
         if data_class.scoring_input:
             self.pre_score_data = data_class.scoring_input
         else:
@@ -41,33 +62,51 @@ class Score(object):
         self.data_class = data_class
 
     def score_psms(self, score_method="multiplicative_log"):
-        if score_method == "best_peptide_per_protein":
-            self.best_peptide_per_protein()
-        if score_method == "iterative_downweighted_log":
-            self.iterative_down_weighted_log()
-        if score_method == "multiplicative_log":
-            self.multiplicative_log()
-        if score_method == "downweighted_multiplicative_log":
-            self.down_weighted_multiplicative_log()
-        if score_method == "downweighted_version2":
-            self.down_weighted_v2()
-        if score_method == "top_two_combined":
-            self.top_two_combied()
-        if score_method == "geometric_mean":
-            self.geometric_mean_log()
-        if score_method == "additive":
-            self.additive()
+        """
+        This method dispatches to the actual scoring method given a string input that is defined in :py:class:`protein_inference.parameters.ProteinInferenceParameter`
+
+        Args:
+            score_method (str): This is a string that represents which scoring method to call.
+
+        Raises:
+            ValueError: Will Error out if the score_method is not present in the constant :attr:`SCORE_METHODS`
+
+        Examples:
+            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score.score_psms(score_method="best_peptide_per_protein")
+        """
+
+        if score_method not in self.SCORE_METHODS:
+            raise ValueError(
+                "score method '{}' is not a proper method. Score method must be one of the following: '{}'".format(score_method, ", ".join(self.SCORE_METHODS))
+            )
+        else:
+            if score_method == "best_peptide_per_protein":
+                self.best_peptide_per_protein()
+            if score_method == "iterative_downweighted_log":
+                self.iterative_down_weighted_log()
+            if score_method == "multiplicative_log":
+                self.multiplicative_log()
+            if score_method == "downweighted_multiplicative_log":
+                self.down_weighted_multiplicative_log()
+            if score_method == "downweighted_version2":
+                self.down_weighted_v2()
+            if score_method == "top_two_combined":
+                self.top_two_combied()
+            if score_method == "geometric_mean":
+                self.geometric_mean_log()
+            if score_method == "additive":
+                self.additive()
 
     def best_peptide_per_protein(self):
         """
-        Class scores all proteins from data_class.scoring_input.
-        This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
+        This method uses a best peptide per protein scoring scheme.
+        The top scoring Psm for each protein is selected as the overall Protein object score
 
-        This class uses a best peptide per protein scoring scheme
+        Examples:
+            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score.best_peptide_per_protein()
 
-        Example: protein_inference.scoring.BestPeptidePerProtein(data_class = data)
-
-        Where data is a DataStore Object
          """
         logger = getLogger("protein_inference.scoring.Score.best_peptide_per_protein")
 
@@ -90,14 +129,12 @@ class Score(object):
 
     def fishers_method(self):
         """
-        Class scores all proteins from data_class.scoring_input.
-        This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
+        This method uses a fishers method scoring scheme
+\
+        Examples:
+            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score.fishers_method()
 
-        This class uses a Fishers method scoring scheme
-
-        Example: protein_inference.scoring.FishersMethod(data_class = data)
-
-        Where data is a DataStore Object
          """
         logger = getLogger("protein_inference.scoring.Score.fishers_method")
 
@@ -118,15 +155,12 @@ class Score(object):
 
     def multiplicative_log(self):
         """
-        Class scores all proteins from data_class.scoring_input.
-        This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
+        This method uses a Multiplicative Log scoring scheme.
+        The selected Psm score from all the peptides per protein are multiplied together and we take -Log(X) of the multiplied Peptide scores
 
-        This class uses a Multiplicative Log scoring scheme.
-        All the Qvalues/PepValues from all the peptides per protein are multiplied together and we take -Log(X) of the multiplied Peptide scores
-
-        Example: protein_inference.scoring.MultiplicativeLog(data_class = data)
-
-        Where data is a DataStore Object
+        Examples:
+            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score.multiplicative_log()
          """
         logger = getLogger("protein_inference.scoring.Score.multiplicative_log")
 
@@ -156,17 +190,14 @@ class Score(object):
 
     def down_weighted_multiplicative_log(self):
         """
-        Class scores all proteins from data_class.scoring_input.
-        This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
-
-        This class uses a Multiplicative Log scoring scheme.
-        All the Qvalues/PepValues from all the peptides per protein are multiplied together and
-        then this number is divided by the set QValue/PepValue mean raised to the number of peptides for that protein
+        This method uses a Multiplicative Log scoring scheme.
+        The selected PSM score from all the peptides per protein are multiplied together and
+        then this number is divided by the set PSM scores mean raised to the number of peptides for that protein
         then we take -Log(X) of the following value
 
-        Example: protein_inference.scoring.DownweightedMultiplicativeLog(data_class = data)
-
-        Where data is a DataStore Object
+        Examples:
+            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score.down_weighted_multiplicative_log()
          """
         logger = getLogger(
             "protein_inference.scoring.Score.down_weighted_multiplicative_log"
@@ -202,16 +233,13 @@ class Score(object):
 
     def top_two_combied(self):
         """
-        Class scores all proteins from data_class.scoring_input.
-        This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
-
-        This class uses a Top Two scoring scheme.
-        The top two scores for each protein are multiplied together and we take -Log(X) of the  multiplied value.
+        This method uses a Top Two scoring scheme.
+        The top two scores for each protein are multiplied together and we take -Log(X) of the multiplied value.
         If a protein only has 1 score/peptide, then we only do -Log(X) of the 1 peptide score
 
-        Example: protein_inference.scoring.TopTwoCombined(data_class = data)
-
-        Where data is a DataStore Object
+        Examples:
+            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score.top_two_combied()
          """
         logger = getLogger("protein_inference.scoring.Score.top_two_combied")
 
@@ -240,19 +268,16 @@ class Score(object):
 
     def down_weighted_v2(self):
         """
-        Class scores all proteins from data_class.scoring_input.
-        This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
-
-        This class uses a Downweighted Multiplicative Log scoring scheme.
+        This method uses a Downweighted Multiplicative Log scoring scheme.
         Each peptide is iteratively downweighted by raising the peptide QValue or PepValue to the following power (1/(1+index_number)).
         Where index_number is the peptide number per protein...
         Each score for a protein provides less and less weight iteratively
 
         We also take -Log(X) of the final score here
 
-        Example: protein_inference.scoring.DownweightedVersion2(data_class = data)
-
-        Where data is a DataStore Object
+        Examples:
+            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score.down_weighted_v2()
          """
         logger = getLogger("protein_inference.scoring.Score.down_weighted_v2")
 
@@ -280,19 +305,16 @@ class Score(object):
 
     def iterative_down_weighted_log(self):
         """
-        Function scores all proteins from data_class.scoring_input.
-        This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
-
-        This Function uses a Downweighted Multiplicative Log scoring scheme.
+        This method uses a Downweighted Multiplicative Log scoring scheme.
         Each peptide is iteratively downweighted by multiplying the peptide QValue or PepValue to the following  (1+index_number).
         Where index_number is the peptide number per protein...
         Each score for a protein provides less and less weight iteratively
 
         We also take -Log(X) of the final score here
 
-        Example: protein_inference.scoring.IterativeDownweightedLog(data_class = data)
-
-        Where data is a DataStore Object
+        Examples:
+            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score.iterative_down_weighted_log()
          """
         logger = getLogger(
             "protein_inference.scoring.Score.iterative_down_weighted_log"
@@ -327,16 +349,13 @@ class Score(object):
 
     def geometric_mean_log(self):
         """
-        Class scores all proteins from data_class.scoring_input.
-        This is either Pep or Q values from an unrestricted or restricted subset of the input scores from Percolator
-
-        This class uses a Geometric Mean scoring scheme.
+        This method uses a Geometric Mean scoring scheme.
 
         We also take -Log(X) of the final score here
 
-        Example: protein_inference.scoring.GeometricMeanLog(data_class = data)
-
-        Where data is a DataStore Object
+        Examples:
+            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score.geometric_mean_log()
          """
         logger = getLogger("protein_inference.scoring.Score.geometric_mean_log")
 
@@ -365,7 +384,7 @@ class Score(object):
 
     def iterative_down_weighted_v2(self):
         """
-        The following class is an experimental class essentially used for future development of potential scoring schemes
+        The following method is an experimental method essentially used for future development of potential scoring schemes
         """
         logger = getLogger("protein_inference.scoring.Score.iterative_down_weighted_v2")
 
@@ -393,8 +412,13 @@ class Score(object):
 
     def additive(self):
         """
-        The following class is an experimental class essentially used for future development of potential scoring schemes
-        """
+        This method uses an additive scoring scheme.
+        The method can only be used if a larger PSM score is a better PSM score such as the Percolator score.
+
+        Examples:
+            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score.additive()
+         """
         logger = getLogger("protein_inference.scoring.Score.additive")
 
         all_scores = []

@@ -1,11 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Nov 30 16:51:50 2017
-
-@author: hinklet
-"""
-
 import os
 import subprocess
 import collections

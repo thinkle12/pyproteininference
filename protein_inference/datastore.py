@@ -90,7 +90,20 @@ class DataStore(object):
             self.validate_digest(digest_class)
             self.check_data_consistency(digest_class)
 
-    def get_sorted_identifiers(self, digest_class, scored=True):
+    def get_sorted_identifiers(self, scored=True):
+        """
+        Retrieves a sorted list of protein strings present in the analysis
+
+        Args:
+            scored (bool): True/False to indicate if we should return scored or non-scored identifiers
+
+        Returns:
+            list: List of sorted protein identifier strings
+
+        Example:
+            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
+            >>> sorted_proteins = data.get_sorted_identifiers(scored=True)
+        """
 
         if scored:
             if self.picked_proteins_scored:
@@ -100,7 +113,7 @@ class DataStore(object):
         else:
             proteins = [x.identifier for x in self.scoring_input]
 
-        all_sp_proteins = set(digest_class.swiss_prot_protein_set)
+        all_sp_proteins = set(self.digest_class.swiss_prot_protein_set)
 
         our_target_sp_proteins = sorted(
             [x for x in proteins if x in all_sp_proteins and self.decoy_symbol not in x]

@@ -27,7 +27,10 @@ class TestDigest(TestCase):
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = protein_inference.in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest.digest_fasta_database()
@@ -338,7 +341,10 @@ class TestDigest(TestCase):
         protein_inference_parameters.missed_cleavages = 2
         digest2 = protein_inference.in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest2.digest_fasta_database()
@@ -580,7 +586,10 @@ class TestDigest(TestCase):
         protein_inference_parameters.missed_cleavages = 1
         digest3 = protein_inference.in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest3.digest_fasta_database()
@@ -753,7 +762,10 @@ class TestDigest(TestCase):
         protein_inference_parameters.missed_cleavages = 0
         digest4 = protein_inference.in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest4.digest_fasta_database()

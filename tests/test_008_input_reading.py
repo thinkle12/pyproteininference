@@ -70,7 +70,10 @@ class TestReader(TestCase):
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest.digest_fasta_database()
@@ -157,7 +160,10 @@ class TestReader(TestCase):
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters_add,
+            digest_type=protein_inference_parameters_add.digest_type,
+            missed_cleavages=protein_inference_parameters_add.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters_add.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters_add.restrict_peptide_length,
             id_splitting=True,
         )
         digest.digest_fasta_database()
@@ -189,7 +195,10 @@ class TestReader(TestCase):
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters_mult,
+            digest_type=protein_inference_parameters_mult.digest_type,
+            missed_cleavages=protein_inference_parameters_mult.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters_mult.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters_mult.restrict_peptide_length,
             id_splitting=True,
         )
         digest.digest_fasta_database()

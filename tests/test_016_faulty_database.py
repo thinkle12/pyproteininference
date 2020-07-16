@@ -83,21 +83,30 @@ class TestFaultyDatabasePipeline(TestCase):
         # Perform digest on each database
         digest_normal = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE_ORIGINAL,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest_normal.digest_fasta_database()
 
         digest_missing_pep = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE_MISSING_PEP,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest_missing_pep.digest_fasta_database()
 
         digest_missing_prot = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE_MISSING_PROT,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest_missing_prot.digest_fasta_database()

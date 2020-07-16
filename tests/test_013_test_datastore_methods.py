@@ -38,7 +38,10 @@ class TestDataStoreMethods(TestCase):
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = protein_inference.in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest.digest_fasta_database()
@@ -65,19 +68,19 @@ class TestDataStoreMethods(TestCase):
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
-        data.restrict_psm_data(parameter_file_object=protein_inference_parameters)
+        data.restrict_psm_data()
 
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input
-        data.create_scoring_input(score_input=protein_inference_parameters.score)
+        data.create_scoring_input()
 
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         if protein_inference_parameters.inference_type == "exclusion":
             # This gets ran if we run exclusion...
-            data.exclude_non_distinguishing_peptides(digest_class=digest)
+            data.exclude_non_distinguishing_peptides()
 
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
@@ -132,7 +135,7 @@ class TestDataStoreMethods(TestCase):
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
-        data.set_based_fdr(false_discovery_rate=float(protein_inference_parameters.fdr))
+        data.set_based_fdr()
         data.calculate_q_values()
 
         # Start datastore tests
@@ -204,34 +207,34 @@ class TestDataStoreMethods(TestCase):
         protein_inference_parameters.restrict_peptide_length = 9
 
         data.restrict_psm_data(
-            parameter_file_object=protein_inference_parameters, remove1pep=True
+            remove1pep=True
         )
         self.assertEqual(len(data.main_data_restricted), 8)
 
         protein_inference_parameters.restrict_pep = None
         # Restrict length and q
         data.restrict_psm_data(
-            parameter_file_object=protein_inference_parameters, remove1pep=True
+            remove1pep=True
         )
         self.assertEqual(len(data.main_data_restricted), 8)
 
         protein_inference_parameters.restrict_q = None
         # Restrict length only
         data.restrict_psm_data(
-            parameter_file_object=protein_inference_parameters, remove1pep=True
+            remove1pep=True
         )
         self.assertEqual(len(data.main_data_restricted), 23)
 
         protein_inference_parameters.restrict_peptide_length = None
         # No Restriction
         data.restrict_psm_data(
-            parameter_file_object=protein_inference_parameters, remove1pep=True
+            remove1pep=True
         )
         self.assertEqual(len(data.main_data_restricted), 27)
 
         # No restriction and no removing 1 pep values
         data.restrict_psm_data(
-            parameter_file_object=protein_inference_parameters, remove1pep=False
+            remove1pep=False
         )
         self.assertEqual(len(data.main_data_restricted), 27)
 
@@ -239,7 +242,7 @@ class TestDataStoreMethods(TestCase):
         protein_inference_parameters.restrict_q = 0.05
         # Restrict pep and q without length
         data.restrict_psm_data(
-            parameter_file_object=protein_inference_parameters, remove1pep=True
+            remove1pep=True
         )
         self.assertEqual(len(data.main_data_restricted), 24)
 
@@ -248,7 +251,7 @@ class TestDataStoreMethods(TestCase):
         protein_inference_parameters.restrict_peptide_length = None
         # restrict pep and length without q
         data.restrict_psm_data(
-            parameter_file_object=protein_inference_parameters, remove1pep=True
+            remove1pep=True
         )
         self.assertEqual(len(data.main_data_restricted), 9)
 
@@ -257,7 +260,7 @@ class TestDataStoreMethods(TestCase):
         protein_inference_parameters.restrict_peptide_length = None
         # restrict pep and length without q
         data.restrict_psm_data(
-            parameter_file_object=protein_inference_parameters, remove1pep=True
+            remove1pep=True
         )
         self.assertEqual(len(data.main_data_restricted), 24)
 
@@ -266,7 +269,7 @@ class TestDataStoreMethods(TestCase):
         protein_inference_parameters.restrict_peptide_length = 9
         # restrict pep and length without q
         data.restrict_psm_data(
-            parameter_file_object=protein_inference_parameters, remove1pep=True
+            remove1pep=True
         )
         self.assertEqual(len(data.main_data_restricted), 10)
 

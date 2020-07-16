@@ -41,7 +41,7 @@ class Inference(object):
 
     PULP ="pulp"
     GLPK = "glpk"
-    LP_SOLVERS = [PULP, GLPK, "none", "None", None]
+    LP_SOLVERS = [PULP, GLPK]
 
     def __init__(self, data_class, digest_class):
         """
@@ -1526,7 +1526,7 @@ class Parsimony(Inference):
 
             self._pulp_grouper()
 
-        else:
+        elif self.parameter_file_object.lp_solver == "glpk":
 
             try:
                 os.mkdir(glpkinout_directory)
@@ -1564,6 +1564,9 @@ class Parsimony(Inference):
                     "glpkout_" + self.parameter_file_object.tag + ".sol",
                 ),
             )
+
+        else:
+            raise ValueError("Parsimony cannot run if lp_solver parameter value is not one of the following: {}".format(", ".join(Inference.LP_SOLVERS)))
 
 
 class FirstProtein(Inference):

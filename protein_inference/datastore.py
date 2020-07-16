@@ -638,7 +638,9 @@ class DataStore(object):
         """
         Method to determine if a higher or lower score is better for a given combination of score input and score type
 
-        This method sets the :attr:`high_low_better` Attribute for the DataStore object
+        This method sets the :attr:`high_low_better` Attribute for the DataStore object.
+
+        This method depends on the output from the Score class to be sorted properly from best to worst score
 
         Returns:
             str: String indicating "higher" or "lower" depending on if a higher or lower score is a better protein score
@@ -658,10 +660,10 @@ class DataStore(object):
         best_score = self.scored_proteins[0].score
 
         if float(best_score) > float(worst_score):
-            higher_or_lower = "higher"
+            higher_or_lower = self.HIGHER_PSM_SCORE
 
         if float(best_score) < float(worst_score):
-            higher_or_lower = "lower"
+            higher_or_lower = self.LOWER_PSM_SCORE
 
         logger.info("best score = " + str(best_score))
         logger.info("worst score = " + str(worst_score))
@@ -997,7 +999,7 @@ class DataStore(object):
                 cur_target_protein_object = self.scored_proteins[cur_target_index]
                 total_targets.append(cur_target_protein_object.identifier)
 
-                if higher_or_lower == "higher":
+                if higher_or_lower == self.HIGHER_PSM_SCORE:
                     if cur_target_protein_object.score > cur_decoy_protein_object.score:
                         index_to_remove.append(cur_decoy_index)
                         decoys_removed.append(cur_decoy_index)
@@ -1009,7 +1011,7 @@ class DataStore(object):
                         cur_decoy_protein_object.picked = True
                         cur_target_protein_object.picked = False
 
-                if higher_or_lower == "lower":
+                if higher_or_lower == self.LOWER_PSM_SCORE:
                     if cur_target_protein_object.score < cur_decoy_protein_object.score:
                         index_to_remove.append(cur_decoy_index)
                         decoys_removed.append(cur_decoy_index)

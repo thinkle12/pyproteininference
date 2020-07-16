@@ -2,6 +2,7 @@ import collections
 from Bio import SeqIO
 from logging import getLogger
 from protein_inference.physical import Protein, Psm
+from protein_inference.inference import Inference
 
 
 class DataStore(object):
@@ -511,7 +512,7 @@ class DataStore(object):
         except KeyError:
             score_key = self.CUSTOM_SCORE_KEY
 
-        if self.parameter_file_object.inference_type != "peptide_centric":
+        if self.parameter_file_object.inference_type != Inference.PEPTIDE_CENTRIC:
             # Loop through all Psms
             for psms in psm_data:
                 psms.assign_main_score(score=score_key)

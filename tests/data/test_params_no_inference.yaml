@@ -18,7 +18,7 @@ parameters:
     isoform_symbol: "-"
     reviewed_identifier_symbol: "sp|"
   inference:
-    inference_type: None
+    inference_type: first_protein
     grouping_type: subset_peptides
   digest:
     digest_type: trypsin

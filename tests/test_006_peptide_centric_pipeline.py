@@ -85,7 +85,7 @@ class TestLoadPeptideCentricWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.digest_type, "trypsin")
         self.assertEqual(protein_inference_parameters.export, "q_value")
         self.assertEqual(protein_inference_parameters.fdr, 0.01)
-        self.assertEqual(protein_inference_parameters.glpk_path, "None")
+        self.assertEqual(protein_inference_parameters.glpk_path, None)
         self.assertEqual(protein_inference_parameters.missed_cleavages, 3)
         self.assertEqual(protein_inference_parameters.picker, True)
         self.assertEqual(protein_inference_parameters.restrict_pep, 0.9)
@@ -101,11 +101,11 @@ class TestLoadPeptideCentricWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.reviewed_identifier_symbol, "sp|")
         self.assertEqual(protein_inference_parameters.inference_type, "peptide_centric")
         self.assertEqual(protein_inference_parameters.tag, "test_peptide_centric")
-        self.assertEqual(protein_inference_parameters.grouping_type, "None")
+        self.assertEqual(protein_inference_parameters.grouping_type, None)
         self.assertEqual(
             protein_inference_parameters.max_identifiers_peptide_centric, 5
         )
-        self.assertEqual(protein_inference_parameters.lp_solver, "None")
+        self.assertEqual(protein_inference_parameters.lp_solver, None)
 
         ### STEP 2: Start with running an In Silico Digestion ###
         ### STEP 2: Start with running an In Silico Digestion ###
@@ -157,7 +157,7 @@ class TestLoadPeptideCentricWorkflow(TestCase):
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters.inference_type == "exclusion":
+        if protein_inference_parameters.inference_type == protein_inference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 
@@ -181,7 +181,7 @@ class TestLoadPeptideCentricWorkflow(TestCase):
         inference_type = protein_inference_parameters.inference_type
 
         # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == "parsimony":
+        if inference_type == protein_inference.inference.Inference.PARSIMONY:
             group = protein_inference.inference.Parsimony(
                 data_class=data, digest_class=digest
             )
@@ -189,25 +189,19 @@ class TestLoadPeptideCentricWorkflow(TestCase):
                 glpkinout_directory=GLPKINOUT_PATH, skip_running_glpk=SKIP_RUNNING_GLPK
             )
 
-        if inference_type == "inclusion":
+        if inference_type == protein_inference.inference.Inference.INCLUSION:
             group = protein_inference.inference.Inclusion(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins()
 
-        if inference_type == "exclusion":
+        if inference_type == protein_inference.inference.Inference.EXCLUSION:
             group = protein_inference.inference.Exclusion(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins()
 
-        if inference_type == "exclusion":
-            group = protein_inference.inference.Exclusion(
-                data_class=data, digest_class=digest
-            )
-            group.infer_proteins()
-
-        if inference_type == "peptide_centric":
+        if inference_type == protein_inference.inference.Inference.PEPTIDE_CENTRIC:
             group = protein_inference.inference.PeptideCentric(
                 data_class=data, digest_class=digest
             )

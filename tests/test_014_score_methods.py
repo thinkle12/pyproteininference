@@ -77,7 +77,7 @@ class TestScoreMethods(TestCase):
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters.inference_type == "exclusion":
+        if protein_inference_parameters.inference_type == protein_inference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 

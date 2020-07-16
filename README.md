@@ -27,7 +27,7 @@ Py Protein Inference is an independent Python package that has the ability to ru
  2. Exclusion
  3. Inclusion
  4. Peptide Centric (Protein Group Level)
- 5. No Inference (Selects first protein per peptide)
+ 5. First Protein (Selects first protein per peptide)
  
  Please see the [__Inference Types__](#inference-types) section for more information on Inference Types
  
@@ -74,12 +74,12 @@ For a sample parameter file please see the `parameters/` or `tests/data/` folder
 |---|---|---|
 | score_method | One of any of the following: __multiplicative_log__, __best_peptide_per_protein__, __top_two_combined__, __additive__, __iterative_downweighted_log__, __downweighted_multiplicative_log__, __geometric_mean__. Recommended: __multiplicative_log__ | String |
 | score | PSM score to use for Protein Scoring. If using Percolator output as input this would either be __posterior_error_prob__ or __q-value__. The string typed here should match the column in your input files __EXACTLY__. If using a custom score it will be filtered accordingly with the value in [__custom_restriction__](#data-restriction) | String |
-| score_type | The Type of score that __score__ parameter is. Either __multiplicative__ or __additive__. See [below](#extra-score-information) for more information| String |
+| score_type | The Type of score that __score__ parameter is. Either __multiplicative__ or __additive__. If a larger psm score is "better" than input additive IE (Mascot Ion Score, Xcorr, Percolator Score). If a smaller psm score is "better" than input multiplicative IE (Q Value, Posterior Error Probability). See [below](#extra-score-information) for more information| String |
 #### Extra Score information:
 
  1. The __score_method__, __score__, and __score_type__ methods must be compatible.
  2. If using a PSM score (__score__ parameter) where the lower the score the better IE (__posterior_error_prob__ or __q-value__) then any  __score_method__ can be used except __additive__. __score_type__ must also be set to __multiplicative__
- 3. If using a PSM score (__score__ parameter) where the higher the score the better IE Percolator Score (called __score__ - column name) in the tab delimited percolator output. Then __score_method__ and __score_type__ must both be __additive__
+ 3. If using a PSM score (__score__ parameter) where the higher the score the better IE (Percolator Score, Mascot Ion Score, Xcorr) (Percolator Score is called __score__ - column name) in the tab delimited percolator output. Then __score_method__ and __score_type__ must both be __additive__
 
 ## Identifiers:
 | Parameter | Description |Type|
@@ -95,7 +95,7 @@ For a sample parameter file please see the `parameters/` or `tests/data/` folder
 ## Inference:
 | Parameter | Description |Type|
 |---|---|---|
-| inference_type | The Inference procedure to apply to the analysis. This can be __parsimony__, __inclusion__, __exclusion__, __peptide_centric__, or __None__. Please see [here](#inference-types) for more information on the inference types.  | String |
+| inference_type | The Inference procedure to apply to the analysis. This can be __parsimony__, __inclusion__, __exclusion__, __peptide_centric__, or __first_protein__. Please see [here](#inference-types) for more information on the inference types.  | String |
 | grouping_type | How to group proteins for a given __inference_type__. This can be __subset_peptides__,  __shared_peptides__, or __None__. Typically __subset_peptides__ is used. This parameter only effects grouped proteins and has no impact on protein leads. | String |
 
 ## Digest:
@@ -271,19 +271,19 @@ Py Protein Inference can also be ran via a docker container. To access the docke
 2. Ability to pull the docker image from docker hub
 
 Pulling the image from docker hub:
-`docker pull pyproteininference:0.4.3`
+`docker pull pyproteininference:0.4.6`
 
-It is recommended to pull the image with the highest version number. Currently this is 0.4.3.
+It is recommended to pull the image with the highest version number. Currently this is 0.4.6.
 
 Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
 Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
 See the example below:
-`docker run -v /path/to/data/:/data pyproteininference:0.4.3 protein_inference_cli.py --help -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+`docker run -v /path/to/data/:/data pyproteininference:0.4.6 protein_inference_cli.py --help -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
 
 #### Building the Docker image from source
 Use the following command from the root directory of the source code:
 Here we use version `0.4.3` and tag as that version as well.
-`docker build . -f Dockerfile -t pyproteininference:0.4.3 --build-arg VERSION=0.4.3`
+`docker build . -f Dockerfile -t pyproteininference:0.4.6 --build-arg VERSION=0.4.6`
 
 ## Extra Information
 
@@ -312,6 +312,11 @@ Exclusion maps all peptides to all possible proteins but removes any peptide fro
 For Peptide Centric inference all peptides are assigned to all possible proteins. Each peptide is then assigned a protein group based on the mentioned possible protein map. For protein group naming, the possible proteins for the peptides in the group are concatenated to a list separated by a semi-colon. 
 
 ![images/peptide_centric.jpeg](images/peptide_centric.jpeg)
+
+#### First Protein Notes
+
+For the First Protein inference method each peptide gets assigned to one protein only. The protein that gets assigned to each peptide is the first listed protein. This is typically the first protein listed in the fasta database file.
+
 
 ### Parsimony Dependancies 
 Parsimony currently has potential external dependancies depending on the __lp_solver__ that is selected in the parameter file.

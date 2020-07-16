@@ -152,23 +152,23 @@ class DataStore(object):
         return our_proteins_sorted
 
     @classmethod
-    def sort_protein_lists(cls, list_of_group_objects, higher_or_lower):
+    def sort_protein_group_objects(cls, list_of_group_objects, higher_or_lower):
         """
         Class Method to sort a list of :py:class:`protein_inferenece.physical.ProteinGroup` objects by score and number of peptides
 
         Args:
             list_of_group_objects (list): list of :py:class:`protein_inferenece.physical.ProteinGroup` objects
-            higher_or_lower (str): String to indicate if a higher or lower protein score is "better"
+            higher_or_lower (str): String to indicate if a "higher" or "lower" protein score is "better"
 
         Returns:
             list: list of sorted :py:class:`protein_inferenece.physical.ProteinGroup` objects
 
         Example:
-            >>> list_of_group_objects = protein_inference.datastore.DataStore.sort_protein_lists(
-            >>>     list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
+            >>> list_of_group_objects = protein_inference.datastore.DataStore.sort_protein_group_objects(
+            >>>     list_of_group_objects=list_of_group_objects, higher_or_lower="higher"
             >>> )
         """
-        if higher_or_lower == "lower":
+        if higher_or_lower == cls.LOWER_PSM_SCORE:
 
             list_of_group_objects = sorted(
                 list_of_group_objects,
@@ -178,7 +178,7 @@ class DataStore(object):
                 ),
                 reverse=False,
             )
-        elif higher_or_lower == "higher":
+        elif higher_or_lower == cls.HIGHER_PSM_SCORE:
 
             list_of_group_objects = sorted(
                 list_of_group_objects,
@@ -192,29 +192,29 @@ class DataStore(object):
         return list_of_group_objects
 
     @classmethod
-    def sort_protein_groups(cls, scores_grouped, higher_or_lower):
+    def sort_protein_objects(cls, scores_grouped, higher_or_lower):
         """
         Class Method to sort a list of :py:class:`protein_inferenece.physical.Protein` objects by score and number of peptides
 
         Args:
             scores_grouped (list): list of :py:class:`protein_inferenece.physical.Protein` objects
-            higher_or_lower (str): String to indicate if a higher or lower protein score is "better"
+            higher_or_lower (str): String to indicate if a "higher" or "lower" protein score is "better"
 
         Returns:
             list: list of sorted :py:class:`protein_inferenece.physical.Protein` objects
 
         Example:
-            >>> scores_grouped = protein_inference.datastore.DataStore.sort_protein_groups(
-            >>>     scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
+            >>> scores_grouped = protein_inference.datastore.DataStore.sort_protein_objects(
+            >>>     scores_grouped=scores_grouped, higher_or_lower="higher"
             >>> )
         """
-        if higher_or_lower == "lower":
+        if higher_or_lower == cls.LOWER_PSM_SCORE:
             scores_grouped = sorted(
                 scores_grouped,
                 key=lambda k: (float(k[0].score), -float(k[0].num_peptides)),
                 reverse=False,
             )
-        if higher_or_lower == "higher":
+        if higher_or_lower == cls.HIGHER_PSM_SCORE:
             scores_grouped = sorted(
                 scores_grouped,
                 key=lambda k: (float(k[0].score), float(k[0].num_peptides)),

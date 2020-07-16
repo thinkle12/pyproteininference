@@ -60,7 +60,10 @@ class TestCustomRestrict(TestCase):
 
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest.digest_fasta_database()
@@ -79,7 +82,7 @@ class TestCustomRestrict(TestCase):
             pep_and_prot_data, digest_class=digest
         )
 
-        data.restrict_psm_data(parameter_file_object=protein_inference_parameters)
+        data.restrict_psm_data()
 
         # Make sure we restrict by custom score
         self.assertEqual(len(data.main_data_restricted), 11)
@@ -101,7 +104,10 @@ class TestCustomRestrict(TestCase):
 
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest.digest_fasta_database()
@@ -120,7 +126,7 @@ class TestCustomRestrict(TestCase):
             pep_and_prot_data, digest_class=digest
         )
 
-        data.restrict_psm_data(parameter_file_object=protein_inference_parameters)
+        data.restrict_psm_data()
 
         # Make sure custom score gets restricted
         self.assertEqual(len(data.main_data_restricted), 9)

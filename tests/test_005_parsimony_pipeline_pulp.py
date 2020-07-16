@@ -133,7 +133,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         self.assertEqual(
             protein_inference_parameters.score_method, "multiplicative_log"
         )
-        self.assertEqual(protein_inference_parameters.score, "posterior_error_prob")
+        self.assertEqual(protein_inference_parameters.psm_score, "posterior_error_prob")
         self.assertEqual(protein_inference_parameters.score_type, "multiplicative")
         self.assertEqual(protein_inference_parameters.decoy_symbol, "##")
         self.assertEqual(protein_inference_parameters.isoform_symbol, "-")
@@ -151,7 +151,10 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest.digest_fasta_database()
@@ -181,21 +184,21 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
-        data.restrict_psm_data(parameter_file_object=protein_inference_parameters)
+        data.restrict_psm_data()
 
         self.assertEqual(len(data.main_data_restricted), 26)
 
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input
-        data.create_scoring_input(score_input=protein_inference_parameters.score)
+        data.create_scoring_input()
 
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         if protein_inference_parameters.inference_type == "exclusion":
             # This gets ran if we run exclusion...
-            data.exclude_non_distinguishing_peptides(digest_class=digest)
+            data.exclude_non_distinguishing_peptides()
 
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
@@ -238,7 +241,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
-        data.set_based_fdr(false_discovery_rate=float(protein_inference_parameters.fdr))
+        data.set_based_fdr()
         data.calculate_q_values()
 
         # Print the len of restricted data... which is how many protein groups pass FDR threshold
@@ -468,7 +471,10 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest.digest_fasta_database()
@@ -498,21 +504,21 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
-        data.restrict_psm_data(parameter_file_object=protein_inference_parameters)
+        data.restrict_psm_data()
 
         self.assertEqual(len(data.main_data_restricted), 26)
 
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input
-        data.create_scoring_input(score_input=protein_inference_parameters.score)
+        data.create_scoring_input()
 
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         if protein_inference_parameters.inference_type == "exclusion":
             # This gets ran if we run exclusion...
-            data.exclude_non_distinguishing_peptides(digest_class=digest)
+            data.exclude_non_distinguishing_peptides()
 
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
@@ -555,7 +561,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
-        data.set_based_fdr(false_discovery_rate=float(protein_inference_parameters.fdr))
+        data.set_based_fdr()
         data.calculate_q_values()
 
         # Print the len of restricted data... which is how many protein groups pass FDR threshold
@@ -782,7 +788,10 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=True,
         )
         digest.digest_fasta_database()
@@ -812,21 +821,21 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
-        data.restrict_psm_data(parameter_file_object=protein_inference_parameters)
+        data.restrict_psm_data()
 
         self.assertEqual(len(data.main_data_restricted), 26)
 
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input
-        data.create_scoring_input(score_input=protein_inference_parameters.score)
+        data.create_scoring_input()
 
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         if protein_inference_parameters.inference_type == "exclusion":
             # This gets ran if we run exclusion...
-            data.exclude_non_distinguishing_peptides(digest_class=digest)
+            data.exclude_non_distinguishing_peptides()
 
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
@@ -869,7 +878,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
-        data.set_based_fdr(false_discovery_rate=float(protein_inference_parameters.fdr))
+        data.set_based_fdr()
         data.calculate_q_values()
 
         # Print the len of restricted data... which is how many protein groups pass FDR threshold

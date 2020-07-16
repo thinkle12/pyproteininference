@@ -27,7 +27,7 @@ Py Protein Inference is an independent Python package that has the ability to ru
  2. Exclusion
  3. Inclusion
  4. Peptide Centric (Protein Group Level)
- 5. No Inference (Selects first protein per peptide)
+ 5. First Protein (Selects first protein per peptide)
  
  Please see the [__Inference Types__](#inference-types) section for more information on Inference Types
  
@@ -95,7 +95,7 @@ For a sample parameter file please see the `parameters/` or `tests/data/` folder
 ## Inference:
 | Parameter | Description |Type|
 |---|---|---|
-| inference_type | The Inference procedure to apply to the analysis. This can be __parsimony__, __inclusion__, __exclusion__, __peptide_centric__, or __None__. Please see [here](#inference-types) for more information on the inference types.  | String |
+| inference_type | The Inference procedure to apply to the analysis. This can be __parsimony__, __inclusion__, __exclusion__, __peptide_centric__, or __first_protein__. Please see [here](#inference-types) for more information on the inference types.  | String |
 | grouping_type | How to group proteins for a given __inference_type__. This can be __subset_peptides__,  __shared_peptides__, or __None__. Typically __subset_peptides__ is used. This parameter only effects grouped proteins and has no impact on protein leads. | String |
 
 ## Digest:
@@ -271,19 +271,19 @@ Py Protein Inference can also be ran via a docker container. To access the docke
 2. Ability to pull the docker image from docker hub
 
 Pulling the image from docker hub:
-`docker pull pyproteininference:0.4.3`
+`docker pull pyproteininference:0.4.6`
 
-It is recommended to pull the image with the highest version number. Currently this is 0.4.3.
+It is recommended to pull the image with the highest version number. Currently this is 0.4.6.
 
 Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
 Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
 See the example below:
-`docker run -v /path/to/data/:/data pyproteininference:0.4.3 protein_inference_cli.py --help -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+`docker run -v /path/to/data/:/data pyproteininference:0.4.6 protein_inference_cli.py --help -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
 
 #### Building the Docker image from source
 Use the following command from the root directory of the source code:
 Here we use version `0.4.3` and tag as that version as well.
-`docker build . -f Dockerfile -t pyproteininference:0.4.3 --build-arg VERSION=0.4.3`
+`docker build . -f Dockerfile -t pyproteininference:0.4.6 --build-arg VERSION=0.4.6`
 
 ## Extra Information
 
@@ -312,6 +312,11 @@ Exclusion maps all peptides to all possible proteins but removes any peptide fro
 For Peptide Centric inference all peptides are assigned to all possible proteins. Each peptide is then assigned a protein group based on the mentioned possible protein map. For protein group naming, the possible proteins for the peptides in the group are concatenated to a list separated by a semi-colon. 
 
 ![images/peptide_centric.jpeg](images/peptide_centric.jpeg)
+
+#### First Protein Notes
+
+For the First Protein inference method each peptide gets assigned to one protein only. The protein that gets assigned to each peptide is the first listed protein. This is typically the first protein listed in the fasta database file.
+
 
 ### Parsimony Dependancies 
 Parsimony currently has potential external dependancies depending on the __lp_solver__ that is selected in the parameter file.

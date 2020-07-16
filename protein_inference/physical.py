@@ -195,6 +195,8 @@ class Psm(object):
     FRONT_FLANKING_REGEX = re.compile("^[A-Z|-][.]")
     BACK_FLANKING_REGEX = re.compile("[.][A-Z|-]$")
 
+    SCORE_ATTRIBUTE_NAMES = set(["pepvalue", "qvalue", "percscore", "custom_score"])
+
     def __init__(self, identifier):
         """
         Initialization method for the Psm object
@@ -317,9 +319,9 @@ class Psm(object):
 
         """
         # Assign a main score based on user input
-        if score not in set(["pepvalue", "qvalue", "percscore", "custom_score"]):
+        if score not in self.SCORE_ATTRIBUTE_NAMES:
             raise ValueError(
-                "Scores must either be pepvalue, qvalue, percscore, or custom_score"
+                "Scores must either be one of: '{}'".format(", ".join(self.SCORE_ATTRIBUTE_NAMES))
             )
         else:
             self.main_score = getattr(self, score)

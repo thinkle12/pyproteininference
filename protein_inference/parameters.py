@@ -232,12 +232,7 @@ class ProteinInferenceParameter(object):
         try:
             if 0 <= float(self.fdr) <= 1:
                 self.logger.info("FDR Input {}".format(self.fdr))
-            else:
-                raise ValueError(
-                    "FDR must be a decimal between 0 and 1, FDR provided: {}".format(
-                        self.fdr
-                    )
-                )
+
         except ValueError:
             raise ValueError(
                 "FDR must be a decimal between 0 and 1, FDR provided: {}".format(
@@ -248,15 +243,11 @@ class ProteinInferenceParameter(object):
         try:
             if 0 <= float(self.restrict_pep) <= 1:
                 self.logger.info("PEP restriction {}".format(self.restrict_pep))
-            else:
-                raise ValueError(
-                    "PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(
-                        self.restrict_pep
-                    )
-                )
+
         except ValueError:
             if not self.restrict_pep or self.restrict_pep.lower() == "none":
                 self.restrict_pep = None
+                self.logger.info("Not restrict by PEP Value")
             else:
                 raise ValueError(
                     "PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(
@@ -268,15 +259,10 @@ class ProteinInferenceParameter(object):
             if 0 <= float(self.restrict_q) <= 1:
                 self.logger.info("Q Value restriction {}".format(self.restrict_q))
 
-            else:
-                raise ValueError(
-                    "Q Value restriction must be a decimal between 0 and 1, Q Value restriction provided: {}".format(
-                        self.restrict_q
-                    )
-                )
         except ValueError:
             if not self.restrict_q or self.restrict_q.lower() == "none":
                 self.restrict_q = None
+                self.logger.info("Not restrict by Q Value")
             else:
                 raise ValueError(
                     "Q Value restriction must be a decimal between 0 and 1, Q Value restriction provided: {}".format(
@@ -286,56 +272,40 @@ class ProteinInferenceParameter(object):
 
         try:
             int(self.missed_cleavages)
-        except ValueError:
-            raise ValueError(
-                "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
-                    self.missed_cleavages
-                )
-            )
-        if type(self.missed_cleavages) == int:
             self.logger.info(
                 "Missed Cleavages selected: {}".format(self.missed_cleavages)
             )
-
-        else:
+        except ValueError:
             raise ValueError(
                 "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
                     self.missed_cleavages
                 )
             )
 
-        if self.restrict_peptide_length:
-            try:
-                int(self.restrict_peptide_length)
-                self.logger.info(
-                    "Peptide Length Restriction: Len {}".format(
-                        self.restrict_peptide_length
-                    ))
-            except ValueError:
-                if not self.restrict_peptide_length or self.restrict_peptide_length.lower() == "none":
-                    self.restrict_peptide_length = None
-                    self.logger.info("Not Restricting by Peptide Length")
-                else:
-                    raise ValueError(
-                        "Peptide Length Restriction must be an integer, Provided Peptide Length Restriction value: {}".format(
-                            self.restrict_peptide_length
-                        )
-                )
-        else:
-            self.logger.info("Not Restricting by Peptide Length")
-
         try:
-            if float(self.restrict_custom):
-                self.logger.info("Custom restriction {}".format(self.restrict_custom))
+            int(self.restrict_peptide_length)
+            self.logger.info(
+                "Peptide Length Restriction: Len {}".format(
+                    self.restrict_peptide_length
+                ))
+        except ValueError:
+            if not self.restrict_peptide_length or self.restrict_peptide_length.lower() == "none":
+                self.restrict_peptide_length = None
+                self.logger.info("Not Restricting by Peptide Length")
             else:
                 raise ValueError(
-                    "Custom restriction must be a numeric: {}".format(
-                        self.restrict_custom
+                    "Peptide Length Restriction must be an integer, Provided Peptide Length Restriction value: {}".format(
+                        self.restrict_peptide_length
                     )
-                )
+            )
+
+        try:
+            float(self.restrict_custom)
+            self.logger.info("Custom restriction {}".format(self.restrict_custom))
         except ValueError:
             if not self.restrict_custom or self.restrict_custom.lower() == "none":
                 self.restrict_custom = None
+                self.logger.info("Not Restricting by Custom Value")
             else:
                 raise ValueError(
                     "Custom restriction must be a number, Custom restriction provided: {}".format(
@@ -397,12 +367,12 @@ class ProteinInferenceParameter(object):
         # Check to see if combination of score (column), method(multiplicative log, additive), and score type (multiplicative/additive) is possible...
         # This will be super custom
 
-        if self.score_type == "additive" and self.score_method != "additive":
+        if self.score_type == Score.ADDITIVE_SCORE_TYPE and self.score_method != Score.ADDITIVE:
             raise ValueError(
                 "If Score type is 'additive' (Higher PSM score is better) then you must use the 'additive' score method"
             )
 
-        elif self.score_type == "multiplicative" and self.score_method == "additive":
+        elif self.score_type == Score.MULTIPLICATIVE_SCORE_TYPE and self.score_method == Score.ADDITIVE:
             raise ValueError(
                 "If Score type is 'multiplicative' (Lower PSM score is better) "
                 "then you must NOT use the 'additive' score method please "
@@ -440,11 +410,16 @@ class ProteinInferenceParameter(object):
         if self.grouping_type in Inference.GROUPING_TYPES:
             self.logger.info("Using Grouping type '{}'".format(self.grouping_type))
         else:
-            raise ValueError(
-                "Grouping Type '{}' not supported, please use one of the following Grouping Types: '{}'".format(
-                    self.grouping_type, ", ".join(Inference.GROUPING_TYPES)
+            if self.grouping_type.lower() == "none" or not self.grouping_type:
+                self.grouping_type = None
+                self.logger.info("Using Grouping type: None")
+            else:
+
+                raise ValueError(
+                    "Grouping Type '{}' not supported, please use one of the following Grouping Types: '{}'".format(
+                        self.grouping_type, ", ".join(Inference.GROUPING_TYPES)
+                    )
                 )
-            )
 
     def _validate_max_id(self):
         """
@@ -472,7 +447,7 @@ class ProteinInferenceParameter(object):
         if self.lp_solver in Inference.LP_SOLVERS:
             self.logger.info("Using LP Solver '{}'".format(self.lp_solver))
         else:
-            if self.lp_solver.lower() == "none":
+            if self.lp_solver.lower() == "none" or not self.lp_solver:
                 self.lp_solver = None
                 self.logger.info("Setting LP Solver to None")
             else:

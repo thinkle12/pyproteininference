@@ -3,6 +3,7 @@ from Bio import SeqIO
 from logging import getLogger
 from protein_inference.physical import Protein, Psm
 from protein_inference.inference import Inference
+from protein_inference.scoring import Score
 
 
 class DataStore(object):
@@ -34,6 +35,21 @@ class DataStore(object):
         logger (logger.logging): Logger object for logging
 
     """
+
+    SCORE_MAPPER = {
+        "q_value": "qvalue",
+        "pep_value": "pepvalue",
+        "perc_score": "percscore",
+        "score": "percscore",
+        "q-value": "qvalue",
+        "posterior_error_prob": "pepvalue",
+        "posterior_error_probability": "pepvalue",
+    }
+
+    CUSTOM_SCORE_KEY = "custom_score"
+
+    HIGHER_PSM_SCORE = "higher"
+    LOWER_PSM_SCORE = "lower"
 
     # Feed data_store instance the reader class...
     def __init__(self, reader_class, digest_class, validate=True):
@@ -72,16 +88,6 @@ class DataStore(object):
         self.protein_group_objects = [] # List of sorted protein group objects
         self.decoy_symbol = self.parameter_file_object.decoy_symbol # Decoy symbol from parameter file
         self.digest_class = digest_class # Digest class object
-        self.SCORE_MAPPER = {
-            "q_value": "qvalue",
-            "pep_value": "pepvalue",
-            "perc_score": "percscore",
-            "score": "percscore",
-            "q-value": "qvalue",
-            "posterior_error_prob": "pepvalue",
-            "posterior_error_probability": "pepvalue",
-        }
-        self.CUSTOM_SCORE_KEY = "custom_score"
 
         self.logger = getLogger("protein_inference.datastore.DataStore")
 
@@ -147,23 +153,23 @@ class DataStore(object):
         return our_proteins_sorted
 
     @classmethod
-    def sort_protein_lists(cls, list_of_group_objects, higher_or_lower):
+    def sort_protein_group_objects(cls, list_of_group_objects, higher_or_lower):
         """
         Class Method to sort a list of :py:class:`protein_inferenece.physical.ProteinGroup` objects by score and number of peptides
 
         Args:
             list_of_group_objects (list): list of :py:class:`protein_inferenece.physical.ProteinGroup` objects
-            higher_or_lower (str): String to indicate if a higher or lower protein score is "better"
+            higher_or_lower (str): String to indicate if a "higher" or "lower" protein score is "better"
 
         Returns:
             list: list of sorted :py:class:`protein_inferenece.physical.ProteinGroup` objects
 
         Example:
-            >>> list_of_group_objects = protein_inference.datastore.DataStore.sort_protein_lists(
-            >>>     list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
+            >>> list_of_group_objects = protein_inference.datastore.DataStore.sort_protein_group_objects(
+            >>>     list_of_group_objects=list_of_group_objects, higher_or_lower="higher"
             >>> )
         """
-        if higher_or_lower == "lower":
+        if higher_or_lower == cls.LOWER_PSM_SCORE:
 
             list_of_group_objects = sorted(
                 list_of_group_objects,
@@ -173,7 +179,7 @@ class DataStore(object):
                 ),
                 reverse=False,
             )
-        elif higher_or_lower == "higher":
+        elif higher_or_lower == cls.HIGHER_PSM_SCORE:
 
             list_of_group_objects = sorted(
                 list_of_group_objects,
@@ -187,29 +193,29 @@ class DataStore(object):
         return list_of_group_objects
 
     @classmethod
-    def sort_protein_groups(cls, scores_grouped, higher_or_lower):
+    def sort_protein_objects(cls, scores_grouped, higher_or_lower):
         """
         Class Method to sort a list of :py:class:`protein_inferenece.physical.Protein` objects by score and number of peptides
 
         Args:
             scores_grouped (list): list of :py:class:`protein_inferenece.physical.Protein` objects
-            higher_or_lower (str): String to indicate if a higher or lower protein score is "better"
+            higher_or_lower (str): String to indicate if a "higher" or "lower" protein score is "better"
 
         Returns:
             list: list of sorted :py:class:`protein_inferenece.physical.Protein` objects
 
         Example:
-            >>> scores_grouped = protein_inference.datastore.DataStore.sort_protein_groups(
-            >>>     scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
+            >>> scores_grouped = protein_inference.datastore.DataStore.sort_protein_objects(
+            >>>     scores_grouped=scores_grouped, higher_or_lower="higher"
             >>> )
         """
-        if higher_or_lower == "lower":
+        if higher_or_lower == cls.LOWER_PSM_SCORE:
             scores_grouped = sorted(
                 scores_grouped,
                 key=lambda k: (float(k[0].score), -float(k[0].num_peptides)),
                 reverse=False,
             )
-        if higher_or_lower == "higher":
+        if higher_or_lower == cls.HIGHER_PSM_SCORE:
             scores_grouped = sorted(
                 scores_grouped,
                 key=lambda k: (float(k[0].score), float(k[0].num_peptides)),
@@ -462,12 +468,12 @@ class DataStore(object):
 
         if custom_threshold:
             custom_restricted = []
-            if self.parameter_file_object.score_type == "multiplicative":
+            if self.parameter_file_object.score_type == Score.MULTIPLICATIVE_SCORE_TYPE:
                 for psms in restricted_data:
                     if psms.custom_score <= custom_threshold:
                         custom_restricted.append(psms)
 
-            if self.parameter_file_object.score_type == "additive":
+            if self.parameter_file_object.score_type == Score.ADDITIVE_SCORE_TYPE:
                 for psms in restricted_data:
                     if psms.custom_score >= custom_threshold:
                         custom_restricted.append(psms)
@@ -632,7 +638,9 @@ class DataStore(object):
         """
         Method to determine if a higher or lower score is better for a given combination of score input and score type
 
-        This method sets the :attr:`high_low_better` Attribute for the DataStore object
+        This method sets the :attr:`high_low_better` Attribute for the DataStore object.
+
+        This method depends on the output from the Score class to be sorted properly from best to worst score
 
         Returns:
             str: String indicating "higher" or "lower" depending on if a higher or lower score is a better protein score
@@ -652,10 +660,10 @@ class DataStore(object):
         best_score = self.scored_proteins[0].score
 
         if float(best_score) > float(worst_score):
-            higher_or_lower = "higher"
+            higher_or_lower = self.HIGHER_PSM_SCORE
 
         if float(best_score) < float(worst_score):
-            higher_or_lower = "lower"
+            higher_or_lower = self.LOWER_PSM_SCORE
 
         logger.info("best score = " + str(best_score))
         logger.info("worst score = " + str(worst_score))
@@ -991,7 +999,7 @@ class DataStore(object):
                 cur_target_protein_object = self.scored_proteins[cur_target_index]
                 total_targets.append(cur_target_protein_object.identifier)
 
-                if higher_or_lower == "higher":
+                if higher_or_lower == self.HIGHER_PSM_SCORE:
                     if cur_target_protein_object.score > cur_decoy_protein_object.score:
                         index_to_remove.append(cur_decoy_index)
                         decoys_removed.append(cur_decoy_index)
@@ -1003,7 +1011,7 @@ class DataStore(object):
                         cur_decoy_protein_object.picked = True
                         cur_target_protein_object.picked = False
 
-                if higher_or_lower == "lower":
+                if higher_or_lower == self.LOWER_PSM_SCORE:
                     if cur_target_protein_object.score < cur_decoy_protein_object.score:
                         index_to_remove.append(cur_decoy_index)
                         decoys_removed.append(cur_decoy_index)
@@ -1028,7 +1036,7 @@ class DataStore(object):
         picked_list = []
         removed_proteins = []
         for protein_objects in self.scored_proteins:
-            if protein_objects.picked == True:
+            if protein_objects.picked:
                 picked_list.append(protein_objects)
             else:
                 removed_proteins.append(protein_objects)

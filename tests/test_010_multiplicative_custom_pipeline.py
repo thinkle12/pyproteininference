@@ -131,7 +131,7 @@ class TestMultiplicativeWorkflow(TestCase):
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters.inference_type == "exclusion":
+        if protein_inference_parameters.inference_type == protein_inference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 
@@ -155,31 +155,25 @@ class TestMultiplicativeWorkflow(TestCase):
         inference_type = protein_inference_parameters.inference_type
 
         # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == "parsimony":
+        if inference_type == protein_inference.inference.Inference.PARSIMONY:
             group = protein_inference.inference.Parsimony(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins(glpkinout_directory=None, skip_running_glpk=None)
 
-        if inference_type == "inclusion":
+        if inference_type == protein_inference.inference.Inference.INCLUSION:
             group = protein_inference.inference.Inclusion(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins()
 
-        if inference_type == "exclusion":
+        if inference_type == protein_inference.inference.Inference.EXCLUSION:
             group = protein_inference.inference.Exclusion(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins()
 
-        if inference_type == "exclusion":
-            group = protein_inference.inference.Exclusion(
-                data_class=data, digest_class=digest
-            )
-            group.infer_proteins()
-
-        if inference_type == "peptide_centric":
+        if inference_type == protein_inference.inference.Inference.PEPTIDE_CENTRIC:
             group = protein_inference.inference.PeptideCentric(
                 data_class=data, digest_class=digest
             )

@@ -1,6 +1,7 @@
 import os
 from protein_inference.physical import Psm
 from protein_inference.datastore import DataStore
+from protein_inference.inference import Inference
 import csv
 import itertools
 from logging import getLogger
@@ -115,7 +116,7 @@ class Reader(object):
             pass
 
         # If no inference only select first poss protein
-        if parameter_file_object.inference_type == "none":
+        if parameter_file_object.inference_type == Inference.FIRST_PROTEIN:
             psm.possible_proteins = [psm.possible_proteins[0]]
 
         return psm
@@ -337,7 +338,7 @@ class PercolatorReader(Reader):
                 p.percscore = float(psm_info[self.perc_score_index])
                 p.qvalue = float(psm_info[self.q_value_index])
                 p.pepvalue = float(psm_info[self.posterior_error_prob_index])
-                if self.parameter_file_object.inference_type == "none":
+                if self.parameter_file_object.inference_type == Inference.FIRST_PROTEIN:
                     poss_proteins = [psm_info[self.proteinIDs_index]]
                 else:
                     poss_proteins = list(
@@ -682,7 +683,7 @@ class GenericReader(Reader):
         ]
 
         # If we select to not run inference at all
-        if self.parameter_file_object.inference_type == "none":
+        if self.parameter_file_object.inference_type == Inference.FIRST_PROTEIN:
             # Only allow 1 Protein per PSM
             self.MAX_ALLOWED_ALTERNATIVE_PROTEINS = 1
 
@@ -883,7 +884,7 @@ class GenericReader(Reader):
                     except KeyError:
                         break
                 # Remove potential Repeats
-                if self.parameter_file_object.inference_type != "none":
+                if self.parameter_file_object.inference_type != Inference.FIRST_PROTEIN:
                     p.possible_proteins = list(set(p.possible_proteins))
 
                 # Get PSM ID

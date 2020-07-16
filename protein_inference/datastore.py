@@ -3,6 +3,7 @@ from Bio import SeqIO
 from logging import getLogger
 from protein_inference.physical import Protein, Psm
 from protein_inference.inference import Inference
+from protein_inference.scoring import Score
 
 
 class DataStore(object):
@@ -467,12 +468,12 @@ class DataStore(object):
 
         if custom_threshold:
             custom_restricted = []
-            if self.parameter_file_object.score_type == "multiplicative":
+            if self.parameter_file_object.score_type == Score.MULTIPLICATIVE_SCORE_TYPE:
                 for psms in restricted_data:
                     if psms.custom_score <= custom_threshold:
                         custom_restricted.append(psms)
 
-            if self.parameter_file_object.score_type == "additive":
+            if self.parameter_file_object.score_type == Score.ADDITIVE_SCORE_TYPE:
                 for psms in restricted_data:
                     if psms.custom_score >= custom_threshold:
                         custom_restricted.append(psms)

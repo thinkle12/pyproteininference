@@ -148,6 +148,13 @@ class PercolatorReader(Reader):
 
     """
 
+    PSMID_INDEX = 0
+    PERC_SCORE_INDEX = 1
+    Q_VALUE_INDEX = 2
+    POSTERIOR_ERROR_PROB_INDEX = 3
+    PEPTIDE_INDEX = 4
+    PROTEINIDS_INDEX = 5
+
     def __init__(
         self,
         digest_class,
@@ -183,12 +190,6 @@ class PercolatorReader(Reader):
         self._validate_input()
         # Define Indicies based on input
 
-        self.psmid_index = 0
-        self.perc_score_index = 1
-        self.q_value_index = 2
-        self.posterior_error_prob_index = 3
-        self.peptide_index = 4
-        self.proteinIDs_index = 5
         self.psms = None
         self.search_id = None
         self.digest_class = digest_class

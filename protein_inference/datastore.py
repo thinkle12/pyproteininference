@@ -1426,14 +1426,23 @@ class DataStore(object):
         # Check to see if we find any proteins with isoform info in name in our input files
         proteins = [x.possible_proteins for x in self.main_data_form]
         flat_proteins = set([item for sublist in proteins for item in sublist])
-        non_iso = [
-            x
-            for x in flat_proteins
-            if self.parameter_file_object.isoform_symbol not in x
-        ]
-        iso = [
-            x for x in flat_proteins if self.parameter_file_object.isoform_symbol in x
-        ]
+        if self.parameter_file_object.isoform_symbol:
+            non_iso = [
+                x
+                for x in flat_proteins
+                if self.parameter_file_object.isoform_symbol not in x
+            ]
+
+        else:
+            non_iso = [x for x in flat_proteins]
+
+        if self.parameter_file_object.isoform_symbol:
+            iso = [
+                x for x in flat_proteins if self.parameter_file_object.isoform_symbol in x
+            ]
+
+        else:
+            iso = []
         logger.info(
             "Number of Non Isoform Labeled Proteins in Data Files: {}".format(
                 len(non_iso)

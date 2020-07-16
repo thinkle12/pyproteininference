@@ -73,7 +73,7 @@ class Export(object):
         data = self.data_class
         tag = data.parameter_file_object.tag
 
-        if "leads" == export_type:
+        if self.EXPORT_LEADS == export_type:
             filename = "{}_leads_{}_{}.csv".format(
                 tag, data.short_score_method, data.psm_score
             )
@@ -83,7 +83,7 @@ class Export(object):
             )
             self.csv_export_leads_restricted(filename_out=complete_filepath)
 
-        if "all" == export_type:
+        if self.EXPORT_ALL == export_type:
             filename = "{}_all_{}_{}.csv".format(
                 tag, data.short_score_method, data.psm_score
             )
@@ -93,7 +93,7 @@ class Export(object):
             )
             self.csv_export_all_restricted(complete_filepath)
 
-        if "comma_sep" == export_type:
+        if self.EXPORT_COMMA_SEP == export_type:
             filename = "{}_comma_sep_{}_{}.csv".format(
                 tag, data.short_score_method, data.psm_score
             )
@@ -103,7 +103,7 @@ class Export(object):
             )
             self.csv_export_comma_sep_restricted(complete_filepath)
 
-        if "q_value_comma_sep" == export_type:
+        if self.EXPORT_Q_VALUE_COMMA_SEP == export_type:
             filename = "{}_q_value_comma_sep_{}_{}.csv".format(
                 tag, data.short_score_method, data.psm_score
             )
@@ -113,7 +113,7 @@ class Export(object):
             )
             self.csv_export_q_value_comma_sep(complete_filepath)
 
-        if "q_value" == export_type:
+        if self.EXPORT_Q_VALUE == export_type:
             filename = "{}_q_value_leads_{}_{}.csv".format(
                 tag, data.short_score_method, data.psm_score
             )
@@ -123,7 +123,7 @@ class Export(object):
             )
             self.csv_export_q_value_leads(complete_filepath)
 
-        if "q_value_all" == export_type:
+        if self.EXPORT_Q_VALUE_ALL == export_type:
             filename = "{}_q_value_all_{}_{}.csv".format(
                 tag, data.short_score_method, data.psm_score
             )
@@ -133,7 +133,7 @@ class Export(object):
             )
             self.csv_export_q_value_all(complete_filepath)
 
-        if "peptides" == export_type:
+        if self.EXPORT_PEPTIDES == export_type:
             filename = "{}_q_value_leads_peptides_{}_{}.csv".format(
                 tag, data.short_score_method, data.psm_score
             )
@@ -143,7 +143,7 @@ class Export(object):
             )
             self.csv_export_q_value_leads_peptides(complete_filepath)
 
-        if "psms" == export_type:
+        if self.EXPORT_PSMS == export_type:
             filename = "{}_q_value_leads_psms_{}_{}.csv".format(
                 tag, data.short_score_method, data.psm_score
             )
@@ -153,7 +153,7 @@ class Export(object):
             )
             self.csv_export_q_value_leads_psms(complete_filepath)
 
-        if "psm_ids" == export_type:
+        if self.EXPORT_PSM_IDS == export_type:
             filename = "{}_q_value_leads_psm_ids_{}_{}.csv".format(
                 tag, data.short_score_method, data.psm_score
             )

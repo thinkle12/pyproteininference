@@ -75,23 +75,23 @@ class Inference(object):
         logger.info("Running Inference with Inference Type: {}".format(inference_type))
 
         # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == "parsimony":
+        if inference_type == Inference.PARSIMONY:
             group = Parsimony(data_class=self.data_class, digest_class=self.digest_class)
             group.infer_proteins()
 
-        if inference_type == "inclusion":
+        if inference_type == Inference.INCLUSION:
             group = Inclusion(data_class=self.data_class, digest_class=self.digest_class)
             group.infer_proteins()
 
-        if inference_type == "exclusion":
+        if inference_type == Inference.EXCLUSION:
             group = Exclusion(data_class=self.data_class, digest_class=self.digest_class)
             group.infer_proteins()
 
-        if inference_type == "none":
+        if inference_type == Inference.FIRST_PROTEIN:
             group = FirstProtein(data_class=self.data_class, digest_class=self.digest_class)
             group.infer_proteins()
 
-        if inference_type == "peptide_centric":
+        if inference_type == Inference.PEPTIDE_CENTRIC:
             group = PeptideCentric(data_class=self.data_class, digest_class=self.digest_class)
             group.infer_proteins()
 
@@ -128,7 +128,7 @@ class Inference(object):
             scored_data, key=lambda k: (len(k.raw_peptides), k.identifier), reverse=True
         )
 
-        if inference_type == "parsimony":
+        if inference_type == Inference.PARSIMONY:
             scored_proteins = lead_protein_objects
             scored_proteins = sorted(
                 scored_proteins,
@@ -205,7 +205,7 @@ class Inference(object):
 
                         ### TODO put in if statement here... if grouping_type==None then skip this...
                         # Assign proteins to groups based on shared peptide... unless the protein is equivalent to the current identifier
-                        if inference_type != "none" and inference_type != "inclusion":
+                        if inference_type != Inference.FIRST_PROTEIN and inference_type != Inference.INCLUSION:
                             for protein in potential_protein_list:
                                 # If statement below to avoid grouping the same protein twice and to not group the lead
                                 if (
@@ -213,7 +213,7 @@ class Inference(object):
                                     and protein != cur_protein_identifier
                                     and protein not in picked_removed
                                     and protein not in missing_proteins
-                                    and inference_type != "none"
+                                    and inference_type != Inference.FIRST_PROTEIN
                                 ):
                                     try:
                                         # Try to find its object using protein_finder (list of identifiers) and scored_proteins (list of Protein Objects)
@@ -242,7 +242,6 @@ class Inference(object):
                                                 current_grouped_proteins.add(
                                                     current_protein_object
                                                 )
-                                                # if inference_type!="inclusion":
                                                 protein_tracker.add(
                                                     current_protein_object
                                                 )
@@ -353,7 +352,6 @@ class Inference(object):
         list_of_proteins_grouped = []
         list_of_group_objects = []
         for protein_group in grouped_protein_objects:
-            # TODO, This split needs to get moved to an external function or method and should be backed by param file
             protein_group.peptides = set(
                 [
                     Psm.split_peptide(peptide_string=x)
@@ -795,7 +793,7 @@ class Inclusion(Inference):
 
         group_dict = self._group_by_peptides(
             scored_data=self.scored_data,
-            inference_type="inclusion",
+            inference_type=Inference.INCLUSION,
             grouping_type=self.data_class.parameter_file_object.grouping_type,
         )
 
@@ -872,7 +870,7 @@ class Exclusion(Inference):
 
         group_dict = self._group_by_peptides(
             scored_data=self.scored_data,
-            inference_type="exclusion",
+            inference_type=Inference.EXCLUSION,
             grouping_type=self.data_class.parameter_file_object.grouping_type,
         )
 
@@ -1252,7 +1250,7 @@ class Parsimony(Inference):
 
         group_dict = self._group_by_peptides(
             scored_data=scored_data,
-            inference_type="parsimony",
+            inference_type=Inference.PARSIMONY,
             lead_protein_objects=self.lead_protein_objects,
             grouping_type=self.data_class.parameter_file_object.grouping_type,
         )
@@ -1456,7 +1454,7 @@ class Parsimony(Inference):
 
         group_dict = self._group_by_peptides(
             scored_data=scored_data,
-            inference_type="parsimony",
+            inference_type=Inference.PARSIMONY,
             lead_protein_objects=self.lead_protein_objects,
             grouping_type=self.data_class.parameter_file_object.grouping_type,
         )
@@ -1608,7 +1606,7 @@ class FirstProtein(Inference):
 
         group_dict = self._group_by_peptides(
             scored_data=self.scored_data,
-            inference_type="none",
+            inference_type=Inference.FIRST_PROTEIN,
             grouping_type=self.data_class.parameter_file_object.grouping_type,
         )
 

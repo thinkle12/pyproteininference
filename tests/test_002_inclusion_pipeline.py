@@ -95,7 +95,7 @@ class TestLoadInclusionWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.reviewed_identifier_symbol, "sp|")
         self.assertEqual(protein_inference_parameters.inference_type, "inclusion")
         self.assertEqual(protein_inference_parameters.tag, "test_inclusion")
-        self.assertEqual(protein_inference_parameters.grouping_type, "None")
+        self.assertEqual(protein_inference_parameters.grouping_type, None)
         self.assertEqual(
             protein_inference_parameters.max_identifiers_peptide_centric, 5
         )
@@ -151,7 +151,7 @@ class TestLoadInclusionWorkflow(TestCase):
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters.inference_type == "exclusion":
+        if protein_inference_parameters.inference_type == protein_inference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 
@@ -175,19 +175,19 @@ class TestLoadInclusionWorkflow(TestCase):
         inference_type = protein_inference_parameters.inference_type
 
         # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == "parsimony":
+        if inference_type == protein_inference.inference.Inference.PARSIMONY:
             group = protein_inference.inference.Parsimony(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins()
 
-        if inference_type == "inclusion":
+        if inference_type == protein_inference.inference.Inference.INCLUSION:
             group = protein_inference.inference.Inclusion(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins()
 
-        if inference_type == "exclusion":
+        if inference_type == protein_inference.inference.Inference.EXCLUSION:
             group = protein_inference.inference.Exclusion(
                 data_class=data, digest_class=digest
             )

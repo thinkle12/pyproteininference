@@ -81,7 +81,7 @@ class TestLoadNoInferenceWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.digest_type, "trypsin")
         self.assertEqual(protein_inference_parameters.export, "q_value")
         self.assertEqual(protein_inference_parameters.fdr, 0.01)
-        self.assertEqual(protein_inference_parameters.glpk_path, "None")
+        self.assertEqual(protein_inference_parameters.glpk_path, None)
         self.assertEqual(protein_inference_parameters.missed_cleavages, 3)
         self.assertEqual(protein_inference_parameters.picker, True)
         self.assertEqual(protein_inference_parameters.restrict_pep, 0.9)
@@ -95,7 +95,7 @@ class TestLoadNoInferenceWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.decoy_symbol, "##")
         self.assertEqual(protein_inference_parameters.isoform_symbol, "-")
         self.assertEqual(protein_inference_parameters.reviewed_identifier_symbol, "sp|")
-        self.assertEqual(protein_inference_parameters.inference_type, "none")
+        self.assertEqual(protein_inference_parameters.inference_type, "first_protein")
         self.assertEqual(protein_inference_parameters.tag, "test_no_inference")
         self.assertEqual(protein_inference_parameters.grouping_type, "subset_peptides")
         self.assertEqual(
@@ -153,7 +153,7 @@ class TestLoadNoInferenceWorkflow(TestCase):
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters.inference_type == "exclusion":
+        if protein_inference_parameters.inference_type == protein_inference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 
@@ -177,25 +177,25 @@ class TestLoadNoInferenceWorkflow(TestCase):
         inference_type = protein_inference_parameters.inference_type
 
         # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == "parsimony":
+        if inference_type == protein_inference.inference.Inference.PARSIMONY:
             group = protein_inference.inference.Parsimony(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins()
 
-        if inference_type == "inclusion":
+        if inference_type == protein_inference.inference.Inference.INCLUSION:
             group = protein_inference.inference.Inclusion(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins()
 
-        if inference_type == "exclusion":
+        if inference_type == protein_inference.inference.Inference.EXCLUSION:
             group = protein_inference.inference.Exclusion(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins()
 
-        if inference_type == "none":
+        if inference_type == protein_inference.inference.Inference.FIRST_PROTEIN:
             group = protein_inference.inference.FirstProtein(
                 data_class=data, digest_class=digest
             )

@@ -468,15 +468,19 @@ class ProteinInferenceParameter(object):
         """
         Internal ProteinInferenceParameter method to validate the lp solver
         """
-        # Check if its pulp or glpk
+        # Check if its pulp, glpk, or None
         if self.lp_solver in Inference.LP_SOLVERS:
             self.logger.info("Using LP Solver '{}'".format(self.lp_solver))
         else:
-            raise ValueError(
-                "LP Solver '{}' not supported, please use one of the following LP Solvers: '{}'".format(
-                    self.lp_solver, ", ".join(Inference.LP_SOLVERS)
+            if self.lp_solver.lower() == "none":
+                self.lp_solver = None
+                self.logger.info("Setting LP Solver to None")
+            else:
+                raise ValueError(
+                    "LP Solver '{}' not supported, please use one of the following LP Solvers: '{}'".format(
+                        self.lp_solver, ", ".join(Inference.LP_SOLVERS)
+                    )
                 )
-            )
 
     def override_q_restrict(self, data_class):
         """
@@ -554,6 +558,7 @@ class ProteinInferenceParameter(object):
 
         self._fix_grouping_type()
         self._fix_glpk_path()
+        self._fix_lp_solver()
 
 
     def _fix_grouping_type(self):
@@ -569,3 +574,10 @@ class ProteinInferenceParameter(object):
         """
         if self.glpk_path in ["None", "none", None]:
             self.glpk_path = None
+
+    def _fix_lp_solver(self):
+        """
+        Internal ProteinInferenceParameter method to override lp_solver for None value
+        """
+        if self.lp_solver in ["None", "none", None]:
+            self.lp_solver = None

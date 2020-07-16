@@ -124,7 +124,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.digest_type, "trypsin")
         self.assertEqual(protein_inference_parameters.export, "q_value")
         self.assertEqual(protein_inference_parameters.fdr, 0.01)
-        self.assertEqual(protein_inference_parameters.glpk_path, "None")
+        self.assertEqual(protein_inference_parameters.glpk_path, None)
         self.assertEqual(protein_inference_parameters.missed_cleavages, 3)
         self.assertEqual(protein_inference_parameters.picker, True)
         self.assertEqual(protein_inference_parameters.restrict_pep, 0.9)
@@ -196,7 +196,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters.inference_type == "exclusion":
+        if protein_inference_parameters.inference_type == protein_inference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 
@@ -220,19 +220,19 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         inference_type = protein_inference_parameters.inference_type
 
         # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == "parsimony":
+        if inference_type == protein_inference.inference.Inference.PARSIMONY:
             group = protein_inference.inference.Parsimony(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins(glpkinout_directory=None, skip_running_glpk=None)
 
-        if inference_type == "inclusion":
+        if inference_type == protein_inference.inference.Inference.INCLUSION:
             group = protein_inference.inference.Inclusion(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins()
 
-        if inference_type == "exclusion":
+        if inference_type == protein_inference.inference.Inference.EXCLUSION:
             group = protein_inference.inference.Exclusion(
                 data_class=data, digest_class=digest
             )
@@ -516,7 +516,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters.inference_type == "exclusion":
+        if protein_inference_parameters.inference_type == protein_inference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 
@@ -540,19 +540,19 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         inference_type = protein_inference_parameters.inference_type
 
         # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == "parsimony":
+        if inference_type == protein_inference.inference.Inference.PARSIMONY:
             group = protein_inference.inference.Parsimony(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins(glpkinout_directory=None, skip_running_glpk=None)
 
-        if inference_type == "inclusion":
+        if inference_type == protein_inference.inference.Inference.INCLUSION:
             group = protein_inference.inference.Inclusion(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins()
 
-        if inference_type == "exclusion":
+        if inference_type == protein_inference.inference.Inference.EXCLUSION:
             group = protein_inference.inference.Exclusion(
                 data_class=data, digest_class=digest
             )
@@ -833,7 +833,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters.inference_type == "exclusion":
+        if protein_inference_parameters.inference_type == protein_inference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 
@@ -857,19 +857,19 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         inference_type = protein_inference_parameters.inference_type
 
         # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == "parsimony":
+        if inference_type == protein_inference.inference.Inference.PARSIMONY:
             group = protein_inference.inference.Parsimony(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins(glpkinout_directory=None, skip_running_glpk=None)
 
-        if inference_type == "inclusion":
+        if inference_type == protein_inference.inference.Inference.INCLUSION:
             group = protein_inference.inference.Inclusion(
                 data_class=data, digest_class=digest
             )
             group.infer_proteins()
 
-        if inference_type == "exclusion":
+        if inference_type == protein_inference.inference.Inference.EXCLUSION:
             group = protein_inference.inference.Exclusion(
                 data_class=data, digest_class=digest
             )

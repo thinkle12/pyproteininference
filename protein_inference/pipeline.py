@@ -2,6 +2,7 @@ import os
 import sys
 import logging
 import protein_inference
+from protein_inference.inference import Inference
 
 
 class ProteinInferencePipeline(object):
@@ -201,7 +202,7 @@ class ProteinInferencePipeline(object):
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters.inference_type == "exclusion":
+        if protein_inference_parameters.inference_type == Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 

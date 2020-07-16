@@ -19,9 +19,10 @@ class ProteinInferenceParameter(object):
         glpk_path (str): Path to local installation of glpsol if inference_type="parsimony" and lp_solver="glpk"
         missed_cleavages (int): Integer to determine the number of missed cleavages in the database digestion :py:class:`protein_inference.in_silico_digest.Digest`
         picker (bool): True/False on whether or not to run the protein picker algorithm :py:meth:protein_inference.datastore.DataStore.protein_picker`
-        restrict_pep (float): Float to restrict the posterior error probability values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
-        restrict_peptide_length (int): Float to restrict the peptide length values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
-        restrict_q (float): Float to restrict the q values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_pep (float/None): Float to restrict the posterior error probability values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_peptide_length (int/None): Float to restrict the peptide length values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_q (float/None): Float to restrict the q values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_custom (float/None): Float to restrict the custom values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`. Filtering depends on score_type variable. If score_type is multiplicative then values that are less than restrict_custom are kept. If score_type is additive then values that are more than restrict_custom are kept.
         score_method (str): String to determine the way in which Proteins are scored can be any of the SCORE_METHODS in :py:class:`protein_inference.scoring.Score`
         score_type (str): String to determine the type of score that the PSM scores are (Additive or Multiplicative) can be any of the SCORE_TYPES in :py:class:`protein_inference.scoring.Score`
         decoy_symbol (str): String to denote decoy proteins from target proteins. IE "##"
@@ -30,9 +31,9 @@ class ProteinInferenceParameter(object):
         inference_type (str): String to determine the inference procedure. Can be any value of INFERENCE_TYPES of :py:class:`protein_inference.inference.Inference` object
         tag (str): String to be added to output files
         psm_score (str): String that indicates the PSM input score. The value should match the string in the input data of the score you want to use for PSM score. This score will be used in scoring methods here: :py:class:`protein_inference.scoring.Score`
-        grouping_type (str): String to determine the grouping procedure. Can be any value of GROUPING_TYPES of :py:class:`protein_inference.inference.Inference` object
+        grouping_type (str/None): String to determine the grouping procedure. Can be any value of GROUPING_TYPES of :py:class:`protein_inference.inference.Inference` object
         max_identifiers_peptide_centric (int): Maximum number of identifiers to assign to a group when running peptide_centric inference. Typically this is 10 or 5.
-        lp_solver (str): The LP solver to use if inference_type="Parsimony". Can be any value in LP_SOLVERS in the :py:class:`protein_inference.inference.Inference` object
+        lp_solver (str/None): The LP solver to use if inference_type="Parsimony". Can be any value in LP_SOLVERS in the :py:class:`protein_inference.inference.Inference` object
         logger (logger.logging): Logger object
 
     """
@@ -84,7 +85,7 @@ class ProteinInferenceParameter(object):
         if validate:
             self.validate_parameters()
 
-        self._override_inference_none()
+        self._fix_none_parameters()
 
     def convert_to_object(self):
         """
@@ -254,7 +255,7 @@ class ProteinInferenceParameter(object):
                     )
                 )
         except ValueError:
-            if not self.restrict_pep or self.restrict_pep == "None":
+            if not self.restrict_pep or self.restrict_pep.lower() == "none":
                 self.restrict_pep = None
             else:
                 raise ValueError(
@@ -274,7 +275,7 @@ class ProteinInferenceParameter(object):
                     )
                 )
         except ValueError:
-            if not self.restrict_q or self.restrict_q == "None":
+            if not self.restrict_q or self.restrict_q.lower() == "none":
                 self.restrict_q = None
             else:
                 raise ValueError(
@@ -306,23 +307,19 @@ class ProteinInferenceParameter(object):
         if self.restrict_peptide_length:
             try:
                 int(self.restrict_peptide_length)
-            except ValueError:
-                raise ValueError(
-                    "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
-                        self.restrict_peptide_length
-                    )
-                )
-            if type(self.restrict_peptide_length) == int:
                 self.logger.info(
                     "Peptide Length Restriction: Len {}".format(
                         self.restrict_peptide_length
-                    )
-                )
-            else:
-                raise ValueError(
-                    "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
-                        self.restrict_peptide_length
-                    )
+                    ))
+            except ValueError:
+                if not self.restrict_peptide_length or self.restrict_peptide_length.lower() == "none":
+                    self.restrict_peptide_length = None
+                    self.logger.info("Not Restricting by Peptide Length")
+                else:
+                    raise ValueError(
+                        "Peptide Length Restriction must be an integer, Provided Peptide Length Restriction value: {}".format(
+                            self.restrict_peptide_length
+                        )
                 )
         else:
             self.logger.info("Not Restricting by Peptide Length")
@@ -337,7 +334,7 @@ class ProteinInferenceParameter(object):
                     )
                 )
         except ValueError:
-            if not self.restrict_custom or self.restrict_custom == "None":
+            if not self.restrict_custom or self.restrict_custom.lower() == "none":
                 self.restrict_custom = None
             else:
                 raise ValueError(
@@ -471,22 +468,19 @@ class ProteinInferenceParameter(object):
         """
         Internal ProteinInferenceParameter method to validate the lp solver
         """
-        # Check if its pulp or glpk
+        # Check if its pulp, glpk, or None
         if self.lp_solver in Inference.LP_SOLVERS:
             self.logger.info("Using LP Solver '{}'".format(self.lp_solver))
         else:
-            raise ValueError(
-                "LP Solver '{}' not supported, please use one of the following LP Solvers: '{}'".format(
-                    self.lp_solver, ", ".join(Inference.LP_SOLVERS)
+            if self.lp_solver.lower() == "none":
+                self.lp_solver = None
+                self.logger.info("Setting LP Solver to None")
+            else:
+                raise ValueError(
+                    "LP Solver '{}' not supported, please use one of the following LP Solvers: '{}'".format(
+                        self.lp_solver, ", ".join(Inference.LP_SOLVERS)
+                    )
                 )
-            )
-
-    def _override_inference_none(self):
-        """
-        Internal ProteinInferenceParameter method to override inference type for None value
-        """
-        if self.inference_type in ["None", "none", None]:
-            self.inference_type = "none"
 
     def override_q_restrict(self, data_class):
         """
@@ -555,3 +549,35 @@ class ProteinInferenceParameter(object):
         self.override_q_restrict(data_class=data_class)
         self.override_pep_restrict(data_class=data_class)
         self.override_custom_restrict(data_class=data_class)
+
+    def _fix_none_parameters(self):
+        """
+        Internal ProteinInferenceParameter method to fix parameters that have been defined as None
+        These get read in as strings with YAML reader and need to be converted to None type
+        """
+
+        self._fix_grouping_type()
+        self._fix_glpk_path()
+        self._fix_lp_solver()
+
+
+    def _fix_grouping_type(self):
+        """
+        Internal ProteinInferenceParameter method to override grouping type for None value
+        """
+        if self.grouping_type in ["None", "none", None]:
+            self.grouping_type = None
+
+    def _fix_glpk_path(self):
+        """
+        Internal ProteinInferenceParameter method to override glpk_path for None value
+        """
+        if self.glpk_path in ["None", "none", None]:
+            self.glpk_path = None
+
+    def _fix_lp_solver(self):
+        """
+        Internal ProteinInferenceParameter method to override lp_solver for None value
+        """
+        if self.lp_solver in ["None", "none", None]:
+            self.lp_solver = None

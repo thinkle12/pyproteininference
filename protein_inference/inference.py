@@ -20,21 +20,28 @@ class Inference(object):
         digest_class (protein_inference.in_silico_digest.Digest): Digest Class
     """
 
-    # TODO put all of the inference_types, etc as static variables , do this with export and score too....
+    PARSIMONY = "parsimony"
+    INCLUSION = "inclusion"
+    EXCLUSION = "exclusion"
+    FIRST_PROTEIN = "first_protein"
+    PEPTIDE_CENTRIC = "peptide_centric"
+
     INFERENCE_TYPES = [
-        "parsimony",
-        "inclusion",
-        "exclusion",
-        "none",
-        "peptide_centric",
-        None,
-        "None",
+        PARSIMONY,
+        INCLUSION,
+        EXCLUSION,
+        FIRST_PROTEIN,
+        PEPTIDE_CENTRIC,
     ]
 
-    PEPTIDE_CENTRIC = ""
+    SUBSET_PEPTIDES = "subset_peptides"
+    SHARED_PEPTIDES = "shared_peptides"
 
-    GROUPING_TYPES = ["subset_peptides", "shared_peptides", "none", None, "None"]
-    LP_SOLVERS = ["pulp", "glpk", "none", "None", None]
+    GROUPING_TYPES = [SUBSET_PEPTIDES, SHARED_PEPTIDES, "none", None, "None"]
+
+    PULP ="pulp"
+    GLPK = "glpk"
+    LP_SOLVERS = [PULP, GLPK, "none", "None", None]
 
     def __init__(self, data_class, digest_class):
         """

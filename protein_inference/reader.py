@@ -655,7 +655,7 @@ class GenericReader(Reader):
         self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
-        self.scoring_variable = parameter_file_object.score
+        self.scoring_variable = parameter_file_object.psm_score
 
         self.logger = getLogger("protein_inference.reader.GenericReader.read_psms")
 

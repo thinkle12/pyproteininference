@@ -131,14 +131,14 @@ class InSilicoDigest(Digest):
         """
         peptides = []
         cut_sites = [0]
-        if self.digest_type == "trypsin":
+        if self.digest_type == self.TRYPSIN:
             for i in range(0, len(proseq) - 1):
                 if proseq[i] == "K" and proseq[i + 1] != "P":
                     cut_sites.append(i + 1)
                 elif proseq[i] == "R" and proseq[i + 1] != "P":
                     cut_sites.append(i + 1)
 
-        if self.digest_type == "lysc":
+        if self.digest_type == self.LYSC:
             for i in range(0, len(proseq) - 1):
                 if proseq[i] == "K" and proseq[i + 1] != "P":
                     cut_sites.append(i + 1)
@@ -153,7 +153,7 @@ class InSilicoDigest(Digest):
                     no_miss_cleave_pep = proseq[cut_sites[j] : cut_sites[j + 1]]
                     peptides.append(no_miss_cleave_pep)
                     # Account for N terminal Methionine Potential Cleavage
-                    if j == 0 and proseq[cut_sites[0]] == "M":
+                    if j == 0 and proseq[cut_sites[0]] == self.METHIONINE:
                         peptides.append(no_miss_cleave_pep[1:])
                     else:
                         pass
@@ -163,12 +163,12 @@ class InSilicoDigest(Digest):
                     peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]])
                     peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]])
                     # Account for N terminal Methionine Potential Cleavage
-                    if j == 0 and proseq[cut_sites[0]] == "M":
+                    if j == 0 and proseq[cut_sites[0]] == self.METHIONINE:
                         peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]][1:])
                         peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]][1:])
 
                 # Account for N terminal Methionine Potential Cleavage
-                if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == "M":
+                if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == self.METHIONINE:
                     peptides.append(proseq[cut_sites[-2] : cut_sites[-1]][1:])
 
                 peptides.append(proseq[cut_sites[-2] : cut_sites[-1]])
@@ -179,16 +179,16 @@ class InSilicoDigest(Digest):
                     peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]])
                     peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]])
                     # Account for N terminal Methionine Potential Cleavage
-                    if j == 0 and proseq[cut_sites[0]] == "M":
+                    if j == 0 and proseq[cut_sites[0]] == self.METHIONINE:
                         peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]][1:])
                         peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]][1:])
                         peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]][1:])
 
                 # Account for N terminal Methionine Potential Cleavage
-                if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == "M":
+                if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == self.METHIONINE:
                     peptides.append(proseq[cut_sites[-3] : cut_sites[-2]][1:])
                     peptides.append(proseq[cut_sites[-3] : cut_sites[-1]][1:])
-                if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == "M":
+                if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == self.METHIONINE:
                     peptides.append(proseq[cut_sites[-2] : cut_sites[-1]][1:])
 
                 peptides.append(proseq[cut_sites[-3] : cut_sites[-2]])
@@ -204,19 +204,19 @@ class InSilicoDigest(Digest):
                         peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]])
                         peptides.append(proseq[cut_sites[j] : cut_sites[j + 4]])
                         # Account for N terminal Methionine Potential Cleavage
-                        if j == 0 and proseq[cut_sites[0]] == "M":
+                        if j == 0 and proseq[cut_sites[0]] == self.METHIONINE:
                             peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]][1:])
                             peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]][1:])
                             peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]][1:])
                             peptides.append(proseq[cut_sites[j] : cut_sites[j + 4]][1:])
 
                     # Account for N terminal Methionine Potential Cleavage
-                    if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == "M":
+                    if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == self.METHIONINE:
                         peptides.append(proseq[cut_sites[-3] : cut_sites[-2]][1:])
                         peptides.append(proseq[cut_sites[-3] : cut_sites[-1]][1:])
-                    if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == "M":
+                    if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == self.METHIONINE:
                         peptides.append(proseq[cut_sites[-2] : cut_sites[-1]][1:])
-                    if cut_sites[-4] == 0 and proseq[cut_sites[-4]] == "M":
+                    if cut_sites[-4] == 0 and proseq[cut_sites[-4]] == self.METHIONINE:
                         peptides.append(proseq[cut_sites[-4] : cut_sites[-3]][1:])
                         peptides.append(proseq[cut_sites[-4] : cut_sites[-2]][1:])
                         peptides.append(proseq[cut_sites[-4] : cut_sites[-1]][1:])
@@ -235,16 +235,16 @@ class InSilicoDigest(Digest):
                         peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]])
                         peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]])
                         # Account for N terminal Methionine Potential Cleavage
-                        if j == 0 and proseq[cut_sites[0]] == "M":
+                        if j == 0 and proseq[cut_sites[0]] == self.METHIONINE:
                             peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]][1:])
                             peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]][1:])
                             peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]][1:])
 
                     # Account for N terminal Methionine Potential Cleavage
-                    if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == "M":
+                    if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == self.METHIONINE:
                         peptides.append(proseq[cut_sites[-3] : cut_sites[-2]][1:])
                         peptides.append(proseq[cut_sites[-3] : cut_sites[-1]][1:])
-                    if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == "M":
+                    if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == self.METHIONINE:
                         peptides.append(proseq[cut_sites[-2] : cut_sites[-1]][1:])
 
                     peptides.append(proseq[cut_sites[-3] : cut_sites[-2]])
@@ -253,14 +253,14 @@ class InSilicoDigest(Digest):
 
         else:  # there is no tryptic site in the protein sequence
             peptides.append(proseq)
-            if proseq[0] == "M":
+            if proseq[0] == self.METHIONINE:
                 peptides.append(proseq[1:])
 
         new_peptides = []
-        if any("X" in x for x in peptides):
+        if any(self.ANY_AMINO_ACID in x for x in peptides):
             for peps in peptides:
-                if "X" in peps:
-                    x_index = peps.index("X")
+                if self.ANY_AMINO_ACID in peps:
+                    x_index = peps.index(self.ANY_AMINO_ACID)
                     for aa in self.AA_LIST:
                         peptide_list = list(peps)
                         peptide_list[x_index] = aa

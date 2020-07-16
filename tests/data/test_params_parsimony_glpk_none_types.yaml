@@ -1,0 +1,30 @@
+parameters:
+  general:
+    export: q_value
+    fdr: 0.01
+    picker: True
+    tag: test_parsimony_no_grouping
+  data_restriction:
+    pep_restriction: .9
+    peptide_length_restriction: 7
+    q_value_restriction: .9
+    custom_restriction: None
+  score:
+    score_method: multiplicative_log
+    score: posterior_error_prob
+    score_type: multiplicative
+  identifiers:
+    decoy_symbol: "##"
+    isoform_symbol: None
+    reviewed_identifier_symbol: None
+  inference:
+    inference_type: parsimony
+    grouping_type: None
+  digest:
+    digest_type: trypsin
+    missed_cleavages: 3
+  parsimony:
+    lp_solver: pulp
+    glpk_path: None
+  peptide_centric:
+    max_identifiers: 5

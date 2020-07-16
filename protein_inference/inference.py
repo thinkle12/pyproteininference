@@ -535,7 +535,8 @@ class Inference(object):
             scores_grouped.append(protein_list)
             # If the lead is reviewed append it to leads and do nothing else...
             # If the lead is unreviewed then try to replace it with the best reviewed hit
-            if not protein_list[0].reviewed:
+            if not protein_list[0].reviewed and self.data_class.parameter_file_object.reviewed_identifier_symbol:
+                # TODO make this a separate internal method
                 # If the lead is unreviewed attempt to replace it...
                 # Start to loop through protein_list which is the current group...
                 for hits in protein_list[1:]:
@@ -609,8 +610,9 @@ class Inference(object):
 
                     else:
                         pass
-            ###NEW ISOFORM OVERRIDE
-            if isoform_override:
+            # If we want to run isoform_override and if the isoform symbol exists...
+            if isoform_override and self.data_class.parameter_file_object.isoform_symbol:
+                # TODO make this a separate internal method
                 if protein_list[0].reviewed:
                     if (
                         self.data_class.parameter_file_object.isoform_symbol

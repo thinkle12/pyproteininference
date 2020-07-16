@@ -17,9 +17,8 @@ class Digest(object):
         id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
             from the database protein strings as sometimes the database will contain those strings while the input data will have the strings split already.
             Keep as False unless you know what you are doing
-        reviewed_identifier_symbol (str): Identifier that distinguishes reviewed from unreviewed proteins. Typically this is "sp|"
+        reviewed_identifier_symbol (str/None): Identifier that distinguishes reviewed from unreviewed proteins. Typically this is "sp|". Can also be None type
         digest_type (str): can be any value in :attr:`LIST_OF_DIGEST_TYPES`
-        reviewed_identifier_symbol (str): Symbol that indicates a reviewed identifier. If using Uniprot this is typically 'sp|'
         logger (logger.logging): Logger object
         max_peptide_length (int): Max peptide length to keep for analysis.
 
@@ -79,7 +78,7 @@ class InSilicoDigest(Digest):
             database_path (str): Path to fasta database file to digest
             digest_type (str): Must be a value in :attr:`LIST_OF_DIGEST_TYPES`
             missed_cleavages (int): Integer that indicates the maximum number of allowable missed cleavages from the ms search
-            reviewed_identifier_symbol (str): Symbol that indicates a reviewed identifier. If using Uniprot this is typically 'sp|'
+            reviewed_identifier_symbol (str/None): Symbol that indicates a reviewed identifier. If using Uniprot this is typically 'sp|'. Can also be None type
             max_peptide_length (int): The maximum length of peptides to keep for the analysis
             id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
                 from the database protein strings as sometimes the database will contain those strings while the input data will have the strings split already.
@@ -304,8 +303,9 @@ class InSilicoDigest(Digest):
             if self.id_splitting == False:
                 identifier_stripped = record.id
 
-            if record.id.startswith(self.SP_STRING):
-                sp_set.add(identifier_stripped)
+            if self.reviewed_identifier_symbol:
+                if record.id.startswith(self.reviewed_identifier_symbol):
+                    sp_set.add(identifier_stripped)
 
             proseq = str(record.seq)
             peptide_list = self.digest(proseq, self.missed_cleavages)
@@ -343,7 +343,7 @@ class PyteomicsDigest(Digest):
             database_path (str): Path to fasta database file to digest
             digest_type (str): Must be a value in :attr:`LIST_OF_DIGEST_TYPES`
             missed_cleavages (int): Integer that indicates the maximum number of allowable missed cleavages from the ms search
-            reviewed_identifier_symbol (str): Symbol that indicates a reviewed identifier. If using Uniprot this is typically 'sp|'
+            reviewed_identifier_symbol (str/None): Symbol that indicates a reviewed identifier. If using Uniprot this is typically 'sp|'
             max_peptide_length (int): The maximum length of peptides to keep for the analysis            id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
                 from the database protein strings as sometimes the database will contain those strings while the input data will have the strings split already.
                 Keep as False unless you know what you are doing
@@ -419,10 +419,11 @@ class PyteomicsDigest(Digest):
             if self.id_splitting == False:
                 identifier_stripped = identifier
 
-            # TODO instead of using [:3] we should replace sp| with nothing
-            # If SP add to
-            if identifier.startswith(self.SP_STRING):
-                sp_set.add(identifier_stripped)
+            # If reviewed add to sp_set
+            if self.reviewed_identifier_symbol:
+                if identifier.startswith(self.reviewed_identifier_symbol):
+                    sp_set.add(identifier_stripped)
+
             prot_dict[identifier_stripped] = new_peptides
             met_cleaved_peps = set()
             for peptide in new_peptides:

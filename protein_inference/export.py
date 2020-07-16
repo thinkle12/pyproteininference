@@ -12,17 +12,26 @@ class Export(object):
         filepath (str): Path to file to be written
 
     """
+    EXPORT_LEADS = "leads"
+    EXPORT_ALL = "all"
+    EXPORT_COMMA_SEP = "comma_sep"
+    EXPORT_Q_VALUE_COMMA_SEP = "q_value_comma_sep"
+    EXPORT_Q_VALUE = "q_value"
+    EXPORT_Q_VALUE_ALL = "q_value_all"
+    EXPORT_PEPTIDES = "peptides"
+    EXPORT_PSMS = "psms"
+    EXPORT_PSM_IDS = "psm_ids"
 
     EXPORT_TYPES = [
-        "leads",
-        "all",
-        "comma_sep",
-        "q_value_comma_sep",
-        "q_value",
-        "q_value_all",
-        "peptides",
-        "psms",
-        "psm_ids",
+        EXPORT_LEADS,
+        EXPORT_ALL,
+        EXPORT_COMMA_SEP,
+        EXPORT_Q_VALUE_COMMA_SEP,
+        EXPORT_Q_VALUE,
+        EXPORT_Q_VALUE_ALL,
+        EXPORT_PEPTIDES,
+        EXPORT_PSMS,
+        EXPORT_PSM_IDS,
     ]
 
     def __init__(self, data_class):

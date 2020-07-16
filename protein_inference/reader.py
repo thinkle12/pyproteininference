@@ -2,6 +2,7 @@ import os
 from protein_inference.physical import Psm
 from protein_inference.datastore import DataStore
 from protein_inference.inference import Inference
+from protein_inference.scoring import Score
 import csv
 import itertools
 from logging import getLogger
@@ -148,6 +149,13 @@ class PercolatorReader(Reader):
 
     """
 
+    PSMID_INDEX = 0
+    PERC_SCORE_INDEX = 1
+    Q_VALUE_INDEX = 2
+    POSTERIOR_ERROR_PROB_INDEX = 3
+    PEPTIDE_INDEX = 4
+    PROTEINIDS_INDEX = 5
+
     def __init__(
         self,
         digest_class,
@@ -183,12 +191,6 @@ class PercolatorReader(Reader):
         self._validate_input()
         # Define Indicies based on input
 
-        self.psmid_index = 0
-        self.perc_score_index = 1
-        self.q_value_index = 2
-        self.posterior_error_prob_index = 3
-        self.peptide_index = 4
-        self.proteinIDs_index = 5
         self.psms = None
         self.search_id = None
         self.digest_class = digest_class
@@ -302,7 +304,7 @@ class PercolatorReader(Reader):
         perc_all_filtered = []
         for psms in perc_all:
             try:
-                float(psms[self.posterior_error_prob_index])
+                float(psms[self.POSTERIOR_ERROR_PROB_INDEX])
                 perc_all_filtered.append(psms)
             except ValueError as e:
                 pass
@@ -310,7 +312,7 @@ class PercolatorReader(Reader):
         # Filter by pep
         perc_all = sorted(
             perc_all_filtered,
-            key=lambda x: float(x[self.posterior_error_prob_index]),
+            key=lambda x: float(x[self.POSTERIOR_ERROR_PROB_INDEX]),
             reverse=False,
         )
 
@@ -330,21 +332,21 @@ class PercolatorReader(Reader):
 
         self.logger.info("Length of PSM Data: {}".format(len(perc_all)))
         for psm_info in perc_all:
-            current_peptide = psm_info[self.peptide_index]
+            current_peptide = psm_info[self.PEPTIDE_INDEX]
             # Define the Psm...
             if current_peptide not in peptide_tracker:
                 p = Psm(identifier=current_peptide)
                 # Add all the attributes
-                p.percscore = float(psm_info[self.perc_score_index])
-                p.qvalue = float(psm_info[self.q_value_index])
-                p.pepvalue = float(psm_info[self.posterior_error_prob_index])
+                p.percscore = float(psm_info[self.PERC_SCORE_INDEX])
+                p.qvalue = float(psm_info[self.Q_VALUE_INDEX])
+                p.pepvalue = float(psm_info[self.POSTERIOR_ERROR_PROB_INDEX])
                 if self.parameter_file_object.inference_type == Inference.FIRST_PROTEIN:
-                    poss_proteins = [psm_info[self.proteinIDs_index]]
+                    poss_proteins = [psm_info[self.PROTEINIDS_INDEX]]
                 else:
                     poss_proteins = list(
                         set(
                             psm_info[
-                                self.proteinIDs_index : self.proteinIDs_index
+                                self.PROTEINIDS_INDEX : self.PROTEINIDS_INDEX
                                 + self.MAX_ALLOWED_ALTERNATIVE_PROTEINS
                             ]
                         )
@@ -352,7 +354,7 @@ class PercolatorReader(Reader):
                 p.possible_proteins = (
                     poss_proteins  # Restrict to 50 total possible proteins...
                 )
-                p.psm_id = psm_info[self.psmid_index]
+                p.psm_id = psm_info[self.PSMID_INDEX]
 
                 # Split peptide if flanking
                 current_peptide = Psm.split_peptide(peptide_string=current_peptide)
@@ -819,13 +821,13 @@ class GenericReader(Reader):
                 )
             )
             self.logger.info("Sorting by {}".format(self.scoring_variable))
-            if self.parameter_file_object.score_type == "additive":
+            if self.parameter_file_object.score_type == Score.ADDITIVE_SCORE_TYPE:
                 all_psms = sorted(
                     psms_all_filtered,
                     key=lambda x: float(x[self.scoring_variable]),
                     reverse=True,
                 )
-            if self.parameter_file_object.score_type == "multiplicative":
+            if self.parameter_file_object.score_type == Score.MULTIPLICATIVE_SCORE_TYPE:
                 all_psms = sorted(
                     psms_all_filtered,
                     key=lambda x: float(x[self.scoring_variable]),

@@ -193,6 +193,7 @@ class ProteinInferenceParameter(object):
         self._validate_grouping_type()
         self._validate_max_id()
         self._validate_lp_solver()
+        self._validate_identifiers()
 
     def _validate_digest_type(self):
         """
@@ -456,6 +457,64 @@ class ProteinInferenceParameter(object):
                         self.lp_solver, ", ".join(Inference.LP_SOLVERS)
                     )
                 )
+
+    def _validate_identifiers(self):
+        """
+        Internal ProteinInferenceParameter method to validate the decoy symbol, isoform symbol, and reviewed identifier symbol
+
+        """
+        if type(self.decoy_symbol) == str:
+            self.logger.info(
+                "Decoy Symbol set to: '{}'".format(
+                    self.decoy_symbol
+                )
+            )
+        else:
+            raise ValueError(
+                "Decoy Symbol must be a string, provided value: {}".format(
+                    self.decoy_symbol
+                )
+            )
+
+
+        if type(self.isoform_symbol) == str:
+            self.logger.info(
+                "Isoform Symbol set to: '{}'".format(
+                    self.isoform_symbol
+                )
+            )
+            if self.isoform_symbol.lower() == "none" or not self.isoform_symbol:
+                self.isoform_symbol = None
+                self.logger.info("Isoform Symbol set to None")
+        else:
+            if self.isoform_symbol:
+                self.isoform_symbol = None
+                self.logger.info("Isoform Symbol set to None")
+            raise ValueError(
+                "Isoform Symbol must be a string, provided value: {}".format(
+                    self.isoform_symbol
+                )
+            )
+
+        if type(self.reviewed_identifier_symbol) == str:
+            self.logger.info(
+                "Reviewed Identifier Symbol set to: '{}'".format(
+                    self.reviewed_identifier_symbol
+                )
+            )
+            if self.reviewed_identifier_symbol.lower() == "none" or not self.reviewed_identifier_symbol:
+                self.reviewed_identifier_symbol = None
+                self.logger.info("Reviewed Identifier Symbol set to None")
+        else:
+            if not self.reviewed_identifier_symbol:
+                self.reviewed_identifier_symbol = None
+                self.logger.info("Reviewed Identifier Symbol set to None")
+            raise ValueError(
+                "Reviewed Identifier Symbol must be a string, provided value: {}".format(
+                    self.reviewed_identifier_symbol
+                )
+            )
+
 
     def override_q_restrict(self, data_class):
         """

@@ -29,7 +29,7 @@ class ProteinInferenceParameter(object):
         reviewed_identifier_symbol (str): String to denote a "Reviewed" Protein. Typically this is: "sp|" if using Uniprot Fasta database
         inference_type (str): String to determine the inference procedure. Can be any value of INFERENCE_TYPES of :py:class:`protein_inference.inference.Inference` object
         tag (str): String to be added to output files
-        score (str): String that indicates the PSM input score. The value should match the string in the input data of the score you want to use for PSM score. This score will be used in scoring methods here: :py:class:`protein_inference.scoring.Score`
+        psm_score (str): String that indicates the PSM input score. The value should match the string in the input data of the score you want to use for PSM score. This score will be used in scoring methods here: :py:class:`protein_inference.scoring.Score`
         grouping_type (str): String to determine the grouping procedure. Can be any value of GROUPING_TYPES of :py:class:`protein_inference.inference.Inference` object
         max_identifiers_peptide_centric (int): Maximum number of identifiers to assign to a group when running peptide_centric inference. Typically this is 10 or 5.
         lp_solver (str): The LP solver to use if inference_type="Parsimony". Can be any value in LP_SOLVERS in the :py:class:`protein_inference.inference.Inference` object
@@ -71,7 +71,7 @@ class ProteinInferenceParameter(object):
         self.reviewed_identifier_symbol = None
         self.inference_type = None
         self.tag = None
-        self.score = None
+        self.psm_score = None
         self.grouping_type = None
         self.max_identifiers_peptide_centric = None
         self.lp_solver = None
@@ -139,7 +139,7 @@ class ProteinInferenceParameter(object):
                 "inference_type"
             ]
             self.tag = yaml_params["parameters"]["general"]["tag"]
-            self.score = yaml_params["parameters"]["score"]["score"]
+            self.psm_score = yaml_params["parameters"]["score"]["score"]
             self.grouping_type = yaml_params["parameters"]["inference"]["grouping_type"]
             self.max_identifiers_peptide_centric = yaml_params["parameters"][
                 "peptide_centric"
@@ -161,7 +161,7 @@ class ProteinInferenceParameter(object):
             self.restrict_q = 0.005
             self.restrict_custom = None
             self.score_method = "multiplicative_log"
-            self.score = "posterior_error_prob"
+            self.psm_score = "posterior_error_prob"
             self.decoy_symbol = "##"
             self.isoform_symbol = "-"
             self.reviewed_identifier_symbol = "sp|"
@@ -541,3 +541,17 @@ class ProteinInferenceParameter(object):
                     "No Custom values found in the input data, overriding parameters to not filter on Custom value"
                 )
                 self.restrict_custom = None
+
+
+    def fix_parameters_from_datastore(self,data_class):
+        """
+        ProteinInferenceParameter method to override restriction values in the parameter file if those scores do not exist in the input files
+
+        Args:
+            data_class (protein_inference.datastore.DataStore): Data class
+
+        """
+
+        self.override_q_restrict(data_class=data_class)
+        self.override_pep_restrict(data_class=data_class)
+        self.override_custom_restrict(data_class=data_class)

@@ -105,7 +105,7 @@ class TestLoadPeptideCentricWorkflow(TestCase):
         self.assertEqual(
             protein_inference_parameters.max_identifiers_peptide_centric, 5
         )
-        self.assertEqual(protein_inference_parameters.lp_solver, "None")
+        self.assertEqual(protein_inference_parameters.lp_solver, None)
 
         ### STEP 2: Start with running an In Silico Digestion ###
         ### STEP 2: Start with running an In Silico Digestion ###

@@ -609,8 +609,9 @@ class Inference(object):
 
                     else:
                         pass
-            ###NEW ISOFORM OVERRIDE
-            if isoform_override:
+            # If we want to run isoform_override and if the isoform symbol exists...
+            if isoform_override and self.data_class.parameter_file_object.isoform_symbol:
+                # TODO make this a separate internal method
                 if protein_list[0].reviewed:
                     if (
                         self.data_class.parameter_file_object.isoform_symbol

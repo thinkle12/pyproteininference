@@ -150,7 +150,10 @@ class ProteinInferencePipeline(object):
         ### STEP 2: Start with running an In Silico Digestion ###
         digest = protein_inference.in_silico_digest.InSilicoDigest(
             database_path=self.database_file,
-            parameter_file_object=protein_inference_parameters,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
             id_splitting=self.id_splitting,
         )
         if self.database_file:
@@ -188,19 +191,19 @@ class ProteinInferencePipeline(object):
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
-        data.restrict_psm_data(parameter_file_object=protein_inference_parameters)
+        data.restrict_psm_data()
 
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input
         ### Step 6: Generate protein scoring input
-        data.create_scoring_input(score_input=protein_inference_parameters.score)
+        data.create_scoring_input()
 
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         if protein_inference_parameters.inference_type == "exclusion":
             # This gets ran if we run exclusion...
-            data.exclude_non_distinguishing_peptides(digest_class=digest)
+            data.exclude_non_distinguishing_peptides()
 
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
@@ -225,7 +228,7 @@ class ProteinInferencePipeline(object):
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
-        data.set_based_fdr(false_discovery_rate=float(protein_inference_parameters.fdr))
+        data.set_based_fdr()
         data.calculate_q_values()
 
         # Print the len of restricted data... which is how many protein groups pass FDR threshold
@@ -239,9 +242,8 @@ class ProteinInferencePipeline(object):
         ### STEP 12: Export to CSV
         ### STEP 12: Export to CSV
         ### STEP 12: Export to CSV
-        export_type = protein_inference_parameters.export
         export = protein_inference.export.Export(data_class=data)
-        export.export_to_csv(directory=self.output_directory, export_type=export_type)
+        export.export_to_csv(directory=self.output_directory, export_type=protein_inference_parameters.export)
 
         self.data = data
         self.digest = digest

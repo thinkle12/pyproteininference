@@ -24,7 +24,10 @@ class Digest(object):
         max_peptide_length (int): Max peptide length to keep for analysis.
 
     """
-    LIST_OF_DIGEST_TYPES = ["trypsin", "lysc"]
+    TRYPSIN = "trypsin"
+    LYSC = "lysc"
+    LIST_OF_DIGEST_TYPES = [TRYPSIN, LYSC]
+
     AA_LIST = [
         "A",
         "R",
@@ -51,6 +54,7 @@ class Digest(object):
     UNIPROT_STR_REGEX = re.compile(UNIPROT_STRS)
     SP_STRING = "sp|"
     METHIONINE = "M"
+    ANY_AMINO_ACID = "X"
 
     def __init__(self):
         pass

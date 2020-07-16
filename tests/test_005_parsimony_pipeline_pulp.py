@@ -124,7 +124,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.digest_type, "trypsin")
         self.assertEqual(protein_inference_parameters.export, "q_value")
         self.assertEqual(protein_inference_parameters.fdr, 0.01)
-        self.assertEqual(protein_inference_parameters.glpk_path, "None")
+        self.assertEqual(protein_inference_parameters.glpk_path, None)
         self.assertEqual(protein_inference_parameters.missed_cleavages, 3)
         self.assertEqual(protein_inference_parameters.picker, True)
         self.assertEqual(protein_inference_parameters.restrict_pep, 0.9)

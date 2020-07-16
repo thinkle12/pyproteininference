@@ -19,9 +19,10 @@ class ProteinInferenceParameter(object):
         glpk_path (str): Path to local installation of glpsol if inference_type="parsimony" and lp_solver="glpk"
         missed_cleavages (int): Integer to determine the number of missed cleavages in the database digestion :py:class:`protein_inference.in_silico_digest.Digest`
         picker (bool): True/False on whether or not to run the protein picker algorithm :py:meth:protein_inference.datastore.DataStore.protein_picker`
-        restrict_pep (float): Float to restrict the posterior error probability values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
-        restrict_peptide_length (int): Float to restrict the peptide length values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
-        restrict_q (float): Float to restrict the q values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_pep (float/None): Float to restrict the posterior error probability values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_peptide_length (int/None): Float to restrict the peptide length values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_q (float/None): Float to restrict the q values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_custom (float/None): Float to restrict the custom values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`. Filtering depends on score_type variable. If score_type is multiplicative then values that are less than restrict_custom are kept. If score_type is additive then values that are more than restrict_custom are kept.
         score_method (str): String to determine the way in which Proteins are scored can be any of the SCORE_METHODS in :py:class:`protein_inference.scoring.Score`
         score_type (str): String to determine the type of score that the PSM scores are (Additive or Multiplicative) can be any of the SCORE_TYPES in :py:class:`protein_inference.scoring.Score`
         decoy_symbol (str): String to denote decoy proteins from target proteins. IE "##"
@@ -30,9 +31,9 @@ class ProteinInferenceParameter(object):
         inference_type (str): String to determine the inference procedure. Can be any value of INFERENCE_TYPES of :py:class:`protein_inference.inference.Inference` object
         tag (str): String to be added to output files
         psm_score (str): String that indicates the PSM input score. The value should match the string in the input data of the score you want to use for PSM score. This score will be used in scoring methods here: :py:class:`protein_inference.scoring.Score`
-        grouping_type (str): String to determine the grouping procedure. Can be any value of GROUPING_TYPES of :py:class:`protein_inference.inference.Inference` object
+        grouping_type (str/None): String to determine the grouping procedure. Can be any value of GROUPING_TYPES of :py:class:`protein_inference.inference.Inference` object
         max_identifiers_peptide_centric (int): Maximum number of identifiers to assign to a group when running peptide_centric inference. Typically this is 10 or 5.
-        lp_solver (str): The LP solver to use if inference_type="Parsimony". Can be any value in LP_SOLVERS in the :py:class:`protein_inference.inference.Inference` object
+        lp_solver (str/None): The LP solver to use if inference_type="Parsimony". Can be any value in LP_SOLVERS in the :py:class:`protein_inference.inference.Inference` object
         logger (logger.logging): Logger object
 
     """

@@ -821,10 +821,10 @@ class Inclusion(Inference):
         list_of_group_objects = regrouped_proteins["group_objects"]
 
         logger.info("Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_groups(
+        scores_grouped = datastore.DataStore.sort_protein_objects(
             scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_lists(
+        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
             list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
         )
 
@@ -894,10 +894,10 @@ class Exclusion(Inference):
         list_of_group_objects = regrouped_proteins["group_objects"]
 
         logger.info("Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_groups(
+        scores_grouped = datastore.DataStore.sort_protein_objects(
             scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_lists(
+        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
             list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
         )
 
@@ -1280,10 +1280,10 @@ class Parsimony(Inference):
             higher_or_lower = self.data_class.high_low_better
 
         logger.info("Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_groups(
+        scores_grouped = datastore.DataStore.sort_protein_objects(
             scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_lists(
+        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
             list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
         )
 
@@ -1292,10 +1292,10 @@ class Parsimony(Inference):
         )
 
         logger.info("Re Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_groups(
+        scores_grouped = datastore.DataStore.sort_protein_objects(
             scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_lists(
+        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
             list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
         )
 
@@ -1484,10 +1484,10 @@ class Parsimony(Inference):
             higher_or_lower = self.data_class.high_low_better
 
         logger.info("Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_groups(
+        scores_grouped = datastore.DataStore.sort_protein_objects(
             scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_lists(
+        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
             list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
         )
 
@@ -1496,17 +1496,17 @@ class Parsimony(Inference):
         )
 
         logger.info("Re Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_groups(
+        scores_grouped = datastore.DataStore.sort_protein_objects(
             scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_lists(
+        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
             list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
         )
 
         self.data_class.grouped_scored_proteins = scores_grouped
         self.data_class.protein_group_objects = list_of_group_objects
 
-    def infer_proteins(self, glpkinout_directory="glpkinout/", skip_running_glpk=False):
+    def infer_proteins(self, glpkinout_directory="glpkinout", skip_running_glpk=False):
         """
         This method performs the Parsimony inference method and either uses pulp or glpk based on the :py:class:`protein_inference.parameters.ProteinInferenceParameter` object
 
@@ -1633,10 +1633,10 @@ class FirstProtein(Inference):
         list_of_group_objects = regrouped_proteins["group_objects"]
 
         logger.info("Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_groups(
+        scores_grouped = datastore.DataStore.sort_protein_objects(
             scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_lists(
+        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
             list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
         )
 
@@ -1655,7 +1655,7 @@ class PeptideCentric(Inference):
     """
     def __init__(self, data_class, digest_class):
         """
-        PeptideCentrinc Inference initialization method
+        PeptideCentric Inference initialization method
 
         Args:
             data_class (protein_inference.datastore.DataStore): Data Class
@@ -1700,10 +1700,10 @@ class PeptideCentric(Inference):
         list_of_group_objects = regrouped_proteins["group_objects"]
 
         logger.info("Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_groups(
+        scores_grouped = datastore.DataStore.sort_protein_objects(
             scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_lists(
+        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
             list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
         )
 

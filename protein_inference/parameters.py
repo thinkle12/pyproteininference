@@ -84,7 +84,7 @@ class ProteinInferenceParameter(object):
         if validate:
             self.validate_parameters()
 
-        self._override_inference_none()
+        self._fix_none_parameters()
 
     def convert_to_object(self):
         """
@@ -254,7 +254,7 @@ class ProteinInferenceParameter(object):
                     )
                 )
         except ValueError:
-            if not self.restrict_pep or self.restrict_pep == "None":
+            if not self.restrict_pep or self.restrict_pep.lower() == "none":
                 self.restrict_pep = None
             else:
                 raise ValueError(
@@ -274,7 +274,7 @@ class ProteinInferenceParameter(object):
                     )
                 )
         except ValueError:
-            if not self.restrict_q or self.restrict_q == "None":
+            if not self.restrict_q or self.restrict_q.lower() == "none":
                 self.restrict_q = None
             else:
                 raise ValueError(
@@ -306,23 +306,19 @@ class ProteinInferenceParameter(object):
         if self.restrict_peptide_length:
             try:
                 int(self.restrict_peptide_length)
-            except ValueError:
-                raise ValueError(
-                    "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
-                        self.restrict_peptide_length
-                    )
-                )
-            if type(self.restrict_peptide_length) == int:
                 self.logger.info(
                     "Peptide Length Restriction: Len {}".format(
                         self.restrict_peptide_length
-                    )
-                )
-            else:
-                raise ValueError(
-                    "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
-                        self.restrict_peptide_length
-                    )
+                    ))
+            except ValueError:
+                if not self.restrict_peptide_length or self.restrict_peptide_length.lower() == "none":
+                    self.restrict_peptide_length = None
+                    self.logger.info("Not Restricting by Peptide Length")
+                else:
+                    raise ValueError(
+                        "Peptide Length Restriction must be an integer, Provided Peptide Length Restriction value: {}".format(
+                            self.restrict_peptide_length
+                        )
                 )
         else:
             self.logger.info("Not Restricting by Peptide Length")
@@ -337,7 +333,7 @@ class ProteinInferenceParameter(object):
                     )
                 )
         except ValueError:
-            if not self.restrict_custom or self.restrict_custom == "None":
+            if not self.restrict_custom or self.restrict_custom.lower() == "none":
                 self.restrict_custom = None
             else:
                 raise ValueError(
@@ -481,13 +477,6 @@ class ProteinInferenceParameter(object):
                 )
             )
 
-    def _override_inference_none(self):
-        """
-        Internal ProteinInferenceParameter method to override inference type for None value
-        """
-        if self.inference_type in ["None", "none", None]:
-            self.inference_type = "none"
-
     def override_q_restrict(self, data_class):
         """
         ProteinInferenceParameter method to override restrict_q if the input data does not contain q values.
@@ -555,3 +544,27 @@ class ProteinInferenceParameter(object):
         self.override_q_restrict(data_class=data_class)
         self.override_pep_restrict(data_class=data_class)
         self.override_custom_restrict(data_class=data_class)
+
+    def _fix_none_parameters(self):
+        """
+        Internal ProteinInferenceParameter method to fix parameters that have been defined as None
+        These get read in as strings with YAML reader and need to be converted to None type
+        """
+
+        self._fix_grouping_type()
+        self._fix_glpk_path()
+
+
+    def _fix_grouping_type(self):
+        """
+        Internal ProteinInferenceParameter method to override grouping type for None value
+        """
+        if self.grouping_type in ["None", "none", None]:
+            self.grouping_type = None
+
+    def _fix_glpk_path(self):
+        """
+        Internal ProteinInferenceParameter method to override glpk_path for None value
+        """
+        if self.glpk_path in ["None", "none", None]:
+            self.glpk_path = None

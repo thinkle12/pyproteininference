@@ -113,21 +113,21 @@ class Score(object):
                 "score method '{}' is not a proper method. Score method must be one of the following: '{}'".format(score_method, ", ".join(self.SCORE_METHODS))
             )
         else:
-            if score_method == "best_peptide_per_protein":
+            if score_method == self.BEST_PEPTIDE_PER_PROTEIN:
                 self.best_peptide_per_protein()
-            if score_method == "iterative_downweighted_log":
+            if score_method == self.ITERATIVE_DOWNWEIGHTED_LOG:
                 self.iterative_down_weighted_log()
-            if score_method == "multiplicative_log":
+            if score_method == self.MULTIPLICATIVE_LOG:
                 self.multiplicative_log()
-            if score_method == "downweighted_multiplicative_log":
+            if score_method == self.DOWNWEIGHTED_MULTIPLICATIVE_LOG:
                 self.down_weighted_multiplicative_log()
-            if score_method == "downweighted_version2":
+            if score_method == self.DOWNWEIGHTED_VERSION2:
                 self.down_weighted_v2()
-            if score_method == "top_two_combined":
+            if score_method == self.TOP_TWO_COMBINED:
                 self.top_two_combied()
-            if score_method == "geometric_mean":
+            if score_method == self.GEOMETRIC_MEAN:
                 self.geometric_mean_log()
-            if score_method == "additive":
+            if score_method == self.ADDITIVE:
                 self.additive()
 
     def best_peptide_per_protein(self):
@@ -155,8 +155,8 @@ class Score(object):
         # Here do ascending sorting because a lower pep or q value is better
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=False)
 
-        self.data_class.score_method = "best_peptide_per_protein"
-        self.data_class.short_score_method = "bppp"
+        self.data_class.score_method = self.BEST_PEPTIDE_PER_PROTEIN
+        self.data_class.short_score_method = self.SHORT_BEST_PEPTIDE_PER_PROTEIN
         self.data_class.scored_proteins = all_scores
 
     def fishers_method(self):
@@ -216,8 +216,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = "multiplicative_log"
-        self.data_class.short_score_method = "ml"
+        self.data_class.score_method = self.MULTIPLICATIVE_LOG
+        self.data_class.short_score_method = self.SHORT_MULTIPLICATIVE_LOG
         self.data_class.scored_proteins = all_scores
 
     def down_weighted_multiplicative_log(self):
@@ -259,8 +259,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = "downweighted_multiplicative_log"
-        self.data_class.short_score_method = "dwml"
+        self.data_class.score_method = self.DOWNWEIGHTED_MULTIPLICATIVE_LOG
+        self.data_class.short_score_method = self.SHORT_DOWNWEIGHTED_MULTIPLICATIVE_LOG
         self.data_class.scored_proteins = all_scores
 
     def top_two_combied(self):
@@ -294,8 +294,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = "top_two_combined"
-        self.data_class.short_score_method = "ttc"
+        self.data_class.score_method = self.TOP_TWO_COMBINED
+        self.data_class.short_score_method = self.SHORT_TOP_TWO_COMBINED
         self.data_class.scored_proteins = all_scores
 
     def down_weighted_v2(self):
@@ -331,8 +331,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = "downweighted_version2"
-        self.data_class.short_score_method = "dw2"
+        self.data_class.score_method = self.DOWNWEIGHTED_VERSION2
+        self.data_class.short_score_method = self.SHORT_DOWNWEIGHTED_VERSION2
         self.data_class.scored_proteins = all_scores
 
     def iterative_down_weighted_log(self):
@@ -375,8 +375,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = "iterative_downweighted_log"
-        self.data_class.short_score_method = "idwl"
+        self.data_class.score_method = self.ITERATIVE_DOWNWEIGHTED_LOG
+        self.data_class.short_score_method = self.SHORT_ITERATIVE_DOWNWEIGHTED_LOG
         self.data_class.scored_proteins = all_scores
 
     def geometric_mean_log(self):
@@ -410,8 +410,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = "geometric_mean_log"
-        self.data_class.short_score_method = "gm"
+        self.data_class.score_method = self.GEOMETRIC_MEAN
+        self.data_class.short_score_method = self.SHORT_GEOMETRIC_MEAN
         self.data_class.scored_proteins = all_scores
 
     def iterative_down_weighted_v2(self):
@@ -467,6 +467,6 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = "additive"
-        self.data_class.short_score_method = "add"
+        self.data_class.score_method = self.ADDITIVE
+        self.data_class.short_score_method = self.SHORT_ADDITIVE
         self.data_class.scored_proteins = all_scores

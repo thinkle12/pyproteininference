@@ -74,12 +74,12 @@ For a sample parameter file please see the `parameters/` or `tests/data/` folder
 |---|---|---|
 | score_method | One of any of the following: __multiplicative_log__, __best_peptide_per_protein__, __top_two_combined__, __additive__, __iterative_downweighted_log__, __downweighted_multiplicative_log__, __geometric_mean__. Recommended: __multiplicative_log__ | String |
 | score | PSM score to use for Protein Scoring. If using Percolator output as input this would either be __posterior_error_prob__ or __q-value__. The string typed here should match the column in your input files __EXACTLY__. If using a custom score it will be filtered accordingly with the value in [__custom_restriction__](#data-restriction) | String |
-| score_type | The Type of score that __score__ parameter is. Either __multiplicative__ or __additive__. See [below](#extra-score-information) for more information| String |
+| score_type | The Type of score that __score__ parameter is. Either __multiplicative__ or __additive__. If a larger psm score is "better" than input additive IE (Mascot Ion Score, Xcorr, Percolator Score). If a smaller psm score is "better" than input multiplicative IE (Q Value, Posterior Error Probability). See [below](#extra-score-information) for more information| String |
 #### Extra Score information:
 
  1. The __score_method__, __score__, and __score_type__ methods must be compatible.
  2. If using a PSM score (__score__ parameter) where the lower the score the better IE (__posterior_error_prob__ or __q-value__) then any  __score_method__ can be used except __additive__. __score_type__ must also be set to __multiplicative__
- 3. If using a PSM score (__score__ parameter) where the higher the score the better IE Percolator Score (called __score__ - column name) in the tab delimited percolator output. Then __score_method__ and __score_type__ must both be __additive__
+ 3. If using a PSM score (__score__ parameter) where the higher the score the better IE (Percolator Score, Mascot Ion Score, Xcorr) (Percolator Score is called __score__ - column name) in the tab delimited percolator output. Then __score_method__ and __score_type__ must both be __additive__
 
 ## Identifiers:
 | Parameter | Description |Type|

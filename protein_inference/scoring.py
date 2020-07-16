@@ -27,18 +27,50 @@ class Score(object):
 
     """
 
+    BEST_PEPTIDE_PER_PROTEIN = "best_peptide_per_protein"
+    ITERATIVE_DOWNWEIGHTED_LOG = "iterative_downweighted_log"
+    MULTIPLICATIVE_LOG = "multiplicative_log"
+    DOWNWEIGHTED_MULTIPLICATIVE_LOG = "downweighted_multiplicative_log"
+    DOWNWEIGHTED_VERSION2 = "downweighted_version2"
+    TOP_TWO_COMBINED = "top_two_combined"
+    GEOMETRIC_MEAN = "geometric_mean"
+    ADDITIVE = "additive"
+
     SCORE_METHODS = [
-        "best_peptide_per_protein",
-        "iterative_downweighted_log",
-        "multiplicative_log",
-        "downweighted_multiplicative_log",
-        "downweighted_version2",
-        "top_two_combined",
-        "geometric_mean",
-        "additive",
+        BEST_PEPTIDE_PER_PROTEIN,
+        ITERATIVE_DOWNWEIGHTED_LOG,
+        MULTIPLICATIVE_LOG,
+        DOWNWEIGHTED_MULTIPLICATIVE_LOG,
+        DOWNWEIGHTED_VERSION2,
+        TOP_TWO_COMBINED,
+        GEOMETRIC_MEAN,
+        ADDITIVE,
     ]
 
-    SCORE_TYPES = ["multiplicative", "additive"]
+    SHORT_BEST_PEPTIDE_PER_PROTEIN = "bppp"
+    SHORT_ITERATIVE_DOWNWEIGHTED_LOG = "idwl"
+    SHORT_MULTIPLICATIVE_LOG = "ml"
+    SHORT_DOWNWEIGHTED_MULTIPLICATIVE_LOG = "dwml"
+    SHORT_DOWNWEIGHTED_VERSION2 = "dw2"
+    SHORT_TOP_TWO_COMBINED = "ttc"
+    SHORT_GEOMETRIC_MEAN = "gm"
+    SHORT_ADDITIVE = "add"
+
+    SHORT_SCORE_METHODS = [
+        SHORT_BEST_PEPTIDE_PER_PROTEIN,
+        SHORT_ITERATIVE_DOWNWEIGHTED_LOG,
+        SHORT_MULTIPLICATIVE_LOG,
+        SHORT_DOWNWEIGHTED_MULTIPLICATIVE_LOG,
+        SHORT_DOWNWEIGHTED_VERSION2,
+        SHORT_TOP_TWO_COMBINED,
+        SHORT_GEOMETRIC_MEAN,
+        SHORT_ADDITIVE,
+    ]
+
+    MULTIPLICATIVE_SCORE_TYPE = "multiplicative"
+    ADDITIVE_SCORE_TYPE = "additive"
+
+    SCORE_TYPES = [MULTIPLICATIVE_SCORE_TYPE, ADDITIVE_SCORE_TYPE]
 
     def __init__(self, data_class):
         """

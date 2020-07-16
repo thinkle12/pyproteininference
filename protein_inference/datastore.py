@@ -35,6 +35,21 @@ class DataStore(object):
 
     """
 
+    SCORE_MAPPER = {
+        "q_value": "qvalue",
+        "pep_value": "pepvalue",
+        "perc_score": "percscore",
+        "score": "percscore",
+        "q-value": "qvalue",
+        "posterior_error_prob": "pepvalue",
+        "posterior_error_probability": "pepvalue",
+    }
+
+    CUSTOM_SCORE_KEY = "custom_score"
+
+    HIGHER_PSM_SCORE = "higher"
+    LOWER_PSM_SCORE = "lower"
+
     # Feed data_store instance the reader class...
     def __init__(self, reader_class, digest_class, validate=True):
         """
@@ -72,16 +87,6 @@ class DataStore(object):
         self.protein_group_objects = [] # List of sorted protein group objects
         self.decoy_symbol = self.parameter_file_object.decoy_symbol # Decoy symbol from parameter file
         self.digest_class = digest_class # Digest class object
-        self.SCORE_MAPPER = {
-            "q_value": "qvalue",
-            "pep_value": "pepvalue",
-            "perc_score": "percscore",
-            "score": "percscore",
-            "q-value": "qvalue",
-            "posterior_error_prob": "pepvalue",
-            "posterior_error_probability": "pepvalue",
-        }
-        self.CUSTOM_SCORE_KEY = "custom_score"
 
         self.logger = getLogger("protein_inference.datastore.DataStore")
 

@@ -66,7 +66,7 @@ class Export(object):
 
         if "leads" == export_type:
             filename = "{}_leads_{}_{}.csv".format(
-                tag, data.short_score_method, data.score
+                tag, data.short_score_method, data.psm_score
             )
             complete_filepath = os.path.join(directory, filename)
             logger.info(
@@ -76,7 +76,7 @@ class Export(object):
 
         if "all" == export_type:
             filename = "{}_all_{}_{}.csv".format(
-                tag, data.short_score_method, data.score
+                tag, data.short_score_method, data.psm_score
             )
             complete_filepath = os.path.join(directory, filename)
             logger.info(
@@ -86,7 +86,7 @@ class Export(object):
 
         if "comma_sep" == export_type:
             filename = "{}_comma_sep_{}_{}.csv".format(
-                tag, data.short_score_method, data.score
+                tag, data.short_score_method, data.psm_score
             )
             complete_filepath = os.path.join(directory, filename)
             logger.info(
@@ -96,7 +96,7 @@ class Export(object):
 
         if "q_value_comma_sep" == export_type:
             filename = "{}_q_value_comma_sep_{}_{}.csv".format(
-                tag, data.short_score_method, data.score
+                tag, data.short_score_method, data.psm_score
             )
             complete_filepath = os.path.join(directory, filename)
             logger.info(
@@ -106,7 +106,7 @@ class Export(object):
 
         if "q_value" == export_type:
             filename = "{}_q_value_leads_{}_{}.csv".format(
-                tag, data.short_score_method, data.score
+                tag, data.short_score_method, data.psm_score
             )
             complete_filepath = os.path.join(directory, filename)
             logger.info(
@@ -116,7 +116,7 @@ class Export(object):
 
         if "q_value_all" == export_type:
             filename = "{}_q_value_all_{}_{}.csv".format(
-                tag, data.short_score_method, data.score
+                tag, data.short_score_method, data.psm_score
             )
             complete_filepath = os.path.join(directory, filename)
             logger.info(
@@ -126,7 +126,7 @@ class Export(object):
 
         if "peptides" == export_type:
             filename = "{}_q_value_leads_peptides_{}_{}.csv".format(
-                tag, data.short_score_method, data.score
+                tag, data.short_score_method, data.psm_score
             )
             complete_filepath = os.path.join(directory, filename)
             logger.info(
@@ -136,7 +136,7 @@ class Export(object):
 
         if "psms" == export_type:
             filename = "{}_q_value_leads_psms_{}_{}.csv".format(
-                tag, data.short_score_method, data.score
+                tag, data.short_score_method, data.psm_score
             )
             complete_filepath = os.path.join(directory, filename)
             logger.info(
@@ -146,7 +146,7 @@ class Export(object):
 
         if "psm_ids" == export_type:
             filename = "{}_q_value_leads_psm_ids_{}_{}.csv".format(
-                tag, data.short_score_method, data.score
+                tag, data.short_score_method, data.psm_score
             )
             complete_filepath = os.path.join(directory, filename)
             logger.info(

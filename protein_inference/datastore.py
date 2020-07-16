@@ -1036,7 +1036,7 @@ class DataStore(object):
         picked_list = []
         removed_proteins = []
         for protein_objects in self.scored_proteins:
-            if protein_objects.picked == True:
+            if protein_objects.picked:
                 picked_list.append(protein_objects)
             else:
                 removed_proteins.append(protein_objects)

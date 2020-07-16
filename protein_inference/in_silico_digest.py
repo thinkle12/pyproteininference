@@ -13,13 +13,13 @@ class Digest(object):
         protein_to_peptide_dictionary (dict): Dictionary of proteins (keys) to peptide sets (values)
         swiss_prot_protein_set (set): Set of reviewed proteins if they are able to be distinguished from unreviewed proteins
         database_path (str): Path to fasta database file to digest
-        num_miss_cleavs (int): The number of missed cleavages to allow
+        missed_cleavages (int): The number of missed cleavages to allow
         id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
             from the database protein strings as sometimes the database will contain those strings while the input data will have the strings split already.
             Keep as False unless you know what you are doing
         reviewed_identifier_symbol (str): Identifier that distinguishes reviewed from unreviewed proteins. Typically this is "sp|"
         digest_type (str): can be any value in :attr:`LIST_OF_DIGEST_TYPES`
-        parameter_file_object (protein_inference.parameter.ProteinInferenceParameter): Protein Inference Parameter Object
+        reviewed_identifier_symbol (str): Symbol that indicates a reviewed identifier. If using Uniprot this is typically 'sp|'
         logger (logger.logging): Logger object
         max_peptide_length (int): Max peptide length to keep for analysis.
 
@@ -61,11 +61,11 @@ class InSilicoDigest(Digest):
     This class represents a custom written in silico digest
     """
 
-    def __init__(self, database_path, parameter_file_object, id_splitting=True):
+    def __init__(self, database_path, digest_type, missed_cleavages, reviewed_identifier_symbol, max_peptide_length, id_splitting=True):
         """
         The following class creates protein to peptide, peptide to protein, and reviewed protein mappings.
 
-        The input is a fasta database, a protein inference parameter object, and whether or not to split IDs.
+        The input is a fasta database, a digest type, the number of missed cleavages, a symbol that references reviewed identifiers and whether or not to split IDs.
 
         Further digestion types need to be added in the future other than just trypsin/lysc
 
@@ -73,15 +73,23 @@ class InSilicoDigest(Digest):
 
         Args:
             database_path (str): Path to fasta database file to digest
-            parameter_file_object (protein_inference.parameter.ProteinInferenceParameter): Protein Inference Parameter Object
+            digest_type (str): Must be a value in :attr:`LIST_OF_DIGEST_TYPES`
+            missed_cleavages (int): Integer that indicates the maximum number of allowable missed cleavages from the ms search
+            reviewed_identifier_symbol (str): Symbol that indicates a reviewed identifier. If using Uniprot this is typically 'sp|'
+            max_peptide_length (int): The maximum length of peptides to keep for the analysis
             id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
                 from the database protein strings as sometimes the database will contain those strings while the input data will have the strings split already.
                 Keep as False unless you know what you are doing
 
+        Raises:
+            ValueError: If arg digest_type is not in :attr:`LIST_OF_DIGEST_TYPES`
         Example:
             >>> digest = protein_inference.in_silico_digest.InSilicoDigest(
             >>>     database_path=database_file,
-            >>>     parameter_file_object=protein_inference_parameters,
+            >>>     digest_type='trypsin',
+            >>>     missed_cleavages=2,
+            >>>     reviewed_identifier_symbol='sp|',
+            >>>     max_peptide_length=7,
             >>>     id_splitting=False,
             >>> )
         """
@@ -89,22 +97,20 @@ class InSilicoDigest(Digest):
         self.protein_to_peptide_dictionary = {}
         self.swiss_prot_protein_set = set()
         self.database_path = database_path
-        self.num_miss_cleavs = parameter_file_object.missed_cleavages
+        self.missed_cleavages = missed_cleavages
         self.id_splitting = id_splitting
-        self.reviewed_identifier_symbol = (
-            parameter_file_object.reviewed_identifier_symbol
-        )
-        if parameter_file_object.digest_type in self.LIST_OF_DIGEST_TYPES:
-            self.digest_type = parameter_file_object.digest_type
+        self.reviewed_identifier_symbol = reviewed_identifier_symbol
+
+        if digest_type in self.LIST_OF_DIGEST_TYPES:
+            self.digest_type = digest_type
         else:
             raise ValueError(
                 "digest_type must be equal to one of the following"
                 + str(self.LIST_OF_DIGEST_TYPES)
                 + " or... (List more digest types here in the future...)"
             )
-        self.parameter_file_object = parameter_file_object
         self.logger = getLogger("protein_inference.in_silico_digest.InSilicoDigest")
-        self.max_peptide_length = parameter_file_object.restrict_peptide_length
+        self.max_peptide_length = max_peptide_length
 
     def digest(self, proseq, miss_cleavage):
         """
@@ -272,7 +278,10 @@ class InSilicoDigest(Digest):
         Example:
             >>> digest = protein_inference.in_silico_digest.InSilicoDigest(
             >>>     database_path=database_file,
-            >>>     parameter_file_object=protein_inference_parameters,
+            >>>     digest_type='trypsin',
+            >>>     missed_cleavages=2,
+            >>>     reviewed_identifier_symbol='sp|',
+            >>>     max_peptide_length=7,
             >>>     id_splitting=False,
             >>> )
             >>> digest.digest_fasta_database()
@@ -295,7 +304,7 @@ class InSilicoDigest(Digest):
                 sp_set.add(identifier_stripped)
 
             proseq = str(record.seq)
-            peptide_list = self.digest(proseq, self.num_miss_cleavs)
+            peptide_list = self.digest(proseq, self.missed_cleavages)
             prot_dict[identifier_stripped] = set(peptide_list)
             for peptide in peptide_list:
                 pep_dict.setdefault(peptide, set()).add(identifier_stripped)
@@ -316,7 +325,7 @@ class PyteomicsDigest(Digest):
     This class represents a pyteomics implementation of an in silico digest
     """
 
-    def __init__(self, database_path, parameter_file_object, id_splitting=True):
+    def __init__(self, database_path, digest_type, missed_cleavages, reviewed_identifier_symbol, max_peptide_length, id_splitting=True):
         """
         The following class creates protein to peptide, peptide to protein, and reviewed protein mappings.
 
@@ -328,15 +337,20 @@ class PyteomicsDigest(Digest):
 
         Args:
             database_path (str): Path to fasta database file to digest
-            parameter_file_object (protein_inference.parameter.ProteinInferenceParameter): Protein Inference Parameter Object
-            id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
+            digest_type (str): Must be a value in :attr:`LIST_OF_DIGEST_TYPES`
+            missed_cleavages (int): Integer that indicates the maximum number of allowable missed cleavages from the ms search
+            reviewed_identifier_symbol (str): Symbol that indicates a reviewed identifier. If using Uniprot this is typically 'sp|'
+            max_peptide_length (int): The maximum length of peptides to keep for the analysis            id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
                 from the database protein strings as sometimes the database will contain those strings while the input data will have the strings split already.
                 Keep as False unless you know what you are doing
 
         Example:
             >>> digest = protein_inference.in_silico_digest.PyteomicsDigest(
             >>>     database_path=database_file,
-            >>>     parameter_file_object=protein_inference_parameters,
+            >>>     digest_type='trypsin',
+            >>>     missed_cleavages=2,
+            >>>     reviewed_identifier_symbol='sp|',
+            >>>     max_peptide_length=7,
             >>>     id_splitting=False,
             >>> )
         """
@@ -344,13 +358,11 @@ class PyteomicsDigest(Digest):
         self.protein_to_peptide_dictionary = {}
         self.swiss_prot_protein_set = set()
         self.database_path = database_path
-        self.num_miss_cleavs = parameter_file_object.missed_cleavages
+        self.missed_cleavages = missed_cleavages
         self.id_splitting = id_splitting
-        self.reviewed_identifier_symbol = (
-            parameter_file_object.reviewed_identifier_symbol
-        )
-        if parameter_file_object.digest_type in self.LIST_OF_DIGEST_TYPES:
-            self.digest_type = parameter_file_object.digest_type
+        self.reviewed_identifier_symbol = reviewed_identifier_symbol
+        if digest_type in self.LIST_OF_DIGEST_TYPES:
+            self.digest_type = digest_type
         else:
             raise ValueError(
                 "digest_type must be equal to one of the following"
@@ -358,7 +370,7 @@ class PyteomicsDigest(Digest):
                 + " or... (List more digest types here in the future...)"
             )
         self.logger = getLogger("protein_inference.in_silico_digest.PyteomicsDigest")
-        self.max_peptide_length = parameter_file_object.restrict_peptide_length
+        self.max_peptide_length = max_peptide_length
 
     def digest_fasta_database(self):
         """
@@ -371,7 +383,10 @@ class PyteomicsDigest(Digest):
         Example:
             >>> digest = protein_inference.in_silico_digest.PyteomicsDigest(
             >>>     database_path=database_file,
-            >>>     parameter_file_object=protein_inference_parameters,
+            >>>     digest_type='trypsin',
+            >>>     missed_cleavages=2,
+            >>>     reviewed_identifier_symbol='sp|',
+            >>>     max_peptide_length=7,
             >>>     id_splitting=False,
             >>> )
             >>> digest.digest_fasta_database()
@@ -386,7 +401,7 @@ class PyteomicsDigest(Digest):
             new_peptides = parser.cleave(
                 sequence,
                 parser.expasy_rules[self.digest_type],
-                self.num_miss_cleavs,
+                self.missed_cleavages,
                 min_length=self.max_peptide_length,
             )
 

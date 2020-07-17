@@ -821,13 +821,13 @@ class GenericReader(Reader):
                 )
             )
             self.logger.info("Sorting by {}".format(self.scoring_variable))
-            if self.parameter_file_object.score_type == Score.ADDITIVE_SCORE_TYPE:
+            if self.parameter_file_object.psm_score_type == Score.ADDITIVE_SCORE_TYPE:
                 all_psms = sorted(
                     psms_all_filtered,
                     key=lambda x: float(x[self.scoring_variable]),
                     reverse=True,
                 )
-            if self.parameter_file_object.score_type == Score.MULTIPLICATIVE_SCORE_TYPE:
+            if self.parameter_file_object.psm_score_type == Score.MULTIPLICATIVE_SCORE_TYPE:
                 all_psms = sorted(
                     psms_all_filtered,
                     key=lambda x: float(x[self.scoring_variable]),

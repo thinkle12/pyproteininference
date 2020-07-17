@@ -27,6 +27,8 @@ class DataStore(object):
         peptide_protein_dictionary (collections.defaultdict): Dictionary of peptide strings (keys) that map to sets of protein strings based on the peptides and proteins found in the search. Peptide -> set(Proteins)
         high_low_better (str): Variable that indicates whether a higher or a lower protein score is better. This is necessary to sort Protein objects by score properly. Can either be "higher" or "lower"
         psm_score (str): Variable that indicates the :py:class:`protein_inference.physical.Psm` score being used in the analysis to generate :py:class:`protein_inference.physical.Protein` scores
+        protein_score (str): String to indicate the protein score method used
+        short_protein_score (str): Short String to indicate the protein score method used
         protein_group_objects (list): List of scored :py:class:`protein_inference.physical.ProteinGroup` objects that have been grouped and sorted. Output from :py:meth:`protein_inference.inference.Inference.run_inference` method
         decoy_symbol (str): String that is used to differentiate between decoy proteins and target proteins. Ex: "##"
         digest_class (protein_inference.in_silico_digest.Digest): Digest object :py:class:`protein_inference.in_silico_digest.Digest`
@@ -85,9 +87,12 @@ class DataStore(object):
         self.peptide_protein_dictionary = None
         self.high_low_better = None # Variable that indicates whether a higher or lower protein score is better
         self.psm_score = None # PSM Score used
+        self.protein_score = None
+        self.short_protein_score = None
         self.protein_group_objects = [] # List of sorted protein group objects
         self.decoy_symbol = self.parameter_file_object.decoy_symbol # Decoy symbol from parameter file
         self.digest_class = digest_class # Digest class object
+
 
         self.logger = getLogger("protein_inference.datastore.DataStore")
 
@@ -468,12 +473,12 @@ class DataStore(object):
 
         if custom_threshold:
             custom_restricted = []
-            if self.parameter_file_object.score_type == Score.MULTIPLICATIVE_SCORE_TYPE:
+            if self.parameter_file_object.psm_score_type == Score.MULTIPLICATIVE_SCORE_TYPE:
                 for psms in restricted_data:
                     if psms.custom_score <= custom_threshold:
                         custom_restricted.append(psms)
 
-            if self.parameter_file_object.score_type == Score.ADDITIVE_SCORE_TYPE:
+            if self.parameter_file_object.psm_score_type == Score.ADDITIVE_SCORE_TYPE:
                 for psms in restricted_data:
                     if psms.custom_score >= custom_threshold:
                         custom_restricted.append(psms)

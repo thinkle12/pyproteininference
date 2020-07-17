@@ -155,8 +155,8 @@ class Score(object):
         # Here do ascending sorting because a lower pep or q value is better
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=False)
 
-        self.data_class.score_method = self.BEST_PEPTIDE_PER_PROTEIN
-        self.data_class.short_score_method = self.SHORT_BEST_PEPTIDE_PER_PROTEIN
+        self.data_class.protein_score = self.BEST_PEPTIDE_PER_PROTEIN
+        self.data_class.short_protein_score = self.SHORT_BEST_PEPTIDE_PER_PROTEIN
         self.data_class.scored_proteins = all_scores
 
     def fishers_method(self):
@@ -181,8 +181,8 @@ class Score(object):
             all_scores.append(protein)
         # Here reverse the sorting to descending because a higher score is better
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
-        self.data_class.score_method = "fishers_method"
-        self.data_class.short_score_method = "fm"
+        self.data_class.protein_score = "fishers_method"
+        self.data_class.short_protein_score = "fm"
         self.data_class.scored_proteins = all_scores
 
     def multiplicative_log(self):
@@ -216,8 +216,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = self.MULTIPLICATIVE_LOG
-        self.data_class.short_score_method = self.SHORT_MULTIPLICATIVE_LOG
+        self.data_class.protein_score = self.MULTIPLICATIVE_LOG
+        self.data_class.short_protein_score = self.SHORT_MULTIPLICATIVE_LOG
         self.data_class.scored_proteins = all_scores
 
     def down_weighted_multiplicative_log(self):
@@ -259,8 +259,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = self.DOWNWEIGHTED_MULTIPLICATIVE_LOG
-        self.data_class.short_score_method = self.SHORT_DOWNWEIGHTED_MULTIPLICATIVE_LOG
+        self.data_class.protein_score = self.DOWNWEIGHTED_MULTIPLICATIVE_LOG
+        self.data_class.short_protein_score = self.SHORT_DOWNWEIGHTED_MULTIPLICATIVE_LOG
         self.data_class.scored_proteins = all_scores
 
     def top_two_combied(self):
@@ -294,8 +294,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = self.TOP_TWO_COMBINED
-        self.data_class.short_score_method = self.SHORT_TOP_TWO_COMBINED
+        self.data_class.protein_score = self.TOP_TWO_COMBINED
+        self.data_class.short_protein_score = self.SHORT_TOP_TWO_COMBINED
         self.data_class.scored_proteins = all_scores
 
     def down_weighted_v2(self):
@@ -331,8 +331,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = self.DOWNWEIGHTED_VERSION2
-        self.data_class.short_score_method = self.SHORT_DOWNWEIGHTED_VERSION2
+        self.data_class.protein_score = self.DOWNWEIGHTED_VERSION2
+        self.data_class.short_protein_score = self.SHORT_DOWNWEIGHTED_VERSION2
         self.data_class.scored_proteins = all_scores
 
     def iterative_down_weighted_log(self):
@@ -375,8 +375,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = self.ITERATIVE_DOWNWEIGHTED_LOG
-        self.data_class.short_score_method = self.SHORT_ITERATIVE_DOWNWEIGHTED_LOG
+        self.data_class.protein_score = self.ITERATIVE_DOWNWEIGHTED_LOG
+        self.data_class.short_protein_score = self.SHORT_ITERATIVE_DOWNWEIGHTED_LOG
         self.data_class.scored_proteins = all_scores
 
     def geometric_mean_log(self):
@@ -410,8 +410,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = self.GEOMETRIC_MEAN
-        self.data_class.short_score_method = self.SHORT_GEOMETRIC_MEAN
+        self.data_class.protein_score = self.GEOMETRIC_MEAN
+        self.data_class.short_protein_score = self.SHORT_GEOMETRIC_MEAN
         self.data_class.scored_proteins = all_scores
 
     def iterative_down_weighted_v2(self):
@@ -438,8 +438,8 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = "iterative_downweighting2"
-        self.data_class.short_score_method = "idw2"
+        self.data_class.protein_score = "iterative_downweighting2"
+        self.data_class.short_protein_score = "idw2"
         self.data_class.scored_proteins = all_scores
 
     def additive(self):
@@ -467,6 +467,6 @@ class Score(object):
         # Higher score is better as a smaller q or pep in a -log will give a larger value
         all_scores = sorted(all_scores, key=lambda k: k.score, reverse=True)
 
-        self.data_class.score_method = self.ADDITIVE
-        self.data_class.short_score_method = self.SHORT_ADDITIVE
+        self.data_class.protein_score = self.ADDITIVE
+        self.data_class.short_protein_score = self.SHORT_ADDITIVE
         self.data_class.scored_proteins = all_scores

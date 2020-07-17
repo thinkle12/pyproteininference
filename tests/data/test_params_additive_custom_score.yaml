@@ -10,9 +10,9 @@ parameters:
     q_value_restriction: None
     custom_restriction: None
   score:
-    score_method: additive
-    score: example_additive_score
-    score_type: additive
+    protein_score: additive
+    psm_score: example_additive_score
+    psm_score_type: additive
   identifiers:
     decoy_symbol: "##"
     isoform_symbol: "-"

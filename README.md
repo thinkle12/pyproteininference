@@ -2,6 +2,8 @@
 # Py Protein Inference
 ## Requirements
 
+Current version: 0.5.0
+
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__
  2. __Python Packages__:
 	__numpy__, __pandas__, __pyteomics__, __biopython__, __pulp__, __PyYAML__. These should be installed automatically during installation.
@@ -33,7 +35,7 @@ Py Protein Inference is an independent Python package that has the ability to ru
  
  In Addition to these inference types Py Protein Inference can also score proteins with a variety of methods:
  
- 1.  Best Peptide Per Protein
+ 1. Best Peptide Per Protein
  2. Multiplicative Log
  3. Top Two Combined
  4. Additive
@@ -41,7 +43,7 @@ Py Protein Inference is an independent Python package that has the ability to ru
  6. Downweighted Multiplicative Log
  7. Geometric Mean
  
-Please see the [__Score Types__](#score-types) section for more information on scoring algorithms
+Please see the [__Protein Score Types__](#protein-score-types) section for more information on scoring algorithms
 
 ## Using Py Protein Inference
 Please go through each section below. The sections highlight how to set everything up properly to run Py Protein Inference and how to run an analysis with Py Protein Inference.
@@ -67,19 +69,19 @@ For a sample parameter file please see the `parameters/` or `tests/data/` folder
 | pep_restriction | Posterior Error Probability values to filter. IE __0.9__. In this case PSMs with PEP values greater than __0.9__ would be removed from the input. If PEP values not in input please use __None__  | Numeric |
 | peptide_length_restriction | Peptide Length to filter on. IE __7__. If no filter wanted please use __None__ | Int |
 | q_value_restriction | Q Values to filter. IE __0.2__. In this case PSMs with Q Values greater than __0.2__ would be removed from the input. If Q Values not in input please use __None__  | Numeric |
-| custom_restriction | Custom Value to filter. IE __5__. In this case PSMs with Custom value greater than / less than __5__ would be removed from the input. If Not using a custom score please use __None__. __NOTE__: If a higher score is "better" for your score please set __score_type__ to __additive__. If a lower score is "better" please set __score_type__ parameter to __multiplicative__   | Numeric |
+| custom_restriction | Custom Value to filter. IE __5__. In this case PSMs with Custom value greater than / less than __5__ would be removed from the input. If Not using a custom score please use __None__. __NOTE__: If a higher score is "better" for your score please set __psm_score_type__ to __additive__. If a lower score is "better" please set __psm_score_type__ parameter to __multiplicative__   | Numeric |
 
 ## Score:
 | Parameter | Description |Type|
 |---|---|---|
-| score_method | One of any of the following: __multiplicative_log__, __best_peptide_per_protein__, __top_two_combined__, __additive__, __iterative_downweighted_log__, __downweighted_multiplicative_log__, __geometric_mean__. Recommended: __multiplicative_log__ | String |
-| score | PSM score to use for Protein Scoring. If using Percolator output as input this would either be __posterior_error_prob__ or __q-value__. The string typed here should match the column in your input files __EXACTLY__. If using a custom score it will be filtered accordingly with the value in [__custom_restriction__](#data-restriction) | String |
-| score_type | The Type of score that __score__ parameter is. Either __multiplicative__ or __additive__. If a larger psm score is "better" than input additive IE (Mascot Ion Score, Xcorr, Percolator Score). If a smaller psm score is "better" than input multiplicative IE (Q Value, Posterior Error Probability). See [below](#extra-score-information) for more information| String |
+| protein_score | One of any of the following: __multiplicative_log__, __best_peptide_per_protein__, __top_two_combined__, __additive__, __iterative_downweighted_log__, __downweighted_multiplicative_log__, __geometric_mean__. Recommended: __multiplicative_log__ | String |
+| psm_score | PSM score to use for Protein Scoring. If using Percolator output as input this would either be __posterior_error_prob__ or __q-value__. The string typed here should match the column in your input files __EXACTLY__. If using a custom score it will be filtered accordingly with the value in [__custom_restriction__](#data-restriction) | String |
+| psm_score_type | The Type of score that __psm_score__ parameter is. Either __multiplicative__ or __additive__. If a larger psm score is "better" than input additive IE (Mascot Ion Score, Xcorr, Percolator Score). If a smaller psm score is "better" than input multiplicative IE (Q Value, Posterior Error Probability). See [below](#extra-score-information) for more information| String |
 #### Extra Score information:
 
- 1. The __score_method__, __score__, and __score_type__ methods must be compatible.
- 2. If using a PSM score (__score__ parameter) where the lower the score the better IE (__posterior_error_prob__ or __q-value__) then any  __score_method__ can be used except __additive__. __score_type__ must also be set to __multiplicative__
- 3. If using a PSM score (__score__ parameter) where the higher the score the better IE (Percolator Score, Mascot Ion Score, Xcorr) (Percolator Score is called __score__ - column name) in the tab delimited percolator output. Then __score_method__ and __score_type__ must both be __additive__
+ 1. The __protein_score__, __psm_score__, and __psm_score_type__ methods must be compatible.
+ 2. If using a PSM score (__psm_score__ parameter) where the lower the score the better IE (__posterior_error_prob__ or __q-value__) then any  __protein_score__ can be used except __additive__. __psm_score_type__ must also be set to __multiplicative__
+ 3. If using a PSM score (__psm_score__ parameter) where the higher the score the better IE (Percolator Score, Mascot Ion Score, Xcorr) (Percolator Score is called __psm_score__ - column name) in the tab delimited percolator output. Then __protein_score__ and __psm_score_type__ must both be __additive__
 
 ## Identifiers:
 | Parameter | Description |Type|
@@ -126,7 +128,7 @@ As previously mentioned the standard input filetype is the tab delimited output 
 |---|---|---|---|---|---|---|---|---|
 | 1.1 | 7.5 | 0.0048 | 0.0007 | R.NYIQSLTQMPK.M | MK14_HUMAN\|Q16539 | MK14_HUMAN\|Q16539-2 | MK14_HUMAN\|Q16539-3 |  |
 | 1.2 | 6.2 | 0.0035 | 0.0006 | R.NTVASSSRSM*R.T | FHDC1_HUMAN\|Q9C0D6 |  |  |  |
-With the above standard input one could use __q-value__ or __posterior_error_prob__ as the PSM score see [Score Section](#score) with __multiplicative__ as __score_type__ and any of the multiplicative options for __score_method__. Also, one could use __score__ as the PSM __score__ with __additive__ as the __score_type__ and __score_method__
+With the above standard input one could use __q-value__ or __posterior_error_prob__ as the PSM score see [Score Section](#score) with __multiplicative__ as __psm_score_type__ and any of the multiplicative options for __protein_score__. Also, one could use __psm_score__ as the PSM __psm_score__ with __additive__ as the __psm_score_type__ and __protein_score__
 
 For example standard input files please see any of the following:
 `tests/data/test_perc_data_target.txt`
@@ -137,7 +139,7 @@ For example standard input files please see any of the following:
 |---|---|---|---|---|
 | 1.1 | 7.5 | R.NYIQSLTQMPK.M | MK14_HUMAN\|Q16539 | MK14_HUMAN\|Q16539-2 | MK14_HUMAN\|Q16539-3 |  |
 | 1.2 | 6.2 |  R.NTVASSSRSM*R.T | FHDC1_HUMAN\|Q9C0D6 |  |  | 
-With the above custom input one could use one could use __custom_score__ as the PSM __score__ with __additive__ as the __score_type__ and __score_method__
+With the above custom input one could use one could use __custom_score__ as the PSM __psm_score__ with __additive__ as the __psm_score_type__ and __protein_score__
 
 For example custom input files please see any of the following:
 `tests/data/test_perc_data_target_additive.txt`
@@ -271,19 +273,19 @@ Py Protein Inference can also be ran via a docker container. To access the docke
 2. Ability to pull the docker image from docker hub
 
 Pulling the image from docker hub:
-`docker pull pyproteininference:0.4.6`
+`docker pull pyproteininference:0.5.0`
 
-It is recommended to pull the image with the highest version number. Currently this is 0.4.6.
+It is recommended to pull the image with the highest version number. Currently this is 0.5.0.
 
 Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
 Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
 See the example below:
-`docker run -v /path/to/data/:/data pyproteininference:0.4.6 protein_inference_cli.py --help -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+`docker run -v /path/to/data/:/data pyproteininference:0.5.0 protein_inference_cli.py --help -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
 
 #### Building the Docker image from source
 Use the following command from the root directory of the source code:
 Here we use version `0.4.3` and tag as that version as well.
-`docker build . -f Dockerfile -t pyproteininference:0.4.6 --build-arg VERSION=0.4.6`
+`docker build . -f Dockerfile -t pyproteininference:0.5.0 --build-arg VERSION=0.5.0`
 
 ## Extra Information
 
@@ -337,7 +339,7 @@ Parsimony currently has potential external dependancies depending on the __lp_so
 
 [Protein Picker](https://www.ncbi.nlm.nih.gov/pubmed/25987413) is an algorithm that treats target and decoy proteins as pairs and is essentially target/decoy competition. If both the target and decoy proteins are identified from the searches when protein picker is ran the target and decoy scores are compared with one another. The one with the larger score is kept to continue on in the analysis while the one with the lower score gets filtered out of the analysis. This algorithm is integrated into other tools such as [Percolator Protein Inference](https://www.ncbi.nlm.nih.gov/pubmed/27572102)
 
-### Score Types
+### Protein Score Types
 
 |Score Type| Description |
 |---|---|

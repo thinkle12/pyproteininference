@@ -71,7 +71,7 @@ logger = logging.getLogger("protein_inference.tests.test_020_parsimony_pipeline_
 
 
 class TestLoadParsimonyGlpkNoneTypeParamsWorkflow(TestCase):
-    # @unittest.skip("Skipping Pulp Test, No CBC executable in build env")
+    @unittest.skip("Skipping Pulp Test, No CBC executable in build env")
     def test_workflow_parsimony_glpk_none_type(self):
 
         ### STEP 1: Load parameter file ###

@@ -110,7 +110,7 @@ logger = logging.getLogger("protein_inference.tests.test_001_parsimony_pipeline.
 
 
 class TestLoadParsimonyPulpWorkflow(TestCase):
-    # @unittest.skip("Skipping Pulp Test, No CBC executable in build env")
+    @unittest.skip("Skipping Pulp Test, No CBC executable in build env")
     def test_workflow_parsimony_pulp(self):
 
         ### STEP 1: Load parameter file ###
@@ -453,7 +453,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
                 set(psm_id_output[i][PEPTIDES_INDEX:]),
             )
 
-    # @unittest.skip("Skipping Pulp Subset Peptides Test, No CBC executable in build env")
+    @unittest.skip("Skipping Pulp Subset Peptides Test, No CBC executable in build env")
     def test_workflow_parsimony_glpk_subset_peptides(self):
         ##### RUN AGAIN WITH DIFFERENT GROUPING TYPE
 
@@ -770,7 +770,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
                 set(psm_id_output[i][PEPTIDES_INDEX:]),
             )
 
-    # @unittest.skip("Skipping Pulp No Grouping Test, No CBC executable in build env")
+    @unittest.skip("Skipping Pulp No Grouping Test, No CBC executable in build env")
     def test_workflow_parsimony_glpk_no_grouping(self):
         ### NOW RUN WITH NO GROUPING
 

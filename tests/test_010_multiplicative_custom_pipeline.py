@@ -139,7 +139,7 @@ class TestMultiplicativeWorkflow(TestCase):
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
         score = protein_inference.scoring.Score(data_class=data)
-        score.score_psms(score_method=protein_inference_parameters.score_method)
+        score.score_psms(score_method=protein_inference_parameters.protein_score)
 
         ### STEP 9: Run protein picker on the data
         ### STEP 9: Run protein picker on the data

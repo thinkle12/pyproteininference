@@ -10,9 +10,9 @@ parameters:
     q_value_restriction: None
     custom_restriction: None
   score:
-    score_method: multiplicative_log
-    score: example_multiplicative_score
-    score_type: multiplicative
+    protein_score: multiplicative_log
+    psm_score: example_multiplicative_score
+    psm_score_type: multiplicative
   identifiers:
     decoy_symbol: "##"
     isoform_symbol: "-"

@@ -23,8 +23,8 @@ class ProteinInferenceParameter(object):
         restrict_peptide_length (int/None): Float to restrict the peptide length values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
         restrict_q (float/None): Float to restrict the q values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`
         restrict_custom (float/None): Float to restrict the custom values by in the PSM input. Used in :py:meth:protein_inference.datastore.DataStore.restrict_psm_data`. Filtering depends on score_type variable. If score_type is multiplicative then values that are less than restrict_custom are kept. If score_type is additive then values that are more than restrict_custom are kept.
-        score_method (str): String to determine the way in which Proteins are scored can be any of the SCORE_METHODS in :py:class:`protein_inference.scoring.Score`
-        score_type (str): String to determine the type of score that the PSM scores are (Additive or Multiplicative) can be any of the SCORE_TYPES in :py:class:`protein_inference.scoring.Score`
+        protein_score (str): String to determine the way in which Proteins are scored can be any of the SCORE_METHODS in :py:class:`protein_inference.scoring.Score`
+        psm_score_type (str): String to determine the type of score that the PSM scores are (Additive or Multiplicative) can be any of the SCORE_TYPES in :py:class:`protein_inference.scoring.Score`
         decoy_symbol (str): String to denote decoy proteins from target proteins. IE "##"
         isoform_symbol (str): String to denote isoforms from regular proteins. IE "-". Can also be None
         reviewed_identifier_symbol (str): String to denote a "Reviewed" Protein. Typically this is: "sp|" if using Uniprot Fasta database
@@ -65,8 +65,9 @@ class ProteinInferenceParameter(object):
         self.restrict_pep = None
         self.restrict_peptide_length = None
         self.restrict_q = None
-        self.score_method = None
-        self.score_type = None
+        self.restrict_custom = None
+        self.protein_score = None
+        self.psm_score_type = None
         self.decoy_symbol = None
         self.isoform_symbol = None
         self.reviewed_identifier_symbol = None
@@ -127,8 +128,8 @@ class ProteinInferenceParameter(object):
             self.restrict_custom = yaml_params["parameters"]["data_restriction"][
                 "custom_restriction"
             ]
-            self.score_method = yaml_params["parameters"]["score"]["score_method"]
-            self.score_type = yaml_params["parameters"]["score"]["score_type"]
+            self.protein_score = yaml_params["parameters"]["score"]["protein_score"]
+            self.psm_score_type = yaml_params["parameters"]["score"]["psm_score_type"]
             self.decoy_symbol = yaml_params["parameters"]["identifiers"]["decoy_symbol"]
             self.isoform_symbol = yaml_params["parameters"]["identifiers"][
                 "isoform_symbol"
@@ -140,7 +141,7 @@ class ProteinInferenceParameter(object):
                 "inference_type"
             ]
             self.tag = yaml_params["parameters"]["general"]["tag"]
-            self.psm_score = yaml_params["parameters"]["score"]["score"]
+            self.psm_score = yaml_params["parameters"]["score"]["psm_score"]
             self.grouping_type = yaml_params["parameters"]["inference"]["grouping_type"]
             self.max_identifiers_peptide_centric = yaml_params["parameters"][
                 "peptide_centric"
@@ -161,14 +162,14 @@ class ProteinInferenceParameter(object):
             self.restrict_peptide_length = 7
             self.restrict_q = 0.005
             self.restrict_custom = None
-            self.score_method = "multiplicative_log"
+            self.protein_score = "multiplicative_log"
             self.psm_score = "posterior_error_prob"
             self.decoy_symbol = "##"
             self.isoform_symbol = "-"
             self.reviewed_identifier_symbol = "sp|"
             self.inference_type = "peptide_centric"
             self.tag = "example_tag"
-            self.score_type = "multiplicative"
+            self.psm_score_type = "multiplicative"
             self.grouping_type = "shared_peptides"
             self.max_identifiers_peptide_centric = 5
             self.lp_solver = "pulp"
@@ -336,13 +337,13 @@ class ProteinInferenceParameter(object):
         Internal ProteinInferenceParameter method to validate the score method
         """
         # Make sure we have the score method defined in code to use...
-        if self.score_method in Score.SCORE_METHODS:
-            self.logger.info("Using Score Method '{}'".format(self.score_method))
+        if self.protein_score in Score.SCORE_METHODS:
+            self.logger.info("Using Score Method '{}'".format(self.protein_score))
         else:
             raise ValueError(
                 "Score Method '{}' not supported, "
                 "please use one of the following Score Methods: '{}'".format(
-                    self.score_method, ", ".join(Score.SCORE_METHODS)
+                    self.protein_score, ", ".join(Score.SCORE_METHODS)
                 )
             )
 
@@ -351,13 +352,13 @@ class ProteinInferenceParameter(object):
         Internal ProteinInferenceParameter method to validate the score type
         """
         # Make sure score type is multiplicative or additive
-        if self.score_type in Score.SCORE_TYPES:
-            self.logger.info("Using Score Type '{}'".format(self.score_type))
+        if self.psm_score_type in Score.SCORE_TYPES:
+            self.logger.info("Using Score Type '{}'".format(self.psm_score_type))
         else:
             raise ValueError(
                 "Score Type '{}' not supported, "
                 "please use one of the following Score Types: '{}'".format(
-                    self.score_type, ", ".join(Score.SCORE_TYPES)
+                    self.psm_score_type, ", ".join(Score.SCORE_TYPES)
                 )
             )
 
@@ -368,12 +369,12 @@ class ProteinInferenceParameter(object):
         # Check to see if combination of score (column), method(multiplicative log, additive), and score type (multiplicative/additive) is possible...
         # This will be super custom
 
-        if self.score_type == Score.ADDITIVE_SCORE_TYPE and self.score_method != Score.ADDITIVE:
+        if self.psm_score_type == Score.ADDITIVE_SCORE_TYPE and self.protein_score != Score.ADDITIVE:
             raise ValueError(
                 "If Score type is 'additive' (Higher PSM score is better) then you must use the 'additive' score method"
             )
 
-        elif self.score_type == Score.MULTIPLICATIVE_SCORE_TYPE and self.score_method == Score.ADDITIVE:
+        elif self.psm_score_type == Score.MULTIPLICATIVE_SCORE_TYPE and self.protein_score == Score.ADDITIVE:
             raise ValueError(
                 "If Score type is 'multiplicative' (Lower PSM score is better) "
                 "then you must NOT use the 'additive' score method please "
@@ -385,7 +386,7 @@ class ProteinInferenceParameter(object):
         else:
             self.logger.info(
                 "Combination of Score Type: '{}' and Score Method: '{}' is Ok".format(
-                    self.score_type, self.score_method
+                    self.psm_score_type, self.protein_score
                 )
             )
 

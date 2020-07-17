@@ -110,7 +110,7 @@ logger = logging.getLogger("protein_inference.tests.test_001_parsimony_pipeline.
 
 
 class TestLoadParsimonyPulpWorkflow(TestCase):
-    @unittest.skip("Skipping Pulp Test, No CBC executable in build env")
+    # @unittest.skip("Skipping Pulp Test, No CBC executable in build env")
     def test_workflow_parsimony_pulp(self):
 
         ### STEP 1: Load parameter file ###
@@ -131,10 +131,10 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.restrict_peptide_length, 7)
         self.assertEqual(protein_inference_parameters.restrict_q, 0.9)
         self.assertEqual(
-            protein_inference_parameters.score_method, "multiplicative_log"
+            protein_inference_parameters.protein_score, "multiplicative_log"
         )
         self.assertEqual(protein_inference_parameters.psm_score, "posterior_error_prob")
-        self.assertEqual(protein_inference_parameters.score_type, "multiplicative")
+        self.assertEqual(protein_inference_parameters.psm_score_type, "multiplicative")
         self.assertEqual(protein_inference_parameters.decoy_symbol, "##")
         self.assertEqual(protein_inference_parameters.isoform_symbol, "-")
         self.assertEqual(protein_inference_parameters.reviewed_identifier_symbol, "sp|")
@@ -204,7 +204,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
         score = protein_inference.scoring.Score(data_class=data)
-        score.score_psms(score_method=protein_inference_parameters.score_method)
+        score.score_psms(score_method=protein_inference_parameters.protein_score)
 
         ### STEP 9: Run protein picker on the data
         ### STEP 9: Run protein picker on the data
@@ -453,7 +453,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
                 set(psm_id_output[i][PEPTIDES_INDEX:]),
             )
 
-    @unittest.skip("Skipping Pulp Subset Peptides Test, No CBC executable in build env")
+    # @unittest.skip("Skipping Pulp Subset Peptides Test, No CBC executable in build env")
     def test_workflow_parsimony_glpk_subset_peptides(self):
         ##### RUN AGAIN WITH DIFFERENT GROUPING TYPE
 
@@ -524,7 +524,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
         score = protein_inference.scoring.Score(data_class=data)
-        score.score_psms(score_method=protein_inference_parameters.score_method)
+        score.score_psms(score_method=protein_inference_parameters.protein_score)
 
         ### STEP 9: Run protein picker on the data
         ### STEP 9: Run protein picker on the data
@@ -770,7 +770,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
                 set(psm_id_output[i][PEPTIDES_INDEX:]),
             )
 
-    @unittest.skip("Skipping Pulp No Grouping Test, No CBC executable in build env")
+    # @unittest.skip("Skipping Pulp No Grouping Test, No CBC executable in build env")
     def test_workflow_parsimony_glpk_no_grouping(self):
         ### NOW RUN WITH NO GROUPING
 
@@ -841,7 +841,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
         score = protein_inference.scoring.Score(data_class=data)
-        score.score_psms(score_method=protein_inference_parameters.score_method)
+        score.score_psms(score_method=protein_inference_parameters.protein_score)
 
         ### STEP 9: Run protein picker on the data
         ### STEP 9: Run protein picker on the data

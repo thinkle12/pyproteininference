@@ -71,7 +71,7 @@ logger = logging.getLogger("protein_inference.tests.test_020_parsimony_pipeline_
 
 
 class TestLoadParsimonyGlpkNoneTypeParamsWorkflow(TestCase):
-    @unittest.skip("Skipping Pulp Test, No CBC executable in build env")
+    # @unittest.skip("Skipping Pulp Test, No CBC executable in build env")
     def test_workflow_parsimony_glpk_none_type(self):
 
         ### STEP 1: Load parameter file ###
@@ -91,10 +91,10 @@ class TestLoadParsimonyGlpkNoneTypeParamsWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.restrict_peptide_length, 7)
         self.assertEqual(protein_inference_parameters.restrict_q, 0.9)
         self.assertEqual(
-            protein_inference_parameters.score_method, "multiplicative_log"
+            protein_inference_parameters.protein_score, "multiplicative_log"
         )
         self.assertEqual(protein_inference_parameters.psm_score, "posterior_error_prob")
-        self.assertEqual(protein_inference_parameters.score_type, "multiplicative")
+        self.assertEqual(protein_inference_parameters.psm_score_type, "multiplicative")
         self.assertEqual(protein_inference_parameters.decoy_symbol, "##")
         self.assertEqual(protein_inference_parameters.isoform_symbol, None)
         self.assertEqual(protein_inference_parameters.reviewed_identifier_symbol, None)
@@ -164,7 +164,7 @@ class TestLoadParsimonyGlpkNoneTypeParamsWorkflow(TestCase):
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
         score = protein_inference.scoring.Score(data_class=data)
-        score.score_psms(score_method=protein_inference_parameters.score_method)
+        score.score_psms(score_method=protein_inference_parameters.protein_score)
 
         ### STEP 9: Run protein picker on the data
         ### STEP 9: Run protein picker on the data

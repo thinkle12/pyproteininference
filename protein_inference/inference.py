@@ -568,7 +568,7 @@ class Parsimony(Inference):
 
         Returns:
             dict: a Dictionary that contains a list of :py:class:`protein_inference.physical.ProteinGroup` objects (key:"group_objects") and
-            a list of grouped :py:class:`protein_inference.physical.Protein` objects (key:"scores_grouped") and a list of Protein objects that have been replaced as lead (key:"lead_replaced"
+            a list of grouped :py:class:`protein_inference.physical.Protein` objects (key:"grouped_protein_objects")
 
 
         """

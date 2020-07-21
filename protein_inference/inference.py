@@ -56,44 +56,42 @@ class Inference(object):
         self.data_class = data_class
         self.digest_class = digest_class
 
-    # TODO factory
-    # TODO make this a class method so we never initialize the Inference class
-    def run_inference(self):
+    @classmethod
+    def run_inference(cls, data_class, digest_class):
         """
-        This method dispatches to one of the five different inference classes/models
+        This class method dispatches to one of the five different inference classes/models
         based on input from the protein inference parameter object :py:class:`protein_inference.parameters.ProteinInferenceParameter`.
-        The methods are "parsimony", "inclusion", "exclusion", "peptide_centric", and "none"
+        The methods are "parsimony", "inclusion", "exclusion", "peptide_centric", and "first_protein"
 
         Example:
-            >>> inference = protein_inference.inference.Inference()
-            >>> inference.run_inference(data_class=data,digest_class=digest)
+            >>> protein_inference.inference.Inference.run_inference(data_class=data,digest_class=digest)
 
         """
         logger = getLogger("protein_inference.inference.Inference.run_inference")
 
-        inference_type = self.data_class.parameter_file_object.inference_type
+        inference_type = data_class.parameter_file_object.inference_type
 
         logger.info("Running Inference with Inference Type: {}".format(inference_type))
 
         # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == Inference.PARSIMONY:
-            group = Parsimony(data_class=self.data_class, digest_class=self.digest_class)
+            group = Parsimony(data_class=data_class, digest_class=digest_class)
             group.infer_proteins()
 
         if inference_type == Inference.INCLUSION:
-            group = Inclusion(data_class=self.data_class, digest_class=self.digest_class)
+            group = Inclusion(data_class=data_class, digest_class=digest_class)
             group.infer_proteins()
 
         if inference_type == Inference.EXCLUSION:
-            group = Exclusion(data_class=self.data_class, digest_class=self.digest_class)
+            group = Exclusion(data_class=data_class, digest_class=digest_class)
             group.infer_proteins()
 
         if inference_type == Inference.FIRST_PROTEIN:
-            group = FirstProtein(data_class=self.data_class, digest_class=self.digest_class)
+            group = FirstProtein(data_class=data_class, digest_class=digest_class)
             group.infer_proteins()
 
         if inference_type == Inference.PEPTIDE_CENTRIC:
-            group = PeptideCentric(data_class=self.data_class, digest_class=self.digest_class)
+            group = PeptideCentric(data_class=data_class, digest_class=digest_class)
             group.infer_proteins()
 
     def _group_by_peptides(

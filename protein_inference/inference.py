@@ -1026,6 +1026,8 @@ class Parsimony(Inference):
         s.t. c2: y[14145]+y[4857]+y[4858]+y[10143]+y[2966] >=1;
         s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1
 
+        Where each new line is a peptide and each y[x] is a protein that maps to said peptide
+
         Args:
             glpkin_filename (str): path to the filename to be used by glpsol
 

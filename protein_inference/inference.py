@@ -12,7 +12,7 @@ import pulp
 
 class Inference(object):
     """
-    Parent Inference class for all grouper subset classes.
+    Parent Inference class for all inference/grouper subset classes.
     The base Inference class contains several methods that are shared across the Inference sub-classes.
 
     Attributes:

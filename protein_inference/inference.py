@@ -95,6 +95,97 @@ class Inference(object):
             group.infer_proteins()
 
     def _create_protein_groups(self, scored_proteins):
+        """
+        This method sets up protein groups for inference methods that do not need grouping
+
+        Args:
+            scored_proteins (list): List of scored :py:class:`protein_inference.physical.Protein` objects
+
+        Returns:
+            list: List of lists of scored :py:class:`protein_inference.physical.Protein` objects
+
+        """
+        scored_proteins = sorted(
+            scored_proteins,
+            key=lambda k: (len(k.raw_peptides), k.identifier),
+            reverse=True,
+        )
+
+        prot_pep_dict = self.data_class.protein_to_peptide_dictionary()
+
+        grouped_proteins = []
+        for protein_objects in scored_proteins:
+            cur_protein_identifier = protein_objects.identifier
+
+            # Set peptide variable if the peptide is in the restricted peptide set
+            # Sort the peptides alphabetically
+            protein_objects.peptides = set(
+                sorted(
+                    [
+                        x
+                        for x in prot_pep_dict[cur_protein_identifier]
+                        if x in set(self.data_class.restricted_peptides)
+                    ]
+                )
+            )
+            protein_list_group = [protein_objects]
+            grouped_proteins.append(protein_list_group)
+        return(grouped_proteins)
+
+
+    def _apply_protein_group_ids(self, grouped_protein_objects):
+        """
+        This method creates the ProteinGroup objects from the output of :py:meth:`protein_inference.inference.Inference_create_protein_groups`
+
+        Args:
+            grouped_protein_objects (list): list of grouped :py:class:`protein_inference.physical.Protein` objects
+
+        Returns:
+            dict: a Dictionary that contains a list of :py:class:`protein_inference.physical.ProteinGroup` objects (key:"group_objects") and
+                a list of grouped :py:class:`protein_inference.physical.Protein` objects (key:"grouped_protein_objects")
+
+
+        """
+        logger = getLogger(
+            "protein_inference.inference.Inference._apply_protein_group_ids"
+        )
+
+        sp_protein_set = set(self.digest_class.swiss_prot_protein_set)
+
+        prot_pep_dict = self.data_class.protein_to_peptide_dictionary()
+
+        # Here we create group ID's
+        group_id = 0
+        protein_group_objects = []
+        for protein_group in grouped_protein_objects:
+            protein_list = []
+            group_id = group_id + 1
+            pg = ProteinGroup(group_id)
+            logger.info("Created Protein Group with ID: {}".format(str(group_id)))
+            for protein in protein_group:
+                cur_protein = protein
+                # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
+                if group_id not in cur_protein.group_identification:
+                    cur_protein.group_identification.add(group_id)
+                if protein.identifier in sp_protein_set:
+                    cur_protein.reviewed = True
+                else:
+                    cur_protein.unreviewed = True
+                cur_identifier = protein.identifier
+                cur_protein.num_peptides = len(prot_pep_dict[cur_identifier])
+                # Here append the number of unique peptides... so we can use this as secondary sorting...
+                protein_list.append(cur_protein)
+                # Sorted protein_groups then becomes a list of lists... of protein objects
+
+            pg.proteins = protein_list
+            protein_group_objects.append(pg)
+
+        return_dict = {
+            "grouped_protein_objects": grouped_protein_objects,
+            "group_objects": protein_group_objects,
+        }
+
+        return return_dict
         self,
         scored_data,
         inference_type="parsimony",

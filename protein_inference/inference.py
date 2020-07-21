@@ -186,6 +186,121 @@ class Inference(object):
         }
 
         return return_dict
+
+class Inclusion(Inference):
+    """
+    Inclusion Inference class. This class contains methods that support the initialization of an Inclusion inference method
+
+    Attributes:
+        data_class (protein_inference.datastore.DataStore): Data Class
+        digest_class (protein_inference.in_silico_digest.Digest): Digest Class
+        scored_data (list): a List of scored Protein objects :py:class:`protein_inference.physical.Protein`
+
+    """
+
+    def __init__(self, data_class, digest_class):
+        """
+        Initialization method of the Inclusion Inference method
+
+        Args:
+            data_class (protein_inference.datastore.DataStore): Data Class
+            digest_class (protein_inference.in_silico_digest.Digest): Digest Class
+        """
+
+        self.data_class = data_class
+        self.digest_class = digest_class
+        self.scored_data = self.data_class.get_protein_data()
+
+    def infer_proteins(self):
+        """
+        This method performs the grouping for Inclusion.
+
+        Inclusion actually does not do grouping as all peptides get assigned to all possible proteins and groups are not created
+
+        This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
+        These are both variables of the :py:class:`protein_inference.datastore.DataStore` and are
+        lists of :py:class:`protein_inference.physical.Protein` and :py:class:`protein_inference.physical.ProteinGroup`
+        """
+        logger = getLogger("protein_inference.inference.Inclusion.infer_proteins")
+
+        grouped_proteins = self._create_protein_groups(scored_proteins=self.scored_data)
+
+        hl = self.data_class.higher_or_lower()
+
+        logger.info("Applying Group ID's for the Inclusion Method")
+
+        regrouped_proteins = self._apply_protein_group_ids(
+            grouped_protein_objects=grouped_proteins,
+        )
+
+        grouped_protein_objects = regrouped_proteins["grouped_protein_objects"]
+        protein_group_objects = regrouped_proteins["group_objects"]
+
+        logger.info("Sorting Results based on lead Protein Score")
+        grouped_protein_objects = datastore.DataStore.sort_protein_objects(
+            grouped_protein_objects=grouped_protein_objects, higher_or_lower=hl
+        )
+        protein_group_objects = datastore.DataStore.sort_protein_group_objects(
+            protein_group_objects=protein_group_objects, higher_or_lower=hl
+        )
+
+        self.data_class.grouped_scored_proteins = grouped_protein_objects
+        self.data_class.protein_group_objects = protein_group_objects
+
+    def _apply_protein_group_ids(self, grouped_protein_objects):
+        """
+        This method creates the ProteinGroup objects for the inclusion inference type using protein groups from :py:meth:`protein_inference.inference.Inference_create_protein_groups`
+
+        Args:
+            grouped_protein_objects (list): list of grouped :py:class:`protein_inference.physical.Protein` objects
+
+        Returns:
+            dict: a Dictionary that contains a list of :py:class:`protein_inference.physical.ProteinGroup` objects (key:"group_objects") and
+                a list of grouped :py:class:`protein_inference.physical.Protein` objects (key:"grouped_protein_objects")
+
+        """
+
+        logger = getLogger(
+            "protein_inference.inference.Inference._apply_protein_group_ids"
+        )
+
+        sp_protein_set = set(self.digest_class.swiss_prot_protein_set)
+
+        prot_pep_dict = self.data_class.protein_to_peptide_dictionary()
+
+        # Here we create group ID's
+        group_id = 0
+        protein_group_objects = []
+        for protein_group in grouped_protein_objects:
+            protein_list = []
+            group_id = group_id + 1
+            pg = ProteinGroup(group_id)
+            logger.info("Created Protein Group with ID: {}".format(str(group_id)))
+            for prot in protein_group:
+                cur_protein = prot
+                # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
+                if group_id not in cur_protein.group_identification:
+                    cur_protein.group_identification.add(group_id)
+                if cur_protein.identifier in sp_protein_set:
+                    cur_protein.reviewed = True
+                else:
+                    cur_protein.unreviewed = True
+                cur_identifier = cur_protein.identifier
+                cur_protein.num_peptides = len(prot_pep_dict[cur_identifier])
+                # Here append the number of unique peptides... so we can use this as secondary sorting...
+                protein_list.append(cur_protein)
+                # Sorted protein_groups then becomes a list of lists... of protein objects
+
+            pg.proteins = protein_list
+            protein_group_objects.append(pg)
+
+        return_dict = {
+            "grouped_protein_objects": grouped_protein_objects,
+            "group_objects": protein_group_objects,
+        }
+
+        return return_dict
+
         self,
         scored_data,
         inference_type="parsimony",

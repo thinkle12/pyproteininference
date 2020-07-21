@@ -294,31 +294,37 @@ Here we use version `0.4.3` and tag as that version as well.
 #### Inclusion Notes
 
 Inclusion simply maps all peptides to all possible proteins. In this model we allow peptides to map to multiple proteins.
+This approach is useful if you want to analyze all possible proteins (even those that do not have any distinguishing peptides.)
 
 ![images/inclusion.png](images/inclusion.png)
 
 #### Parsimony Notes
 
 Parsimony is the process of taking the list of peptides and mapping them to the minimal set of protein identifiers avaliable. 
+This is a standard method that is good at limiting the overall number of proteins but still utilizing all selected peptides.
+This method allows shared peptides to map to more than one protein. Assuming that the proteins the peptides get mapped to also contain at least one unique peptide across the searches.
 
 ![images/parsimony.png](images/parsimony.png)
 
 #### Exclusion Notes
 
 Exclusion maps all peptides to all possible proteins but removes any peptide from the search that is not distinguishing. This means that if a peptide maps to more than one protein it will be removed. With this inference model the database selection is very important. Ideally the database selected for searches should have limited redundancy.
+The redundancy is computed on the database level. IE if a peptide maps to more than one protein that is contained in the fasta database then that peptide will be removed from the analysis entirely.
+Exception: If two or more proteins within the database map to the exact same set of digested peptides the algorithm will select the first listed protein and discard the others.
 
 ![images/exclusion.png](images/exclusion.png)
 
 #### Peptide Centric Notes
 
 For Peptide Centric inference all peptides are assigned to all possible proteins. Each peptide is then assigned a protein group based on the mentioned possible protein map. For protein group naming, the possible proteins for the peptides in the group are concatenated to a list separated by a semi-colon. 
+This method is useful when there are a lot of shared peptides between multiple proteins. This will create new protein groups based on the shared peptides. This can sometimes more accurately represent the biological state.
 
 ![images/peptide_centric.jpeg](images/peptide_centric.jpeg)
 
 #### First Protein Notes
 
 For the First Protein inference method each peptide gets assigned to one protein only. The protein that gets assigned to each peptide is the first listed protein. This is typically the first protein listed in the fasta database file.
-
+This method is useful if you just want a quick way to get a sense of the protein FDR and are not worried as much about the peptide to protein mapping.
 
 ### Parsimony Dependancies 
 Parsimony currently has potential external dependancies depending on the __lp_solver__ that is selected in the parameter file.
@@ -343,7 +349,7 @@ Parsimony currently has potential external dependancies depending on the __lp_so
 
 |Score Type| Description |
 |---|---|
-| Best Peptide Per Protein | Uses the best scoring PSM as the overall score for a given protein |
+| Best Peptide Per Protein | Uses the best scoring PSM as the overall score for a given protein. This can be beneficial to use when proteins of interest map to few peptides |
 | Multiplicative Log | Multiplies all of the PSM scores together and then takes the log of the value (This only works for scores where lower is better) |
 | Top Two Combined | Takes the two best scoring peptides and applies Multiplicative Log to them to get the protein score |
 | Additive | Adds all of the PSM scores together (This only works for scores where higher is better) |

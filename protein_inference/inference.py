@@ -1336,16 +1336,11 @@ class Parsimony(Inference):
         # Then we find all proteins that share at least 1 peptide with each lead protein
         # If they share at least 1 peptide then assign that protein to the group...
 
-        group_dict = self._group_by_peptides(
-            scored_data=scored_data,
-            inference_type=Inference.PARSIMONY,
+        grouped_proteins = self._create_protein_groups(
+            all_scored_proteins=scored_data,
             lead_protein_objects=self.lead_protein_objects,
             grouping_type=self.data_class.parameter_file_object.grouping_type,
         )
-
-        self.list_of_prots_not_in_db = group_dict["missing_proteins"]
-        self.list_of_peps_not_in_db = group_dict["missing_peptides"]
-        grouped_proteins = group_dict["grouped_proteins"]
 
         regrouped_proteins = self._swissprot_and_isoform_override(
             scored_data=scored_data,
@@ -1354,40 +1349,39 @@ class Parsimony(Inference):
             isoform_override=True,
         )
 
-        scores_grouped = regrouped_proteins["scores_grouped"]
-        list_of_group_objects = regrouped_proteins["group_objects"]
-        lead_replaced_prot_pairs = regrouped_proteins["lead_replaced"]
+        grouped_protein_objects = regrouped_proteins["grouped_protein_objects"]
+        protein_group_objects = regrouped_proteins["group_objects"]
 
-        self.data_class.lead_replaced_proteins = lead_replaced_prot_pairs
-
-        # Get the higher or lower variable
-        if not self.data_class.high_low_better:
-            higher_or_lower = self.data_class.higher_or_lower()
-        else:
-            higher_or_lower = self.data_class.high_low_better
+        hl = self.data_class.higher_or_lower()
 
         logger.info("Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_objects(
-            scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
+        grouped_protein_objects = datastore.DataStore.sort_protein_objects(
+            grouped_protein_objects=grouped_protein_objects, higher_or_lower=hl
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
-            list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
+        protein_group_objects = datastore.DataStore.sort_protein_group_objects(
+            protein_group_objects=protein_group_objects, higher_or_lower=hl
         )
 
-        list_of_group_objects = self._reassign_leads(
-            list_of_group_objects
+        # Run lead reassignment for the group objets and protein objects
+        protein_group_objects = self._reassign_protein_group_leads(
+            protein_group_objects = protein_group_objects, 
+        )
+        
+        grouped_protein_objects = self._reassign_protein_list_leads(
+            grouped_protein_objects=grouped_protein_objects
+
         )
 
         logger.info("Re Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_objects(
-            scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
+        grouped_protein_objects = datastore.DataStore.sort_protein_objects(
+            grouped_protein_objects=grouped_protein_objects, higher_or_lower=hl
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
-            list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
+        protein_group_objects = datastore.DataStore.sort_protein_group_objects(
+            protein_group_objects=protein_group_objects, higher_or_lower=hl
         )
 
-        self.data_class.grouped_scored_proteins = scores_grouped
-        self.data_class.protein_group_objects = list_of_group_objects
+        self.data_class.grouped_scored_proteins = grouped_protein_objects
+        self.data_class.protein_group_objects = protein_group_objects
 
     def _pulp_grouper(self):
         """
@@ -1492,7 +1486,6 @@ class Parsimony(Inference):
         # Each peptide is a constraint with the proteins it maps to having to be greater than or equal to 1
         # In the case below we see that protein 3 has a unique peptide, protein 2 is redundant
 
-        # TODO try to add sorted() to pep_prot_dict[peptides] below...
         logger.info("Sorting peptides before looping")
         for peptides in sorted(list(pep_prot_dict.keys())):
             try:
@@ -1540,16 +1533,11 @@ class Parsimony(Inference):
 
         self.lead_protein_objects = lead_protein_objects
 
-        group_dict = self._group_by_peptides(
-            scored_data=scored_data,
-            inference_type=Inference.PARSIMONY,
+        grouped_proteins = self._create_protein_groups(
+            all_scored_proteins=scored_data,
             lead_protein_objects=self.lead_protein_objects,
             grouping_type=self.data_class.parameter_file_object.grouping_type,
         )
-
-        self.list_of_prots_not_in_db = group_dict["missing_proteins"]
-        self.list_of_peps_not_in_db = group_dict["missing_peptides"]
-        grouped_proteins = group_dict["grouped_proteins"]
 
         regrouped_proteins = self._swissprot_and_isoform_override(
             scored_data=scored_data,
@@ -1558,40 +1546,40 @@ class Parsimony(Inference):
             isoform_override=True,
         )
 
-        scores_grouped = regrouped_proteins["scores_grouped"]
-        list_of_group_objects = regrouped_proteins["group_objects"]
-        lead_replaced_prot_pairs = regrouped_proteins["lead_replaced"]
-
-        self.data_class.lead_replaced_proteins = lead_replaced_prot_pairs
+        grouped_protein_objects = regrouped_proteins["grouped_protein_objects"]
+        protein_group_objects = regrouped_proteins["group_objects"]
 
         # Get the higher or lower variable
-        if not self.data_class.high_low_better:
-            higher_or_lower = self.data_class.higher_or_lower()
-        else:
-            higher_or_lower = self.data_class.high_low_better
+        hl = self.data_class.higher_or_lower()
 
         logger.info("Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_objects(
-            scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
+        grouped_protein_objects = datastore.DataStore.sort_protein_objects(
+            grouped_protein_objects=grouped_protein_objects, higher_or_lower=hl
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
-            list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
+        protein_group_objects = datastore.DataStore.sort_protein_group_objects(
+            protein_group_objects=protein_group_objects, higher_or_lower=hl
         )
 
-        list_of_group_objects = self._reassign_leads(
-            list_of_group_objects,
+        # Run lead reassignment for the group objets and protein objects
+        protein_group_objects = self._reassign_protein_group_leads(
+            protein_group_objects=protein_group_objects,
+        )
+
+        grouped_protein_objects = self._reassign_protein_list_leads(
+            grouped_protein_objects=grouped_protein_objects
+
         )
 
         logger.info("Re Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_objects(
-            scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
+        grouped_protein_objects = datastore.DataStore.sort_protein_objects(
+            grouped_protein_objects=grouped_protein_objects, higher_or_lower=hl
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
-            list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
+        protein_group_objects = datastore.DataStore.sort_protein_group_objects(
+            protein_group_objects=protein_group_objects, higher_or_lower=hl
         )
 
-        self.data_class.grouped_scored_proteins = scores_grouped
-        self.data_class.protein_group_objects = list_of_group_objects
+        self.data_class.grouped_scored_proteins = grouped_protein_objects
+        self.data_class.protein_group_objects = protein_group_objects
 
     def infer_proteins(self, glpkinout_directory="glpkinout", skip_running_glpk=False):
         """
@@ -1681,7 +1669,6 @@ class FirstProtein(Inference):
         self.digest_class = digest_class
         self.scored_data = self.data_class.get_protein_data()
         self.data_class = data_class
-        self.lead_protein_set = None
 
     def infer_proteins(self):
         """
@@ -1695,40 +1682,29 @@ class FirstProtein(Inference):
 
         logger = getLogger("protein_inference.inference.FirstProtein.infer_proteins")
 
-        group_dict = self._group_by_peptides(
-            scored_data=self.scored_data,
-            inference_type=Inference.FIRST_PROTEIN,
-            grouping_type=self.data_class.parameter_file_object.grouping_type,
-        )
-
-        self.list_of_prots_not_in_db = group_dict["missing_proteins"]
-        self.list_of_peps_not_in_db = group_dict["missing_peptides"]
-        grouped_proteins = group_dict["grouped_proteins"]
+        grouped_proteins = self._create_protein_groups(scored_proteins=self.scored_data)
 
         # Get the higher or lower variable
-        if not self.data_class.high_low_better:
-            self.data_class.higher_or_lower()
-        else:
-            higher_or_lower = self.data_class.high_low_better
+        hl = self.data_class.higher_or_lower()
 
         logger.info("Applying Group ID's for the First Protein Method")
         regrouped_proteins = self._apply_protein_group_ids(
             grouped_protein_objects=grouped_proteins,
         )
 
-        scores_grouped = regrouped_proteins["scores_grouped"]
-        list_of_group_objects = regrouped_proteins["group_objects"]
+        grouped_protein_objects = regrouped_proteins["grouped_protein_objects"]
+        protein_group_objects = regrouped_proteins["group_objects"]
 
         logger.info("Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_objects(
-            scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
+        grouped_protein_objects = datastore.DataStore.sort_protein_objects(
+            grouped_protein_objects=grouped_protein_objects, higher_or_lower=hl
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
-            list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
+        protein_group_objects = datastore.DataStore.sort_protein_group_objects(
+            protein_group_objects=protein_group_objects, higher_or_lower=hl
         )
 
-        self.data_class.grouped_scored_proteins = scores_grouped
-        self.data_class.protein_group_objects = list_of_group_objects
+        self.data_class.grouped_scored_proteins = grouped_protein_objects
+        self.data_class.protein_group_objects = protein_group_objects
 
 
 class PeptideCentric(Inference):
@@ -1754,8 +1730,6 @@ class PeptideCentric(Inference):
         self.data_class = data_class
         self.digest_class = digest_class
         self.scored_data = self.data_class.get_protein_data()
-        self.lead_protein_set = None
-        self.parameter_file_object = data_class.parameter_file_object
 
     def infer_proteins(self):
         """
@@ -1773,26 +1747,71 @@ class PeptideCentric(Inference):
         logger = getLogger("protein_inference.inference.PeptideCentric.infer_proteins")
 
         # Get the higher or lower variable
-        if not self.data_class.high_low_better:
-            hl = self.data_class.higher_or_lower()
-            higher_or_lower = self.data_class.high_low_better
-        else:
-            higher_or_lower = self.data_class.high_low_better
+        hl = self.data_class.higher_or_lower()
 
         logger.info("Applying Group ID's for the Peptide Centric Method")
+        regrouped_proteins = self._apply_protein_group_ids()
 
-        regrouped_proteins = self._apply_group_ids_peptide_centric()
-
-        scores_grouped = regrouped_proteins["scores_grouped"]
-        list_of_group_objects = regrouped_proteins["group_objects"]
+        grouped_protein_objects = regrouped_proteins["grouped_protein_objects"]
+        protein_group_objects = regrouped_proteins["group_objects"]
 
         logger.info("Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_objects(
-            scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
+        grouped_protein_objects = datastore.DataStore.sort_protein_objects(
+            grouped_protein_objects=grouped_protein_objects, higher_or_lower=hl
         )
-        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
-            list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
+        protein_group_objects = datastore.DataStore.sort_protein_group_objects(
+            protein_group_objects=protein_group_objects, higher_or_lower=hl
         )
 
-        self.data_class.grouped_scored_proteins = scores_grouped
-        self.data_class.protein_group_objects = list_of_group_objects
+        self.data_class.grouped_scored_proteins = grouped_protein_objects
+        self.data_class.protein_group_objects = protein_group_objects
+
+    def _apply_protein_group_ids(self):
+        """
+        This method creates the ProteinGroup objects for the peptide_centric inference based on protein groups from :py:meth:`protein_inference.inference.Inference_create_protein_groups`
+
+        Returns:
+            dict: a Dictionary that contains a list of :py:class:`protein_inference.physical.ProteinGroup` objects (key:"group_objects") and
+                a list of grouped :py:class:`protein_inference.physical.Protein` objects (key:"grouped_protein_objects")
+
+        """
+
+        logger = getLogger(
+            "protein_inference.inference.Inference._apply_protein_group_ids"
+        )
+
+        grouped_protein_objects = self.data_class.get_protein_data()
+
+        # Here we create group ID's
+        group_id = 0
+        list_of_proteins_grouped = []
+        protein_group_objects = []
+        for protein_group in grouped_protein_objects:
+            protein_group.peptides = set(
+                [
+                    Psm.split_peptide(peptide_string=x)
+                    for x in list(protein_group.raw_peptides)
+                ]
+            )
+            protein_list = []
+            group_id = group_id + 1
+            pg = ProteinGroup(group_id)
+            logger.info("Created Protein Group with ID: {}".format(str(group_id)))
+            # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
+            if group_id not in protein_group.group_identification:
+                protein_group.group_identification.add(group_id)
+            protein_group.num_peptides = len(protein_group.peptides)
+            # Here append the number of unique peptides... so we can use this as secondary sorting...
+            protein_list.append(protein_group)
+            # Sorted protein_groups then becomes a list of lists... of protein objects
+
+            pg.proteins = protein_list
+            protein_group_objects.append(pg)
+            list_of_proteins_grouped.append([protein_group])
+
+        return_dict = {
+            "grouped_protein_objects": list_of_proteins_grouped,
+            "group_objects": protein_group_objects,
+        }
+
+        return return_dict

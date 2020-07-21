@@ -94,7 +94,7 @@ class Inference(object):
             group = PeptideCentric(data_class=data_class, digest_class=digest_class)
             group.infer_proteins()
 
-    def _group_by_peptides(
+    def _create_protein_groups(self, scored_proteins):
         self,
         scored_data,
         inference_type="parsimony",

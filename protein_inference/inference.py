@@ -364,71 +364,84 @@ class Exclusion(Inference):
         self.data_class.protein_group_objects = protein_group_objects
 
 
+class Parsimony(Inference):
+    """
+    Parsimony Inference class. This class contains methods that support the initialization of a Parsimony inference method
+
+    Attributes:
+        data_class (protein_inference.datastore.DataStore): Data Class
+        digest_class (protein_inference.in_silico_digest.Digest): Digest Class
+        scored_data (list): a List of scored Protein objects :py:class:`protein_inference.physical.Protein`
+        lead_protein_set (set): Set of protein strings that are classified as leads from the LP solver
+
+    """
+    def __init__(self, data_class, digest_class):
+        """
+        Initialization method of the Parsimony object
+
+        Args:
+            data_class (protein_inference.datastore.DataStore): Data Class
+            digest_class (protein_inference.in_silico_digest.Digest): Digest Class
+        """
+        self.data_class = data_class
+        self.digest_class = digest_class
+        self.scored_data = self.data_class.get_protein_data()
+        self.lead_protein_set = None
+        self.parameter_file_object = data_class.parameter_file_object
+
+
+    def _create_protein_groups(
         self,
-        scored_data,
-        inference_type="parsimony",
-        lead_protein_objects=None,
+        all_scored_proteins,
+        lead_protein_objects,
         grouping_type="shared_peptides",
     ):
         """
-        Internal method that creates a list of lists of :py:class:`protein_inference.physical.Protein` objects
+        Internal method that creates a list of lists of :py:class:`protein_inference.physical.Protein` objects for the Parsimony inference object
         These list of lists are "groups" and the proteins get grouped them according to grouping_type variable
 
-        lead_protein_objects is only needed if the inference type is "parsimony". If else keep as None
-
         Args:
-            scored_data (list): list of :py:class:`protein_inference.physical.Protein` objects
-            inference_type (str): One of :attr:`INFERENCE_TYPES`
+            all_scored_proteins (list): list of :py:class:`protein_inference.physical.Protein` objects
             lead_protein_objects (list): list of :py:class:`protein_inference.physical.Protein` objects. Only needed if inference_type=parsimony
             grouping_type: (str): One of :attr:`GROUPING_TYPES`
 
         Returns:
-            dict: list of grouped :py:class:`protein_inference.physical.Protein` objects (key:grouped_proteins) and
-                lists of proteins and peptides not in the digest (key:missing_proteins), (key:list_of_peps_not_in_db)
+            list: list of lists of :py:class:`protein_inference.physical.Protein` objects
 
         """
-        logger = getLogger("protein_inference.inference.Inference._group_by_peptides")
+
+        logger = getLogger("protein_inference.inference.Inference._create_protein_groups")
 
         logger.info("Grouping Peptides with Grouping Type: {}".format(grouping_type))
-        logger.info("Grouping Peptides with Inference Type: {}".format(inference_type))
+        logger.info("Grouping Peptides with Inference Type: {}".format(self.PARSIMONY))
 
-        scored_data = sorted(
-            scored_data, key=lambda k: (len(k.raw_peptides), k.identifier), reverse=True
+        all_scored_proteins = sorted(
+            all_scored_proteins, key=lambda k: (len(k.raw_peptides), k.identifier), reverse=True
         )
 
-        if inference_type == Inference.PARSIMONY:
-            scored_proteins = lead_protein_objects
-            scored_proteins = sorted(
-                scored_proteins,
-                key=lambda k: (len(k.raw_peptides), k.identifier),
-                reverse=True,
-            )
-        else:
-            scored_proteins = list(scored_data)
-            scored_proteins = sorted(
-                scored_proteins,
-                key=lambda k: (len(k.raw_peptides), k.identifier),
-                reverse=True,
-            )
-            # Add some code here to remove complete subset proteins...
-        protein_finder = [x.identifier for x in scored_data]
+        lead_scored_proteins = lead_protein_objects
+        lead_scored_proteins = sorted(
+            lead_scored_proteins,
+            key=lambda k: (len(k.raw_peptides), k.identifier),
+            reverse=True,
+        )
+
+        protein_finder = [x.identifier for x in all_scored_proteins]
 
         prot_pep_dict = self.data_class.protein_to_peptide_dictionary()
 
         protein_tracker = set()
-        restricted_peptides_set = set(self.data_class.restricted_peptides)
         try:
             picked_removed = set(
                 [x.identifier for x in self.data_class.picked_proteins_removed]
             )
         except TypeError:
             picked_removed = set([])
-        list_of_prots_not_in_db = []
-        list_of_peps_not_in_db = []
+
         missing_proteins = set()
         in_silico_peptides_to_proteins = self.digest_class.peptide_to_protein_dictionary
         grouped_proteins = []
-        for protein_objects in scored_proteins:
+        for protein_objects in lead_scored_proteins:
             if protein_objects not in protein_tracker:
                 protein_tracker.add(protein_objects)
                 cur_protein_identifier = protein_objects.identifier
@@ -440,7 +453,7 @@ class Exclusion(Inference):
                         [
                             x
                             for x in prot_pep_dict[cur_protein_identifier]
-                            if x in restricted_peptides_set
+                            if x in set(self.data_class.restricted_peptides)
                         ]
                     )
                 )
@@ -453,7 +466,7 @@ class Exclusion(Inference):
                 ) in (
                     current_peptides
                 ):  # Probably put an if here... if peptide is in the list of peptide after being restricted by datastore.RestrictMainData
-                    if peptide in restricted_peptides_set:
+                    if peptide in set(self.data_class.restricted_peptides):
                         # Get the proteins that map to the current peptide using in_silico_peptides_to_proteins
                         # First make sure our peptide is formatted properly...
                         if not peptide.isupper() or not peptide.isalpha():
@@ -461,8 +474,6 @@ class Exclusion(Inference):
                             peptide = Psm.remove_peptide_mods(peptide)
                         potential_protein_list = in_silico_peptides_to_proteins[peptide]
                         if not potential_protein_list:
-                            list_of_prots_not_in_db.append(peptide)
-                            list_of_peps_not_in_db.append(protein_objects.identifier)
                             logger.warning(
                                 "Protein "
                                 + str(protein_objects.identifier)
@@ -471,9 +482,8 @@ class Exclusion(Inference):
                                 + " is not in database..."
                             )
 
-                        ### TODO put in if statement here... if grouping_type==None then skip this...
                         # Assign proteins to groups based on shared peptide... unless the protein is equivalent to the current identifier
-                        if inference_type != Inference.FIRST_PROTEIN and inference_type != Inference.INCLUSION:
+                        if grouping_type!=self.NONE_GROUPING:
                             for protein in potential_protein_list:
                                 # If statement below to avoid grouping the same protein twice and to not group the lead
                                 if (
@@ -481,12 +491,11 @@ class Exclusion(Inference):
                                     and protein != cur_protein_identifier
                                     and protein not in picked_removed
                                     and protein not in missing_proteins
-                                    and inference_type != Inference.FIRST_PROTEIN
                                 ):
                                     try:
-                                        # Try to find its object using protein_finder (list of identifiers) and scored_proteins (list of Protein Objects)
+                                        # Try to find its object using protein_finder (list of identifiers) and lead_scored_proteins (list of Protein Objects)
                                         cur_index = protein_finder.index(protein)
-                                        current_protein_object = scored_data[cur_index]
+                                        current_protein_object = all_scored_proteins[cur_index]
                                         if not current_protein_object.peptides:
                                             current_protein_object.peptides = set(
                                                 sorted(
@@ -495,7 +504,7 @@ class Exclusion(Inference):
                                                         for x in prot_pep_dict[
                                                             current_protein_object.identifier
                                                         ]
-                                                        if x in restricted_peptides_set
+                                                        if x in self.data_class.restricted_peptides
                                                     ]
                                                 )
                                             )

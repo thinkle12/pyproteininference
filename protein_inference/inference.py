@@ -301,6 +301,69 @@ class Inclusion(Inference):
 
         return return_dict
 
+
+class Exclusion(Inference):
+    """
+    Exclusion Inference class. This class contains methods that support the initialization of an Exclusion inference method
+
+    Attributes:
+        data_class (protein_inference.datastore.DataStore): Data Class
+        digest_class (protein_inference.in_silico_digest.Digest): Digest Class
+        scored_data (list): a List of scored Protein objects :py:class:`protein_inference.physical.Protein`
+
+    """
+    def __init__(self, data_class, digest_class):
+        """
+        Initialization method of the Exclusion Class
+
+        Args:
+            data_class (protein_inference.datastore.DataStore): Data Class
+            digest_class (protein_inference.in_silico_digest.Digest): Digest Class
+
+        """
+        self.data_class = data_class
+        self.digest_class = digest_class
+        self.scored_data = self.data_class.get_protein_data()
+        self.list_of_prots_not_in_db = None
+        self.list_of_peps_not_in_db = None
+
+    def infer_proteins(self):
+        """
+        This method performs the Exclusion inference/grouping method.
+
+        For the exclusion inference method groups cannot be created because all shared peptides are removed
+
+        This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
+        These are both variables of the :py:class:`protein_inference.datastore.DataStore` and are
+        lists of :py:class:`protein_inference.physical.Protein` and :py:class:`protein_inference.physical.ProteinGroup`
+
+        """
+        logger = getLogger("protein_inference.inference.Exclusion.infer_proteins")
+
+        grouped_proteins = self._create_protein_groups(scored_proteins=self.scored_data)
+
+        hl = self.data_class.higher_or_lower()
+
+        logger.info("Applying Group ID's for the Exclusion Method")
+        regrouped_proteins = self._apply_protein_group_ids(
+            grouped_protein_objects=grouped_proteins,
+        )
+
+        grouped_protein_objects = regrouped_proteins["grouped_protein_objects"]
+        protein_group_objects = regrouped_proteins["group_objects"]
+
+        logger.info("Sorting Results based on lead Protein Score")
+        grouped_protein_objects = datastore.DataStore.sort_protein_objects(
+            grouped_protein_objects=grouped_protein_objects, higher_or_lower=hl
+        )
+        protein_group_objects = datastore.DataStore.sort_protein_group_objects(
+            protein_group_objects=protein_group_objects, higher_or_lower=hl
+        )
+
+        self.data_class.grouped_scored_proteins = grouped_protein_objects
+        self.data_class.protein_group_objects = protein_group_objects
+
+
         self,
         scored_data,
         inference_type="parsimony",

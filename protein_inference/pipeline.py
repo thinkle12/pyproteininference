@@ -223,8 +223,7 @@ class ProteinInferencePipeline(object):
         ### STEP 10: Apply Inference
         ### STEP 10: Apply Inference
         ### STEP 10: Apply Inference
-        inference = protein_inference.inference.Inference(data_class=data, digest_class=digest)
-        inference.run_inference()
+        protein_inference.inference.Inference.run_inference(data_class=data, digest_class=digest)
 
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations

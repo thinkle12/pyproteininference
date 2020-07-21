@@ -583,10 +583,7 @@ class Parsimony(Inference):
         prot_pep_dict = self.data_class.protein_to_peptide_dictionary()
 
         # Get the higher or lower variable
-        if not self.data_class.high_low_better:
-            higher_or_lower = self.data_class.higher_or_lower()
-        else:
-            higher_or_lower = self.data_class.high_low_better
+        higher_or_lower = self.data_class.higher_or_lower()
 
         logger.info(
             "Applying Group IDs... and Executing {} Swissprot Override...".format(

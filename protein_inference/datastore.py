@@ -679,34 +679,37 @@ class DataStore(object):
             >>> high_low = data.higher_or_lower()
         """
 
+        if not self.high_low_better:
+            logger = getLogger("protein_inference.datastore.DataStore.higher_or_lower")
 
-        logger = getLogger("protein_inference.datastore.DataStore.higher_or_lower")
-
-        logger.info(
-            "Determining If a higher or lower score is better based on scored proteins"
-        )
-        worst_score = self.scored_proteins[-1].score
-        best_score = self.scored_proteins[0].score
-
-        if float(best_score) > float(worst_score):
-            higher_or_lower = self.HIGHER_PSM_SCORE
-
-        if float(best_score) < float(worst_score):
-            higher_or_lower = self.LOWER_PSM_SCORE
-
-        logger.info("best score = " + str(best_score))
-        logger.info("worst score = " + str(worst_score))
-
-        if best_score == worst_score:
-            raise ValueError(
-                "Best and Worst scores were identical, equal to "
-                + str(best_score)
-                + ". Score type "
-                + str(self.score)
-                + " produced the error, please change score type."
+            logger.info(
+                "Determining If a higher or lower score is better based on scored proteins"
             )
+            worst_score = self.scored_proteins[-1].score
+            best_score = self.scored_proteins[0].score
 
-        self.high_low_better = higher_or_lower
+            if float(best_score) > float(worst_score):
+                higher_or_lower = self.HIGHER_PSM_SCORE
+
+            if float(best_score) < float(worst_score):
+                higher_or_lower = self.LOWER_PSM_SCORE
+
+            logger.info("best score = " + str(best_score))
+            logger.info("worst score = " + str(worst_score))
+
+            if best_score == worst_score:
+                raise ValueError(
+                    "Best and Worst scores were identical, equal to "
+                    + str(best_score)
+                    + ". Score type "
+                    + str(self.score)
+                    + " produced the error, please change score type."
+                )
+
+            self.high_low_better = higher_or_lower
+
+        else:
+            higher_or_lower = self.high_low_better
 
         return higher_or_lower
 

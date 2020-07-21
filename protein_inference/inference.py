@@ -591,11 +591,10 @@ class Parsimony(Inference):
             )
         )
         # Here we create group ID's for all groups and do some sorting
-        scores_grouped = []
+        grouped_protein_objects = []
         group_id = 0
         leads = set()
-        lead_replaced_prot_pairs = []
-        list_of_group_objects = []
+        protein_group_objects = []
         for protein_group in grouped_proteins:
             protein_list = []
             group_id = group_id + 1
@@ -626,166 +625,230 @@ class Parsimony(Inference):
                     # Potentially it got 'picked' (removed) by protein picker...
                     pass
 
-            # Sort the groups based on higher or lower indication, secondarily sort the groups based on number of unique peptides
-            # We use the index [1:] as we do not wish to sort the lead protein... from GLPK
-            if higher_or_lower == datastore.DataStore.LOWER_PSM_SCORE:
-                protein_list[1:] = sorted(
-                    protein_list[1:],
-                    key=lambda k: (float(k.score), -float(k.num_peptides)),
-                    reverse=False,
-                )
-            if higher_or_lower == datastore.DataStore.HIGHER_PSM_SCORE:
-                protein_list[1:] = sorted(
-                    protein_list[1:],
-                    key=lambda k: (float(k.score), float(k.num_peptides)),
-                    reverse=True,
-                )
+            # Sort protein sub group
+            protein_list = datastore.DataStore.sort_protein_sub_groups(protein_list=protein_list,
+                                                                       higher_or_lower=higher_or_lower)
 
-            # scores_grouped is the MAIN list of lists with grouped protein objects
-            scores_grouped.append(protein_list)
+            # grouped_protein_objects is the MAIN list of lists with grouped protein objects
+            grouped_protein_objects.append(protein_list)
             # If the lead is reviewed append it to leads and do nothing else...
             # If the lead is unreviewed then try to replace it with the best reviewed hit
-            if not protein_list[0].reviewed and self.data_class.parameter_file_object.reviewed_identifier_symbol:
-                # TODO make this a separate internal method
-                # If the lead is unreviewed attempt to replace it...
-                # Start to loop through protein_list which is the current group...
-                for hits in protein_list[1:]:
-                    # Find the first reviewed it... if its not a lead protein already then do score swap and break...
-                    if hits.reviewed:
-                        best_swiss_prot_prot = hits
+            # Run swissprot override
+            if self.data_class.parameter_file_object.reviewed_identifier_symbol:
+                sp_override = self._swissprot_override(protein_list=protein_list,
+                                                         leads=leads,
+                                                         grouped_protein_objects=grouped_protein_objects,
+                                                         override_type=override_type)
+                grouped_protein_objects = sp_override["grouped_protein_objects"]
+                leads = sp_override["leads"]
+                protein_list = sp_override["protein_list"]
 
-                        if override_type == "soft":
-                            # If the lead proteins peptides are a subset of the best swissprot.... then swap the proteins... (meaning equal peptides or the swissprot completely covers the tremble reference)
-                            if best_swiss_prot_prot.identifier not in leads and set(
-                                protein_list[0].peptides
-                            ).issubset(set(best_swiss_prot_prot.peptides)):
-                                # We use -1 as the idex of scores_grouped because the current 'protein_list' is the last entry appended to scores grouped
-                                # Essentially scores_grouped[-1]==protein_list
-                                # We need this syntax so we can switch the location of the unreviewed lead identifier with the best reviewed identifier in scores_grouped
-                                swiss_prot_override_index = scores_grouped[-1].index(
-                                    best_swiss_prot_prot
-                                )
-                                cur_tr_lead = scores_grouped[-1][0]
-                                logger.info(cur_tr_lead.identifier)
-                                (
-                                    scores_grouped[-1][0],
-                                    scores_grouped[-1][swiss_prot_override_index],
-                                ) = (
-                                    scores_grouped[-1][swiss_prot_override_index],
-                                    scores_grouped[-1][0],
-                                )
-                                scores_grouped[-1][
-                                    swiss_prot_override_index
-                                ], scores_grouped[-1][0]
-                                new_sp_lead = scores_grouped[-1][0]
-                                logger.info(new_sp_lead.identifier)
-                                lead_replaced_prot_pairs.append(
-                                    [cur_tr_lead, new_sp_lead]
-                                )
-                                # Append new_sp_lead protein to leads, to make sure we dont repeat leads
-                                leads.add(new_sp_lead.identifier)
-                                break
-                            else:
-                                # If no reviewed and none not in leads then pass...
-                                pass
-
-                        if override_type == "hard":
-                            if best_swiss_prot_prot.identifier not in leads:
-                                # We use -1 as the index of scores_grouped because the current 'protein_list' is the last entry appended to scores_grouped
-                                # Essentially scores_grouped[-1]==protein_list
-                                # We need this syntax so we can switch the location of the unreviewed lead identifier with the best reviewed identifier in scores_grouped
-                                swiss_prot_override_index = scores_grouped[-1].index(
-                                    best_swiss_prot_prot
-                                )
-                                cur_tr_lead = scores_grouped[-1][0]
-                                logger.info(cur_tr_lead.identifier)
-                                (
-                                    scores_grouped[-1][0],
-                                    scores_grouped[-1][swiss_prot_override_index],
-                                ) = (
-                                    scores_grouped[-1][swiss_prot_override_index],
-                                    scores_grouped[-1][0],
-                                )
-                                new_sp_lead = scores_grouped[-1][0]
-                                logger.info(new_sp_lead.identifier)
-                                lead_replaced_prot_pairs.append(
-                                    [cur_tr_lead, new_sp_lead]
-                                )
-                                # Append new_sp_lead protein to leads, to make sure we dont repeat leads
-                                leads.add(new_sp_lead.identifier)
-                                break
-                            else:
-                                # If no reviewed and none not in leads then pass...
-                                pass
-
-                    else:
-                        pass
-            # If we want to run isoform_override and if the isoform symbol exists...
+            # Run isoform override If we want to run isoform_override and if the isoform symbol exists...
             if isoform_override and self.data_class.parameter_file_object.isoform_symbol:
-                # TODO make this a separate internal method
-                if protein_list[0].reviewed:
-                    if (
-                        self.data_class.parameter_file_object.isoform_symbol
-                        in protein_list[0].identifier
-                    ):
-                        pure_id = protein_list[0].identifier.split(
-                            self.data_class.parameter_file_object.isoform_symbol
-                        )[0]
-                        # Start to loop through protein_list which is the current group...
-                        for potential_replacement in protein_list[1:]:
-                            isoform_override = potential_replacement
-                            if (
-                                isoform_override.identifier == pure_id
-                                and isoform_override.identifier not in leads
-                                and set(protein_list[0].peptides).issubset(
-                                    set(isoform_override.peptides)
-                                )
-                            ):
-                                isoform_override_index = scores_grouped[-1].index(
-                                    isoform_override
-                                )
-                                cur_iso_lead = scores_grouped[-1][0]
-                                logger.info(cur_iso_lead.identifier)
-                                (
-                                    scores_grouped[-1][0],
-                                    scores_grouped[-1][isoform_override_index],
-                                ) = (
-                                    scores_grouped[-1][isoform_override_index],
-                                    scores_grouped[-1][0],
-                                )
-                                scores_grouped[-1][
-                                    isoform_override_index
-                                ], scores_grouped[-1][0]
-                                new_iso_lead = scores_grouped[-1][0]
-                                logger.info(new_iso_lead.identifier)
-                                lead_replaced_prot_pairs.append(
-                                    [cur_iso_lead, new_iso_lead]
-                                )
-                                leads.add(protein_list[0].identifier)
+                iso_override = self._isoform_override(protein_list=protein_list,
+                                                         leads=leads,
+                                                         grouped_protein_objects=grouped_protein_objects)
+                grouped_protein_objects = iso_override["grouped_protein_objects"]
+                leads = iso_override["leads"]
+                protein_list = iso_override["protein_list"]
 
             pg.proteins = protein_list
-            list_of_group_objects.append(pg)
+            protein_group_objects.append(pg)
 
         return_dict = {
-            "lead_replaced": lead_replaced_prot_pairs,
-            "scores_grouped": scores_grouped,
-            "group_objects": list_of_group_objects,
+            "grouped_protein_objects": grouped_protein_objects,
+            "group_objects": protein_group_objects,
         }
 
         return return_dict
 
-    def _reassign_leads(self, list_of_group_objects):
+    def _swissprot_override(self, protein_list, leads, grouped_protein_objects, override_type):
         """
-        This internal method corrects leads that are improperly assigned in the parsimony inference method
+        This method re-assigns protein group leads if the lead is an unreviewed protein and if the protein group contains a reviewed protein that contains the exact same set of peptides as the unreviewed lead
+        This method is here to provide consistency to the output
 
         Args:
-            list_of_group_objects (list): List of :py:class:`protein_inference.physical.ProteinGroup` objects
+            protein_list (list): List of grouped :py:class:`protein_inference.physical.Protein` objects
+            leads (set): Set of string protien identifiers that have been identified as a lead
+            grouped_protein_objects (list): List of protein_list lists 
+            override_type (str): "soft" or "hard" on how to override non reviewed identifiers. "soft" is preferred 
 
+        Returns:
+            dict: leads (set): Set of string protien identifiers that have been identified as a lead. Updated to reflect lead changes
+            grouped_protein_objects (list): List of protein_list lists. Updated to reflect lead changes
+            protein_list (list): List of grouped :py:class:`protein_inference.physical.Protein` objects. Updated to reflect lead changes
+
+        """
+
+        logger = getLogger(
+            "protein_inference.inference.Inference._swissprot_override"
+        )
+
+        if not protein_list[0].reviewed:
+            # If the lead is unreviewed attempt to replace it...
+            # Start to loop through protein_list which is the current group...
+            for hits in protein_list[1:]:
+                # Find the first reviewed it... if its not a lead protein already then do score swap and break...
+                if hits.reviewed:
+                    best_swiss_prot_prot = hits
+
+                    if override_type == "soft":
+                        # If the lead proteins peptides are a subset of the best swissprot.... then swap the proteins... (meaning equal peptides or the swissprot completely covers the tremble reference)
+                        if best_swiss_prot_prot.identifier not in leads and set(
+                                protein_list[0].peptides
+                        ).issubset(set(best_swiss_prot_prot.peptides)):
+                            # We use -1 as the idex of grouped_protein_objects because the current 'protein_list' is the last entry appended to scores grouped
+                            # Essentially grouped_protein_objects[-1]==protein_list
+                            # We need this syntax so we can switch the location of the unreviewed lead identifier with the best reviewed identifier in grouped_protein_objects
+                            swiss_prot_override_index = grouped_protein_objects[-1].index(
+                                best_swiss_prot_prot
+                            )
+                            cur_tr_lead = grouped_protein_objects[-1][0]
+                            (
+                                grouped_protein_objects[-1][0],
+                                grouped_protein_objects[-1][swiss_prot_override_index],
+                            ) = (
+                                grouped_protein_objects[-1][swiss_prot_override_index],
+                                grouped_protein_objects[-1][0],
+                            )
+                            grouped_protein_objects[-1][
+                                swiss_prot_override_index
+                            ], grouped_protein_objects[-1][0]
+                            new_sp_lead = grouped_protein_objects[-1][0]
+                            logger.info("Overriding Unreviewed {} with Reviewed {}".format(cur_tr_lead.identifier, new_sp_lead.identifier))
+
+                            # Append new_sp_lead protein to leads, to make sure we dont repeat leads
+                            leads.add(new_sp_lead.identifier)
+                            break
+                        else:
+                            # If no reviewed and none not in leads then pass...
+                            pass
+
+                    if override_type == "hard":
+                        if best_swiss_prot_prot.identifier not in leads:
+                            # We use -1 as the index of grouped_protein_objects because the current 'protein_list' is the last entry appended to grouped_protein_objects
+                            # Essentially grouped_protein_objects[-1]==protein_list
+                            # We need this syntax so we can switch the location of the unreviewed lead identifier with the best reviewed identifier in grouped_protein_objects
+                            swiss_prot_override_index = grouped_protein_objects[-1].index(
+                                best_swiss_prot_prot
+                            )
+                            cur_tr_lead = grouped_protein_objects[-1][0]
+                            logger.info(cur_tr_lead.identifier)
+                            # Re-assigning the value within the index will also reassign the value in protein_list...
+                            # This is because grouped_protein_objects[-1] equals protein_list
+                            # So we do not have to reassign values in protein_list
+                            (
+                                grouped_protein_objects[-1][0],
+                                grouped_protein_objects[-1][swiss_prot_override_index],
+                            ) = (
+                                grouped_protein_objects[-1][swiss_prot_override_index],
+                                grouped_protein_objects[-1][0],
+                            )
+                            new_sp_lead = grouped_protein_objects[-1][0]
+                            logger.info(new_sp_lead.identifier)
+
+                            # Append new_sp_lead protein to leads, to make sure we dont repeat leads
+                            leads.add(new_sp_lead.identifier)
+                            break
+                        else:
+                            # If no reviewed and none not in leads then pass...
+                            pass
+
+                else:
+                    pass
+
+        else:
+            leads.add(protein_list[0].identifier)
+
+        return_dict = {"leads": leads,
+                       "grouped_protein_objects": grouped_protein_objects,
+                       "protein_list":protein_list}
+
+        return(return_dict)
+
+
+    def _isoform_override(self, protein_list, grouped_protein_objects, leads):
+        """
+        This method re-assigns protein group leads if the lead is an isoform protein and if the protein group contains a canonical protein that contains the exact same set of peptides as the isoform lead.
+        This method is here to provide consistency to the output
+        
+        Args:
+            protein_list (list): List of grouped :py:class:`protein_inference.physical.Protein` objects
+            leads (set): Set of string protien identifiers that have been identified as a lead
+            grouped_protein_objects (list): List of protein_list lists 
+
+        Returns:
+            dict: leads (set): Set of string protien identifiers that have been identified as a lead. Updated to reflect lead changes
+            grouped_protein_objects (list): List of protein_list lists. Updated to reflect lead changes
+            protein_list (list): List of grouped :py:class:`protein_inference.physical.Protein` objects. Updated to reflect lead changes
+
+
+        """
+
+        logger = getLogger(
+            "protein_inference.inference.Inference._isoform_override"
+        )
+
+        if protein_list[0].reviewed:
+            if (
+                    self.data_class.parameter_file_object.isoform_symbol
+                    in protein_list[0].identifier
+            ):
+                pure_id = protein_list[0].identifier.split(
+                    self.data_class.parameter_file_object.isoform_symbol
+                )[0]
+                # Start to loop through protein_list which is the current group...
+                for potential_replacement in protein_list[1:]:
+                    isoform_override = potential_replacement
+                    if (
+                            isoform_override.identifier == pure_id
+                            and isoform_override.identifier not in leads
+                            and set(protein_list[0].peptides).issubset(
+                        set(isoform_override.peptides)
+                    )
+                    ):
+                        isoform_override_index = grouped_protein_objects[-1].index(
+                            isoform_override
+                        )
+                        cur_iso_lead = grouped_protein_objects[-1][0]
+                        # Re-assigning the value within the index will also reassign the value in protein_list...
+                        # This is because grouped_protein_objects[-1] equals protein_list
+                        # So we do not have to reassign values in protein_list
+                        (
+                            grouped_protein_objects[-1][0],
+                            grouped_protein_objects[-1][isoform_override_index],
+                        ) = (
+                            grouped_protein_objects[-1][isoform_override_index],
+                            grouped_protein_objects[-1][0],
+                        )
+                        grouped_protein_objects[-1][
+                            isoform_override_index
+                        ], grouped_protein_objects[-1][0]
+
+                        new_iso_lead = grouped_protein_objects[-1][0]
+                        logger.info("Overriding Isoform {} with {}".format(cur_iso_lead.identifier,new_iso_lead.identifier))
+                        leads.add(protein_list[0].identifier)
+
+        return_dict = {"leads": leads,
+                       "grouped_protein_objects": grouped_protein_objects,
+                       "protein_list":protein_list}
+
+        return(return_dict)
+
+    def _reassign_protein_group_leads(self, protein_group_objects):
+        """
+        This internal method corrects leads that are improperly assigned in the parsimony inference method.
+        This method acts on the protein group objects
+
+        Args:
+            protein_group_objects (list): List of :py:class:`protein_inference.physical.ProteinGroup` objects
+            
         Returns:
             list: List of :py:class:`protein_inference.physical.ProteinGroup` objects where leads have been reassigned properly
 
+
         """
-        logger = getLogger("protein_inference.inference.Inference._reassign_leads")
+        logger = getLogger("protein_inference.inference.Inference._reassign_protein_group_leads")
 
         # Get the higher or lower variable
         if not self.data_class.high_low_better:
@@ -793,25 +856,23 @@ class Parsimony(Inference):
         else:
             higher_or_lower = self.data_class.high_low_better
 
-        # TODO why is this only occuring on the list_of group_objects...
-        # TODO This should be happening to the list of protein objects tooo.... aka scores_grouped
         # Sometimes we have cases where:
         # protein a maps to peptides 1,2,3
         # protein b maps to peptides 1,2
         # protein c maps to a bunch of peptides and peptide 3
         # Therefore, in the model proteins a and b are equivalent in that they map to 2 peptides together - 1 and 2. peptide 3 maps to a but also to c...
         # Sometimes the model (glpk) will spit out protein b as the lead... we wish to swap protein b as the lead with protein a because it will likely have a better score...
-        logger.info("Potentially Reassigning leads...")
+        logger.info("Potentially Reassigning Protein Group leads...")
         lead_protein_set = set(
-            [x.proteins[0].identifier for x in list_of_group_objects]
+            [x.proteins[0].identifier for x in protein_group_objects]
         )
-        for i in range(len(list_of_group_objects)):
+        for i in range(len(protein_group_objects)):
             for j in range(
-                1, len(list_of_group_objects[i].proteins)
+                1, len(protein_group_objects[i].proteins)
             ):  # Loop over all sub proteins in the group...
                 # if the lead proteins peptides are a subset of one of its proteins in the group, and the secondary protein is not a lead protein and its score is better than the leads... and it has more peptides...
-                new_lead = list_of_group_objects[i].proteins[j]
-                old_lead = list_of_group_objects[i].proteins[0]
+                new_lead = protein_group_objects[i].proteins[j]
+                old_lead = protein_group_objects[i].proteins[0]
                 if higher_or_lower == datastore.DataStore.HIGHER_PSM_SCORE:
                     if (
                         set(old_lead.peptides).issubset(set(new_lead.peptides))
@@ -832,8 +893,8 @@ class Parsimony(Inference):
                         lead_protein_set.remove(old_lead.identifier)
                         # Swap their positions in the list
                         (
-                            list_of_group_objects[i].proteins[0],
-                            list_of_group_objects[i].proteins[j],
+                            protein_group_objects[i].proteins[0],
+                            protein_group_objects[i].proteins[j],
                         ) = (new_lead, old_lead)
                         logger.info(j)
                         break
@@ -858,191 +919,103 @@ class Parsimony(Inference):
                         lead_protein_set.remove(old_lead.identifier)
                         # Swap their positions in the list
                         (
-                            list_of_group_objects[i].proteins[0],
-                            list_of_group_objects[i].proteins[j],
+                            protein_group_objects[i].proteins[0],
+                            protein_group_objects[i].proteins[j],
                         ) = (new_lead, old_lead)
                         break
 
-        return list_of_group_objects
+        return protein_group_objects
 
-
-class Inclusion(Inference):
-    """
-    Inclusion Inference class. This class contains methods that support the initialization of an Inclusion inference method
-
-    Attributes:
-        data_class (protein_inference.datastore.DataStore): Data Class
-        digest_class (protein_inference.in_silico_digest.Digest): Digest Class
-        scored_data (list): a List of scored Protein objects :py:class:`protein_inference.physical.Protein`
-        list_of_prots_not_in_db (list): list of protein strings not found in db
-        list_of_peps_not_in_db (list): list of peptide strings not found in db
-
-    """
-
-    def __init__(self, data_class, digest_class):
+    def _reassign_protein_list_leads(self, grouped_protein_objects):
         """
-        Initialization method of the Inclusion Inference method
+        This internal method corrects leads that are improperly assigned in the parsimony inference method.
+        This method acts on the grouped protein objects
 
         Args:
-            data_class (protein_inference.datastore.DataStore): Data Class
-            digest_class (protein_inference.in_silico_digest.Digest): Digest Class
+            grouped_protein_objects (list): List of :py:class:`protein_inference.physical.Protein` objects
+
+        Returns:
+            list: List of :py:class:`protein_inference.physical.Protein` objects where leads have been reassigned properly
+
+
         """
-
-        self.data_class = data_class
-        self.digest_class = digest_class
-        self.scored_data = self.data_class.get_protein_data()
-        self.list_of_prots_not_in_db = None
-        self.list_of_peps_not_in_db = None
-
-    def infer_proteins(self):
-        """
-        This method performs the Inclusion inference method
-
-        This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`protein_inference.datastore.DataStore` and are
-        lists of :py:class:`protein_inference.physical.Protein` and :py:class:`protein_inference.physical.ProteinGroup`
-        """
-        logger = getLogger("protein_inference.inference.Inclusion.infer_proteins")
-
-        group_dict = self._group_by_peptides(
-            scored_data=self.scored_data,
-            inference_type=Inference.INCLUSION,
-            grouping_type=self.data_class.parameter_file_object.grouping_type,
-        )
-
-        self.list_of_prots_not_in_db = group_dict["missing_proteins"]
-        self.list_of_peps_not_in_db = group_dict["missing_peptides"]
-        grouped_proteins = group_dict["grouped_proteins"]
+        logger = getLogger("protein_inference.inference.Inference._reassign_protein_list_leads")
 
         # Get the higher or lower variable
         if not self.data_class.high_low_better:
-            hl = self.data_class.higher_or_lower()
-            higher_or_lower = self.data_class.high_low_better
+            higher_or_lower = self.data_class.higher_or_lower()
         else:
             higher_or_lower = self.data_class.high_low_better
 
-        logger.info("Applying Group ID's for the Inclusion Method")
-        # regrouped_proteins = self._apply_protein_group_ids(grouped_protein_objects = grouped_proteins,
-        #                                                    data_class = self.data_class, digest_class = self.digest_class)
-
-        regrouped_proteins = self._apply_group_ids_no_groups(
-            grouped_protein_objects=grouped_proteins,
+        # Sometimes we have cases where:
+        # protein a maps to peptides 1,2,3
+        # protein b maps to peptides 1,2
+        # protein c maps to a bunch of peptides and peptide 3
+        # Therefore, in the model proteins a and b are equivalent in that they map to 2 peptides together - 1 and 2. peptide 3 maps to a but also to c...
+        # Sometimes the model (glpk) will spit out protein b as the lead... we wish to swap protein b as the lead with protein a because it will likely have a better score...
+        logger.info("Potentially Reassigning Proteoin List leads...")
+        lead_protein_set = set(
+            [x[0].identifier for x in grouped_protein_objects]
         )
+        for i in range(len(grouped_protein_objects)):
+            for j in range(
+                    1, len(grouped_protein_objects[i])
+            ):  # Loop over all sub proteins in the group...
+                # if the lead proteins peptides are a subset of one of its proteins in the group, and the secondary protein is not a lead protein and its score is better than the leads... and it has more peptides...
+                new_lead = grouped_protein_objects[i][j]
+                old_lead = grouped_protein_objects[i][0]
+                if higher_or_lower == datastore.DataStore.HIGHER_PSM_SCORE:
+                    if (
+                            set(old_lead.peptides).issubset(set(new_lead.peptides))
+                            and new_lead.identifier not in lead_protein_set
+                            and old_lead.score <= new_lead.score
+                            and len(old_lead.peptides) < len(new_lead.peptides)
+                    ):
+                        logger.info(
+                            "protein {} will replace protein {} as lead, with index {}, New Num Peptides: {}, Old Num Peptides: {}".format(
+                                str(new_lead.identifier),
+                                str(old_lead.identifier),
+                                str(j),
+                                str(len(new_lead.peptides)),
+                                str(len(old_lead.peptides)),
+                            )
+                        )
+                        lead_protein_set.add(new_lead.identifier)
+                        lead_protein_set.remove(old_lead.identifier)
+                        # Swap their positions in the list
+                        (
+                            grouped_protein_objects[i][0],
+                            grouped_protein_objects[i][j],
+                        ) = (new_lead, old_lead)
+                        logger.info(j)
+                        break
 
-        scores_grouped = regrouped_proteins["scores_grouped"]
-        list_of_group_objects = regrouped_proteins["group_objects"]
+                if higher_or_lower == datastore.DataStore.LOWER_PSM_SCORE:
+                    if (
+                            set(old_lead.peptides).issubset(set(new_lead.peptides))
+                            and new_lead.identifier not in lead_protein_set
+                            and old_lead.score >= new_lead.score
+                            and len(old_lead.peptides) < len(new_lead.peptides)
+                    ):
+                        logger.info(
+                            "protein {} will replace protein {} as lead, with index {}, New Num Peptides: {}, Old Num Peptides: {}".format(
+                                str(new_lead.identifier),
+                                str(old_lead.identifier),
+                                str(j),
+                                str(len(new_lead.peptides)),
+                                str(len(old_lead.peptides)),
+                            )
+                        )
+                        lead_protein_set.add(new_lead.identifier)
+                        lead_protein_set.remove(old_lead.identifier)
+                        # Swap their positions in the list
+                        (
+                            grouped_protein_objects[i][0],
+                            grouped_protein_objects[i][j],
+                        ) = (new_lead, old_lead)
+                        break
 
-        logger.info("Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_objects(
-            scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
-        )
-        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
-            list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
-        )
-
-        self.data_class.grouped_scored_proteins = scores_grouped
-        self.data_class.protein_group_objects = list_of_group_objects
-
-
-class Exclusion(Inference):
-    """
-    Exclusion Inference class. This class contains methods that support the initialization of an Exclusion inference method
-
-    Attributes:
-        data_class (protein_inference.datastore.DataStore): Data Class
-        digest_class (protein_inference.in_silico_digest.Digest): Digest Class
-        scored_data (list): a List of scored Protein objects :py:class:`protein_inference.physical.Protein`
-        list_of_prots_not_in_db (list): list of protein strings not found in db
-        list_of_peps_not_in_db (list): list of peptide strings not found in db
-
-    """
-    def __init__(self, data_class, digest_class):
-        """
-        Initialization method of the Exclusion Class
-
-        Args:
-            data_class (protein_inference.datastore.DataStore): Data Class
-            digest_class (protein_inference.in_silico_digest.Digest): Digest Class
-        """
-        self.data_class = data_class
-        self.digest_class = digest_class
-        self.scored_data = self.data_class.get_protein_data()
-        self.list_of_prots_not_in_db = None
-        self.list_of_peps_not_in_db = None
-
-    def infer_proteins(self):
-        """
-        This method performs the Exclusion inference method
-
-        This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`protein_inference.datastore.DataStore` and are
-        lists of :py:class:`protein_inference.physical.Protein` and :py:class:`protein_inference.physical.ProteinGroup`
-
-        """
-        logger = getLogger("protein_inference.inference.Exclusion.infer_proteins")
-
-        group_dict = self._group_by_peptides(
-            scored_data=self.scored_data,
-            inference_type=Inference.EXCLUSION,
-            grouping_type=self.data_class.parameter_file_object.grouping_type,
-        )
-
-        self.list_of_prots_not_in_db = group_dict["missing_proteins"]
-        self.list_of_peps_not_in_db = group_dict["missing_peptides"]
-        grouped_proteins = group_dict["grouped_proteins"]
-
-        # Get the higher or lower variable
-        if not self.data_class.high_low_better:
-            self.data_class.higher_or_lower()
-        else:
-            higher_or_lower = self.data_class.high_low_better
-
-        logger.info("Applying Group ID's for the Exclusion Method")
-        regrouped_proteins = self._apply_protein_group_ids(
-            grouped_protein_objects=grouped_proteins,
-        )
-
-        scores_grouped = regrouped_proteins["scores_grouped"]
-        list_of_group_objects = regrouped_proteins["group_objects"]
-
-        logger.info("Sorting Results based on lead Protein Score")
-        scores_grouped = datastore.DataStore.sort_protein_objects(
-            scores_grouped=scores_grouped, higher_or_lower=higher_or_lower
-        )
-        list_of_group_objects = datastore.DataStore.sort_protein_group_objects(
-            list_of_group_objects=list_of_group_objects, higher_or_lower=higher_or_lower
-        )
-
-        self.data_class.grouped_scored_proteins = scores_grouped
-        self.data_class.protein_group_objects = list_of_group_objects
-
-
-class Parsimony(Inference):
-    """
-    Parsimony Inference class. This class contains methods that support the initialization of a Parsimony inference method
-
-    Attributes:
-        data_class (protein_inference.datastore.DataStore): Data Class
-        digest_class (protein_inference.in_silico_digest.Digest): Digest Class
-        scored_data (list): a List of scored Protein objects :py:class:`protein_inference.physical.Protein`
-        list_of_prots_not_in_db (list): list of protein strings not found in db
-        list_of_peps_not_in_db (list): list of peptide strings not found in db
-        lead_protein_set (set): Set of protein strings that are classified as leads from the LP solver
-
-    """
-    def __init__(self, data_class, digest_class):
-        """
-        Initialization method of the Parsimony object
-
-        Args:
-            data_class (protein_inference.datastore.DataStore): Data Class
-            digest_class (protein_inference.in_silico_digest.Digest): Digest Class
-        """
-        self.data_class = data_class
-        self.digest_class = digest_class
-        self.scored_data = self.data_class.get_protein_data()
-        self.lead_protein_set = None
-        self.parameter_file_object = data_class.parameter_file_object
+        return grouped_protein_objects
 
     def _setup_glpk(self, glpkin_filename="glpkin.mod"):
         """

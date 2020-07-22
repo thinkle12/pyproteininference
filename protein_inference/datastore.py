@@ -231,12 +231,14 @@ class DataStore(object):
     @classmethod
     def sort_protein_sub_groups(cls, protein_list, higher_or_lower):
         """
+        Method to sort protein sub lists
 
         Args:
-            protein_list:
-            higher_or_lower:
+            protein_list (list): List of :py:class:`protein_inferenece.physical.Protein` objects to be sorted
+            higher_or_lower (str): String to indicate if a "higher" or "lower" protein score is "better"
 
         Returns:
+            list: List of :py:class:`protein_inferenece.physical.Protein` objects to be sorted by score and number of peptides
 
         """
 

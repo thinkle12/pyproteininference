@@ -220,17 +220,19 @@ optional arguments:
                         mapping will be taken from the input files only. If
                         this is left blank it will default to True.
   -i [BOOL], --id_splitting [BOOL]
-                        Set '--id_splitting True' or '--id_splitting
-                        False'.Whether or not to split the identifiers that
-                        are present in the fasta database. Only set this flag
-                        to True if you know what you are doing. Sometimes the
+                        Set '--id_splitting True' or '--id_splitting False'.
+                        This flag is by default False. So if it is left blank
+                        then the variable is set to False. This flag indicates
+                        whether or not to split the identifiers that are
+                        present in the fasta database. Only set this flag to
+                        True if you know what you are doing. Sometimes the
                         fasta database protein IDs will be like:
                         'sp|ARAF_HUMAN|P10398'. While protein IDs in the input
                         files will be 'ARAF_HUMAN|P10398'. Setting This flag
                         to True will split off the front 'sp|' from the
                         database protein identifiers. This is typically not
                         necessary. So leave this blank unless you know what
-                        you are doing.                       
+                        you are doing.                     
 ```
 
 The following flags are `"necessary"`:

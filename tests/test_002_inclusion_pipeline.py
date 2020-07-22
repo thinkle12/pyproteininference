@@ -124,6 +124,7 @@ class TestLoadInclusionWorkflow(TestCase):
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
             digest_class=digest,
+            append_alt_from_db=False,
         )
         pep_and_prot_data.read_psms()
 
@@ -416,6 +417,7 @@ class TestLoadInclusionWorkflow(TestCase):
             combined_files=None,
             output_directory=os.path.join(OUTPUT_DIR, "leads"),
             id_splitting=True,
+            append_alt_from_db=False,
         )
 
         pipeline.execute()

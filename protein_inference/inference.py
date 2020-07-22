@@ -107,7 +107,7 @@ class Inference(object):
         """
         scored_proteins = sorted(
             scored_proteins,
-            key=lambda k: (len(k.raw_peptides), k.identifier),
+            key=lambda k: (k.score, len(k.raw_peptides), k.identifier),
             reverse=True,
         )
 

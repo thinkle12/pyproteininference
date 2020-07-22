@@ -1099,6 +1099,8 @@ class DataStore(object):
 
         logger = getLogger("protein_inference.datastore.DataStore.set_based_fdr")
 
+        logger.info("Calculating Set Based FDR")
+
         # pick out the lead scoring protein for each group... lead score is at 0 position
         lead_score = [x[0] for x in self.grouped_scored_proteins]
         # Now pick out only the lead protein identifiers
@@ -1187,6 +1189,7 @@ class DataStore(object):
 
         lead_proteins.reverse()
 
+        logger.info("Calculating FDRs")
         fdr_list = []
         for i in range(len(lead_proteins)):
             binary_decoy_target_list = [
@@ -1202,6 +1205,7 @@ class DataStore(object):
 
         qvalue_list = []
         new_fdr_list = []
+        logger.info("Calculating Q Values")
         for fdrs in fdr_list:
             new_fdr_list.append(fdrs)
             qvalue = min(new_fdr_list)
@@ -1210,6 +1214,7 @@ class DataStore(object):
 
         qvalue_list.reverse()
 
+        logger.info("Assigning Q Values")
         for k in range(len(self.protein_group_objects)):
             self.protein_group_objects[k].q_value = qvalue_list[k]
 

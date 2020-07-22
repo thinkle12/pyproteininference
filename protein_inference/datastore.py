@@ -179,8 +179,8 @@ class DataStore(object):
             protein_group_objects = sorted(
                 protein_group_objects,
                 key=lambda k: (
-                    float(k.proteins[0].score),
-                    -float(k.proteins[0].num_peptides),
+                    k.proteins[0].score,
+                    -k.proteins[0].num_peptides,
                 ),
                 reverse=False,
             )
@@ -189,8 +189,8 @@ class DataStore(object):
             protein_group_objects = sorted(
                 protein_group_objects,
                 key=lambda k: (
-                    float(k.proteins[0].score),
-                    float(k.proteins[0].num_peptides),
+                    k.proteins[0].score,
+                    k.proteins[0].num_peptides,
                 ),
                 reverse=True,
             )
@@ -217,13 +217,13 @@ class DataStore(object):
         if higher_or_lower == cls.LOWER_PSM_SCORE:
             grouped_protein_objects = sorted(
                 grouped_protein_objects,
-                key=lambda k: (float(k[0].score), -float(k[0].num_peptides)),
+                key=lambda k: (k[0].score, -k[0].num_peptides),
                 reverse=False,
             )
         if higher_or_lower == cls.HIGHER_PSM_SCORE:
             grouped_protein_objects = sorted(
                 grouped_protein_objects,
-                key=lambda k: (float(k[0].score), float(k[0].num_peptides)),
+                key=lambda k: (k[0].score, k[0].num_peptides),
                 reverse=True,
             )
         return grouped_protein_objects

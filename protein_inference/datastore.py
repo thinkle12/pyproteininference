@@ -158,12 +158,12 @@ class DataStore(object):
         return our_proteins_sorted
 
     @classmethod
-    def sort_protein_group_objects(cls, list_of_group_objects, higher_or_lower):
+    def sort_protein_group_objects(cls, protein_group_objects, higher_or_lower):
         """
         Class Method to sort a list of :py:class:`protein_inferenece.physical.ProteinGroup` objects by score and number of peptides
 
         Args:
-            list_of_group_objects (list): list of :py:class:`protein_inferenece.physical.ProteinGroup` objects
+            protein_group_objects (list): list of :py:class:`protein_inferenece.physical.ProteinGroup` objects
             higher_or_lower (str): String to indicate if a "higher" or "lower" protein score is "better"
 
         Returns:
@@ -171,39 +171,39 @@ class DataStore(object):
 
         Example:
             >>> list_of_group_objects = protein_inference.datastore.DataStore.sort_protein_group_objects(
-            >>>     list_of_group_objects=list_of_group_objects, higher_or_lower="higher"
+            >>>     protein_group_objects=list_of_group_objects, higher_or_lower="higher"
             >>> )
         """
         if higher_or_lower == cls.LOWER_PSM_SCORE:
 
-            list_of_group_objects = sorted(
-                list_of_group_objects,
+            protein_group_objects = sorted(
+                protein_group_objects,
                 key=lambda k: (
-                    float(k.proteins[0].score),
-                    -float(k.proteins[0].num_peptides),
+                    k.proteins[0].score,
+                    -k.proteins[0].num_peptides,
                 ),
                 reverse=False,
             )
         elif higher_or_lower == cls.HIGHER_PSM_SCORE:
 
-            list_of_group_objects = sorted(
-                list_of_group_objects,
+            protein_group_objects = sorted(
+                protein_group_objects,
                 key=lambda k: (
-                    float(k.proteins[0].score),
-                    float(k.proteins[0].num_peptides),
+                    k.proteins[0].score,
+                    k.proteins[0].num_peptides,
                 ),
                 reverse=True,
             )
 
-        return list_of_group_objects
+        return protein_group_objects
 
     @classmethod
-    def sort_protein_objects(cls, scores_grouped, higher_or_lower):
+    def sort_protein_objects(cls, grouped_protein_objects, higher_or_lower):
         """
         Class Method to sort a list of :py:class:`protein_inferenece.physical.Protein` objects by score and number of peptides
 
         Args:
-            scores_grouped (list): list of :py:class:`protein_inferenece.physical.Protein` objects
+            grouped_protein_objects (list): list of :py:class:`protein_inferenece.physical.Protein` objects
             higher_or_lower (str): String to indicate if a "higher" or "lower" protein score is "better"
 
         Returns:
@@ -211,27 +211,53 @@ class DataStore(object):
 
         Example:
             >>> scores_grouped = protein_inference.datastore.DataStore.sort_protein_objects(
-            >>>     scores_grouped=scores_grouped, higher_or_lower="higher"
+            >>>     grouped_protein_objects=scores_grouped, higher_or_lower="higher"
             >>> )
         """
         if higher_or_lower == cls.LOWER_PSM_SCORE:
-            scores_grouped = sorted(
-                scores_grouped,
-                key=lambda k: (float(k[0].score), -float(k[0].num_peptides)),
+            grouped_protein_objects = sorted(
+                grouped_protein_objects,
+                key=lambda k: (k[0].score, -k[0].num_peptides),
                 reverse=False,
             )
         if higher_or_lower == cls.HIGHER_PSM_SCORE:
-            scores_grouped = sorted(
-                scores_grouped,
-                key=lambda k: (float(k[0].score), float(k[0].num_peptides)),
+            grouped_protein_objects = sorted(
+                grouped_protein_objects,
+                key=lambda k: (k[0].score, k[0].num_peptides),
                 reverse=True,
             )
-        return scores_grouped
+        return grouped_protein_objects
 
     @classmethod
-    def sort_protein_sub_groups(cls):
-        # TODO make a method that sorts one protein group
-        pass
+    def sort_protein_sub_groups(cls, protein_list, higher_or_lower):
+        """
+        Method to sort protein sub lists
+
+        Args:
+            protein_list (list): List of :py:class:`protein_inferenece.physical.Protein` objects to be sorted
+            higher_or_lower (str): String to indicate if a "higher" or "lower" protein score is "better"
+
+        Returns:
+            list: List of :py:class:`protein_inferenece.physical.Protein` objects to be sorted by score and number of peptides
+
+        """
+
+        # Sort the groups based on higher or lower indication, secondarily sort the groups based on number of unique peptides
+        # We use the index [1:] as we do not wish to sort the lead protein...
+        if higher_or_lower == cls.LOWER_PSM_SCORE:
+            protein_list[1:] = sorted(
+                protein_list[1:],
+                key=lambda k: (float(k.score), -float(k.num_peptides)),
+                reverse=False,
+            )
+        if higher_or_lower == cls.HIGHER_PSM_SCORE:
+            protein_list[1:] = sorted(
+                protein_list[1:],
+                key=lambda k: (float(k.score), float(k.num_peptides)),
+                reverse=True,
+            )
+
+        return protein_list
 
     def get_psm_data(self):
         """
@@ -655,34 +681,37 @@ class DataStore(object):
             >>> high_low = data.higher_or_lower()
         """
 
+        if not self.high_low_better:
+            logger = getLogger("protein_inference.datastore.DataStore.higher_or_lower")
 
-        logger = getLogger("protein_inference.datastore.DataStore.higher_or_lower")
-
-        logger.info(
-            "Determining If a higher or lower score is better based on scored proteins"
-        )
-        worst_score = self.scored_proteins[-1].score
-        best_score = self.scored_proteins[0].score
-
-        if float(best_score) > float(worst_score):
-            higher_or_lower = self.HIGHER_PSM_SCORE
-
-        if float(best_score) < float(worst_score):
-            higher_or_lower = self.LOWER_PSM_SCORE
-
-        logger.info("best score = " + str(best_score))
-        logger.info("worst score = " + str(worst_score))
-
-        if best_score == worst_score:
-            raise ValueError(
-                "Best and Worst scores were identical, equal to "
-                + str(best_score)
-                + ". Score type "
-                + str(self.score)
-                + " produced the error, please change score type."
+            logger.info(
+                "Determining If a higher or lower score is better based on scored proteins"
             )
+            worst_score = self.scored_proteins[-1].score
+            best_score = self.scored_proteins[0].score
 
-        self.high_low_better = higher_or_lower
+            if float(best_score) > float(worst_score):
+                higher_or_lower = self.HIGHER_PSM_SCORE
+
+            if float(best_score) < float(worst_score):
+                higher_or_lower = self.LOWER_PSM_SCORE
+
+            logger.info("best score = " + str(best_score))
+            logger.info("worst score = " + str(worst_score))
+
+            if best_score == worst_score:
+                raise ValueError(
+                    "Best and Worst scores were identical, equal to "
+                    + str(best_score)
+                    + ". Score type "
+                    + str(self.score)
+                    + " produced the error, please change score type."
+                )
+
+            self.high_low_better = higher_or_lower
+
+        else:
+            higher_or_lower = self.high_low_better
 
         return higher_or_lower
 
@@ -1072,6 +1101,8 @@ class DataStore(object):
 
         logger = getLogger("protein_inference.datastore.DataStore.set_based_fdr")
 
+        logger.info("Calculating Set Based FDR")
+
         # pick out the lead scoring protein for each group... lead score is at 0 position
         lead_score = [x[0] for x in self.grouped_scored_proteins]
         # Now pick out only the lead protein identifiers
@@ -1160,6 +1191,7 @@ class DataStore(object):
 
         lead_proteins.reverse()
 
+        logger.info("Calculating FDRs")
         fdr_list = []
         for i in range(len(lead_proteins)):
             binary_decoy_target_list = [
@@ -1175,6 +1207,7 @@ class DataStore(object):
 
         qvalue_list = []
         new_fdr_list = []
+        logger.info("Calculating Q Values")
         for fdrs in fdr_list:
             new_fdr_list.append(fdrs)
             qvalue = min(new_fdr_list)
@@ -1183,6 +1216,7 @@ class DataStore(object):
 
         qvalue_list.reverse()
 
+        logger.info("Assigning Q Values")
         for k in range(len(self.protein_group_objects)):
             self.protein_group_objects[k].q_value = qvalue_list[k]
 

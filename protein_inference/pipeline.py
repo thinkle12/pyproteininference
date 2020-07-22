@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+import argparse
 import protein_inference
 from protein_inference.inference import Inference
 
@@ -40,7 +41,7 @@ class ProteinInferencePipeline(object):
         combined_directory=None,
         output_directory=None,
         id_splitting=False,
-        append_alt_from_db=False,
+        append_alt_from_db=True,
     ):
         """
 
@@ -102,6 +103,9 @@ class ProteinInferencePipeline(object):
         self._validate_input()
 
         self._set_output_directory()
+
+        self._log_append_alt_from_db()
+
 
     def execute(self):
         """
@@ -367,3 +371,9 @@ class ProteinInferencePipeline(object):
             return False
         else:
             raise argparse.ArgumentTypeError('Boolean value expected.')
+
+    def _log_append_alt_from_db(self):
+        if self.append_alt_from_db:
+            self.logger.info("Append Alternative Proteins from Database set to True")
+        else:
+            self.logger.info("Append Alternative Proteins from Database set to False")

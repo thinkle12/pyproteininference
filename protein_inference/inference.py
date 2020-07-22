@@ -107,11 +107,13 @@ class Inference(object):
         """
         scored_proteins = sorted(
             scored_proteins,
-            key=lambda k: (len(k.raw_peptides), k.identifier),
+            key=lambda k: (k.score, len(k.raw_peptides), k.identifier),
             reverse=True,
         )
 
         prot_pep_dict = self.data_class.protein_to_peptide_dictionary()
+
+        restricted_peptides_set = set(self.data_class.restricted_peptides)
 
         grouped_proteins = []
         for protein_objects in scored_proteins:
@@ -124,7 +126,7 @@ class Inference(object):
                     [
                         x
                         for x in prot_pep_dict[cur_protein_identifier]
-                        if x in set(self.data_class.restricted_peptides)
+                        if x in restricted_peptides_set
                     ]
                 )
             )
@@ -431,6 +433,7 @@ class Parsimony(Inference):
         prot_pep_dict = self.data_class.protein_to_peptide_dictionary()
 
         protein_tracker = set()
+        restricted_peptides_set = set(self.data_class.restricted_peptides)
         try:
             picked_removed = set(
                 [x.identifier for x in self.data_class.picked_proteins_removed]
@@ -453,7 +456,7 @@ class Parsimony(Inference):
                         [
                             x
                             for x in prot_pep_dict[cur_protein_identifier]
-                            if x in set(self.data_class.restricted_peptides)
+                            if x in restricted_peptides_set
                         ]
                     )
                 )
@@ -466,7 +469,7 @@ class Parsimony(Inference):
                 ) in (
                     current_peptides
                 ):  # Probably put an if here... if peptide is in the list of peptide after being restricted by datastore.RestrictMainData
-                    if peptide in set(self.data_class.restricted_peptides):
+                    if peptide in restricted_peptides_set:
                         # Get the proteins that map to the current peptide using in_silico_peptides_to_proteins
                         # First make sure our peptide is formatted properly...
                         if not peptide.isupper() or not peptide.isalpha():
@@ -504,7 +507,7 @@ class Parsimony(Inference):
                                                         for x in prot_pep_dict[
                                                             current_protein_object.identifier
                                                         ]
-                                                        if x in self.data_class.restricted_peptides
+                                                        if x in restricted_peptides_set
                                                     ]
                                                 )
                                             )

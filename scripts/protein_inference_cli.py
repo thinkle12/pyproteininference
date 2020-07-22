@@ -116,20 +116,27 @@ parser.add_argument(
     "This is typically not necessary. So leave this blank unless you know what you are doing.",
 )
 
-# TODO Add if main
-args = parser.parse_args()
+def main():
+    """
+    Script function for running the execute method of the ProteinInferencePipeline class
 
+    """
+    args = parser.parse_args()
 
-pipeline = protein_inference.pipeline.ProteinInferencePipeline(
-    parameter_file=args.yaml_params,
-    database_file=args.database,
-    target_files=args.target,
-    decoy_files=args.decoy,
-    combined_files=args.combined_files,
-    target_directory=args.target_directory,
-    decoy_directory=args.decoy_directory,
-    combined_directory=args.combined_directory,
-    output_directory=args.dir_name,
-    append_alt_from_db=args.append_alt,
-)
-pipeline.execute()
+    pipeline = protein_inference.pipeline.ProteinInferencePipeline(
+        parameter_file=args.yaml_params,
+        database_file=args.database,
+        target_files=args.target,
+        decoy_files=args.decoy,
+        combined_files=args.combined_files,
+        target_directory=args.target_directory,
+        decoy_directory=args.decoy_directory,
+        combined_directory=args.combined_directory,
+        output_directory=args.dir_name,
+        append_alt_from_db=args.append_alt,
+        id_splitting=args.id_splitting,
+    )
+    pipeline.execute()
+
+if __name__ == "__main__":
+    main()

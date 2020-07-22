@@ -86,28 +86,57 @@ parser.add_argument(
     "--append_alt",
     dest="append_alt",
     required=False,
-    help="Whether or not to add alternative proteins to each PSM from the database digest. "
-    "If False the peptide/protein mapping will be taken from the input files only."
-    "If this is left blank it will default to True",
-    metavar="BOOL",
+    type=protein_inference.pipeline.ProteinInferencePipeline.str2bool,
+    nargs='?',
+    const=True,
     default=True,
-    type=bool,
+    metavar="BOOL",
+    help="Set '--append_alt True' or '--append_alt False'. "
+    "Whether or not to add alternative proteins to each PSM from the database digest. "
+    "If False the peptide/protein mapping will be taken from the input files only. "
+    "If this is left blank it will default to True.",
+)
+parser.add_argument(
+    "-i",
+    "--id_splitting",
+    dest="id_splitting",
+    required=False,
+    type=protein_inference.pipeline.ProteinInferencePipeline.str2bool,
+    nargs='?',
+    const=True,
+    default=False,
+    metavar="BOOL",
+    help="Set '--id_splitting True' or '--id_splitting False'. "
+    "This flag is by default False. So if it is left blank then the variable is set to False. "
+    "This flag indicates whether or not to split the identifiers that are present in the fasta database. "
+    "Only set this flag to True if you know what you are doing. "
+    "Sometimes the fasta database protein IDs will be like: 'sp|ARAF_HUMAN|P10398'. "
+    "While protein IDs in the input files will be 'ARAF_HUMAN|P10398'. "
+    "Setting This flag to True will split off the front 'sp|' from the database protein identifiers. "
+    "This is typically not necessary. So leave this blank unless you know what you are doing.",
 )
 
-# TODO Add if main
-args = parser.parse_args()
+def main():
+    """
+    Script function for running the execute method of the ProteinInferencePipeline class
 
+    """
+    args = parser.parse_args()
 
-pipeline = protein_inference.pipeline.ProteinInferencePipeline(
-    parameter_file=args.yaml_params,
-    database_file=args.database,
-    target_files=args.target,
-    decoy_files=args.decoy,
-    combined_files=args.combined_files,
-    target_directory=args.target_directory,
-    decoy_directory=args.decoy_directory,
-    combined_directory=args.combined_directory,
-    output_directory=args.dir_name,
-    append_alt_from_db=args.append_alt,
-)
-pipeline.execute()
+    pipeline = protein_inference.pipeline.ProteinInferencePipeline(
+        parameter_file=args.yaml_params,
+        database_file=args.database,
+        target_files=args.target,
+        decoy_files=args.decoy,
+        combined_files=args.combined_files,
+        target_directory=args.target_directory,
+        decoy_directory=args.decoy_directory,
+        combined_directory=args.combined_directory,
+        output_directory=args.dir_name,
+        append_alt_from_db=args.append_alt,
+        id_splitting=args.id_splitting,
+    )
+    pipeline.execute()
+
+if __name__ == "__main__":
+    main()

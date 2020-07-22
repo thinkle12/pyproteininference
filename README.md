@@ -213,18 +213,33 @@ optional arguments:
                         search
   -y FILE, --yaml_params FILE
                         Provide a Protein Inference Yaml Parameter File
-  -p BOOL, --append_alt BOOL
+  -p [BOOL], --append_alt [BOOL]
+                        Set '--append_alt True' or '--append_alt False'.
                         Whether or not to add alternative proteins to each PSM
                         from the database digest. If False the peptide/protein
-                        mapping will be taken from the input files only.If
-                        this is left blank it will default to True
+                        mapping will be taken from the input files only. If
+                        this is left blank it will default to True.
+  -i [BOOL], --id_splitting [BOOL]
+                        Set '--id_splitting True' or '--id_splitting False'.
+                        This flag is by default False. So if it is left blank
+                        then the variable is set to False. This flag indicates
+                        whether or not to split the identifiers that are
+                        present in the fasta database. Only set this flag to
+                        True if you know what you are doing. Sometimes the
+                        fasta database protein IDs will be like:
+                        'sp|ARAF_HUMAN|P10398'. While protein IDs in the input
+                        files will be 'ARAF_HUMAN|P10398'. Setting This flag
+                        to True will split off the front 'sp|' from the
+                        database protein identifiers. This is typically not
+                        necessary. So leave this blank unless you know what
+                        you are doing.                     
 ```
 
-The following flags are necessary:
+The following flags are `"necessary"`:
 
-1) `-db` Path to Fasta Database file
-2) `-y` Path to Protein Inference Yaml Parameter file
-3) `-o` Output  Directoryis not necessary but if it is left blank files will be written to the current working directory
+1) `-db` Path to Fasta Database file (Technically this is optional but recommended if the peptide to protein map is not present in the input files)
+2) `-y` Path to Protein Inference Yaml Parameter file (Required)
+3) `-o` Output  Directory is not necessary but if it is left blank files will be written to the current working directory
 
 The following combinations of input are allowed and at least one combination is required:
 
@@ -232,6 +247,11 @@ The following combinations of input are allowed and at least one combination is 
 2) `-a -b` Path to input target (`-a`) and decoy (`-b`) directories that contain target and decoy files. This is one directory each and all .txt and .tsv files will be read in as input
 3) `-f` Path to input combined target/decoy (`-f`) files. This can be one file file or multiple files separated by spaces (" ")
 4) `-c` Path to input combined target/decoy (`-a`) directory that contain combined target/decoy files. This is one directory each and all .txt and .tsv files will be read in as input
+
+Other flags
+
+1) `-p` This flag is a True/False on whether or not to append alternative proteins from the fasta database digestion. If this flag is left blank it defaults to True. If a database is not supplied this flag does nothing.
+2) `-i` True/False on whether or not to split the IDs in the fasta database file. Only use this flag if you know what you are doing. It typically should be left blank. See the help display above for more info.
 
 Any other combinations will result in an Error raised.
 Please do not attempt to load separate target and decoy files with combined files. Also, do not load from directory as well as file as this is not supported.

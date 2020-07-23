@@ -213,6 +213,7 @@ class TestReader(TestCase):
             decoy_file=DECOY_FILE_MULTIPLICATIVE,
             parameter_file_object=protein_inference_parameters_mult,
             digest_class=digest,
+            append_alt_from_db=False,
         )
         pep_and_prot_data_mult.read_psms()
 

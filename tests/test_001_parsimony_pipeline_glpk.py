@@ -171,6 +171,7 @@ class TestLoadParsimonyGlpkWorkflow(TestCase):
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
             digest_class=digest,
+            append_alt_from_db=False,
         )
         pep_and_prot_data.read_psms()
 
@@ -492,6 +493,7 @@ class TestLoadParsimonyGlpkWorkflow(TestCase):
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
             digest_class=digest,
+            append_alt_from_db=False,
         )
         pep_and_prot_data.read_psms()
 
@@ -810,6 +812,7 @@ class TestLoadParsimonyGlpkWorkflow(TestCase):
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
             digest_class=digest,
+            append_alt_from_db=False,
         )
         pep_and_prot_data.read_psms()
 

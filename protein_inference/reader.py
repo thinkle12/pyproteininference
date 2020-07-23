@@ -160,7 +160,7 @@ class PercolatorReader(Reader):
         self,
         digest_class,
         parameter_file_object,
-        append_alt_from_db=False,
+        append_alt_from_db=True,
         target_file=None,
         decoy_file=None,
         combined_files=None,
@@ -441,7 +441,7 @@ class ProteologicPostSearchReader(Reader):
         postsearch_id,
         digest_class,
         parameter_file_object,
-        append_alt_from_db=False,
+        append_alt_from_db=True,
     ):
         """
 
@@ -620,7 +620,7 @@ class GenericReader(Reader):
         self,
         digest_class,
         parameter_file_object,
-        append_alt_from_db=False,
+        append_alt_from_db=True,
         target_file=None,
         decoy_file=None,
         combined_files=None,

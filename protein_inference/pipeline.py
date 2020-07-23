@@ -229,19 +229,10 @@ class ProteinInferencePipeline(object):
         ### STEP 10: Apply Inference
         protein_inference.inference.Inference.run_inference(data_class=data, digest_class=digest)
 
-        ### STEP 11: Run FDR and Q value Calculations
-        ### STEP 11: Run FDR and Q value Calculations
-        ### STEP 11: Run FDR and Q value Calculations
-        data.set_based_fdr()
+        ### STEP 11: Q value Calculations
+        ### STEP 11: Q value Calculations
+        ### STEP 11: Q value Calculations
         data.calculate_q_values()
-
-        # Print the len of restricted data... which is how many protein groups pass FDR threshold
-        self.logger.info(
-            "Number of Proteins passing an FDR of "
-            + str(protein_inference_parameters.fdr)
-            + " = "
-            + str(len(data.fdr_restricted_grouped_scored_proteins))
-        )
 
         ### STEP 12: Export to CSV
         ### STEP 12: Export to CSV

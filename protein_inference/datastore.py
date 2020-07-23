@@ -19,7 +19,6 @@ class DataStore(object):
         main_data_restricted (list): List of restricted :py:class:`protein_inference.physical.Psm` objects. Restriction is based on the parameter_file_object and the object is created by function :py:meth:`protein_inference.datastore.DataStore.restrict_psm_data`
         scored_proteins (list): List of scored :py:class:`protein_inference.physical.Protein` objects. Output from scoring methods from :py:mod:`protein_inference.scoring`
         grouped_scored_proteins (list): List of scored :py:class:`protein_inference.physical.Protein` objects that have been grouped and sorted. Output from :py:meth:`protein_inference.inference.Inference.run_inference` method
-        fdr_restricted_grouped_scored_proteins (list): grouped_scored_proteins that have been filtered based on FDR in parameter_file_object. Object created with :py:meth:`protein_inference.datastore.DataStore.set_based_fdr`
         scoring_input (list): List of non-scored :py:class:`protein_inference.physical.Protein` objects. Output from :py:meth:`protein_inference.datastore.DataStore.create_scoring_input`
         picked_proteins_scored (list): List of :py:class:`protein_inference.physical.Protein` objects that pass the protein picker algorithm (:py:meth:`protein_inference.datastore.DataStore.protein_picker`)
         picked_proteins_removed (list): List of :py:class:`protein_inference.physical.Protein` objects that do not pass the protein picker algorithm (:py:meth:`protein_inference.datastore.DataStore.protein_picker`)
@@ -79,7 +78,6 @@ class DataStore(object):
         self.main_data_restricted = None # PSM data post restriction
         self.scored_proteins = [] # List of scored Protein objects
         self.grouped_scored_proteins = [] # List of sorted scored Protein objects
-        self.fdr_restricted_grouped_scored_proteins = None # List of Protein objects restricted by FDR
         self.scoring_input = None # List of non scored Protein objects
         self.picked_proteins_scored = None # List of Protein objects after picker algorithm
         self.picked_proteins_removed = None # Protein objects removed via picker
@@ -720,7 +718,7 @@ class DataStore(object):
         Method to retrieve the protein string identifiers
 
         Args:
-            data_form (str): Can be one of the following: "main", "restricted", "picked", "picked_removed", "fdr_restricted"
+            data_form (str): Can be one of the following: "main", "restricted", "picked", "picked_removed"
 
         Returns:
             list: list of protein identifier strings
@@ -751,12 +749,6 @@ class DataStore(object):
             # Here we look at the proteins that were removed due to picking (aka the proteins that have a worse score than their target/decoy counterpart)
             data_to_select = self.picked_proteins_removed
             prots = [x.identifier for x in data_to_select]
-            proteins = prots
-
-        if data_form == "fdr_restricted":
-            # Proteins that pass fdr restriction...
-            data_to_select = self.fdr_restricted_grouped_scored_proteins
-            prots = [x[0].identifier for x in data_to_select]
             proteins = prots
 
         return proteins
@@ -1078,93 +1070,7 @@ class DataStore(object):
         self.picked_proteins_removed = removed_proteins
         logger.info("Finished Removing Proteins")
 
-    def set_based_fdr(self, regular=True):
-        """
-        Method calculates set based FDR on the lead protein in the group on the :attr:`grouped_scored_proteins` instance variable
-        FDR is calculated As (2*decoys)/total if regular is set to True and is (decoys)/total if regular is set to False
-
-        Selected FDR comes from the protein inference parameter object
-
-        This method sets the :attr:`fdr_restricted_grouped_scored_proteins` for the :py:class:`protein_inference.datastore.DataStore` object
-
-        Args:
-            regular (bool): True/False on how to calculate FDR. (2*decoys)/total if regular is set to True and is (decoys)/total if regular is set to False
-
-        Returns:
-            None
-
-        Example:
-            >>> data = protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
-            >>> # Data must be scored first
-            >>> data.set_based_fdr(regular=True)
-        """
-
-        logger = getLogger("protein_inference.datastore.DataStore.set_based_fdr")
-
-        logger.info("Calculating Set Based FDR")
-
-        # pick out the lead scoring protein for each group... lead score is at 0 position
-        lead_score = [x[0] for x in self.grouped_scored_proteins]
-        # Now pick out only the lead protein identifiers
-        lead_proteins = [x.identifier for x in lead_score]
-
-        # Reverse the list (best to worst) -> (worst to best)
-        lead_proteins.reverse()
-
-        fdr_list = []
-        for i in range(len(lead_proteins)):
-            binary_decoy_target_list = [
-                1 if elem.startswith(self.decoy_symbol) else 0 for elem in lead_proteins
-            ]
-            total = len(lead_proteins)
-            decoys = sum(binary_decoy_target_list)
-            # Calculate FDR at every step starting with the entire list...
-            # Delete first entry (worst score) every time we go through a cycle
-            if regular:
-                fdr = (2 * decoys) / (float(total))
-            else:
-                fdr = (decoys) / (float(total))
-            fdr_list.append(fdr)
-            # print(fdr)
-            if fdr < self.parameter_file_object.fdr:
-                break
-            else:
-                # Here we delete the worst score every time... thus making our list smaller and smaller
-                del lead_proteins[0]
-
-        lead_proteins.reverse()
-
-        fdr_restricted_set = [
-            self.grouped_scored_proteins[x] for x in range(len(lead_proteins))
-        ]
-
-        onehitwonders = []
-        for groups in fdr_restricted_set:
-            if int(groups[0].num_peptides) == 1:
-                onehitwonders.append(groups[0])
-
-        logger.info(
-            "Protein Group leads that pass with more than 1 PSM with a "
-            + str(self.parameter_file_object.fdr)
-            + " FDR = "
-            + str(len(fdr_restricted_set) - len(onehitwonders))
-        )
-        logger.info(
-            "Protein Group lead One hit Wonders that pass "
-            + str(self.parameter_file_object.fdr)
-            + " FDR = "
-            + str(len(onehitwonders))
-        )
-
-        logger.info(
-            "Number of Protein groups that pass a "
-            + str(self.parameter_file_object.fdr * 100)
-            + " percent FDR: "
-            + str(len(fdr_restricted_set))
-        )
-        self.fdr_restricted_grouped_scored_proteins = fdr_restricted_set
-
-    def calculate_q_values(self):
+    def calculate_q_values(self, regular=True):
         """
         Method calculates Q values FDR on the lead protein in the group on the :attr:`protein_group_objects` instance variable
         FDR is calculated As (2*decoys)/total if regular is set to True and is (decoys)/total if regular is set to False
@@ -1201,7 +1107,10 @@ class DataStore(object):
             decoys = sum(binary_decoy_target_list)
             # Calculate FDR at every step starting with the entire list...
             # Delete first entry (worst score) every time we go through a cycle
-            fdr = (decoys * 2) / (float(total))
+            if regular:
+                fdr = (2 * decoys) / (float(total))
+            else:
+                fdr = (decoys) / (float(total))
             fdr_list.append(fdr)
             del lead_proteins[0]
 
@@ -1219,6 +1128,38 @@ class DataStore(object):
         logger.info("Assigning Q Values")
         for k in range(len(self.protein_group_objects)):
             self.protein_group_objects[k].q_value = qvalue_list[k]
+
+        fdr_restricted = [x for x in self.protein_group_objects if x.q_value<=self.parameter_file_object.fdr]
+
+
+        fdr_restricted_set = [
+            self.grouped_scored_proteins[x] for x in range(len(fdr_restricted))
+        ]
+
+        onehitwonders = []
+        for groups in fdr_restricted_set:
+            if int(groups[0].num_peptides) == 1:
+                onehitwonders.append(groups[0])
+
+        logger.info(
+            "Protein Group leads that pass with more than 1 PSM with a "
+            + str(self.parameter_file_object.fdr)
+            + " FDR = "
+            + str(len(fdr_restricted_set) - len(onehitwonders))
+        )
+        logger.info(
+            "Protein Group lead One hit Wonders that pass "
+            + str(self.parameter_file_object.fdr)
+            + " FDR = "
+            + str(len(onehitwonders))
+        )
+
+        logger.info(
+            "Number of Protein groups that pass a "
+            + str(self.parameter_file_object.fdr * 100)
+            + " percent FDR: "
+            + str(len(fdr_restricted_set))
+        )
 
         logger.info("Finished Q value Calculation")
 
@@ -1321,7 +1262,6 @@ class DataStore(object):
             + " Entrapment FDR: "
             + str(len(fdr_restricted_set))
         )
-        self.fdr_restricted_grouped_scored_proteins = fdr_restricted_set
 
         return(fdr_restricted_set)
 
@@ -1620,3 +1560,11 @@ class DataStore(object):
             )
 
         return status
+
+    def get_protein_objects(self, fdr_restricted=False):
+        if fdr_restricted:
+            protein_objects = [x.proteins for x in self.protein_group_objects if x.q_value<=self.parameter_file_object.fdr]
+        else:
+            protein_objects = self.grouped_scored_proteins
+
+        return protein_objects

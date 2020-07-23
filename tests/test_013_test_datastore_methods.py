@@ -136,7 +136,6 @@ class TestDataStoreMethods(TestCase):
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
         ### STEP 11: Run FDR and Q value Calculations
-        data.set_based_fdr()
         data.calculate_q_values()
 
         # Start datastore tests
@@ -347,20 +346,6 @@ class TestDataStoreMethods(TestCase):
         )
         df_picked_removed = data.get_protein_identifiers(data_form="picked_removed")
         self.assertListEqual(df_picked_removed, ["##TCAF1_HUMAN|##Q9Y4C2"])
-        df_fdr_restricted = data.get_protein_identifiers(data_form="fdr_restricted")
-        self.assertListEqual(
-            df_fdr_restricted,
-            [
-                "RPOC_SHIF8|Q0SY12",
-                "RAF1_HUMAN|P04049",
-                "ARAF_HUMAN|P10398",
-                "BRAF_HUMAN|P15056",
-                "TCAF1_HUMAN|Q9Y4C2",
-                "HNRPU_HUMAN|Q00839",
-                "B3KX72_HUMAN|B3KX72",
-                "Q96BA7_HUMAN|Q96BA7",
-            ],
-        )
 
         p1 = data.get_protein_information(protein_string="RAF1_HUMAN|P04049")
         self.assertListEqual(

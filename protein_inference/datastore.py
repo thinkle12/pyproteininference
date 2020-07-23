@@ -1560,3 +1560,11 @@ class DataStore(object):
             )
 
         return status
+
+    def get_protein_objects(self, fdr_restricted=False):
+        if fdr_restricted:
+            protein_objects = [x.proteins for x in self.protein_group_objects if x.q_value<=self.parameter_file_object.fdr]
+        else:
+            protein_objects = self.grouped_scored_proteins
+
+        return protein_objects

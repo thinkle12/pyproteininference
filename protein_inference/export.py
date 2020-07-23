@@ -177,7 +177,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
 
         """
-        data_to_write = self.data_class.fdr_restricted_grouped_scored_proteins
+        protein_objects = self.data_class.get_protein_objects(fdr_restricted=True)
         ungrouped_list = [
             [
                 "Protein",
@@ -188,7 +188,7 @@ class Export(object):
                 "Peptides",
             ]
         ]
-        for groups in data_to_write:
+        for groups in protein_objects:
             for prots in groups:
                 ungrouped_list.append([prots.identifier])
                 ungrouped_list[-1].append(prots.score)
@@ -216,6 +216,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
 
         """
+        protein_objects = self.data_class.get_protein_objects(fdr_restricted=True)
         ungrouped_list = [
             [
                 "Protein",
@@ -226,7 +227,7 @@ class Export(object):
                 "Peptides",
             ]
         ]
-        for groups in self.data_class.fdr_restricted_grouped_scored_proteins:
+        for groups in protein_objects:
             ungrouped_list.append([groups[0].identifier])
             ungrouped_list[-1].append(groups[0].score)
             ungrouped_list[-1].append(groups[0].num_peptides)
@@ -254,6 +255,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
 
         """
+        protein_objects = self.data_class.get_protein_objects(fdr_restricted=True)
         ungrouped_list = [
             [
                 "Protein",
@@ -264,7 +266,7 @@ class Export(object):
                 "Other_Potential_Identifiers",
             ]
         ]
-        for groups in self.data_class.fdr_restricted_grouped_scored_proteins:
+        for groups in protein_objects:
             for prots in groups:
                 if prots == groups[0]:
                     ungrouped_list.append([prots.identifier])

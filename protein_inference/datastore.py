@@ -19,7 +19,6 @@ class DataStore(object):
         main_data_restricted (list): List of restricted :py:class:`protein_inference.physical.Psm` objects. Restriction is based on the parameter_file_object and the object is created by function :py:meth:`protein_inference.datastore.DataStore.restrict_psm_data`
         scored_proteins (list): List of scored :py:class:`protein_inference.physical.Protein` objects. Output from scoring methods from :py:mod:`protein_inference.scoring`
         grouped_scored_proteins (list): List of scored :py:class:`protein_inference.physical.Protein` objects that have been grouped and sorted. Output from :py:meth:`protein_inference.inference.Inference.run_inference` method
-        fdr_restricted_grouped_scored_proteins (list): grouped_scored_proteins that have been filtered based on FDR in parameter_file_object. Object created with :py:meth:`protein_inference.datastore.DataStore.set_based_fdr`
         scoring_input (list): List of non-scored :py:class:`protein_inference.physical.Protein` objects. Output from :py:meth:`protein_inference.datastore.DataStore.create_scoring_input`
         picked_proteins_scored (list): List of :py:class:`protein_inference.physical.Protein` objects that pass the protein picker algorithm (:py:meth:`protein_inference.datastore.DataStore.protein_picker`)
         picked_proteins_removed (list): List of :py:class:`protein_inference.physical.Protein` objects that do not pass the protein picker algorithm (:py:meth:`protein_inference.datastore.DataStore.protein_picker`)
@@ -79,7 +78,6 @@ class DataStore(object):
         self.main_data_restricted = None # PSM data post restriction
         self.scored_proteins = [] # List of scored Protein objects
         self.grouped_scored_proteins = [] # List of sorted scored Protein objects
-        self.fdr_restricted_grouped_scored_proteins = None # List of Protein objects restricted by FDR
         self.scoring_input = None # List of non scored Protein objects
         self.picked_proteins_scored = None # List of Protein objects after picker algorithm
         self.picked_proteins_removed = None # Protein objects removed via picker
@@ -720,7 +718,7 @@ class DataStore(object):
         Method to retrieve the protein string identifiers
 
         Args:
-            data_form (str): Can be one of the following: "main", "restricted", "picked", "picked_removed", "fdr_restricted"
+            data_form (str): Can be one of the following: "main", "restricted", "picked", "picked_removed"
 
         Returns:
             list: list of protein identifier strings
@@ -751,12 +749,6 @@ class DataStore(object):
             # Here we look at the proteins that were removed due to picking (aka the proteins that have a worse score than their target/decoy counterpart)
             data_to_select = self.picked_proteins_removed
             prots = [x.identifier for x in data_to_select]
-            proteins = prots
-
-        if data_form == "fdr_restricted":
-            # Proteins that pass fdr restriction...
-            data_to_select = self.fdr_restricted_grouped_scored_proteins
-            prots = [x[0].identifier for x in data_to_select]
             proteins = prots
 
         return proteins
@@ -1321,7 +1313,6 @@ class DataStore(object):
             + " Entrapment FDR: "
             + str(len(fdr_restricted_set))
         )
-        self.fdr_restricted_grouped_scored_proteins = fdr_restricted_set
 
         return(fdr_restricted_set)
 

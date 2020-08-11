@@ -409,7 +409,7 @@ class DataStore(object):
         custom_threshold = self.parameter_file_object.restrict_custom
 
         main_psm_data = self.main_data_form
-        logger.info("Length of main data: " + str(len(self.main_data_form)))
+        logger.info("Length of main data: {}".format(len(self.main_data_form)))
         # If restrict_main_data is called, we automatically discard everything that has a PEP of 1
         if remove1pep and posterior_error_prob_threshold:
             main_psm_data = [x for x in main_psm_data if x.pepvalue != 1]
@@ -511,7 +511,7 @@ class DataStore(object):
 
         self.main_data_restricted = restricted_data
 
-        logger.info("Length of restricted data: " + str(len(restricted_data)))
+        logger.info("Length of restricted data: {}".format(len(restricted_data)))
 
         self.restricted_peptides = [x.non_flanking_peptide for x in restricted_data]
 
@@ -694,16 +694,15 @@ class DataStore(object):
             if float(best_score) < float(worst_score):
                 higher_or_lower = self.LOWER_PSM_SCORE
 
-            logger.info("best score = " + str(best_score))
-            logger.info("worst score = " + str(worst_score))
+            logger.info("best score = {}".format(best_score))
+            logger.info("worst score = {}".format(worst_score))
 
             if best_score == worst_score:
                 raise ValueError(
-                    "Best and Worst scores were identical, equal to "
-                    + str(best_score)
-                    + ". Score type "
-                    + str(self.psm_score)
-                    + " produced the error, please change psm_score type."
+                    "Best and Worst scores were identical, equal to {}. Score type {} produced the error, please change psm_score type.".format(
+                        best_score,
+                        self.psm_score
+                    )
                 )
 
             self.high_low_better = higher_or_lower
@@ -855,7 +854,7 @@ class DataStore(object):
         peptide_sets = [frozenset(e) for e in peptides]
         # Find a way to sort this list of sets...
         # We can sort the sets if we sort proteins from above...
-        logger.info(str(len(peptide_sets)) + " number of peptide sets")
+        logger.info("{} number of peptide sets".format(len(peptide_sets)))
         non_subset_peptide_sets = set()
         i = 0
         # Get all peptide sets that are not a subset...
@@ -885,10 +884,7 @@ class DataStore(object):
             x for x in self.scoring_input if x.identifier in non_subset_proteins
         ]
 
-        logger.info(
-            str(len(self.scoring_input))
-            + " proteins in scoring input after removing subset proteins"
-        )
+        logger.info("{} proteins in scoring input after removing subset proteins".format(len(self.scoring_input)))
 
         # For all the proteins that are not a complete subset of another protein...
         # Get the raw peptides...
@@ -1007,7 +1003,7 @@ class DataStore(object):
 
         # Create a list of all the proteins from the scored data
         all_proteins = [x.identifier for x in self.scored_proteins]
-        logger.info(str(len(all_proteins)) + " proteins scored")
+        logger.info("{} proteins scored".format(len(all_proteins)))
 
         total_targets = []
         total_decoys = []
@@ -1052,12 +1048,10 @@ class DataStore(object):
             except ValueError:
                 pass
 
-        logger.info(str(len(total_decoys)) + " total decoy proteins")
-        logger.info(
-            str(len(total_targets)) + " matching target proteins also found in search"
-        )
-        logger.info(str(len(decoys_removed)) + " decoy proteins to be removed")
-        logger.info(str(len(targets_removed)) + " target proteins to be removed")
+        logger.info("{} total decoy proteins".format(len(total_decoys)))
+        logger.info("{} matching target proteins also found in search".format(len(total_targets)))
+        logger.info("{} decoy proteins to be removed".format(len(decoys_removed)))
+        logger.info("{} target proteins to be removed".format(len(targets_removed)))
 
         logger.info("Removing Lower Scoring Proteins...")
         picked_list = []
@@ -1143,23 +1137,25 @@ class DataStore(object):
                 onehitwonders.append(groups[0])
 
         logger.info(
-            "Protein Group leads that pass with more than 1 PSM with a "
-            + str(self.parameter_file_object.fdr)
-            + " FDR = "
-            + str(len(fdr_restricted_set) - len(onehitwonders))
+            "Protein Group leads that pass with more than 1 PSM with a {} FDR = {}".format(
+                self.parameter_file_object.fdr,
+                str(len(fdr_restricted_set) - len(onehitwonders))
+            )
+
         )
         logger.info(
-            "Protein Group lead One hit Wonders that pass "
-            + str(self.parameter_file_object.fdr)
-            + " FDR = "
-            + str(len(onehitwonders))
+            "Protein Group lead One hit Wonders that pass {} FDR = {}".format(
+                self.parameter_file_object.fdr,
+                len(onehitwonders)
+            )
         )
 
         logger.info(
-            "Number of Protein groups that pass a "
-            + str(self.parameter_file_object.fdr * 100)
-            + " percent FDR: "
-            + str(len(fdr_restricted_set))
+            "Number of Protein groups that pass a {} percent FDR: {}".format(
+                str(self.parameter_file_object.fdr * 100),
+                len(fdr_restricted_set)
+            )
+
         )
 
         logger.info("Finished Q value Calculation")
@@ -1226,7 +1222,6 @@ class DataStore(object):
             # Delete first entry (worst score) every time we go through a cycle
             fdr = (entraped) / (float(total))
             fdr_list.append(fdr)
-            # print(fdr)
             if fdr < false_discovery_rate:
                 break
             else:
@@ -1245,23 +1240,23 @@ class DataStore(object):
                 onehitwonders.append(groups[0])
 
         logger.info(
-            "Protein Group leads that pass with more than 1 PSM with a "
-            + str(false_discovery_rate)
-            + " Entrapment FDR = "
-            + str(len(fdr_restricted_set) - len(onehitwonders))
+            "Protein Group leads that pass with more than 1 PSM with a {}  Entrapment FDR =  {}".format(
+                false_discovery_rate,
+                str(len(fdr_restricted_set) - len(onehitwonders))
+            )
         )
         logger.info(
-            "Protein Group lead One hit Wonders that pass "
-            + str(false_discovery_rate)
-            + " Entrapment FDR = "
-            + str(len(onehitwonders))
+            "Protein Group lead One hit Wonders that pass {} Entrapment FDR = {}".format(
+                false_discovery_rate,
+                len(onehitwonders)
+            )
         )
 
         logger.info(
-            "Number of Protein groups that pass a "
-            + str(false_discovery_rate * 100)
-            + " Entrapment FDR: "
-            + str(len(fdr_restricted_set))
+            "Number of Protein groups that pass a {} Entrapment FDR: {}".format(
+                str(false_discovery_rate * 100),
+                len(fdr_restricted_set)
+            )
         )
 
         return(fdr_restricted_set)

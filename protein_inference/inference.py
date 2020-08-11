@@ -478,11 +478,10 @@ class Parsimony(Inference):
                         potential_protein_list = in_silico_peptides_to_proteins[peptide]
                         if not potential_protein_list:
                             logger.warning(
-                                "Protein "
-                                + str(protein_objects.identifier)
-                                + " and Peptide "
-                                + str(peptide)
-                                + " is not in database..."
+                                "Protein {} and Peptide {} is not in database...".format(
+                                    protein_objects.identifier,
+                                    peptide
+                                )
                             )
 
                         # Assign proteins to groups based on shared peptide... unless the protein is equivalent to the current identifier
@@ -1154,7 +1153,7 @@ class Parsimony(Inference):
         )  # Sort peptides alphabetically first...
         for j in range(len(total_sorted_peptides)):
             peptides_glpsol_format = [
-                "y[" + str(dd_num[x][0]) + "]"
+                "y[{}]".format(dd_num[x][0])
                 for x in sorted(pep_prot_dict[total_sorted_peptides[j]])
                 if x in unique_protein_set
             ]
@@ -1198,7 +1197,7 @@ class Parsimony(Inference):
         # Run GLPK with the following command
         if not skip_running:
             p = subprocess.Popen(
-                str(path_to_glpsol) + " -m " + str(glpkin) + " -o " + str(glpkout),
+                "{} -m {} -o {}".format(path_to_glpsol,glpkin,glpkout),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 shell=True,
@@ -1306,13 +1305,13 @@ class Parsimony(Inference):
                     lead_proteins.append(dd_prot_nums[passing_protein_number][0])
                 except IndexError:
                     logger.warning(
-                        "No Protein for Protein Number" + str(passing_protein_number)
+                        "No Protein for Protein Number {}".format(passing_protein_number)
                     )
 
         lead_protein_set = set(lead_proteins)
         self.lead_protein_set = lead_protein_set
 
-        logger.info("Number of lead proteins = " + str(len(lead_proteins)))
+        logger.info("Number of lead proteins = {}".format(len(lead_proteins)))
 
         scored_proteins = list(scored_data)
         protein_finder = [x.identifier for x in scored_proteins]
@@ -1517,7 +1516,6 @@ class Parsimony(Inference):
         lead_protein_identifiers = []
         for proteins in unique_prots_sorted:
             parsimony_value = pulp.value(prots[proteins])
-            # print("prot" + str(proteins) + '  ' + str(parsimony_value))
             if proteins in protein_finder and parsimony_value == 1:
                 p_ind = protein_finder.index(proteins)
                 protein_object = scored_proteins[p_ind]
@@ -1617,7 +1615,7 @@ class Parsimony(Inference):
             self._setup_glpk(
                 glpkin_filename=os.path.join(
                     glpkinout_directory,
-                    "glpkin_" + self.parameter_file_object.tag + ".mod",
+                    "glpkin_{}.mod".format(self.parameter_file_object.tag),
                 )
             )
 
@@ -1625,11 +1623,11 @@ class Parsimony(Inference):
                 path_to_glpsol=self.parameter_file_object.glpk_path,
                 glpkin=os.path.join(
                     glpkinout_directory,
-                    "glpkin_" + self.parameter_file_object.tag + ".mod",
+                    "glpkin_{}.mod".format(self.parameter_file_object.tag),
                 ),
                 glpkout=os.path.join(
                     glpkinout_directory,
-                    "glpkout_" + self.parameter_file_object.tag + ".sol",
+                    "glpkout_{}.sol".format(self.parameter_file_object.tag),
                 ),
                 skip_running=skip_running_glpk,
             )
@@ -1638,7 +1636,7 @@ class Parsimony(Inference):
                 swissprot_override="soft",
                 glpksolution_filename=os.path.join(
                     glpkinout_directory,
-                    "glpkout_" + self.parameter_file_object.tag + ".sol",
+                    "glpkout_{}.sol".format(self.parameter_file_object.tag),
                 ),
             )
 

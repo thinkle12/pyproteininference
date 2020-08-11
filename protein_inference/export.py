@@ -178,7 +178,7 @@ class Export(object):
 
         """
         protein_objects = self.data_class.get_protein_objects(fdr_restricted=True)
-        ungrouped_list = [
+        protein_export_list = [
             [
                 "Protein",
                 "Score",
@@ -190,20 +190,20 @@ class Export(object):
         ]
         for groups in protein_objects:
             for prots in groups:
-                ungrouped_list.append([prots.identifier])
-                ungrouped_list[-1].append(prots.score)
-                ungrouped_list[-1].append(prots.num_peptides)
+                protein_export_list.append([prots.identifier])
+                protein_export_list[-1].append(prots.score)
+                protein_export_list[-1].append(prots.num_peptides)
                 if prots.reviewed == True:
-                    ungrouped_list[-1].append("Reviewed")
+                    protein_export_list[-1].append("Reviewed")
                 else:
-                    ungrouped_list[-1].append("Unreviewed")
-                ungrouped_list[-1].append(prots.group_identification)
+                    protein_export_list[-1].append("Unreviewed")
+                protein_export_list[-1].append(prots.group_identification)
                 for peps in prots.peptides:
-                    ungrouped_list[-1].append(peps)
+                    protein_export_list[-1].append(peps)
 
         with open(filename_out, "w") as f:
             writer = csv.writer(f)
-            writer.writerows(ungrouped_list)
+            writer.writerows(protein_export_list)
 
     def csv_export_leads_restricted(self, filename_out):
         """
@@ -217,7 +217,7 @@ class Export(object):
 
         """
         protein_objects = self.data_class.get_protein_objects(fdr_restricted=True)
-        ungrouped_list = [
+        protein_export_list = [
             [
                 "Protein",
                 "Score",
@@ -228,20 +228,20 @@ class Export(object):
             ]
         ]
         for groups in protein_objects:
-            ungrouped_list.append([groups[0].identifier])
-            ungrouped_list[-1].append(groups[0].score)
-            ungrouped_list[-1].append(groups[0].num_peptides)
+            protein_export_list.append([groups[0].identifier])
+            protein_export_list[-1].append(groups[0].score)
+            protein_export_list[-1].append(groups[0].num_peptides)
             if groups[0].reviewed == True:
-                ungrouped_list[-1].append("Reviewed")
+                protein_export_list[-1].append("Reviewed")
             else:
-                ungrouped_list[-1].append("Unreviewed")
-            ungrouped_list[-1].append(groups[0].group_identification)
+                protein_export_list[-1].append("Unreviewed")
+            protein_export_list[-1].append(groups[0].group_identification)
             for peps in sorted(groups[0].peptides):
-                ungrouped_list[-1].append(peps)
+                protein_export_list[-1].append(peps)
 
         with open(filename_out, "w") as f:
             writer = csv.writer(f)
-            writer.writerows(ungrouped_list)
+            writer.writerows(protein_export_list)
 
     def csv_export_comma_sep_restricted(self, filename_out):
         """
@@ -256,7 +256,7 @@ class Export(object):
 
         """
         protein_objects = self.data_class.get_protein_objects(fdr_restricted=True)
-        ungrouped_list = [
+        protein_export_list = [
             [
                 "Protein",
                 "Score",
@@ -269,19 +269,19 @@ class Export(object):
         for groups in protein_objects:
             for prots in groups:
                 if prots == groups[0]:
-                    ungrouped_list.append([prots.identifier])
-                    ungrouped_list[-1].append(prots.score)
-                    ungrouped_list[-1].append(prots.num_peptides)
+                    protein_export_list.append([prots.identifier])
+                    protein_export_list[-1].append(prots.score)
+                    protein_export_list[-1].append(prots.num_peptides)
                     if prots.reviewed == True:
-                        ungrouped_list[-1].append("Reviewed")
+                        protein_export_list[-1].append("Reviewed")
                     else:
-                        ungrouped_list[-1].append("Unreviewed")
-                    ungrouped_list[-1].append(prots.group_identification)
+                        protein_export_list[-1].append("Unreviewed")
+                    protein_export_list[-1].append(prots.group_identification)
                 else:
-                    ungrouped_list[-1].append(prots.identifier)
+                    protein_export_list[-1].append(prots.identifier)
         with open(filename_out, "w") as f:
             writer = csv.writer(f)
-            writer.writerows(ungrouped_list)
+            writer.writerows(protein_export_list)
 
     def csv_export_q_value_leads(self, filename_out):
         """
@@ -293,7 +293,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
 
         """
-        ungrouped_list = [
+        protein_export_list = [
             [
                 "Protein",
                 "Score",
@@ -306,22 +306,22 @@ class Export(object):
         ]
         for groups in self.data_class.protein_group_objects:
             lead_protein = groups.proteins[0]
-            ungrouped_list.append([lead_protein.identifier])
-            ungrouped_list[-1].append(lead_protein.score)
-            ungrouped_list[-1].append(groups.q_value)
-            ungrouped_list[-1].append(lead_protein.num_peptides)
+            protein_export_list.append([lead_protein.identifier])
+            protein_export_list[-1].append(lead_protein.score)
+            protein_export_list[-1].append(groups.q_value)
+            protein_export_list[-1].append(lead_protein.num_peptides)
             if lead_protein.reviewed == True:
-                ungrouped_list[-1].append("Reviewed")
+                protein_export_list[-1].append("Reviewed")
             else:
-                ungrouped_list[-1].append("Unreviewed")
-            ungrouped_list[-1].append(groups.number_id)
+                protein_export_list[-1].append("Unreviewed")
+            protein_export_list[-1].append(groups.number_id)
             peptides = lead_protein.peptides
             for peps in sorted(peptides):
-                ungrouped_list[-1].append(peps)
+                protein_export_list[-1].append(peps)
 
         with open(filename_out, "w") as f:
             writer = csv.writer(f)
-            writer.writerows(ungrouped_list)
+            writer.writerows(protein_export_list)
 
     def csv_export_q_value_comma_sep(self, filename_out):
         """
@@ -334,7 +334,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
 
         """
-        ungrouped_list = [
+        protein_export_list = [
             [
                 "Protein",
                 "Score",
@@ -347,21 +347,21 @@ class Export(object):
         ]
         for groups in self.data_class.protein_group_objects:
             lead_protein = groups.proteins[0]
-            ungrouped_list.append([lead_protein.identifier])
-            ungrouped_list[-1].append(lead_protein.score)
-            ungrouped_list[-1].append(groups.q_value)
-            ungrouped_list[-1].append(lead_protein.num_peptides)
+            protein_export_list.append([lead_protein.identifier])
+            protein_export_list[-1].append(lead_protein.score)
+            protein_export_list[-1].append(groups.q_value)
+            protein_export_list[-1].append(lead_protein.num_peptides)
             if lead_protein.reviewed == True:
-                ungrouped_list[-1].append("Reviewed")
+                protein_export_list[-1].append("Reviewed")
             else:
-                ungrouped_list[-1].append("Unreviewed")
-            ungrouped_list[-1].append(groups.number_id)
+                protein_export_list[-1].append("Unreviewed")
+            protein_export_list[-1].append(groups.number_id)
             for other_prots in groups.proteins[1:]:
-                ungrouped_list[-1].append(other_prots.identifier)
+                protein_export_list[-1].append(other_prots.identifier)
 
         with open(filename_out, "w") as f:
             writer = csv.writer(f)
-            writer.writerows(ungrouped_list)
+            writer.writerows(protein_export_list)
 
     def csv_export_q_value_all(self, filename_out):
         """
@@ -375,7 +375,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
 
         """
-        ungrouped_list = [
+        protein_export_list = [
             [
                 "Protein",
                 "Score",
@@ -388,24 +388,24 @@ class Export(object):
         ]
         for groups in self.data_class.protein_group_objects:
             for proteins in groups.proteins:
-                ungrouped_list.append([proteins.identifier])
-                ungrouped_list[-1].append(proteins.score)
-                ungrouped_list[-1].append(groups.q_value)
-                ungrouped_list[-1].append(proteins.num_peptides)
+                protein_export_list.append([proteins.identifier])
+                protein_export_list[-1].append(proteins.score)
+                protein_export_list[-1].append(groups.q_value)
+                protein_export_list[-1].append(proteins.num_peptides)
                 if proteins.reviewed == True:
-                    ungrouped_list[-1].append("Reviewed")
+                    protein_export_list[-1].append("Reviewed")
                 else:
-                    ungrouped_list[-1].append("Unreviewed")
-                ungrouped_list[-1].append(groups.number_id)
+                    protein_export_list[-1].append("Unreviewed")
+                protein_export_list[-1].append(groups.number_id)
                 for peps in sorted(proteins.peptides):
-                    ungrouped_list[-1].append(peps)
+                    protein_export_list[-1].append(peps)
 
         with open(filename_out, "w") as f:
             writer = csv.writer(f)
-            writer.writerows(ungrouped_list)
+            writer.writerows(protein_export_list)
 
     def csv_export_q_value_all_proteologic(self, filename_out):
-        ungrouped_list = [
+        protein_export_list = [
             [
                 "Protein",
                 "Score",
@@ -418,21 +418,21 @@ class Export(object):
         ]
         for groups in self.data_class.protein_group_objects:
             for proteins in groups.proteins:
-                ungrouped_list.append([proteins.identifier])
-                ungrouped_list[-1].append(proteins.score)
-                ungrouped_list[-1].append(groups.q_value)
-                ungrouped_list[-1].append(proteins.num_peptides)
+                protein_export_list.append([proteins.identifier])
+                protein_export_list[-1].append(proteins.score)
+                protein_export_list[-1].append(groups.q_value)
+                protein_export_list[-1].append(proteins.num_peptides)
                 if proteins.reviewed == True:
-                    ungrouped_list[-1].append("Reviewed")
+                    protein_export_list[-1].append("Reviewed")
                 else:
-                    ungrouped_list[-1].append("Unreviewed")
-                ungrouped_list[-1].append(groups.number_id)
+                    protein_export_list[-1].append("Unreviewed")
+                protein_export_list[-1].append(groups.number_id)
                 for peps in sorted(proteins.peptides):
-                    ungrouped_list[-1].append(peps)
+                    protein_export_list[-1].append(peps)
 
         with open(filename_out, "w") as f:
             writer = csv.writer(f)
-            writer.writerows(ungrouped_list)
+            writer.writerows(protein_export_list)
 
     def csv_export_q_value_all_long(self, filename_out):
         """
@@ -444,7 +444,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
 
         """
-        ungrouped_list = [
+        protein_export_list = [
             [
                 "Protein",
                 "Score",
@@ -458,20 +458,20 @@ class Export(object):
         for groups in self.data_class.protein_group_objects:
             lead_protein = groups.proteins[0]
             for peps in lead_protein.peptides:
-                ungrouped_list.append([lead_protein.identifier])
-                ungrouped_list[-1].append(lead_protein.score)
-                ungrouped_list[-1].append(groups.q_value)
-                ungrouped_list[-1].append(lead_protein.num_peptides)
+                protein_export_list.append([lead_protein.identifier])
+                protein_export_list[-1].append(lead_protein.score)
+                protein_export_list[-1].append(groups.q_value)
+                protein_export_list[-1].append(lead_protein.num_peptides)
                 if lead_protein.reviewed == True:
-                    ungrouped_list[-1].append("Reviewed")
+                    protein_export_list[-1].append("Reviewed")
                 else:
-                    ungrouped_list[-1].append("Unreviewed")
-                ungrouped_list[-1].append(groups.number_id)
-                ungrouped_list[-1].append(peps)
+                    protein_export_list[-1].append("Unreviewed")
+                protein_export_list[-1].append(groups.number_id)
+                protein_export_list[-1].append(peps)
 
         with open(filename_out, "w") as f:
             writer = csv.writer(f)
-            writer.writerows(ungrouped_list)
+            writer.writerows(protein_export_list)
 
     def csv_export_q_value_leads_peptides(self, filename_out, peptide_delimiter=" "):
         """
@@ -484,7 +484,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
             peptide_delimiter (str): String to separate peptides by in the "Peptides" column of the csv file
         """
-        ungrouped_list = [
+        protein_export_list = [
             [
                 "Protein",
                 "Score",
@@ -497,21 +497,21 @@ class Export(object):
         ]
         for groups in self.data_class.protein_group_objects:
             lead_protein = groups.proteins[0]
-            ungrouped_list.append([lead_protein.identifier])
-            ungrouped_list[-1].append(lead_protein.score)
-            ungrouped_list[-1].append(groups.q_value)
-            ungrouped_list[-1].append(lead_protein.num_peptides)
+            protein_export_list.append([lead_protein.identifier])
+            protein_export_list[-1].append(lead_protein.score)
+            protein_export_list[-1].append(groups.q_value)
+            protein_export_list[-1].append(lead_protein.num_peptides)
             if lead_protein.reviewed == True:
-                ungrouped_list[-1].append("Reviewed")
+                protein_export_list[-1].append("Reviewed")
             else:
-                ungrouped_list[-1].append("Unreviewed")
-            ungrouped_list[-1].append(groups.number_id)
+                protein_export_list[-1].append("Unreviewed")
+            protein_export_list[-1].append(groups.number_id)
             peptides = peptide_delimiter.join(list(sorted(lead_protein.peptides)))
-            ungrouped_list[-1].append(peptides)
+            protein_export_list[-1].append(peptides)
 
         with open(filename_out, "w") as f:
             writer = csv.writer(f)
-            writer.writerows(ungrouped_list)
+            writer.writerows(protein_export_list)
 
     def csv_export_q_value_leads_psms(self, filename_out, peptide_delimiter=" "):
         """
@@ -524,7 +524,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
             peptide_delimiter (str): String to separate peptides by in the "Peptides" column of the csv file
         """
-        ungrouped_list = [
+        protein_export_list = [
             [
                 "Protein",
                 "Score",
@@ -537,23 +537,23 @@ class Export(object):
         ]
         for groups in self.data_class.protein_group_objects:
             lead_protein = groups.proteins[0]
-            ungrouped_list.append([lead_protein.identifier])
-            ungrouped_list[-1].append(lead_protein.score)
-            ungrouped_list[-1].append(groups.q_value)
-            ungrouped_list[-1].append(lead_protein.num_peptides)
+            protein_export_list.append([lead_protein.identifier])
+            protein_export_list[-1].append(lead_protein.score)
+            protein_export_list[-1].append(groups.q_value)
+            protein_export_list[-1].append(lead_protein.num_peptides)
             if lead_protein.reviewed == True:
-                ungrouped_list[-1].append("Reviewed")
+                protein_export_list[-1].append("Reviewed")
             else:
-                ungrouped_list[-1].append("Unreviewed")
-            ungrouped_list[-1].append(groups.number_id)
+                protein_export_list[-1].append("Unreviewed")
+            protein_export_list[-1].append(groups.number_id)
             psms = peptide_delimiter.join(
                 sorted([x.non_flanking_peptide for x in lead_protein.psms])
             )
-            ungrouped_list[-1].append(psms)
+            protein_export_list[-1].append(psms)
 
         with open(filename_out, "w") as f:
             writer = csv.writer(f)
-            writer.writerows(ungrouped_list)
+            writer.writerows(protein_export_list)
 
     def csv_export_q_value_leads_psm_ids(self, filename_out, peptide_delimiter=" "):
         """
@@ -566,7 +566,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
             peptide_delimiter (str): String to separate psm_ids by in the "Peptides" column of the csv file
         """
-        ungrouped_list = [
+        protein_export_list = [
             [
                 "Protein",
                 "Score",
@@ -579,18 +579,18 @@ class Export(object):
         ]
         for groups in self.data_class.protein_group_objects:
             lead_protein = groups.proteins[0]
-            ungrouped_list.append([lead_protein.identifier])
-            ungrouped_list[-1].append(lead_protein.score)
-            ungrouped_list[-1].append(groups.q_value)
-            ungrouped_list[-1].append(lead_protein.num_peptides)
+            protein_export_list.append([lead_protein.identifier])
+            protein_export_list[-1].append(lead_protein.score)
+            protein_export_list[-1].append(groups.q_value)
+            protein_export_list[-1].append(lead_protein.num_peptides)
             if lead_protein.reviewed == True:
-                ungrouped_list[-1].append("Reviewed")
+                protein_export_list[-1].append("Reviewed")
             else:
-                ungrouped_list[-1].append("Unreviewed")
-            ungrouped_list[-1].append(groups.number_id)
+                protein_export_list[-1].append("Unreviewed")
+            protein_export_list[-1].append(groups.number_id)
             psms = peptide_delimiter.join(sorted(lead_protein.get_psm_ids()))
-            ungrouped_list[-1].append(psms)
+            protein_export_list[-1].append(psms)
 
         with open(filename_out, "w") as f:
             writer = csv.writer(f)
-            writer.writerows(ungrouped_list)
+            writer.writerows(protein_export_list)

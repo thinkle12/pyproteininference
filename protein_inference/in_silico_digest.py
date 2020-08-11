@@ -108,9 +108,7 @@ class InSilicoDigest(Digest):
             self.digest_type = digest_type
         else:
             raise ValueError(
-                "digest_type must be equal to one of the following"
-                + str(self.LIST_OF_DIGEST_TYPES)
-                + " or... (List more digest types here in the future...)"
+                "digest_type must be equal to one of the following {}".format(str(self.LIST_OF_DIGEST_TYPES))
             )
         self.logger = getLogger("protein_inference.in_silico_digest.InSilicoDigest")
         self.max_peptide_length = max_peptide_length
@@ -369,9 +367,7 @@ class PyteomicsDigest(Digest):
             self.digest_type = digest_type
         else:
             raise ValueError(
-                "digest_type must be equal to one of the following"
-                + str(self.LIST_OF_DIGEST_TYPES)
-                + " or... (List more digest types here in the future...)"
+                "digest_type must be equal to one of the following {}".format(str(self.LIST_OF_DIGEST_TYPES))
             )
         self.logger = getLogger("protein_inference.in_silico_digest.PyteomicsDigest")
         self.max_peptide_length = max_peptide_length

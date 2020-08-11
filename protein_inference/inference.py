@@ -690,10 +690,10 @@ class Parsimony(Inference):
         if not protein_list[0].reviewed:
             # If the lead is unreviewed attempt to replace it...
             # Start to loop through protein_list which is the current group...
-            for hits in protein_list[1:]:
+            for protein in protein_list[1:]:
                 # Find the first reviewed it... if its not a lead protein already then do score swap and break...
-                if hits.reviewed:
-                    best_swiss_prot_prot = hits
+                if protein.reviewed:
+                    best_swiss_prot_prot = protein
 
                     if override_type == "soft":
                         # If the lead proteins peptides are a subset of the best swissprot.... then swap the proteins... (meaning equal peptides or the swissprot completely covers the tremble reference)
@@ -1067,33 +1067,31 @@ class Parsimony(Inference):
         # Loop over the list of peptides...
         for k in range(len(data_peptides)):
             raw_peptides = data_peptides[k]
-            t_set = set()
+            peptide_set = set()
             # Loop over each individual peptide per protein...
             for peps in raw_peptides:
-                peptide = peps
-
                 # Remove mods...
-                new_peptide = Psm.remove_peptide_mods(peptide)
+                new_peptide = Psm.remove_peptide_mods(peps)
                 # Add it to a temporary set...
-                t_set.add(new_peptide)
+                peptide_set.add(new_peptide)
             # Append this set to a new list...
-            peptide_sets.append(t_set)
+            peptide_sets.append(peptide_set)
             # Set that proteins peptides to be the unmodified ones...
-            data_peptides[k] = t_set
+            data_peptides[k] = peptide_set
 
         # Get them all...
         all_peptides = [x for x in data_peptides]
         # Remove redundant sets...
-        restrictedlst = [
+        non_redundant_peptide_sets = [
             set(i)
             for i in OrderedDict.fromkeys(frozenset(item) for item in peptide_sets)
         ]
 
-        # Loop over  the restricted list of peptides...
+        # Loop over the restricted list of peptides...
         ind_list = []
-        for p in restrictedlst:
+        for peptide_set in non_redundant_peptide_sets:
             # Get its index in terms of the overall list...
-            ind_list.append(all_peptides.index(p))
+            ind_list.append(all_peptides.index(peptide_set))
 
         # Get the protein based on the index
         restricted_proteins = [
@@ -1125,9 +1123,9 @@ class Parsimony(Inference):
         # For all the unique proteins from the search create a number to protein dictionary and a protein to number dictionary
         # Here we essentially assign a number to each protein
         # This is important as the glpk analysis just treats proteins as numbers...
-        for p in range(len(unique_prots_sorted)):
-            dd_num[unique_prots_sorted[p]].append(p)
-            dd_prot_nums[p].append(unique_prots_sorted[p])
+        for peptide_set in range(len(unique_prots_sorted)):
+            dd_num[unique_prots_sorted[peptide_set]].append(peptide_set)
+            dd_prot_nums[peptide_set].append(unique_prots_sorted[peptide_set])
 
         # Store this data as glpk_number_protein_dictionary
         # The numbers are important as they are used in the GLPK input and we need to know what number in the GLPK output corresponds with which protein from the search
@@ -1151,17 +1149,17 @@ class Parsimony(Inference):
         # s.t. c2: y[14145]+y[4857]+y[4858]+y[10143]+y[2966] >=1;
         # s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1;
         # Each of the lines (constants, c1,c2,c3) is a peptide and each of the y[x] is a protein
-        tot_peps = sorted(
+        total_sorted_peptides = sorted(
             list(set(flat_peptides_in_data))
         )  # Sort peptides alphabetically first...
-        for j in range(len(tot_peps)):
-            combine = [
+        for j in range(len(total_sorted_peptides)):
+            peptides_glpsol_format = [
                 "y[" + str(dd_num[x][0]) + "]"
-                for x in sorted(pep_prot_dict[tot_peps[j]])
+                for x in sorted(pep_prot_dict[total_sorted_peptides[j]])
                 if x in unique_protein_set
             ]
             fileout.write(
-                "s.t. c" + str(j + 1) + ": " + "+".join(combine) + " >=1;" + "\n"
+                "s.t. c" + str(j + 1) + ": " + "+".join(peptides_glpsol_format) + " >=1;" + "\n"
             )
 
         # Finish writing the rest of the file and close it
@@ -1281,21 +1279,21 @@ class Parsimony(Inference):
             "   No. Column name       Activity     Lower bound   Upper bound"
         )
 
-        newlist = []
+        restricted_glpk_out = []
         # Fix this -13 and +2... not really sure how
         # Based on the output file we should start two lines after the start index and stop 13 before the end of the file...
         for lines in range(start + 2, len(glpk_out) - 13):
-            new = [x.strip() for x in glpk_out[lines].split(" ")]
-            res = []
-            for stuff in new:
-                if stuff != "":
-                    res.append(stuff)
-            newlist.append(res)
+            split_lines = [x.strip() for x in glpk_out[lines].split(" ")]
+            restricted_content = []
+            for content in split_lines:
+                if content != "":
+                    restricted_content.append(content)
+            restricted_glpk_out.append(restricted_content)
 
         # Use 1 here as 1 is the location in the line of the protein number
         # 3 is the location of the binary (which indicates whether or not the protein number has a unique peptide making it a lead protein)
-        numbers = [x[1].split("]")[0].split("[")[-1] for x in newlist]
-        binary = [x[3] for x in newlist]
+        numbers = [x[1].split("]")[0].split("[")[-1] for x in restricted_glpk_out]
+        binary = [x[3] for x in restricted_glpk_out]
 
         self.numbers = numbers
 
@@ -1426,7 +1424,7 @@ class Parsimony(Inference):
         # Loop over the list of peptides...
         for k in range(len(data_peptides)):
             raw_peptides = data_peptides[k]
-            t_set = set()
+            peptide_set = set()
             # Loop over each individual peptide per protein...
             for peps in raw_peptides:
                 peptide = peps
@@ -1434,25 +1432,25 @@ class Parsimony(Inference):
                 # Remove mods...
                 new_peptide = Psm.remove_peptide_mods(peptide)
                 # Add it to a temporary set...
-                t_set.add(new_peptide)
+                peptide_set.add(new_peptide)
             # Append this set to a new list...
-            peptide_sets.append(t_set)
+            peptide_sets.append(peptide_set)
             # Set that proteins peptides to be the unmodified ones...
-            data_peptides[k] = t_set
+            data_peptides[k] = peptide_set
 
         # Get them all...
         all_peptides = [x for x in data_peptides]
         # Remove redundant sets...
-        restrictedlst = [
+        non_redundant_peptide_sets = [
             set(i)
             for i in OrderedDict.fromkeys(frozenset(item) for item in peptide_sets)
         ]
 
         # Loop over  the restricted list of peptides...
         ind_list = []
-        for p in restrictedlst:
+        for pep_sets in non_redundant_peptide_sets:
             # Get its index in terms of the overall list...
-            ind_list.append(all_peptides.index(p))
+            ind_list.append(all_peptides.index(pep_sets))
 
         # Get the protein based on the index
         restricted_proteins = [

@@ -577,11 +577,11 @@ class DataStore(object):
                 protein_psm_dict[protein_name].append(psms)
 
         protein_list = []
-        for pkeys in sorted(protein_psm_dict.keys()):
-            p = Protein(identifier=pkeys)
-            p.psms = protein_psm_dict[pkeys]
-            p.raw_peptides = set([x.identifier for x in protein_psm_dict[pkeys]])
-            protein_list.append(p)
+        for pkey in sorted(protein_psm_dict.keys()):
+            protein_object = Protein(identifier=pkey)
+            protein_object.psms = protein_psm_dict[pkey]
+            protein_object.raw_peptides = set([x.identifier for x in protein_psm_dict[pkey]])
+            protein_list.append(protein_object)
 
         self.psm_score = self.parameter_file_object.psm_score
         self.scoring_input = protein_list
@@ -601,16 +601,16 @@ class DataStore(object):
         psm_data = self.get_psm_data()
 
         res_pep_set = set(self.restricted_peptides)
-        dd_prots = collections.defaultdict(set)
+        default_dict_proteins = collections.defaultdict(set)
         for peptide_objects in psm_data:
             for prots in peptide_objects.possible_proteins:
                 cur_peptide = peptide_objects.non_flanking_peptide
                 if cur_peptide in res_pep_set:
-                    dd_prots[prots].add(cur_peptide)
+                    default_dict_proteins[prots].add(cur_peptide)
 
-        self.protein_peptide_dictionary = dd_prots
+        self.protein_peptide_dictionary = default_dict_proteins
 
-        return dd_prots
+        return default_dict_proteins
 
     def peptide_to_protein_dictionary(self):
         """
@@ -627,18 +627,18 @@ class DataStore(object):
         psm_data = self.get_psm_data()
 
         res_pep_set = set(self.restricted_peptides)
-        dd_peps = collections.defaultdict(set)
+        default_dict_peptides = collections.defaultdict(set)
         for peptide_objects in psm_data:
             for prots in peptide_objects.possible_proteins:
                 cur_peptide = peptide_objects.non_flanking_peptide
                 if cur_peptide in res_pep_set:
-                    dd_peps[cur_peptide].add(prots)
+                    default_dict_peptides[cur_peptide].add(prots)
                 else:
                     pass
 
-        self.peptide_protein_dictionary = dd_peps
+        self.peptide_protein_dictionary = default_dict_peptides
 
-        return dd_peps
+        return default_dict_peptides
 
     def unique_to_leads_peptides(self):
         """
@@ -702,8 +702,8 @@ class DataStore(object):
                     "Best and Worst scores were identical, equal to "
                     + str(best_score)
                     + ". Score type "
-                    + str(self.score)
-                    + " produced the error, please change score type."
+                    + str(self.psm_score)
+                    + " produced the error, please change psm_score type."
                 )
 
             self.high_low_better = higher_or_lower
@@ -852,20 +852,20 @@ class DataStore(object):
         # Get frozen set of peptides....
         # We will also have a corresponding list of proteins...
         # They will have the same index...
-        sets = [frozenset(e) for e in peptides]
+        peptide_sets = [frozenset(e) for e in peptides]
         # Find a way to sort this list of sets...
         # We can sort the sets if we sort proteins from above...
-        logger.info(str(len(sets)) + " number of peptide sets")
-        us = set()
+        logger.info(str(len(peptide_sets)) + " number of peptide sets")
+        non_subset_peptide_sets = set()
         i = 0
         # Get all peptide sets that are not a subset...
-        while sets:
+        while peptide_sets:
             i = i + 1
-            e = sets.pop()
-            if any(e.issubset(s) for s in sets) or any(e.issubset(s) for s in us):
+            peptide_set = peptide_sets.pop()
+            if any(peptide_set.issubset(s) for s in peptide_sets) or any(peptide_set.issubset(s) for s in non_subset_peptide_sets):
                 continue
             else:
-                us.add(e)
+                non_subset_peptide_sets.add(peptide_set)
             if i % 10000 == 0:
                 logger.info("Parsed {} Peptide Sets".format(i))
 
@@ -873,8 +873,8 @@ class DataStore(object):
 
         # Get their index from peptides which is the initial list of sets...
         list_of_indeces = []
-        for u in us:
-            ind = peptides.index(u)
+        for pep_sets in non_subset_peptide_sets:
+            ind = peptides.index(pep_sets)
             list_of_indeces.append(ind)
 
         non_subset_proteins = set([our_proteins_sorted[x] for x in list_of_indeces])
@@ -914,6 +914,7 @@ class DataStore(object):
             [x for x in counted_peptides.keys() if counted_peptides[x] <= 1]
         )
 
+        # Alter self.scoring_input by removing psms and peptides that are not in raw_peps_good
         current_score_input = list(self.scoring_input)
         for j in range(len(current_score_input)):
             k = j + 1

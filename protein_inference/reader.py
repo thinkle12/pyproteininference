@@ -51,6 +51,12 @@ class Reader(object):
             list: List of column names for alternative proteins for the input data
 
         """
+        # TODO edit this method... this takes the header and determines the maximum number of columns based on the header...
+        # TODO we should also pass in the filename... Read it fully and determine the longest list...
+        # TODO then we can compare what we currently get to the longest list in the file and if they match good...
+        # TODO if they do not match then log it and set it to the max... :)
+        # We will have to read the file n twice but I dont think it will matter...
+        # This way we can skip the digest which takes up a bunch of memory... And we can digest just based on whats in the file... :)
         price_count = itertools.count(1)
         return [
             "alternative_protein_{}".format(next(price_count)) if f == "" else f
@@ -266,22 +272,22 @@ class PercolatorReader(Reader):
                 all = []
                 for f in self.combined_files:
                     self.logger.info(f)
-                    p = []
+                    combined_psm_result_rows = []
                     with open(f, "r") as perc_files:
                         spamreader = csv.reader(perc_files, delimiter="\t")
                         for row in spamreader:
-                            p.append(row)
-                    del p[0]
-                    all = all + p
+                            combined_psm_result_rows.append(row)
+                    del combined_psm_result_rows[0]
+                    all = all + combined_psm_result_rows
             elif self.combined_files:
                 # If not just read the file...
-                p = []
+                combined_psm_result_rows = []
                 with open(self.combined_files, "r") as perc_files:
                     spamreader = csv.reader(perc_files, delimiter="\t")
                     for row in spamreader:
-                        p.append(row)
-                del p[0]
-                all = p
+                        combined_psm_result_rows.append(row)
+                del combined_psm_result_rows[0]
+                all = combined_psm_result_rows
             perc_all = all
 
         elif self.directory:
@@ -290,13 +296,13 @@ class PercolatorReader(Reader):
             all = []
             for files in all_files:
                 self.logger.info(files)
-                p = []
+                combined_psm_result_rows = []
                 with open(files, "r") as perc_file:
                     spamreader = csv.reader(perc_file, delimiter="\t")
                     for row in spamreader:
-                        p.append(row)
-                del p[0]
-                all = all + p
+                        combined_psm_result_rows.append(row)
+                del combined_psm_result_rows[0]
+                all = all + combined_psm_result_rows
             perc_all = all
 
         peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
@@ -335,11 +341,11 @@ class PercolatorReader(Reader):
             current_peptide = psm_info[self.PEPTIDE_INDEX]
             # Define the Psm...
             if current_peptide not in peptide_tracker:
-                p = Psm(identifier=current_peptide)
+                combined_psm_result_rows = Psm(identifier=current_peptide)
                 # Add all the attributes
-                p.percscore = float(psm_info[self.PERC_SCORE_INDEX])
-                p.qvalue = float(psm_info[self.Q_VALUE_INDEX])
-                p.pepvalue = float(psm_info[self.POSTERIOR_ERROR_PROB_INDEX])
+                combined_psm_result_rows.percscore = float(psm_info[self.PERC_SCORE_INDEX])
+                combined_psm_result_rows.qvalue = float(psm_info[self.Q_VALUE_INDEX])
+                combined_psm_result_rows.pepvalue = float(psm_info[self.POSTERIOR_ERROR_PROB_INDEX])
                 if self.parameter_file_object.inference_type == Inference.FIRST_PROTEIN:
                     poss_proteins = [psm_info[self.PROTEINIDS_INDEX]]
                 else:
@@ -351,10 +357,10 @@ class PercolatorReader(Reader):
                             ]
                         )
                     )
-                p.possible_proteins = (
+                combined_psm_result_rows.possible_proteins = (
                     poss_proteins  # Restrict to 50 total possible proteins...
                 )
-                p.psm_id = psm_info[self.PSMID_INDEX]
+                combined_psm_result_rows.psm_id = psm_info[self.PSMID_INDEX]
 
                 # Split peptide if flanking
                 current_peptide = Psm.split_peptide(peptide_string=current_peptide)
@@ -374,10 +380,10 @@ class PercolatorReader(Reader):
                     current_alt_proteins = []
                     self.logger.warning(
                         "Peptide {} was not found in the supplied DB with the following proteins {}".format(
-                            current_peptide, ";".join(p.possible_proteins)
+                            current_peptide, ";".join(combined_psm_result_rows.possible_proteins)
                         )
                     )
-                    for poss_prot in p.possible_proteins:
+                    for poss_prot in combined_psm_result_rows.possible_proteins:
                         self.digest_class.peptide_to_protein_dictionary.setdefault(
                             current_peptide, set()
                         ).add(poss_prot)
@@ -398,18 +404,18 @@ class PercolatorReader(Reader):
                 )
 
                 # Restrict to 50 possible proteins
-                p = self._fix_alternative_proteins(
+                combined_psm_result_rows = self._fix_alternative_proteins(
                     append_alt_from_db=self.append_alt_from_db,
                     identifiers_sorted=identifiers_sorted,
                     max_proteins=self.MAX_ALLOWED_ALTERNATIVE_PROTEINS,
-                    psm=p,
+                    psm=combined_psm_result_rows,
                     parameter_file_object=self.parameter_file_object,
                 )
 
                 # Remove blank alt proteins
-                p.possible_proteins = [x for x in p.possible_proteins if x != ""]
+                combined_psm_result_rows.possible_proteins = [x for x in combined_psm_result_rows.possible_proteins if x != ""]
 
-                list_of_psm_objects.append(p)
+                list_of_psm_objects.append(combined_psm_result_rows)
                 peptide_tracker.add(current_peptide)
 
         self.psms = list_of_psm_objects
@@ -781,14 +787,14 @@ class GenericReader(Reader):
             all_files = os.listdir(self.directory)
             all = []
             for files in all_files:
-                p = []
+                psm_per_file = []
                 with open(files, "r") as psm_file:
-                    self.logger.info(self.target_file)
+                    self.logger.info(files)
                     spamreader = csv.reader(psm_file, delimiter="\t")
                     fieldnames = self.remap(next(spamreader))
                     for row in spamreader:
-                        p.append(dict(zip(fieldnames, row)))
-                all = all + p
+                        psm_per_file.append(dict(zip(fieldnames, row)))
+                all = all + psm_per_file
             all_psms = all
 
         psms_all_filtered = []
@@ -854,43 +860,43 @@ class GenericReader(Reader):
             current_peptide = psm_info[self.PEPTIDE]
             # Define the Psm...
             if current_peptide not in peptide_tracker:
-                p = Psm(identifier=current_peptide)
+                psm = Psm(identifier=current_peptide)
                 # Attempt to add variables from PSM info...
                 # If they do not exist in the psm info then we skip...
                 try:
-                    p.percscore = float(psm_info[self.SCORE])
+                    psm.percscore = float(psm_info[self.SCORE])
                 except KeyError:
                     pass
                 try:
-                    p.qvalue = float(psm_info[self.Q_VALUE])
+                    psm.qvalue = float(psm_info[self.Q_VALUE])
                 except KeyError:
                     pass
                 try:
-                    p.pepvalue = float(psm_info[self.POSTERIOR_ERROR_PROB])
+                    psm.pepvalue = float(psm_info[self.POSTERIOR_ERROR_PROB])
                 except KeyError:
                     pass
                 # If user has a custom score IE not q-value or pep_value...
                 if self.load_custom_score:
                     # Then we look for it...
-                    p.custom_score = float(psm_info[self.scoring_variable])
-                p.possible_proteins = []
-                p.possible_proteins.append(psm_info[self.PROTEIN_IDS])
+                    psm.custom_score = float(psm_info[self.scoring_variable])
+                psm.possible_proteins = []
+                psm.possible_proteins.append(psm_info[self.PROTEIN_IDS])
                 for (
                     alternative_protein_keys
                 ) in self.MAX_ALTERNATIVE_PROTEIN_COLUMN_NAMES:
                     try:
                         if psm_info[alternative_protein_keys]:
-                            p.possible_proteins.append(
+                            psm.possible_proteins.append(
                                 psm_info[alternative_protein_keys]
                             )
                     except KeyError:
                         break
                 # Remove potential Repeats
                 if self.parameter_file_object.inference_type != Inference.FIRST_PROTEIN:
-                    p.possible_proteins = list(set(p.possible_proteins))
+                    psm.possible_proteins = list(set(psm.possible_proteins))
 
                 # Get PSM ID
-                p.psm_id = psm_info[self.PSMID]
+                psm.psm_id = psm_info[self.PSMID]
 
                 # Split peptide if flanking
                 current_peptide = Psm.split_peptide(peptide_string=current_peptide)
@@ -910,10 +916,10 @@ class GenericReader(Reader):
                     current_alt_proteins = []
                     self.logger.warning(
                         "Peptide {} was not found in the supplied DB for Proteins {}".format(
-                            current_peptide, ";".join(p.possible_proteins)
+                            current_peptide, ";".join(psm.possible_proteins)
                         )
                     )
-                    for poss_prot in p.possible_proteins:
+                    for poss_prot in psm.possible_proteins:
                         self.digest_class.peptide_to_protein_dictionary.setdefault(
                             current_peptide, set()
                         ).add(poss_prot)
@@ -934,15 +940,15 @@ class GenericReader(Reader):
                 )
 
                 # Restrict to 50 possible proteins
-                p = self._fix_alternative_proteins(
+                psm = self._fix_alternative_proteins(
                     append_alt_from_db=self.append_alt_from_db,
                     identifiers_sorted=identifiers_sorted,
                     max_proteins=self.MAX_ALLOWED_ALTERNATIVE_PROTEINS,
-                    psm=p,
+                    psm=psm,
                     parameter_file_object=self.parameter_file_object,
                 )
 
-                list_of_psm_objects.append(p)
+                list_of_psm_objects.append(psm)
                 peptide_tracker.add(current_peptide)
 
         self.psms = list_of_psm_objects

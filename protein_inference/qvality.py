@@ -28,13 +28,13 @@ class CalculateQandPepValues(Qvality):
         self.uuid_tag = str(self.uuid)
         self.temp_dir = tempfile.gettempdir()
         self.target_score_file = os.path.join(
-            self.temp_dir, "target_scores-" + self.uuid_tag
+            self.temp_dir, "target_scores-{}".format(self.uuid_tag)
         )
         self.decoy_score_file = os.path.join(
-            self.temp_dir, "decoy_scores-" + self.uuid_tag
+            self.temp_dir, "decoy_scores-{}".format(self.uuid_tag)
         )
         self.qvality_output_filename = os.path.join(
-            self.temp_dir, "qvality_output-" + self.uuid_tag
+            self.temp_dir, "qvality_output-{}".format(self.uuid_tag)
         )
 
     def execute(self):
@@ -57,12 +57,10 @@ class CalculateQandPepValues(Qvality):
             for d in decoys:
                 f.write(d + "\n")
         p = subprocess.Popen(
-            "qvality "
-            + self.target_score_file
-            + " "
-            + self.decoy_score_file
-            + " -o "
-            + self.qvality_output_filename,
+            "qvality {} {} -o {}".forat(
+                self.target_score_file,
+                self.decoy_score_file,
+                self.qvality_output_filename),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=True,

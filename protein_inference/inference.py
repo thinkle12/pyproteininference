@@ -44,6 +44,12 @@ class Inference(object):
     GLPK = "glpk"
     LP_SOLVERS = [PULP, GLPK]
 
+
+    ALL_SHARED_PEPTIDES = "all"
+    BEST_SHARED_PEPTIDES = "best"
+    NONE_SHARED_PEPTIDES = None
+    SHARED_PEPTIDE_TYPES = [ALL_SHARED_PEPTIDES, BEST_SHARED_PEPTIDES, NONE_SHARED_PEPTIDES]
+
     def __init__(self, data_class, digest_class):
         """
         Initialization method of Inference object
@@ -1642,6 +1648,68 @@ class Parsimony(Inference):
 
         else:
             raise ValueError("Parsimony cannot run if lp_solver parameter value is not one of the following: {}".format(", ".join(Inference.LP_SOLVERS)))
+
+        # Call assign shared peptides
+        self._assign_shared_peptides(shared_pep_type=self.parameter_file_object.shared_peptides)
+
+
+    def _assign_shared_peptides(self, shared_pep_type="all"):
+
+        logger = getLogger("protein_inference.inference.Parsimony._assign_shared_peptides")
+
+        if not self.data_class.grouped_scored_proteins and self.data_class.protein_group_objects:
+            raise ValueError("Grouped Protein objects could not be found. Please run 'infer_proteins' method of the Parsimony class")
+
+        if shared_pep_type==self.ALL_SHARED_PEPTIDES:
+            pass
+
+        elif shared_pep_type==self.BEST_SHARED_PEPTIDES:
+            logger.info("Assigning Shared Peptides from Parsimony to the Best Scoring Protein")
+            raw_peptide_tracker = set()
+            peptide_tracker = set()
+            for prots in self.data_class.grouped_scored_proteins:
+                new_psms = []
+                new_raw_peptides = set()
+                new_peptides = set()
+                lead_prot = prots[0]
+                for psm in lead_prot.psms:
+                    raw_pep = psm.identifier
+                    pep = psm.non_flanking_peptide
+                    if raw_pep not in raw_peptide_tracker:
+                        new_raw_peptides.add(raw_pep)
+                        raw_peptide_tracker.add(raw_pep)
+                    if pep not in peptide_tracker:
+                        new_peptides.add(pep)
+                        new_psms.append(psm)
+                        peptide_tracker.add(pep)
+                lead_prot.psms = new_psms
+                lead_prot.raw_peptides = new_raw_peptides
+                lead_prot.peptides = new_peptides
+
+            raw_peptide_tracker = set()
+            peptide_tracker = set()
+            for group in self.data_class.protein_group_objects:
+                lead_prot = group.proteins[0]
+                new_psms = []
+                new_raw_peptides = set()
+                new_peptides = set()
+                for psm in lead_prot.psms:
+                    raw_pep = psm.identifier
+                    pep = psm.non_flanking_peptide
+                    if raw_pep not in raw_peptide_tracker:
+                        new_raw_peptides.add(raw_pep)
+                        raw_peptide_tracker.add(raw_pep)
+                    if pep not in peptide_tracker:
+                        new_peptides.add(pep)
+                        new_psms.append(psm)
+                        peptide_tracker.add(pep)
+
+                lead_prot.psms = new_psms
+                lead_prot.raw_peptides = new_raw_peptides
+                lead_prot.peptides = new_peptides
+
+        else:
+            pass
 
 
 class FirstProtein(Inference):

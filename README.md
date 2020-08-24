@@ -2,7 +2,7 @@
 # Py Protein Inference
 ## Requirements
 
-Current version: 0.5.0
+Current version: 0.5.6
 
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__
  2. __Python Packages__:
@@ -54,7 +54,7 @@ Please go through each section below. The sections highlight how to set everythi
 
 ## Yaml Parameter File Outline
 The Yaml Parameter File is the central location for all configurations for a given Protein Inference run and are summarized below:
-For a sample parameter file please see the `parameters/` or `tests/data/` folder and look for `.yaml` files.
+For a sample parameter file please see the `parameters/` or `tests/data/` folder in the repository and look for `.yaml` files.
 ## General:
 | Parameter | Description |Type|
 |---|---|---|
@@ -113,6 +113,8 @@ These parameters are only used if __parsimony__ is selected as __inference_type_
 |---|---|---|
 | lp_solver | This can be one of: __pulp__, __glpk__, __None__. This determines which linear program solver is used. Please see [here](#parsimony-dependancies) for more information on lp solvers. Both options have external dependency requirements. Input __None__ if not running __parsimony__ | String |
 | glpk_path | If glpk is selected as __lp_solver__ input the path to the commandline tool __glpsol__. This is typically just __glpsol__ | String |
+| shared_peptides | How to assign shared peptides for parsimony. Can be one of: __all__ or __best__. __all__ assigns shared peptides to all possible proteins in the output. __best__ assigns shared peptides to the best scoring protein which is a "winner take all" approach. This is specific to the Parsimony Inference type. | String |
+
 
 ## Peptide Centric:
 These parameters are only used if __peptide_centric__ is selected as 
@@ -293,19 +295,19 @@ Py Protein Inference can also be ran via a docker container. To access the docke
 2. Ability to pull the docker image from docker hub
 
 Pulling the image from docker hub:
-`docker pull pyproteininference:0.5.0`
+`docker pull pyproteininference:0.5.6`
 
-It is recommended to pull the image with the highest version number. Currently this is 0.5.0.
+It is recommended to pull the image with the highest version number. Currently this is 0.5.6.
 
 Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
 Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
 See the example below:
-`docker run -v /path/to/data/:/data pyproteininference:0.5.0 protein_inference_cli.py --help -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+`docker run -v /path/to/data/:/data pyproteininference:0.5.6 protein_inference_cli.py --help -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
 
 #### Building the Docker image from source
 Use the following command from the root directory of the source code:
-Here we use version `0.4.3` and tag as that version as well.
-`docker build . -f Dockerfile -t pyproteininference:0.5.0 --build-arg VERSION=0.5.0`
+Here we use version `0.5.6` and tag as that version as well.
+`docker build . -f Dockerfile -t pyproteininference:0.5.6 --build-arg VERSION=0.5.6`
 
 ## Extra Information
 

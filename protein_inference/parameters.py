@@ -147,6 +147,11 @@ class ProteinInferenceParameter(object):
                 "peptide_centric"
             ]["max_identifiers"]
             self.lp_solver = yaml_params["parameters"]["parsimony"]["lp_solver"]
+            try:
+                # Do try except here to make old param files backwards compatible
+                self.shared_peptides = yaml_params["parameters"]["parsimony"]["shared_peptides"]
+            except KeyError:
+                self.shared_peptides = Inference.ALL_SHARED_PEPTIDES
 
         else:
             self.logger.warning(
@@ -459,6 +464,24 @@ class ProteinInferenceParameter(object):
                     )
                 )
 
+    def _validate_parsimony_shared_peptides(self):
+        """
+        Internal ProteinInferenceParameter method to validate the shared peptides parameter
+        """
+        # Check if its all, best, or none
+        if self.shared_peptides in Inference.SHARED_PEPTIDE_TYPES:
+            self.logger.info("Using Shared Peptide types '{}'".format(self.shared_peptides))
+        else:
+            if self.shared_peptides.lower() == "none" or not self.shared_peptides:
+                self.shared_peptides = None
+                self.logger.info("Setting Shared Peptide type to None")
+            else:
+                raise ValueError(
+                    "Shared Peptide types '{}' not supported, please use one of the following Shared Peptide types: '{}'".format(
+                        self.shared_peptides, ", ".join(Inference.SHARED_PEPTIDE_TYPES)
+                    )
+                )
+
     def _validate_identifiers(self):
         """
         Internal ProteinInferenceParameter method to validate the decoy symbol, isoform symbol, and reviewed identifier symbol
@@ -594,6 +617,7 @@ class ProteinInferenceParameter(object):
         self._fix_grouping_type()
         self._fix_glpk_path()
         self._fix_lp_solver()
+        self._fix_shared_peptides()
 
 
     def _fix_grouping_type(self):
@@ -616,3 +640,10 @@ class ProteinInferenceParameter(object):
         """
         if self.lp_solver in ["None", "none", None]:
             self.lp_solver = None
+
+    def _fix_shared_peptides(self):
+        """
+        Internal ProteinInferenceParameter method to override shared_peptides for None value
+        """
+        if self.shared_peptides in ["None", "none", None]:
+            self.shared_peptides = None

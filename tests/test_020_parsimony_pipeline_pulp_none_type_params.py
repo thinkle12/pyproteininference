@@ -28,7 +28,7 @@ DECOY_FILE = resource_filename(
     "protein_inference", "../tests/data/test_perc_data_decoy.txt"
 )
 PARAMETER_FILE = resource_filename(
-    "protein_inference", "../tests/data/test_params_parsimony_glpk_none_types.yaml"
+    "protein_inference", "../tests/data/test_params_parsimony_pulp_none_types.yaml"
 )
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('protein_inference', '../tests/output/')

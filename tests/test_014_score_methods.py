@@ -2,22 +2,22 @@ import tempfile
 from unittest import TestCase
 from pkg_resources import resource_filename
 
-import protein_inference
+import py_protein_inference
 
 TEST_DATABASE = resource_filename(
-    "protein_inference", "../tests/data/test_database.fasta"
+    "py_protein_inference", "../tests/data/test_database.fasta"
 )
 PARAMETER_FILE = resource_filename(
-    "protein_inference", "../tests/data/test_params_inclusion.yaml"
+    "py_protein_inference", "../tests/data/test_params_inclusion.yaml"
 )
 OUTPUT_DIR = tempfile.gettempdir()
-# OUTPUT_DIR = resource_filename('protein_inference', '../tests/output/')
+# OUTPUT_DIR = resource_filename('py_protein_inference', '../tests/output/')
 
 TARGET_FILE = resource_filename(
-    "protein_inference", "../tests/data/test_perc_data_target.txt"
+    "py_protein_inference", "../tests/data/test_perc_data_target.txt"
 )
 DECOY_FILE = resource_filename(
-    "protein_inference", "../tests/data/test_perc_data_decoy.txt"
+    "py_protein_inference", "../tests/data/test_perc_data_decoy.txt"
 )
 
 temp_dir = tempfile.gettempdir()
@@ -28,14 +28,14 @@ class TestScoreMethods(TestCase):
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
-        protein_inference_parameters = protein_inference.parameters.ProteinInferenceParameter(
+        protein_inference_parameters = py_protein_inference.parameters.ProteinInferenceParameter(
             yaml_param_filepath=PARAMETER_FILE
         )
 
         ### STEP 2: Start with running an In Silico Digestion ###
         ### STEP 2: Start with running an In Silico Digestion ###
         ### STEP 2: Start with running an In Silico Digestion ###
-        digest = protein_inference.in_silico_digest.InSilicoDigest(
+        digest = py_protein_inference.in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,
@@ -48,7 +48,7 @@ class TestScoreMethods(TestCase):
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
-        pep_and_prot_data = protein_inference.reader.GenericReader(
+        pep_and_prot_data = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             combined_files=None,
@@ -61,7 +61,7 @@ class TestScoreMethods(TestCase):
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
-        data = protein_inference.datastore.DataStore(
+        data = py_protein_inference.datastore.DataStore(
             pep_and_prot_data, digest_class=digest
         )
 
@@ -78,14 +78,14 @@ class TestScoreMethods(TestCase):
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
         ### Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters.inference_type == protein_inference.inference.Inference.EXCLUSION:
+        if protein_inference_parameters.inference_type == py_protein_inference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
-        score = protein_inference.scoring.Score(data_class=data)
+        score = py_protein_inference.scoring.Score(data_class=data)
         score.score_psms(score_method="best_peptide_per_protein")
         self.assertEqual(data.scored_proteins[0].score, 3.5e-06)
 

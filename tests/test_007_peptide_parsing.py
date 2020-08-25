@@ -10,7 +10,7 @@ import tempfile
 from unittest import TestCase
 from pkg_resources import resource_filename
 
-from protein_inference.physical import Psm
+from py_protein_inference.physical import Psm
 
 
 class TestLoadPeptideParsing(TestCase):

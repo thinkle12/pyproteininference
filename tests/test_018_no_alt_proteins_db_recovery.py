@@ -28,32 +28,6 @@ DECOY_FILE = resource_filename(
 PARAMETER_FILE = resource_filename(
     "protein_inference", "../tests/data/test_params_inclusion.yaml"
 )
-OUTPUT_DIR = tempfile.gettempdir()
-# OUTPUT_DIR = resource_filename('protein_inference', '../tests/output/')
-for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
-    if not os.path.exists(os.path.join(OUTPUT_DIR, sub_dir)):
-        os.makedirs(os.path.join(OUTPUT_DIR, sub_dir))
-
-LEAD_OUTPUT_FILE = resource_filename(
-    "protein_inference",
-    "../tests/output/leads/test_inclusion_q_value_leads_ml_posterior_error_prob.csv",
-)
-ALL_OUTPUT_FILE = resource_filename(
-    "protein_inference",
-    "../tests/output/all/test_inclusion_q_value_all_ml_posterior_error_prob.csv",
-)
-PEPTIDE_OUTPUT_FILE = resource_filename(
-    "protein_inference",
-    "../tests/output/peptides/test_inclusion_q_value_leads_peptides_ml_posterior_error_prob.csv",
-)
-PSM_OUTPUT_FILE = resource_filename(
-    "protein_inference",
-    "../tests/output/psms/test_inclusion_q_value_leads_psms_ml_posterior_error_prob.csv",
-)
-PSM_ID_OUTPUT_FILE = resource_filename(
-    "protein_inference",
-    "../tests/output/psm_ids/test_inclusion_q_value_leads_psm_ids_ml_posterior_error_prob.csv",
-)
 
 IDENTIFIER_INDEX = 0
 SCORE_INDEX = 1

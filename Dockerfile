@@ -43,5 +43,6 @@ COPY requirements.txt /py_protein_inference/
 WORKDIR /py_protein_inference/
 RUN mkdir /glpkinout
 
-RUN pip install -r requirements.txt \
-    && python setup.py install
+RUN pip install -r requirements.txt
+
+RUN python setup.py develop

@@ -10,49 +10,49 @@ import tempfile
 from unittest import TestCase
 from pkg_resources import resource_filename
 
-import protein_inference
-from protein_inference import in_silico_digest
-from protein_inference.parameters import ProteinInferenceParameter
+import py_protein_inference
+from py_protein_inference import in_silico_digest
+from py_protein_inference.parameters import ProteinInferenceParameter
 import os
 import logging
 
 
 TEST_DATABASE = resource_filename(
-    "protein_inference", "../tests/data/test_database.fasta"
+    "py_protein_inference", "../tests/data/test_database.fasta"
 )
 TARGET_FILE = resource_filename(
-    "protein_inference", "../tests/data/test_perc_data_target.txt"
+    "py_protein_inference", "../tests/data/test_perc_data_target.txt"
 )
 DECOY_FILE = resource_filename(
-    "protein_inference", "../tests/data/test_perc_data_decoy.txt"
+    "py_protein_inference", "../tests/data/test_perc_data_decoy.txt"
 )
 PARAMETER_FILE = resource_filename(
-    "protein_inference", "../tests/data/test_params_peptide_centric.yaml"
+    "py_protein_inference", "../tests/data/test_params_peptide_centric.yaml"
 )
 
 TARGET_FILE_ADDITIVE = resource_filename(
-    "protein_inference", "../tests/data/test_perc_data_target_additive.txt"
+    "py_protein_inference", "../tests/data/test_perc_data_target_additive.txt"
 )
 DECOY_FILE_ADDITIVE = resource_filename(
-    "protein_inference", "../tests/data/test_perc_data_decoy_additive.txt"
+    "py_protein_inference", "../tests/data/test_perc_data_decoy_additive.txt"
 )
 
 TARGET_FILE_MULTIPLICATIVE = resource_filename(
-    "protein_inference", "../tests/data/test_perc_data_target_multiplicative.txt"
+    "py_protein_inference", "../tests/data/test_perc_data_target_multiplicative.txt"
 )
 DECOY_FILE_MULTIPLICATIVE = resource_filename(
-    "protein_inference", "../tests/data/test_perc_data_decoy_multiplicative.txt"
+    "py_protein_inference", "../tests/data/test_perc_data_decoy_multiplicative.txt"
 )
 
 PARAMETER_FILE_ADDITIVE = resource_filename(
-    "protein_inference", "../tests/data/test_params_additive_custom_score.yaml"
+    "py_protein_inference", "../tests/data/test_params_additive_custom_score.yaml"
 )
 PARAMETER_FILE_MULTIPLICATIVE = resource_filename(
-    "protein_inference", "../tests/data/test_params_multiplicative_custom_score.yaml"
+    "py_protein_inference", "../tests/data/test_params_multiplicative_custom_score.yaml"
 )
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("protein_inference.tests.test_008_generic_reader.py")
+logger = logging.getLogger("py_protein_inference.tests.test_008_generic_reader.py")
 
 
 class TestReader(TestCase):
@@ -83,7 +83,7 @@ class TestReader(TestCase):
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
-        pep_and_prot_data = protein_inference.reader.GenericReader(
+        pep_and_prot_data = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
@@ -93,7 +93,7 @@ class TestReader(TestCase):
 
         self.assertEqual(len(pep_and_prot_data.psms), 27)
 
-        pep_and_prot_data_perc = protein_inference.reader.PercolatorReader(
+        pep_and_prot_data_perc = py_protein_inference.reader.PercolatorReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
@@ -115,7 +115,7 @@ class TestReader(TestCase):
             self.assertEqual(cur_generic.qvalue, cur_perc.qvalue)
 
         # Test to see if we can read a list of files
-        pep_and_prot_data = protein_inference.reader.GenericReader(
+        pep_and_prot_data = py_protein_inference.reader.GenericReader(
             target_file=[TARGET_FILE, TARGET_FILE],
             decoy_file=[DECOY_FILE, DECOY_FILE],
             parameter_file_object=protein_inference_parameters,
@@ -125,7 +125,7 @@ class TestReader(TestCase):
 
         self.assertEqual(len(pep_and_prot_data.psms), 54)
 
-        pep_and_prot_data_perc = protein_inference.reader.PercolatorReader(
+        pep_and_prot_data_perc = py_protein_inference.reader.PercolatorReader(
             target_file=[TARGET_FILE, TARGET_FILE],
             decoy_file=[DECOY_FILE, DECOY_FILE],
             parameter_file_object=protein_inference_parameters,
@@ -173,7 +173,7 @@ class TestReader(TestCase):
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
-        pep_and_prot_data_add = protein_inference.reader.GenericReader(
+        pep_and_prot_data_add = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE_ADDITIVE,
             decoy_file=DECOY_FILE_ADDITIVE,
             parameter_file_object=protein_inference_parameters_add,
@@ -208,7 +208,7 @@ class TestReader(TestCase):
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
         ### STEP 3: Read PSM Data ###
-        pep_and_prot_data_mult = protein_inference.reader.GenericReader(
+        pep_and_prot_data_mult = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE_MULTIPLICATIVE,
             decoy_file=DECOY_FILE_MULTIPLICATIVE,
             parameter_file_object=protein_inference_parameters_mult,

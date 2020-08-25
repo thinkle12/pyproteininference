@@ -1,4 +1,4 @@
-import protein_inference
+import py_protein_inference
 import argparse
 
 
@@ -38,7 +38,7 @@ parser.add_argument(
     "--output",
     dest="dir_name",
     required=False,
-    help="protein_inference Result Directory to write to - Name of file will be determined by parameters selected and parameter tag",
+    help="Result Directory to write to - Name of file will be determined by parameters selected and parameter tag",
     metavar="DIR",
 )
 parser.add_argument(
@@ -86,7 +86,7 @@ parser.add_argument(
     "--append_alt",
     dest="append_alt",
     required=False,
-    type=protein_inference.pipeline.ProteinInferencePipeline.str2bool,
+    type=py_protein_inference.pipeline.ProteinInferencePipeline.str2bool,
     nargs='?',
     const=True,
     default=True,
@@ -101,7 +101,7 @@ parser.add_argument(
     "--id_splitting",
     dest="id_splitting",
     required=False,
-    type=protein_inference.pipeline.ProteinInferencePipeline.str2bool,
+    type=py_protein_inference.pipeline.ProteinInferencePipeline.str2bool,
     nargs='?',
     const=True,
     default=False,
@@ -123,7 +123,7 @@ def main():
     """
     args = parser.parse_args()
 
-    pipeline = protein_inference.pipeline.ProteinInferencePipeline(
+    pipeline = py_protein_inference.pipeline.ProteinInferencePipeline(
         parameter_file=args.yaml_params,
         database_file=args.database,
         target_files=args.target,

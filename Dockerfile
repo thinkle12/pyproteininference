@@ -27,21 +27,22 @@ WORKDIR /
 
 # Install Py Protein Inference
 # Make directory to store source
-RUN mkdir /protein_inference
+RUN mkdir /py_protein_inference
 
 # copy the entire protein_inference directory into the docker image
-COPY /protein_inference /protein_inference/protein_inference/
-COPY /tests /protein_inference/tests/
-COPY setup.cfg /protein_inference/
-COPY setup.py /protein_inference/
-COPY /parameters /protein_inference/parameters/
-COPY /scripts /protein_inference/scripts/
-COPY .git /protein_inference/.git/
-COPY README.md /protein_inference/
-COPY requirements.txt /protein_inference/
+COPY /py_protein_inference /py_protein_inference/py_protein_inference/
+COPY /tests /py_protein_inference/tests/
+COPY setup.cfg /py_protein_inference/
+COPY setup.py /py_protein_inference/
+COPY /parameters /py_protein_inference/parameters/
+COPY /scripts /py_protein_inference/scripts/
+COPY .git /py_protein_inference/.git/
+COPY README.md /py_protein_inference/
+COPY requirements.txt /py_protein_inference/
 
-WORKDIR /protein_inference/
+WORKDIR /py_protein_inference/
 RUN mkdir /glpkinout
 
-RUN pip install -r requirements.txt \
-    && python setup.py install
+RUN pip install -r requirements.txt
+
+RUN python setup.py develop

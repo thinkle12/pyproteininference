@@ -87,7 +87,7 @@ class InSilicoDigest(Digest):
         Raises:
             ValueError: If arg digest_type is not in :attr:`LIST_OF_DIGEST_TYPES`
         Example:
-            >>> digest = protein_inference.in_silico_digest.InSilicoDigest(
+            >>> digest = py_protein_inference.in_silico_digest.InSilicoDigest(
             >>>     database_path=database_file,
             >>>     digest_type='trypsin',
             >>>     missed_cleavages=2,
@@ -110,7 +110,7 @@ class InSilicoDigest(Digest):
             raise ValueError(
                 "digest_type must be equal to one of the following {}".format(str(self.LIST_OF_DIGEST_TYPES))
             )
-        self.logger = getLogger("protein_inference.in_silico_digest.InSilicoDigest")
+        self.logger = getLogger("py_protein_inference.in_silico_digest.InSilicoDigest")
         self.max_peptide_length = max_peptide_length
 
     def digest(self, proseq, miss_cleavage):
@@ -277,7 +277,7 @@ class InSilicoDigest(Digest):
             None
 
         Example:
-            >>> digest = protein_inference.in_silico_digest.InSilicoDigest(
+            >>> digest = py_protein_inference.in_silico_digest.InSilicoDigest(
             >>>     database_path=database_file,
             >>>     digest_type='trypsin',
             >>>     missed_cleavages=2,
@@ -347,7 +347,7 @@ class PyteomicsDigest(Digest):
                 Keep as False unless you know what you are doing
 
         Example:
-            >>> digest = protein_inference.in_silico_digest.PyteomicsDigest(
+            >>> digest = py_protein_inference.in_silico_digest.PyteomicsDigest(
             >>>     database_path=database_file,
             >>>     digest_type='trypsin',
             >>>     missed_cleavages=2,
@@ -369,7 +369,7 @@ class PyteomicsDigest(Digest):
             raise ValueError(
                 "digest_type must be equal to one of the following {}".format(str(self.LIST_OF_DIGEST_TYPES))
             )
-        self.logger = getLogger("protein_inference.in_silico_digest.PyteomicsDigest")
+        self.logger = getLogger("py_protein_inference.in_silico_digest.PyteomicsDigest")
         self.max_peptide_length = max_peptide_length
 
     def digest_fasta_database(self):
@@ -381,7 +381,7 @@ class PyteomicsDigest(Digest):
             None
 
         Example:
-            >>> digest = protein_inference.in_silico_digest.PyteomicsDigest(
+            >>> digest = py_protein_inference.in_silico_digest.PyteomicsDigest(
             >>>     database_path=database_file,
             >>>     digest_type='trypsin',
             >>>     missed_cleavages=2,

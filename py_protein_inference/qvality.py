@@ -17,7 +17,7 @@ class CalculateQandPepValues(Qvality):
 
     Input is a DataStore object
 
-    Example: protein_inference.qvality.CalculateQandPepValues(data_class = data)
+    Example: py_protein_inference.qvality.CalculateQandPepValues(data_class = data)
 
     """
 
@@ -38,7 +38,7 @@ class CalculateQandPepValues(Qvality):
         )
 
     def execute(self):
-        logger = getLogger("protein_inference.qvality.CalculateQandPepValues.execute")
+        logger = getLogger("py_protein_inference.qvality.CalculateQandPepValues.execute")
 
         # Need to generate UUIDs for the filenames... because we are going to delete all of them...
         targets = []

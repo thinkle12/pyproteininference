@@ -5,45 +5,42 @@ Created on Tue Dec  5 16:16:17 2017
 
 @author: hinklet
 """
-import csv
-import tempfile
 from unittest import TestCase
 from pkg_resources import resource_filename
 
-import protein_inference
-from protein_inference import in_silico_digest
-from protein_inference.parameters import ProteinInferenceParameter
-import os
+import py_protein_inference
+from py_protein_inference import in_silico_digest
+from py_protein_inference.parameters import ProteinInferenceParameter
 import logging
 
 
 TEST_DATABASE = resource_filename(
-    "protein_inference", "../tests/data/test_database.fasta"
+    "py_protein_inference", "../tests/data/test_database.fasta"
 )
 
 TARGET_FILE_MULTIPLICATIVE = resource_filename(
-    "protein_inference", "../tests/data/test_perc_data_target_multiplicative.txt"
+    "py_protein_inference", "../tests/data/test_perc_data_target_multiplicative.txt"
 )
 DECOY_FILE_MULTIPLICATIVE = resource_filename(
-    "protein_inference", "../tests/data/test_perc_data_decoy_multiplicative.txt"
+    "py_protein_inference", "../tests/data/test_perc_data_decoy_multiplicative.txt"
 )
 PARAMETER_FILE_MULTIPLICATIVE = resource_filename(
-    "protein_inference", "../tests/data/test_params_multiplicative_custom_score.yaml"
+    "py_protein_inference", "../tests/data/test_params_multiplicative_custom_score.yaml"
 )
 
 TARGET_FILE_ADDITIVE = resource_filename(
-    "protein_inference", "../tests/data/test_perc_data_target_additive.txt"
+    "py_protein_inference", "../tests/data/test_perc_data_target_additive.txt"
 )
 DECOY_FILE_ADDITIVE = resource_filename(
-    "protein_inference", "../tests/data/test_perc_data_decoy_additive.txt"
+    "py_protein_inference", "../tests/data/test_perc_data_decoy_additive.txt"
 )
 PARAMETER_FILE_ADDITIVE = resource_filename(
-    "protein_inference", "../tests/data/test_params_additive_custom_score.yaml"
+    "py_protein_inference", "../tests/data/test_params_additive_custom_score.yaml"
 )
 
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("protein_inference.tests.test_019_custom_score_restrict")
+logger = logging.getLogger("py_protein_inference.tests.test_019_custom_score_restrict")
 
 
 class TestCustomRestrict(TestCase):
@@ -68,7 +65,7 @@ class TestCustomRestrict(TestCase):
         )
         digest.digest_fasta_database()
 
-        pep_and_prot_data = protein_inference.reader.GenericReader(
+        pep_and_prot_data = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE_MULTIPLICATIVE,
             decoy_file=DECOY_FILE_MULTIPLICATIVE,
             parameter_file_object=protein_inference_parameters,
@@ -78,7 +75,7 @@ class TestCustomRestrict(TestCase):
 
         self.assertEqual(len(pep_and_prot_data.psms), 27)
 
-        data = protein_inference.datastore.DataStore(
+        data = py_protein_inference.datastore.DataStore(
             pep_and_prot_data, digest_class=digest
         )
 
@@ -112,7 +109,7 @@ class TestCustomRestrict(TestCase):
         )
         digest.digest_fasta_database()
 
-        pep_and_prot_data = protein_inference.reader.GenericReader(
+        pep_and_prot_data = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE_ADDITIVE,
             decoy_file=DECOY_FILE_ADDITIVE,
             parameter_file_object=protein_inference_parameters,
@@ -122,7 +119,7 @@ class TestCustomRestrict(TestCase):
 
         self.assertEqual(len(pep_and_prot_data.psms), 27)
 
-        data = protein_inference.datastore.DataStore(
+        data = py_protein_inference.datastore.DataStore(
             pep_and_prot_data, digest_class=digest
         )
 

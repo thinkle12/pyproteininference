@@ -9,8 +9,8 @@ class Protein(object):
 
     Attributes:
         identifier (str): String identifier for the Protein object
-        score (float): Float that represents the protein score as output from :py:class:`protein_inference.scoring.Score` methods
-        psms (list): List of :py:class:`protein_inference.physical.Psm` objects
+        score (float): Float that represents the protein score as output from :py:class:`py_protein_inference.scoring.Score` methods
+        psms (list): List of :py:class:`py_protein_inference.physical.Psm` objects
         group_identification (set): Set of group Identifiers that the protein belongs to (int)
         reviewed (bool): True/False on if the identifier is reviewed
         unreviewed (bool): True/False on if the identifier is reviewed
@@ -48,7 +48,7 @@ class Protein(object):
             identifier (str): String identifier for the Protein object
 
         Example:
-            >>> protein = protein_inference.physical.Protein(identifier = "PRKDC_HUMAN|P78527")
+            >>> protein = py_protein_inference.physical.Protein(identifier = "PRKDC_HUMAN|P78527")
 
         """
         self.identifier = identifier
@@ -206,7 +206,7 @@ class Psm(object):
         identifier (str): Peptide Identifier: IE ""K.DLIDEGH#AATQLVNQLHDVVVENNLSDK.Q"
 
         Example:
-            >>> psm = protein_inference.physical.Psm(identifier = "K.DLIDEGHAATQLVNQLHDVVVENNLSDK.Q")
+            >>> psm = py_protein_inference.physical.Psm(identifier = "K.DLIDEGHAATQLVNQLHDVVVENNLSDK.Q")
 
         """
         self.identifier = identifier
@@ -335,8 +335,8 @@ class ProteinGroup(object):
 
     Attributes:
         number_id (int): unique Integer to represent a group
-        proteins (list): List of :py:class:`protein_inference.physical.Protein` objects
-        q_value (float): Q value for the protein group that is calculated with method :py:meth:`protein_inference.datastore.DataStore.calculate_q_values`
+        proteins (list): List of :py:class:`py_protein_inference.physical.Protein` objects
+        q_value (float): Q value for the protein group that is calculated with method :py:meth:`py_protein_inference.datastore.DataStore.calculate_q_values`
 
     """
 
@@ -350,7 +350,7 @@ class ProteinGroup(object):
             number_id (int): unique Integer to represent a group
 
         Example:
-            >>> pg = protein_inference.physical.ProteinGroup(number_id = 1)
+            >>> pg = py_protein_inference.physical.ProteinGroup(number_id = 1)
         """
 
         self.proteins = []

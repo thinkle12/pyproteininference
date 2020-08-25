@@ -8,7 +8,7 @@ class Export(object):
     Class that handles exporting protein inference results to filesystem as csv files
 
     Attributes:
-        data_class (protein_inference.datastore.DataStore): Data Class
+        data_class (py_protein_inference.datastore.DataStore): Data Class
         filepath (str): Path to file to be written
 
     """
@@ -39,10 +39,10 @@ class Export(object):
         Initialization method for the Export class
 
         Args:
-            data_class (protein_inference.datastore.DataStore): Data Class
+            data_class (py_protein_inference.datastore.DataStore): Data Class
 
         Example:
-            >>> export = protein_inference.export.Export(data_class=data)
+            >>> export = py_protein_inference.export.Export(data_class=data)
 
         """
         self.data_class = data_class
@@ -52,7 +52,7 @@ class Export(object):
         """
         Method that dispatches to one of the many export methods given an export_type input
 
-        filepath is determined based on directory arg and information from data_class :py:class:`protein_inference.datastore.DataStore`
+        filepath is determined based on directory arg and information from data_class :py:class:`py_protein_inference.datastore.DataStore`
 
         This method sets the :attr:`filepath` variable.
 
@@ -61,11 +61,11 @@ class Export(object):
             export_type (str): Must be a value in :attr:`EXPORT_TYPES` and determines the output format
 
         Example:
-            >>> export = protein_inference.export.Export(data_class=data)
+            >>> export = py_protein_inference.export.Export(data_class=data)
             >>> export.export_to_csv(directory="/path/to/output/dir/", export_type="psms")
 
         """
-        logger = getLogger("protein_inference.export.Export.export_to_csv")
+        logger = getLogger("py_protein_inference.export.Export.export_to_csv")
 
         if not directory:
             directory = os.getcwd()

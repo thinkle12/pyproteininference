@@ -7,23 +7,23 @@ from logging import getLogger
 
 class Score(object):
     """
-    Score class that contains methods to do a variety of scoring methods on the :py:class:`protein_inference.physical.Psm` objects
-    contained inside of :py:class:`protein_inference.physical.Protein` objects
+    Score class that contains methods to do a variety of scoring methods on the :py:class:`py_protein_inference.physical.Psm` objects
+    contained inside of :py:class:`py_protein_inference.physical.Protein` objects
 
     Methods in the class loop over each Protein object and creates a protein "score" variable using the Psm object scores.
 
-    Methods score all proteins from :attr:`scoring_input` from :py:class:`protein_inference.datastore.DataStore`.
-    The PSM score that is used is determined from :py:meth:`protein_inference.datastore.DataStore.create_scoring_input`
+    Methods score all proteins from :attr:`scoring_input` from :py:class:`py_protein_inference.datastore.DataStore`.
+    The PSM score that is used is determined from :py:meth:`py_protein_inference.datastore.DataStore.create_scoring_input`
 
-    Each scoring method will set the following attributes for :py:class:`protein_inference.datastore.DataStore`
+    Each scoring method will set the following attributes for :py:class:`py_protein_inference.datastore.DataStore`
 
     1. attr:`score_method`; This is the full name of the score method
     2. attr:`short_score_method`; This is the short name of the score method
-    3. attr:`scored_proteins`; This is a list of :py:class:`protein_inference.physical.Protein` objects that have been scored
+    3. attr:`scored_proteins`; This is a list of :py:class:`py_protein_inference.physical.Protein` objects that have been scored
 
     Attributes:
-        pre_score_data (list): This is a list of :py:class:`protein_inference.physical.Protein` objects that contain :py:class:`protein_inference.physical.Psm` objects
-        data_class (protein_inference.datastore.DataStore): Data class object
+        pre_score_data (list): This is a list of :py:class:`py_protein_inference.physical.Protein` objects that contain :py:class:`py_protein_inference.physical.Psm` objects
+        data_class (py_protein_inference.datastore.DataStore): Data class object
 
     """
 
@@ -77,13 +77,13 @@ class Score(object):
         Initialization method for the Score class
 
         Args:
-            data_class (protein_inference.datastore.DataStore): Data class object
+            data_class (py_protein_inference.datastore.DataStore): Data class object
 
         Raises:
-            ValueError: If the variable :attr:`scoring_input` for :py:class:`protein_inference.datastore.DataStore` is Empty "[]" or does not exist "None"
+            ValueError: If the variable :attr:`scoring_input` for :py:class:`py_protein_inference.datastore.DataStore` is Empty "[]" or does not exist "None"
 
         Examples:
-            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score = py_protein_inference.scoring.Score(data_class=data)
         """
         if data_class.scoring_input:
             self.pre_score_data = data_class.scoring_input
@@ -95,7 +95,7 @@ class Score(object):
 
     def score_psms(self, score_method="multiplicative_log"):
         """
-        This method dispatches to the actual scoring method given a string input that is defined in :py:class:`protein_inference.parameters.ProteinInferenceParameter`
+        This method dispatches to the actual scoring method given a string input that is defined in :py:class:`py_protein_inference.parameters.ProteinInferenceParameter`
 
         Args:
             score_method (str): This is a string that represents which scoring method to call.
@@ -104,7 +104,7 @@ class Score(object):
             ValueError: Will Error out if the score_method is not present in the constant :attr:`SCORE_METHODS`
 
         Examples:
-            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score = py_protein_inference.scoring.Score(data_class=data)
             >>> score.score_psms(score_method="best_peptide_per_protein")
         """
 
@@ -136,11 +136,11 @@ class Score(object):
         The top scoring Psm for each protein is selected as the overall Protein object score
 
         Examples:
-            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score = py_protein_inference.scoring.Score(data_class=data)
             >>> score.best_peptide_per_protein()
 
          """
-        logger = getLogger("protein_inference.scoring.Score.best_peptide_per_protein")
+        logger = getLogger("py_protein_inference.scoring.Score.best_peptide_per_protein")
 
         all_scores = []
 
@@ -164,11 +164,11 @@ class Score(object):
         This method uses a fishers method scoring scheme
 \
         Examples:
-            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score = py_protein_inference.scoring.Score(data_class=data)
             >>> score.fishers_method()
 
          """
-        logger = getLogger("protein_inference.scoring.Score.fishers_method")
+        logger = getLogger("py_protein_inference.scoring.Score.fishers_method")
 
         all_scores = []
         logger.info("Scoring Proteins with fishers method")
@@ -191,10 +191,10 @@ class Score(object):
         The selected Psm score from all the peptides per protein are multiplied together and we take -Log(X) of the multiplied Peptide scores
 
         Examples:
-            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score = py_protein_inference.scoring.Score(data_class=data)
             >>> score.multiplicative_log()
          """
-        logger = getLogger("protein_inference.scoring.Score.multiplicative_log")
+        logger = getLogger("py_protein_inference.scoring.Score.multiplicative_log")
 
         # Instead of making all_scores a list... make it a generator??
 
@@ -228,11 +228,11 @@ class Score(object):
         then we take -Log(X) of the following value
 
         Examples:
-            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score = py_protein_inference.scoring.Score(data_class=data)
             >>> score.down_weighted_multiplicative_log()
          """
         logger = getLogger(
-            "protein_inference.scoring.Score.down_weighted_multiplicative_log"
+            "py_protein_inference.scoring.Score.down_weighted_multiplicative_log"
         )
 
         score_list = []
@@ -270,10 +270,10 @@ class Score(object):
         If a protein only has 1 score/peptide, then we only do -Log(X) of the 1 peptide score
 
         Examples:
-            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score = py_protein_inference.scoring.Score(data_class=data)
             >>> score.top_two_combied()
          """
-        logger = getLogger("protein_inference.scoring.Score.top_two_combied")
+        logger = getLogger("py_protein_inference.scoring.Score.top_two_combied")
 
         all_scores = []
         logger.info("Scoring Proteins with Top Two Method")
@@ -308,10 +308,10 @@ class Score(object):
         We also take -Log(X) of the final score here
 
         Examples:
-            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score = py_protein_inference.scoring.Score(data_class=data)
             >>> score.down_weighted_v2()
          """
-        logger = getLogger("protein_inference.scoring.Score.down_weighted_v2")
+        logger = getLogger("py_protein_inference.scoring.Score.down_weighted_v2")
 
         all_scores = []
         logger.info("Scoring Proteins with down weighted v2 method")
@@ -345,11 +345,11 @@ class Score(object):
         We also take -Log(X) of the final score here
 
         Examples:
-            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score = py_protein_inference.scoring.Score(data_class=data)
             >>> score.iterative_down_weighted_log()
          """
         logger = getLogger(
-            "protein_inference.scoring.Score.iterative_down_weighted_log"
+            "py_protein_inference.scoring.Score.iterative_down_weighted_log"
         )
 
         all_scores = []
@@ -386,10 +386,10 @@ class Score(object):
         We also take -Log(X) of the final score here
 
         Examples:
-            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score = py_protein_inference.scoring.Score(data_class=data)
             >>> score.geometric_mean_log()
          """
-        logger = getLogger("protein_inference.scoring.Score.geometric_mean_log")
+        logger = getLogger("py_protein_inference.scoring.Score.geometric_mean_log")
 
         all_scores = []
         logger.info("Scoring Proteins. with GML method")
@@ -418,7 +418,7 @@ class Score(object):
         """
         The following method is an experimental method essentially used for future development of potential scoring schemes
         """
-        logger = getLogger("protein_inference.scoring.Score.iterative_down_weighted_v2")
+        logger = getLogger("py_protein_inference.scoring.Score.iterative_down_weighted_v2")
 
         all_scores = []
         logger.info("Scoring Proteins with iterative down weighted v2 method")
@@ -448,10 +448,10 @@ class Score(object):
         The method can only be used if a larger PSM score is a better PSM score such as the Percolator score.
 
         Examples:
-            >>> score = protein_inference.scoring.Score(data_class=data)
+            >>> score = py_protein_inference.scoring.Score(data_class=data)
             >>> score.additive()
          """
-        logger = getLogger("protein_inference.scoring.Score.additive")
+        logger = getLogger("py_protein_inference.scoring.Score.additive")
 
         all_scores = []
         logger.info("Scoring Proteins with additive method")

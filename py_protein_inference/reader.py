@@ -1,8 +1,8 @@
 import os
-from protein_inference.physical import Psm
-from protein_inference.datastore import DataStore
-from protein_inference.inference import Inference
-from protein_inference.scoring import Score
+from py_protein_inference.physical import Psm
+from py_protein_inference.datastore import DataStore
+from py_protein_inference.inference import Inference
+from py_protein_inference.scoring import Score
 import csv
 import itertools
 from logging import getLogger
@@ -90,17 +90,17 @@ class Reader(object):
         parameter_file_object,
     ):
         """
-        Internal method to fix the alternative proteins variable for a given :py:class:`protein_inference.physical.Psm` object
+        Internal method to fix the alternative proteins variable for a given :py:class:`py_protein_inference.physical.Psm` object
 
         Args:
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
             identifiers_sorted (list): List of sorted Protein Strings for the given Psm
-            max_proteins (int): Maximum number of proteins that a :py:class:`protein_inference.physical.Psm` is allowed to map to
-            psm: (protein_inference.physical.Psm): Psm object of interest
-            parameter_file_object: (protein_inference.parameters.ProteinInferenceParameter): Protein Inference Parameter Pbject
+            max_proteins (int): Maximum number of proteins that a :py:class:`py_protein_inference.physical.Psm` is allowed to map to
+            psm: (py_protein_inference.physical.Psm): Psm object of interest
+            parameter_file_object: (py_protein_inference.parameters.ProteinInferenceParameter): Protein Inference Parameter Pbject
 
         Returns:
-            protein_inference.physical.Psm: Psm with alternative proteins fixed
+            py_protein_inference.physical.Psm: Psm with alternative proteins fixed
 
         """
         # If we are appending alternative proteins from the db
@@ -131,8 +131,8 @@ class Reader(object):
 
 class PercolatorReader(Reader):
     """
-    The following class takes a percolator target file and a percolator decoy file  or combined files/directory and creates standard :py:class:`protein_inference.physical.Psm` objects.
-    This reader class is used as input for :py:class:`protein_inference.datastore.DataStore`
+    The following class takes a percolator target file and a percolator decoy file  or combined files/directory and creates standard :py:class:`py_protein_inference.physical.Psm` objects.
+    This reader class is used as input for :py:class:`py_protein_inference.datastore.DataStore`
 
     Percolator Output is formatted as follows:
     with each entry being tabbed delimited
@@ -150,7 +150,7 @@ class PercolatorReader(Reader):
         posterior_error_prob_index (int): Index of the posterior error probability from the input files
         peptide_index (int): Index of the peptides from the input files
         proteinIDs_index (int): Index of the proteins from the input files
-        psms (list): List of :py:class:`protein_inference.physical.Psm` objects
+        psms (list): List of :py:class:`py_protein_inference.physical.Psm` objects
         logger (logger.logging): Logger object
 
     """
@@ -175,8 +175,8 @@ class PercolatorReader(Reader):
         """
 
         Args:
-            digest_class (protein_inference.in_silico_digest.Digest):
-            parameter_file_object (protein_inference.parameters.ProteinInferenceParameter):
+            digest_class (py_protein_inference.in_silico_digest.Digest):
+            parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
             target_file (str/list): Path to Target PSM result files
             decoy_file (str/list): Path to Decoy PSM result files
@@ -187,7 +187,7 @@ class PercolatorReader(Reader):
             object:
 
         Example:
-            >>> protein_inference.reader.PercolatorReader(target_file = "example_target.txt",
+            >>> py_protein_inference.reader.PercolatorReader(target_file = "example_target.txt",
             >>>     decoy_file = "example_decoy.txt", digest_class=digest,parameter_file_object=pi_params)
         """
         self.target_file = target_file
@@ -203,18 +203,18 @@ class PercolatorReader(Reader):
         self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
-        self.logger = getLogger("protein_inference.reader.PercolatorReader.read_psms")
+        self.logger = getLogger("py_protein_inference.reader.PercolatorReader.read_psms")
 
     def read_psms(self):
         """
-        Method to read psms from the input files and to transform them into a list of :py:class:`protein_inference.physical.Psm` objects
+        Method to read psms from the input files and to transform them into a list of :py:class:`py_protein_inference.physical.Psm` objects
 
         This method sets the :attr:`psms` variable. Which is a list of Psm objets
 
-        This method must be ran before initializing :py:class:`protein_inference.datastore.DataStore`
+        This method must be ran before initializing :py:class:`py_protein_inference.datastore.DataStore`
 
         Example:
-            >>> reader = protein_inference.reader.PercolatorReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt",
+            >>> reader = py_protein_inference.reader.PercolatorReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt",
             >>>     digest_class=digest, parameter_file_object=pi_params)
             >>> reader.read_psms()
 
@@ -433,8 +433,8 @@ class ProteologicPostSearchReader(Reader):
         proteologic_object (list): List of proteologic post search objects
         search_id (int): Search ID or Search IDs associated with the data
         postsearch_id: PostSearch ID or PostSearch IDs associated with the data
-        digest_class (protein_inference.in_silico_digest.Digest):
-        parameter_file_object (protein_inference.parameters.ProteinInferenceParameter):
+        digest_class (py_protein_inference.in_silico_digest.Digest):
+        parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
         append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
         logger (logger.logging): Logger object
 
@@ -455,8 +455,8 @@ class ProteologicPostSearchReader(Reader):
             proteologic_object (list): List of proteologic post search objects
             search_id (int): Search ID or Search IDs associated with the data
             postsearch_id: PostSearch ID or PostSearch IDs associated with the data
-            digest_class (protein_inference.in_silico_digest.Digest):
-            parameter_file_object (protein_inference.parameters.ProteinInferenceParameter):
+            digest_class (py_protein_inference.in_silico_digest.Digest):
+            parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
 
 
@@ -473,16 +473,16 @@ class ProteologicPostSearchReader(Reader):
 
         self.parameter_file_object = parameter_file_object
         self.logger = getLogger(
-            "protein_inference.reader.ProteologicPostSearchReader.read_psms"
+            "py_protein_inference.reader.ProteologicPostSearchReader.read_psms"
         )
 
     def read_psms(self):
         """
-        Method to read psms from the input files and to transform them into a list of :py:class:`protein_inference.physical.Psm` objects
+        Method to read psms from the input files and to transform them into a list of :py:class:`py_protein_inference.physical.Psm` objects
 
         This method sets the :attr:`psms` variable. Which is a list of Psm objets
 
-        This method must be ran before initializing :py:class:`protein_inference.datastore.DataStore`
+        This method must be ran before initializing :py:class:`py_protein_inference.datastore.DataStore`
 
         """
         self.logger.info("Reading in data from Proteologic...")
@@ -588,7 +588,7 @@ class ProteologicPostSearchReader(Reader):
 
 class GenericReader(Reader):
     """
-    The following class takes a percolator like target file and a percolator like decoy file and creates standard :py:class:`protein_inference.physical.Psm` objects.
+    The following class takes a percolator like target file and a percolator like decoy file and creates standard :py:class:`py_protein_inference.physical.Psm` objects.
 
     Percolator Like Output is formatted as follows:
     with each entry being tabbed delimited
@@ -602,12 +602,12 @@ class GenericReader(Reader):
         decoy_file (str/list): Path to Decoy PSM result files
         combined_files (str/list): Path to Combined PSM result files
         directory (str): Path to directory containing combined PSM result files
-        psms (list): List of :py:class:`protein_inference.physical.Psm` objects
+        psms (list): List of :py:class:`py_protein_inference.physical.Psm` objects
         logger (logger.logging): Logger object
         load_custom_score (bool): True/False on whether or not to load a custom score. Depends on scoring_variable
         scoring_variable (str): String to indicate which column in the input file is to be used as the scoring input
-        digest_class (protein_inference.in_silico_digest.Digest):
-        parameter_file_object (protein_inference.parameters.ProteinInferenceParameter):
+        digest_class (py_protein_inference.in_silico_digest.Digest):
+        parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
         append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
 
 
@@ -635,8 +635,8 @@ class GenericReader(Reader):
         """
 
         Args:
-            digest_class (protein_inference.in_silico_digest.Digest):
-            parameter_file_object (protein_inference.parameters.ProteinInferenceParameter):
+            digest_class (py_protein_inference.in_silico_digest.Digest):
+            parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
             target_file (str/list): Path to Target PSM result files
             decoy_file (str/list): Path to Decoy PSM result files
@@ -647,7 +647,7 @@ class GenericReader(Reader):
             object:
 
         Example:
-            >>> protein_inference.reader.GenericReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt",
+            >>> py_protein_inference.reader.GenericReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt",
             >>>     digest_class=digest, parameter_file_object=pi_params)
         """
         self.target_file = target_file
@@ -666,7 +666,7 @@ class GenericReader(Reader):
         self.parameter_file_object = parameter_file_object
         self.scoring_variable = parameter_file_object.psm_score
 
-        self.logger = getLogger("protein_inference.reader.GenericReader.read_psms")
+        self.logger = getLogger("py_protein_inference.reader.GenericReader.read_psms")
 
         if (
             self.scoring_variable != self.Q_VALUE
@@ -697,14 +697,14 @@ class GenericReader(Reader):
 
     def read_psms(self):
         """
-        Method to read psms from the input files and to transform them into a list of :py:class:`protein_inference.physical.Psm` objects
+        Method to read psms from the input files and to transform them into a list of :py:class:`py_protein_inference.physical.Psm` objects
 
         This method sets the :attr:`psms` variable. Which is a list of Psm objets
 
-        This method must be ran before initializing :py:class:`protein_inference.datastore.DataStore`
+        This method must be ran before initializing :py:class:`py_protein_inference.datastore.DataStore`
 
         Example:
-            >>> reader = protein_inference.reader.GenericReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt",
+            >>> reader = py_protein_inference.reader.GenericReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt",
             >>>     digest_class=digest, parameter_file_object=pi_params)
             >>> reader.read_psms()
 

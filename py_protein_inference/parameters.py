@@ -166,7 +166,7 @@ class ProteinInferenceParameter(object):
             self.restrict_pep = 0.9
             self.restrict_peptide_length = 7
             self.restrict_q = 0.005
-            self.restrict_custom = None
+            self.restrict_custom = "None"
             self.protein_score = "multiplicative_log"
             self.psm_score = "posterior_error_prob"
             self.decoy_symbol = "##"
@@ -178,6 +178,7 @@ class ProteinInferenceParameter(object):
             self.grouping_type = "shared_peptides"
             self.max_identifiers_peptide_centric = 5
             self.lp_solver = "pulp"
+            self.shared_peptides = "all"
 
     def validate_parameters(self):
         """
@@ -200,6 +201,7 @@ class ProteinInferenceParameter(object):
         self._validate_max_id()
         self._validate_lp_solver()
         self._validate_identifiers()
+        self._validate_parsimony_shared_peptides()
 
     def _validate_digest_type(self):
         """
@@ -424,7 +426,7 @@ class ProteinInferenceParameter(object):
 
                 raise ValueError(
                     "Grouping Type '{}' not supported, please use one of the following Grouping Types: '{}'".format(
-                        self.grouping_type, ", ".join(Inference.GROUPING_TYPES)
+                        self.grouping_type, Inference.GROUPING_TYPES
                     )
                 )
 
@@ -478,7 +480,7 @@ class ProteinInferenceParameter(object):
             else:
                 raise ValueError(
                     "Shared Peptide types '{}' not supported, please use one of the following Shared Peptide types: '{}'".format(
-                        self.shared_peptides, ", ".join(Inference.SHARED_PEPTIDE_TYPES)
+                        self.shared_peptides, Inference.SHARED_PEPTIDE_TYPES
                     )
                 )
 

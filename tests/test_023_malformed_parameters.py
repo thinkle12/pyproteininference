@@ -391,5 +391,166 @@ class TestMalformedParameters(TestCase):
         self.assertEqual(protein_inference_parameters.shared_peptides, "all")
 
 
+    def test_faulty_shaped_parameters(self):
 
+        # Read params with pyyaml
+        with open(PARAMETER_FILE, "r") as stream:
+            yaml_params = yaml.load(stream, Loader=yaml.Loader)
 
+        # Edit the params to something incorrect...
+        edited_yaml_params = yaml_params
+        edited_yaml_params["parameters"]["general"].pop('fdr', None)
+
+        # Rewrite the params...
+        with open(NEW_PARAMETER_FILE, 'w') as file:
+             new_params = yaml.dump(edited_yaml_params, file)
+
+        # Re-read the params with ProteinInferenceParameter...
+        with self.assertRaises(ValueError):
+            protein_inference_parameters = ProteinInferenceParameter(
+                yaml_param_filepath=NEW_PARAMETER_FILE
+            )
+
+        # Read params with pyyaml
+        with open(PARAMETER_FILE, "r") as stream:
+            yaml_params = yaml.load(stream, Loader=yaml.Loader)
+
+        # Edit the params to something incorrect...
+        edited_yaml_params = yaml_params
+        edited_yaml_params["parameters"]["data_restriction"].pop('pep_restriction', None)
+
+        # Rewrite the params...
+        with open(NEW_PARAMETER_FILE, 'w') as file:
+             new_params = yaml.dump(edited_yaml_params, file)
+
+        # Re-read the params with ProteinInferenceParameter...
+        with self.assertRaises(ValueError):
+            protein_inference_parameters = ProteinInferenceParameter(
+                yaml_param_filepath=NEW_PARAMETER_FILE
+            )
+
+        # Read params with pyyaml
+        with open(PARAMETER_FILE, "r") as stream:
+            yaml_params = yaml.load(stream, Loader=yaml.Loader)
+
+        # Edit the params to something incorrect...
+        edited_yaml_params = yaml_params
+        edited_yaml_params["parameters"]["score"].pop('protein_score', None)
+
+        # Rewrite the params...
+        with open(NEW_PARAMETER_FILE, 'w') as file:
+             new_params = yaml.dump(edited_yaml_params, file)
+
+        # Re-read the params with ProteinInferenceParameter...
+        with self.assertRaises(ValueError):
+            protein_inference_parameters = ProteinInferenceParameter(
+                yaml_param_filepath=NEW_PARAMETER_FILE
+            )
+
+        # Read params with pyyaml
+        with open(PARAMETER_FILE, "r") as stream:
+            yaml_params = yaml.load(stream, Loader=yaml.Loader)
+
+        # Edit the params to something incorrect...
+        edited_yaml_params = yaml_params
+        edited_yaml_params["parameters"]["identifiers"].pop('decoy_symbol', None)
+
+        # Rewrite the params...
+        with open(NEW_PARAMETER_FILE, 'w') as file:
+            new_params = yaml.dump(edited_yaml_params, file)
+
+        # Re-read the params with ProteinInferenceParameter...
+        with self.assertRaises(ValueError):
+            protein_inference_parameters = ProteinInferenceParameter(
+                yaml_param_filepath=NEW_PARAMETER_FILE
+            )
+
+        # Read params with pyyaml
+        with open(PARAMETER_FILE, "r") as stream:
+            yaml_params = yaml.load(stream, Loader=yaml.Loader)
+
+        # Edit the params to something incorrect...
+        edited_yaml_params = yaml_params
+        edited_yaml_params["parameters"]["inference"].pop('inference_type', None)
+
+        # Rewrite the params...
+        with open(NEW_PARAMETER_FILE, 'w') as file:
+            new_params = yaml.dump(edited_yaml_params, file)
+
+        # Re-read the params with ProteinInferenceParameter...
+        with self.assertRaises(ValueError):
+            protein_inference_parameters = ProteinInferenceParameter(
+                yaml_param_filepath=NEW_PARAMETER_FILE
+            )
+
+        # Read params with pyyaml
+        with open(PARAMETER_FILE, "r") as stream:
+            yaml_params = yaml.load(stream, Loader=yaml.Loader)
+
+        # Edit the params to something incorrect...
+        edited_yaml_params = yaml_params
+        edited_yaml_params["parameters"]["digest"].pop('digest_type', None)
+
+        # Rewrite the params...
+        with open(NEW_PARAMETER_FILE, 'w') as file:
+            new_params = yaml.dump(edited_yaml_params, file)
+
+        # Re-read the params with ProteinInferenceParameter...
+        with self.assertRaises(ValueError):
+            protein_inference_parameters = ProteinInferenceParameter(
+                yaml_param_filepath=NEW_PARAMETER_FILE
+            )
+
+        # Read params with pyyaml
+        with open(PARAMETER_FILE, "r") as stream:
+            yaml_params = yaml.load(stream, Loader=yaml.Loader)
+
+        # Edit the params to something incorrect...
+        edited_yaml_params = yaml_params
+        edited_yaml_params["parameters"]["parsimony"].pop('lp_solver', None)
+
+        # Rewrite the params...
+        with open(NEW_PARAMETER_FILE, 'w') as file:
+            new_params = yaml.dump(edited_yaml_params, file)
+
+        # Re-read the params with ProteinInferenceParameter...
+        with self.assertRaises(ValueError):
+            protein_inference_parameters = ProteinInferenceParameter(
+                yaml_param_filepath=NEW_PARAMETER_FILE
+            )
+
+        # Read params with pyyaml
+        with open(PARAMETER_FILE, "r") as stream:
+            yaml_params = yaml.load(stream, Loader=yaml.Loader)
+
+        # Edit the params to something incorrect...
+        edited_yaml_params = yaml_params
+        edited_yaml_params["parameters"]["peptide_centric"].pop('max_identifiers', None)
+
+        # Rewrite the params...
+        with open(NEW_PARAMETER_FILE, 'w') as file:
+            new_params = yaml.dump(edited_yaml_params, file)
+
+        # Re-read the params with ProteinInferenceParameter...
+        with self.assertRaises(ValueError):
+            protein_inference_parameters = ProteinInferenceParameter(
+                yaml_param_filepath=NEW_PARAMETER_FILE
+            )
+
+        # Read params with pyyaml
+        with open(PARAMETER_FILE, "r") as stream:
+            yaml_params = yaml.load(stream, Loader=yaml.Loader)
+
+        # Edit the params to something incorrect...
+        edited_yaml_params = yaml_params
+        edited_yaml_params["parameters"].pop('general', None)
+
+        # Rewrite the params...
+        with open(NEW_PARAMETER_FILE, 'w') as file:
+            new_params = yaml.dump(edited_yaml_params, file)
+
+        # Re-read the params with ProteinInferenceParameter...
+        with self.assertRaises(ValueError):
+            protein_inference_parameters = ProteinInferenceParameter(
+                yaml_param_filepath=NEW_PARAMETER_FILE
+            )

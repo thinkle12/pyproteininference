@@ -2,7 +2,7 @@
 # Py Protein Inference
 ## Requirements
 
-Current version: 0.6.1
+Current version: 0.6.2
 
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__
  2. __Python Packages__:
@@ -295,19 +295,19 @@ Py Protein Inference can also be ran via a docker container. To access the docke
 2. Ability to pull the docker image from docker hub
 
 Pulling the image from docker hub:
-`docker pull pyproteininference:0.6.1`
+`docker pull pyproteininference:0.6.2`
 
-It is recommended to pull the image with the highest version number. Currently this is 0.6.1.
+It is recommended to pull the image with the highest version number. Currently this is 0.6.2.
 
 Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
 Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
 See the example below:
-`docker run -v /path/to/data/:/data pyproteininference:0.6.1 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+`docker run -v /path/to/data/:/data pyproteininference:0.6.2 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
 
 #### Building the Docker image from source
 Use the following command from the root directory of the source code:
-Here we use version `0.6.1` and tag as that version as well.
-`docker build . -f Dockerfile -t pyproteininference:0.6.1 --build-arg VERSION=0.6.1`
+Here we use version `0.6.2` and tag as that version as well.
+`docker build . -f Dockerfile -t pyproteininference:0.6.2 --build-arg VERSION=0.6.2`
 
 ## Extra Information
 

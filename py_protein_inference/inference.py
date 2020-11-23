@@ -61,6 +61,7 @@ class Inference(object):
         """
         self.data_class = data_class
         self.digest_class = digest_class
+        self.data_class._validate_scored_proteins()
 
     @classmethod
     def run_inference(cls, data_class, digest_class):
@@ -217,6 +218,7 @@ class Inclusion(Inference):
 
         self.data_class = data_class
         self.digest_class = digest_class
+        self.data_class._validate_scored_proteins()
         self.scored_data = self.data_class.get_protein_data()
 
     def infer_proteins(self):
@@ -331,6 +333,7 @@ class Exclusion(Inference):
         """
         self.data_class = data_class
         self.digest_class = digest_class
+        self.data_class._validate_scored_proteins()
         self.scored_data = self.data_class.get_protein_data()
         self.list_of_prots_not_in_db = None
         self.list_of_peps_not_in_db = None
@@ -393,6 +396,7 @@ class Parsimony(Inference):
         """
         self.data_class = data_class
         self.digest_class = digest_class
+        self.data_class._validate_scored_proteins()
         self.scored_data = self.data_class.get_protein_data()
         self.lead_protein_set = None
         self.parameter_file_object = data_class.parameter_file_object
@@ -1734,6 +1738,7 @@ class FirstProtein(Inference):
         """
         self.data_class = data_class
         self.digest_class = digest_class
+        self.data_class._validate_scored_proteins()
         self.scored_data = self.data_class.get_protein_data()
         self.data_class = data_class
 
@@ -1796,6 +1801,7 @@ class PeptideCentric(Inference):
         """
         self.data_class = data_class
         self.digest_class = digest_class
+        self.data_class._validate_scored_proteins()
         self.scored_data = self.data_class.get_protein_data()
 
     def infer_proteins(self):

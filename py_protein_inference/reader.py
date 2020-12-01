@@ -69,16 +69,33 @@ class Reader(object):
 
         """
         if (
-            not self.target_file
-            and not self.decoy_file
+            self.target_file
+            and self.decoy_file
             and not self.combined_files
             and not self.directory
         ):
-            raise ValueError(
-                "No input provided, please supply either target and decoy files, combined files, or a directory of combined target/decoy files"
-            )
+            self.logger.info("Validating input as target_file and decoy_file")
+        elif (
+            self.combined_files
+            and not self.target_file
+            and not self.decoy_file
+            and not self.directory
+        ):
+            self.logger.info("Validating input as combined_files")
+        elif (
+            self.directory
+            and not self.combined_files
+            and not self.decoy_file
+            and not self.target_file
+        ):
+            self.logger.info("Validating input as combined_directory")
         else:
-            pass
+            raise ValueError(
+                "To run Protein inference please supply either: "
+                "(1) either one or multiple target_files and decoy_files, "
+                "(2) either one or multiple combined_files that include target and decoy data"
+                "(3) a combined_directory that contains combined target/decoy files (combined_directory)"
+            )
 
     @classmethod
     def _fix_alternative_proteins(
@@ -194,7 +211,6 @@ class PercolatorReader(Reader):
         self.decoy_file = decoy_file
         self.combined_files = combined_files
         self.directory = directory
-        self._validate_input()
         # Define Indicies based on input
 
         self.psms = None
@@ -204,6 +220,9 @@ class PercolatorReader(Reader):
 
         self.parameter_file_object = parameter_file_object
         self.logger = getLogger("py_protein_inference.reader.PercolatorReader.read_psms")
+
+        self._validate_input()
+
 
     def read_psms(self):
         """
@@ -654,7 +673,6 @@ class GenericReader(Reader):
         self.decoy_file = decoy_file
         self.combined_files = combined_files
         self.directory = directory
-        self._validate_input()
 
         self.psms = None
         self.search_id = None
@@ -667,6 +685,8 @@ class GenericReader(Reader):
         self.scoring_variable = parameter_file_object.psm_score
 
         self.logger = getLogger("py_protein_inference.reader.GenericReader.read_psms")
+
+        self._validate_input()
 
         if (
             self.scoring_variable != self.Q_VALUE

@@ -89,7 +89,7 @@ class Score(object):
             self.pre_score_data = data_class.scoring_input
         else:
             raise ValueError(
-                "scoring input not found in data class - Please run PreScoreQValue of PreScorePepValue from DataStore to run any scoring type"
+                "scoring input not found in data class - Please run 'create_scoring_input' method from DataStore to run any scoring type"
             )
         self.data_class = data_class
 

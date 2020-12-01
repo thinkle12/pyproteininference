@@ -68,11 +68,7 @@ class DataStore(object):
         """
         # If the reader class is from a percolator.psms then define main_data_form as reader_class.psms
         # main_data_form is the starting point for all other analyses
-        if reader_class.psms:
-            self.main_data_form = reader_class.psms # Unrestricted PSM data
-            self.restricted_peptides = [
-                x.non_flanking_peptide for x in self.main_data_form
-            ]
+        self._init_validate(reader_class=reader_class)
 
         self.parameter_file_object = reader_class.parameter_file_object # Parameter object
         self.main_data_restricted = None # PSM data post restriction
@@ -119,11 +115,13 @@ class DataStore(object):
         """
 
         if scored:
+            self._validate_scored_proteins()
             if self.picked_proteins_scored:
                 proteins = set([x.identifier for x in self.picked_proteins_scored])
             else:
                 proteins = set([x.identifier for x in self.scored_proteins])
         else:
+            self._validate_scoring_input()
             proteins = [x.identifier for x in self.scoring_input]
 
         all_sp_proteins = set(self.digest_class.swiss_prot_protein_set)
@@ -269,6 +267,8 @@ class DataStore(object):
             >>> data = py_protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
             >>> psm_data = data.get_psm_data()
         """
+        if not self.main_data_restricted and not self.main_data_form:
+            raise ValueError("Both main_data_restricted and main_data_form variables are empty. Please re-load the DataStore object with a properly loaded Reader object.")
 
         if self.main_data_restricted:
             psm_data = self.main_data_restricted
@@ -398,6 +398,9 @@ class DataStore(object):
             >>> data = py_protein_inference.datastore.DataStore(reader_class = reader, digest_class=digest)
             >>> data.restrict_psm_data(remove1pep=True)
         """
+
+        # Validate that we have the main data variable
+        self._validate_main_data_form()
 
         logger = getLogger("py_protein_inference.datastore.DataStore.restrict_psm_data")
 
@@ -981,6 +984,8 @@ class DataStore(object):
             >>> data.protein_picker()
         """
 
+        self._validate_scored_proteins()
+
         logger = getLogger("py_protein_inference.datastore.DataStore.protein_picker")
 
         logger.info("Running Protein Picker")
@@ -1080,6 +1085,8 @@ class DataStore(object):
             >>> # Data must be scored first
             >>> data.calculate_q_values()
         """
+
+        self._validate_protein_group_objects()
 
         logger = getLogger("py_protein_inference.datastore.DataStore.calculate_q_values")
 
@@ -1564,3 +1571,46 @@ class DataStore(object):
             protein_objects = self.grouped_scored_proteins
 
         return protein_objects
+
+    def _init_validate(self, reader_class):
+        if reader_class.psms:
+            self.main_data_form = reader_class.psms  # Unrestricted PSM data
+            self.restricted_peptides = [
+                x.non_flanking_peptide for x in self.main_data_form
+            ]
+        else:
+            raise ValueError("Psms variable from Reader object is either empty or does not exist. "
+                             "Make sure your files contain proper data and that you run the 'read_psms' "
+                             "method on your Reader object.")
+
+    def _validate_main_data_form(self):
+        if self.main_data_form:
+            pass
+        else:
+            raise ValueError("Main Data is not defined, thus method cannot be ran. Please make sure PSM data is properly loaded from the Reader object")
+
+    def _validate_main_data_restricted(self):
+        if self.main_data_restricted:
+            pass
+        else:
+            raise ValueError("Main Data Restricted is not defined, thus method cannot be ran. Please make sure PSM data is properly loaded from the Reader object and make sure to run DataStore method 'restrict_psm_data'.")
+
+    def _validate_scored_proteins(self):
+        if self.picked_proteins_scored or self.scored_proteins:
+            pass
+        else:
+            raise ValueError("Proteins have not been scored, Please initialize a Score object and run a score method with 'score_psms' instance method.")
+
+
+    def _validate_scoring_input(self):
+        if self.scoring_input:
+            pass
+        else:
+            raise ValueError(
+                "Scoring input has not been created, Please run 'create_scoring_input' method from the DataStore object to continue.")
+
+    def _validate_protein_group_objects(self):
+        if self.protein_group_objects and self.grouped_scored_proteins:
+            pass
+        else:
+            raise ValueError("Either 'protein_group_objects' or 'grouped_scored_proteins' or both DataStore variables are undefined. Please make sure you run an inference method from the Inference class before proceeding.")

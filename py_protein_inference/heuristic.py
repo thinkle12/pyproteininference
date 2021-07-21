@@ -180,7 +180,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
         for inference_method in self.inference_method_list:
 
             py_protein_inference_parameters = py_protein_inference.parameters.ProteinInferenceParameter(
-                yaml_param_filepath=None
+                yaml_param_filepath=self.parameter_file
             )
 
             self.logger.info("Overriding inference type {}".format(py_protein_inference_parameters.inference_type))

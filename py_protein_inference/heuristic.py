@@ -12,6 +12,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
     Logic is executed in the :py:meth:`py_protein_inference.heuristic.HeuristicPipeline.execute` method
 
     Attributes:
+        parameter_file (str): Path to Protein Inference Yaml Parameter File
         database_file (str): Path to Fasta database used in proteomics search
         target_files (str/list): Path to Target Psm File (Or a list of files)
         decoy_files (str/list): Path to Decoy Psm File (Or a list of files)

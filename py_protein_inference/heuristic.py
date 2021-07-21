@@ -33,6 +33,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
     def __init__(
             self,
+            parameter_file=None,
             database_file=None,
             target_files=None,
             decoy_files=None,
@@ -47,6 +48,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
         """
 
         Args:
+            parameter_file (str): Path to Protein Inference Yaml Parameter File
             database_file (str): Path to Fasta database used in proteomics search
             target_files (str/list): Path to Target Psm File (Or a list of files)
             decoy_files (str/list): Path to Decoy Psm File (Or a list of files)
@@ -63,6 +65,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         Example:
             >>> heuristic = py_protein_inference.heuristic.HeuristicPipeline(
+            >>>     parameter_file=yaml_params,
             >>>     database_file=database,
             >>>     target_files=target,
             >>>     decoy_files=decoy,
@@ -86,6 +89,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         )
 
+        self.parameter_file = parameter_file
         self.database_file = database_file
         self.target_files = target_files
         self.decoy_files = decoy_files
@@ -127,6 +131,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         Example:
             >>> heuristic = py_protein_inference.heuristic.HeuristicPipeline(
+            >>>     parameter_file=yaml_params,
             >>>     database_file=database,
             >>>     target_files=target,
             >>>     decoy_files=decoy,
@@ -145,7 +150,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
         py_protein_inference_parameters = py_protein_inference.parameters.ProteinInferenceParameter(
-            yaml_param_filepath=None
+            yaml_param_filepath=self.parameter_file
         )
 
         ### STEP 2: Start with running an In Silico Digestion ###

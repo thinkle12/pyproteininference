@@ -7,3 +7,4 @@ from py_protein_inference import physical
 from py_protein_inference import qvality
 from py_protein_inference import parameters
 from py_protein_inference import pipeline
+from py_protein_inference import heuristic

@@ -2,11 +2,11 @@
 # Py Protein Inference
 ## Requirements
 
-Current version: 0.6.2
+Current version: 0.7.0
 
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__
  2. __Python Packages__:
-	__numpy__, __pandas__, __pyteomics__, __biopython__, __pulp__, __PyYAML__. These should be installed automatically during installation.
+	__numpy__, __pandas__, __pyteomics__, __biopython__, __pulp__, __PyYAML__, __matplotlib__. These should be installed automatically during installation.
 		
 
 ## Installation
@@ -166,6 +166,7 @@ There are two ways to run Py Protein Inference:
  1. [__Command Line__](#running-via-command-line)
  2. [__Within Python__](#running-within-python)
  3. [__Docker__](#running-with-docker)
+ 4. [__Heuristic__](#running-heuristic)
 ### Running Via Command Line
 Upon proper installation of the package, the command line tool should be installed and _should_ be available from any location on the system.
 The command line tool can be called as follows:
@@ -176,7 +177,7 @@ If this does not work download `protein_inference_cli.py` from our repository an
 
 Command line options are as follows:
 ```
-cli$ protein_inference_cli.py --help
+cli$ python protein_inference_cli.py --help
 usage: protein_inference_cli.py [-h] [-t FILE [FILE ...]] [-d FILE [FILE ...]]
                                 [-f FILE [FILE ...]] [-o DIR] [-a DIR]
                                 [-b DIR] [-c DIR] -db FILE -y FILE
@@ -295,21 +296,145 @@ Py Protein Inference can also be ran via a docker container. To access the docke
 2. Ability to pull the docker image from docker hub
 
 Pulling the image from docker hub:
-`docker pull pyproteininference:0.6.2`
+`docker pull pyproteininference:0.7.0`
 
-It is recommended to pull the image with the highest version number. Currently this is 0.6.2.
+It is recommended to pull the image with the highest version number. Currently this is 0.7.0.
 
 Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
 Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
 See the example below:
-`docker run -v /path/to/data/:/data pyproteininference:0.6.2 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+`docker run -v /path/to/data/:/data pyproteininference:0.7.0 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
 
 #### Building the Docker image from source
 Use the following command from the root directory of the source code:
-Here we use version `0.6.2` and tag as that version as well.
-`docker build . -f Dockerfile -t pyproteininference:0.6.2 --build-arg VERSION=0.6.2`
+Here we use version `0.7.0` and tag as that version as well.
+`docker build . -f Dockerfile -t pyproteininference:0.7.0 --build-arg VERSION=0.7.0`
+
+### Running Heuristic
+Py Protein Inference also has a built in Heuristic that runs through four inference methods (Inclusion, Exclusion, Parsimony, and Peptide Centric) and selects a recommended method for your given dataset. 
+The data from the recommended method will be written out to the output directory indicated by the user.
+The Heuristic method also outputs a ROC plot that showcases all of the inference methods compared to one another to gain further insight. For more information on this Heuristic Method see the [__Heuristic__](#running-heuristic) section
+
+#### Running the Heuristic Method via the Command Line
+`python protein_inference_heuristic_cli.py --help`
+This will return the help prompt for the tool.
+If this does not work download `protein_inference_heuristic_cli.py` from our repository and write the full path to the script while also calling `python`
+`python /path/to/directory/py_protein_inference/scripts/protein_inference_heuristic_cli.py --help`
+
+Command line options are as follows:
+```
+cli$ python protein_inference_heuristic_cli.py --help
+usage: protein_inference_heuristic_cli.py [-h] [-t FILE [FILE ...]] [-d FILE [FILE ...]] [-f FILE [FILE ...]] [-o DIR] [-a DIR] [-b DIR] [-c DIR]
+                                          [-db FILE] -y FILE [-p [BOOL]] [-i [BOOL]] [-r FILE] [-m FLOAT]
+
+Protein Inference Heuristic
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t FILE [FILE ...], --target FILE [FILE ...]
+                        Input target psm output from percolator. Can either input one file or a list of files
+  -d FILE [FILE ...], --decoy FILE [FILE ...]
+                        Input decoy psm output from percolator. Can either input one file or a list of files
+  -f FILE [FILE ...], --combined_files FILE [FILE ...]
+                        Input combined psm output from percolator. This should contain Target and Decoy PSMS. Can either input one file or a list of
+                        files
+  -o DIR, --output DIR  Result Directory to write to - Name of file will be determined by parameters selected and parameter tag
+  -a DIR, --target_directory DIR
+                        Directory that contains either .txt or .tsv input target psm data. Make sure the directory ONLY contains result files
+  -b DIR, --decoy_directory DIR
+                        Directory that contains either .txt or .tsv input decoy psm data. Make sure the directory ONLY contains result files
+  -c DIR, --combined_directory DIR
+                        Directory that contains either .txt or .tsv input data with targets/decoys combined. Make sure the directory ONLY contains
+                        result files
+  -db FILE, --database FILE
+                        Provide the fasta formatted database used in the MS search
+  -y FILE, --yaml_params FILE
+                        Provide a Protein Inference Yaml Parameter File
+  -p [BOOL], --append_alt [BOOL]
+                        Set '--append_alt True' or '--append_alt False'. Whether or not to add alternative proteins to each PSM from the database
+                        digest. If False the peptide/protein mapping will be taken from the input files only. If this is left blank it will default
+                        to True.
+  -i [BOOL], --id_splitting [BOOL]
+                        Set '--id_splitting True' or '--id_splitting False'. This flag is by default False. So if it is left blank then the variable
+                        is set to False. This flag indicates whether or not to split the identifiers that are present in the fasta database. Only
+                        set this flag to True if you know what you are doing. Sometimes the fasta database protein IDs will be like:
+                        'sp|ARAF_HUMAN|P10398'. While protein IDs in the input files will be 'ARAF_HUMAN|P10398'. Setting This flag to True will
+                        split off the front 'sp|' from the database protein identifiers. This is typically not necessary. So leave this blank unless
+                        you know what you are doing.
+  -r FILE, --roc_plot_filepath FILE
+                        PDF Filepath to write the ROC plot to after Heuristic Scoring
+  -m FLOAT, --fdr_max FLOAT
+                        The maximum FDR to display in the ROC plot
+```
+
+Input options are the same as the standard protein_inference_cli.py with the addition of two optional inputs:
+1) `-r` This is a filepath that will have a pdf plot written to it after the heuristic method has been run. If this is left blank it will write the plot into the standard output directory with the name roc_plot.pdf
+2) `-m` The maximum FDR to display in the ROC plot. If this value is left blank it will be set to 0.2
+
+
+#### Running the Heuristic Method via Python
+To run within a python console please see the following example:
+```python
+from py_protein_inference.heuristic import HeuristicPipeline
+
+yaml_params = "/path/to/yaml/params.yaml"
+database = "/path/to/database/file.fasta"
+### target_files can either be a list of files or one file
+target_files = ["/path/to/target1.txt","/path/to/target2.txt"]
+### decoy_files can either be a list of files or one file
+decoy_files = ["/path/to/decoy1.txt","/path/to/decoy2.txt"]
+output_directory_name = "/path/to/output/directory/"
+pdf_filename = "/path/to/output/directory/roc_plot.pdf"
+
+hp = HeuristicPipeline(parameter_file=yaml_params,
+							 database_file=database,  
+							 target_files=target_files,  
+							 decoy_files=decoy_files,  
+							 combined_files=None,  
+							 output_directory=output_directory_name,
+							 roc_plot_filepath=pdf_filename,
+							 fdr_max=0.2)  
+# Calling .execute() will initiate the heuristic pipeline with the given data 
+# The suggested method will be output in the console and the suggested method results will be written into the output_directory
+hp.execute()
+
+# The ROC plot can be ran separately as well with the following:
+hp.generate_roc_plot(fdr_max=0.1, pdf_filename=pdf_filename)
+# Note, the above method can only be ran after .execute() has been run as well
+```
+
+#### Heuristic Output Example
+
+##### Console Output
+Console Output is as follows and indicates the recommended method at the end:
+```
+2021-07-22 17:43:05,677 - py_protein_inference.heuristic.HeuristicPipeline - INFO - Number of Passing Proteins per Inference Method
+2021-07-22 17:43:05,678 - py_protein_inference.heuristic.HeuristicPipeline - INFO - {'inclusion': 4956, 'exclusion': 1769, 'parsimony': 2808, 'peptide_centric': 4757}
+2021-07-22 17:43:05,679 - py_protein_inference.heuristic.HeuristicPipeline - INFO - Initial Heuristic Scores
+2021-07-22 17:43:05,679 - py_protein_inference.heuristic.HeuristicPipeline - INFO - {'inclusion': 0.5928862224126847, 'exclusion': 0.576152064531587, 'parsimony': 0.2663299076815886, 'peptide_centric': 0.4970103849784959}
+2021-07-22 17:43:05,679 - py_protein_inference.heuristic.HeuristicPipeline - INFO - Removing inclusion with score 0.5928862224126847
+2021-07-22 17:43:05,680 - py_protein_inference.heuristic.HeuristicPipeline - INFO - Final Heuristic Scores
+2021-07-22 17:43:05,680 - py_protein_inference.heuristic.HeuristicPipeline - INFO - {'exclusion': 0.5323198942498348, 'parsimony': 0.1394422310756972, 'peptide_centric': 1.0786541402665502}
+2021-07-22 17:43:05,680 - py_protein_inference.heuristic.HeuristicPipeline - INFO - Removing exclusion with score 0.5323198942498348
+2021-07-22 17:43:05,680 - py_protein_inference.heuristic.HeuristicPipeline - INFO - Inference peptide_centric Selected with score 1.0786541402665502
+```
+
+##### ROC Plot Output
+Below is an example of an ROC plot on some data. The plot indicates the number of target proteins identified at a specified decoy FDR for four methods (Inclusion, Exclusion, Parsimony, and Peptide Centric). 
+The plot also indicates the Target FDR that is set in the parameter file. This Target FDR is also used by the heuristic in order to make decisions about the recommended inference method for the given dataset.
+![images/swissprot_example.png](images/swissprot_example.png)
 
 ## Extra Information
+
+### Heuristic Algorithm Notes
+The Heuristic Algorithm contains multiple steps listed below:
+1. First each of the four main inference methods is executed.
+2. The number of Target proteins is identified for each inference method based on the target FDR found in the parameter file. This is usually 1% but can be changed by the user.
+3. Similarity measurements are generated between all 4 methods. The similarity measurements are calculated by taking the number of target hits at the specified FDR of each method and dividing this number by the mean of the other 3 methods. This is done for all 4 methods.
+4. The least similar method of the four is removed from further analysis.
+5. The remaining methods are again checked against one another and step 3 is repeated for the 3 remaining methods
+6. Inclusion/Exclusion are checked to see if they pass a certain threshold of similarity (This is empirically set to .2). Users can override this value by setting the value of `empirical_threshold` when running the method `determine_optimal_inference_method()` which is an instance method of the `HeuristicPipeline` Class. __Note__: This must be ran only after `execute()` has been ran on the data.
+7. Using Empirical evidence a candidate method is selected based on the methods still available.
 
 ### Inference Types
 

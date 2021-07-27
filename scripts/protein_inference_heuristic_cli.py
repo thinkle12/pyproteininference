@@ -77,7 +77,7 @@ parser.add_argument(
     "-y",
     "--yaml_params",
     dest="yaml_params",
-    required=True,
+    required=False,
     help="Provide a Protein Inference Yaml Parameter File",
     metavar="FILE",
 )
@@ -130,6 +130,7 @@ parser.add_argument(
     required=False,
     help="The maximum FDR to display in the ROC plot",
     metavar="FLOAT",
+    type=float,
 )
 
 def main():

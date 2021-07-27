@@ -543,7 +543,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
         plt.legend(loc='lower right')
         plt.title("FDR vs Target Protein Hits per Inference Method")
         if pdf_filename:
+            self.logger.info("Writing ROC plot to: {}".format(pdf_filename))
             f.savefig(pdf_filename)
-        plt.show()
         plt.close()
 

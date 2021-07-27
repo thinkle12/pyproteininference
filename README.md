@@ -130,6 +130,7 @@ As previously mentioned the standard input filetype is the tab delimited output 
 |---|---|---|---|---|---|---|---|---|
 | 1.1 | 7.5 | 0.0048 | 0.0007 | R.NYIQSLTQMPK.M | MK14_HUMAN\|Q16539 | MK14_HUMAN\|Q16539-2 | MK14_HUMAN\|Q16539-3 |  |
 | 1.2 | 6.2 | 0.0035 | 0.0006 | R.NTVASSSRSM*R.T | FHDC1_HUMAN\|Q9C0D6 |  |  |  |
+
 With the above standard input one could use __q-value__ or __posterior_error_prob__ as the PSM score see [Score Section](#score) with __multiplicative__ as __psm_score_type__ and any of the multiplicative options for __protein_score__. Also, one could use __psm_score__ as the PSM __psm_score__ with __additive__ as the __psm_score_type__ and __protein_score__
 
 For example standard input files please see any of the following:
@@ -141,6 +142,7 @@ For example standard input files please see any of the following:
 |---|---|---|---|---|
 | 1.1 | 7.5 | R.NYIQSLTQMPK.M | MK14_HUMAN\|Q16539 | MK14_HUMAN\|Q16539-2 | MK14_HUMAN\|Q16539-3 |  |
 | 1.2 | 6.2 |  R.NTVASSSRSM*R.T | FHDC1_HUMAN\|Q9C0D6 |  |  | 
+
 With the above custom input one could use one could use __custom_score__ as the PSM __psm_score__ with __additive__ as the __psm_score_type__ and __protein_score__
 
 For example custom input files please see any of the following:

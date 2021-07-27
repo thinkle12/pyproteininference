@@ -1,9 +1,11 @@
+import os
 import sys
 import numpy
 import logging
 import py_protein_inference
 from py_protein_inference.pipeline import ProteinInferencePipeline
 from py_protein_inference.inference import Inference
+import matplotlib.pyplot as plt
 
 class HeuristicPipeline(ProteinInferencePipeline):
     """
@@ -23,6 +25,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
         output_directory (str): Path to Directory where output will be written
         id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
         append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
+        roc_plot_filepath (str): Filepath to be written to by Heuristic Plotting method. This is optional and a default filename will be created in output_directory if this is left as None
+        fdr_max (float): The Maximum FDR to display on the ROC Plot generated to compare inference methods
         logger (logging.logger): Logger object for logging
         inference_method_list: (list) List of inference methods used in heuristic determination
         datastore_dict: (dict) Dictionary of :py:class:`py_protein_inference.datastore.DataStore` objects generated in hueristic determination with the inference method as the key of each entry
@@ -45,6 +49,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
             output_directory=None,
             id_splitting=False,
             append_alt_from_db=True,
+            roc_plot_filepath=None,
+            fdr_max=0.2,
     ):
         """
 
@@ -60,7 +66,9 @@ class HeuristicPipeline(ProteinInferencePipeline):
             output_directory (str): Path to Directory where output will be written
             id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
             append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
-
+            roc_plot_filepath (str): Filepath to be written to by Heuristic Plotting method. This is optional and a default filename will be created in output_directory if this is left as None
+            fdr_max (float): The Maximum FDR to display on the ROC Plot generated to compare inference methods    
+                
         Returns:
             object:
 
@@ -76,6 +84,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
             >>>     combined_directory=combined_directory,
             >>>     output_directory=dir_name,
             >>>     append_alt_from_db=append_alt,
+            >>>     roc_plot_filepath=roc_plot_filepath,
+            >>>     fdr_max=0.2,
             >>> )
         """
 
@@ -101,6 +111,14 @@ class HeuristicPipeline(ProteinInferencePipeline):
         self.output_directory = output_directory
         self.id_splitting = id_splitting
         self.append_alt_from_db = append_alt_from_db
+        if not roc_plot_filepath:
+            self.roc_plot_filepath = os.path.join(self.output_directory, "roc_plot.pdf")
+        else:
+            self.roc_plot_filepath = roc_plot_filepath
+        if not fdr_max:
+            self.fdr_max = 0.2
+        else:
+            self.fdr_max = fdr_max
 
         self.inference_method_list = [Inference.INCLUSION, Inference.EXCLUSION, Inference.PARSIMONY, Inference.PEPTIDE_CENTRIC]
         self.datastore_dict = {}
@@ -114,7 +132,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         self._log_append_alt_from_db()
 
-    def execute(self, fdr_threshold=0.01):
+    def execute(self, fdr_threshold=0.01, skip_plot=False):
         """
         This method is the main driver of the heuristic method
         This method calls other classes and methods that make up the heuristic pipeline
@@ -126,6 +144,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         Args:
             fdr_threshold (float): The Qvalue/FDR threshold the heuristic method uses to base calculations from
+            skip_plot (bool): True/False on whether to skip outputting ROC Plot
 
         Returns:
             None
@@ -142,6 +161,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
             >>>     combined_directory=combined_directory,
             >>>     output_directory=dir_name,
             >>>     append_alt_from_db=append_alt,
+            >>>     roc_plot_filepath=roc_plot_filepath,
+            >>>     fdr_max=0.2,
             >>> )
             >>> heuristic.execute(fdr_threshold=0.01)
 
@@ -260,6 +281,12 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         export = py_protein_inference.export.Export(data_class=self.selected_datastore)
         export.export_to_csv(directory=self.output_directory, export_type=py_protein_inference_parameters.export)
+
+        if not skip_plot:
+            self.generate_roc_plot(fdr_max=self.fdr_max, pdf_filename=self.roc_plot_filepath)
+
+        else:
+            self.logger.info("skip_plot is set to True. Not creating ROC Plot.")
 
     def determine_optimal_inference_method(self, empirical_threshold=.2):
 
@@ -494,3 +521,29 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         if len(remaining_inference_methods)==0:
             raise ValueError("Not able to determine optimal Inference Method for your dataset")
+
+    def generate_roc_plot(self, fdr_max=0.2, pdf_filename=None, target_fdr=None):
+        f = plt.figure()
+        for inference_method in self.datastore_dict.keys():
+            fdr_vs_target_hits = self.datastore_dict[inference_method].generate_fdr_vs_target_hits(fdr_max=fdr_max)
+            fdrs = [x[0] for x in fdr_vs_target_hits]
+            target_hits = [x[1] for x in fdr_vs_target_hits]
+            plt.plot(fdrs, target_hits, '-', label = inference_method)
+            target_fdr = self.datastore_dict[inference_method].parameter_file_object.fdr
+            if inference_method == self.selected_method:
+                best_value = min(fdrs, key=lambda x:abs(x-target_fdr))
+                best_index = fdrs.index(best_value)
+                best_target_hit_value = target_hits[best_index]
+
+        plt.axvline(target_fdr, color="black", linestyle='--', alpha=.75, label="Target FDR")
+        plt.legend()
+        plt.xlabel('Decoy FDR')
+        plt.ylabel('Target Protein Hits')
+        plt.xlim([-.01, fdr_max])
+        plt.legend(loc='lower right')
+        plt.title("FDR vs Target Protein Hits per Inference Method")
+        if pdf_filename:
+            f.savefig(pdf_filename)
+        plt.show()
+        plt.close()
+

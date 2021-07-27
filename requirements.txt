@@ -3,3 +3,4 @@ pyteomics
 biopython
 pulp
 PyYAML
+matplotlib

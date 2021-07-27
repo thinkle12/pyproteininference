@@ -51,7 +51,7 @@ class TestHeuristicWorkflow(TestCase):
                                                               output_directory=OUTPUT_DIR,
                                                               id_splitting=True)
 
-        hp.execute()
+        hp.execute(skip_plot=True)
 
         self.assertEqual(hp.selected_method, "parsimony")
 
@@ -77,7 +77,7 @@ class TestHeuristicWorkflow(TestCase):
                                                               output_directory=OUTPUT_DIR,
                                                               id_splitting=True)
 
-        hp.execute()
+        hp.execute(skip_plot=True)
 
         self.assertEqual(hp.selected_method, "parsimony")
 

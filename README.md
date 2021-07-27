@@ -6,7 +6,7 @@ Current version: 0.7.0
 
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__
  2. __Python Packages__:
-	__numpy__, __pandas__, __pyteomics__, __biopython__, __pulp__, __PyYAML__, __matplotlib__. These should be installed automatically during installation.
+	__numpy__, __pyteomics__, __biopython__, __pulp__, __PyYAML__, __matplotlib__. These should be installed automatically during installation.
 		
 
 ## Installation

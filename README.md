@@ -424,6 +424,7 @@ Console Output is as follows and indicates the recommended method at the end:
 ##### ROC Plot Output
 Below is an example of an ROC plot on some data. The plot indicates the number of target proteins identified at a specified decoy FDR for four methods (Inclusion, Exclusion, Parsimony, and Peptide Centric). 
 The plot also indicates the Target FDR that is set in the parameter file. This Target FDR is also used by the heuristic in order to make decisions about the recommended inference method for the given dataset.
+
 ![images/swissprot_example.png](images/swissprot_example.png)
 
 ## Extra Information

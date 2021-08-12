@@ -1614,3 +1614,16 @@ class DataStore(object):
             pass
         else:
             raise ValueError("Either 'protein_group_objects' or 'grouped_scored_proteins' or both DataStore variables are undefined. Please make sure you run an inference method from the Inference class before proceeding.")
+
+    def generate_fdr_vs_target_hits(self, fdr_max=0.2):
+
+        fdr_vs_count = []
+        count_list = []
+        for pg in self.protein_group_objects:
+            if not pg.proteins[0].identifier.startswith(self.decoy_symbol):
+                count_list.append(pg)
+            fdr_vs_count.append([pg.q_value,len(count_list)])
+
+        fdr_vs_count = [x for x in fdr_vs_count if x[0]<fdr_max]
+
+        return fdr_vs_count

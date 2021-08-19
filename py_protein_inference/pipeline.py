@@ -24,8 +24,8 @@ class ProteinInferencePipeline(object):
         id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
         append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
         logger (logging.logger): Logger object for logging
-        data_class (py_protein_inference.datastore.DataStore): Data Class
-        digest_class (py_protein_inference.in_silico_digest.Digest): Digest Class
+        data (py_protein_inference.datastore.DataStore): Data Class
+        digest (py_protein_inference.in_silico_digest.Digest): Digest Class
 
     """
 
@@ -181,16 +181,16 @@ class ProteinInferencePipeline(object):
             decoy_file=self.decoy_files,
             combined_files=self.combined_files,
             parameter_file_object=py_protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
             append_alt_from_db=self.append_alt_from_db,
         )
         reader.read_psms()
 
-        ### STEP 4: Initiate the datastore class ###
-        ### STEP 4: Initiate the datastore class ###
-        ### STEP 4: Initiate the datastore class ###
+        ### STEP 4: Initiate the datastore object ###
+        ### STEP 4: Initiate the datastore object ###
+        ### STEP 4: Initiate the datastore object ###
         data = py_protein_inference.datastore.DataStore(
-            reader_class=reader, digest_class=digest
+            reader=reader, digest=digest
         )
 
         ### Step 5: Restrict the PSM data
@@ -213,7 +213,7 @@ class ProteinInferencePipeline(object):
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
-        score = py_protein_inference.scoring.Score(data_class=data)
+        score = py_protein_inference.scoring.Score(data=data)
         score.score_psms(score_method=py_protein_inference_parameters.protein_score)
 
         ### STEP 9: Run protein picker on the data
@@ -227,7 +227,7 @@ class ProteinInferencePipeline(object):
         ### STEP 10: Apply Inference
         ### STEP 10: Apply Inference
         ### STEP 10: Apply Inference
-        py_protein_inference.inference.Inference.run_inference(data_class=data, digest_class=digest)
+        py_protein_inference.inference.Inference.run_inference(data=data, digest=digest)
 
         ### STEP 11: Q value Calculations
         ### STEP 11: Q value Calculations
@@ -237,7 +237,7 @@ class ProteinInferencePipeline(object):
         ### STEP 12: Export to CSV
         ### STEP 12: Export to CSV
         ### STEP 12: Export to CSV
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(directory=self.output_directory, export_type=py_protein_inference_parameters.export)
 
         self.data = data

@@ -69,7 +69,7 @@ class TestAltProteinRead(TestCase):
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
             append_alt_from_db=True,
         )
         pep_and_prot_data.read_psms()
@@ -112,7 +112,7 @@ class TestAltProteinRead(TestCase):
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
             append_alt_from_db=False,
         )
         pep_and_prot_data_no_append.read_psms()

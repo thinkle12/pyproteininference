@@ -1,5 +1,6 @@
 import os
 import sys
+import copy
 import numpy
 import logging
 import py_protein_inference
@@ -35,6 +36,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
         selected_datastore: (:py:class:`py_protein_inference.datastore.DataStore`) The DataStore object as selected by the heuristic
 
     """
+
+    RATIO_CONSTANT = 2
 
     def __init__(
             self,
@@ -111,14 +114,11 @@ class HeuristicPipeline(ProteinInferencePipeline):
         self.output_directory = output_directory
         self.id_splitting = id_splitting
         self.append_alt_from_db = append_alt_from_db
+        self.fdr_max = fdr_max
         if not roc_plot_filepath:
             self.roc_plot_filepath = os.path.join(self.output_directory, "roc_plot.pdf")
         else:
             self.roc_plot_filepath = roc_plot_filepath
-        if not fdr_max:
-            self.fdr_max = 0.2
-        else:
-            self.fdr_max = fdr_max
 
         self.inference_method_list = [Inference.INCLUSION, Inference.EXCLUSION, Inference.PARSIMONY, Inference.PEPTIDE_CENTRIC]
         self.datastore_dict = {}
@@ -168,16 +168,11 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         """
 
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
         py_protein_inference_parameters = py_protein_inference.parameters.ProteinInferenceParameter(
             yaml_param_filepath=self.parameter_file
         )
 
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
+
         digest = py_protein_inference.in_silico_digest.InSilicoDigest(
             database_path=self.database_file,
             digest_type=py_protein_inference_parameters.digest_type,
@@ -200,78 +195,56 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         for inference_method in self.inference_method_list:
 
-            py_protein_inference_parameters = py_protein_inference.parameters.ProteinInferenceParameter(
-                yaml_param_filepath=self.parameter_file
-            )
+            method_specific_parameters = copy.deepcopy(py_protein_inference_parameters)
 
-            self.logger.info("Overriding inference type {}".format(py_protein_inference_parameters.inference_type))
+            self.logger.info("Overriding inference type {}".format(method_specific_parameters.inference_type))
 
-            py_protein_inference_parameters.inference_type = inference_method
-            py_protein_inference_parameters.fdr = fdr_threshold
+            method_specific_parameters.inference_type = inference_method
+            method_specific_parameters.fdr = fdr_threshold
 
-            self.logger.info("New inference type {}".format(py_protein_inference_parameters.inference_type))
-            self.logger.info("FDR Threshold Set to {}".format(py_protein_inference_parameters.fdr))
+            self.logger.info("New inference type {}".format(method_specific_parameters.inference_type))
+            self.logger.info("FDR Threshold Set to {}".format(method_specific_parameters.fdr))
 
 
-            ### STEP 3: Read PSM Data ###
-            ### STEP 3: Read PSM Data ###
-            ### STEP 3: Read PSM Data ###
             reader = py_protein_inference.reader.GenericReader(
                 target_file=self.target_files,
                 decoy_file=self.decoy_files,
                 combined_files=self.combined_files,
-                parameter_file_object=py_protein_inference_parameters,
-                digest_class=digest,
+                parameter_file_object=method_specific_parameters,
+                digest=digest,
                 append_alt_from_db=self.append_alt_from_db,
             )
             reader.read_psms()
 
-            ### STEP 4: Initiate the datastore class ###
-            ### STEP 4: Initiate the datastore class ###
-            ### STEP 4: Initiate the datastore class ###
+
             data = py_protein_inference.datastore.DataStore(
-                reader_class=reader, digest_class=digest
+                reader=reader, digest=digest
             )
 
-            ### Step 5: Restrict the PSM data
-            ### Step 5: Restrict the PSM data
-            ### Step 5: Restrict the PSM data
+
             data.restrict_psm_data()
 
-            ### Step 6: Generate protein scoring input
-            ### Step 6: Generate protein scoring input
-            ### Step 6: Generate protein scoring input
+
             data.create_scoring_input()
 
-            ### Step 7: Remove non unique peptides if running exclusion
-            ### Step 7: Remove non unique peptides if running exclusion
-            ### Step 7: Remove non unique peptides if running exclusion
-            if py_protein_inference_parameters.inference_type == Inference.EXCLUSION:
-                # This gets ran if we run exclusion...
+
+            if method_specific_parameters.inference_type == Inference.EXCLUSION:
                 data.exclude_non_distinguishing_peptides()
 
-            ### STEP 8: Score our PSMs given a score method
-            ### STEP 8: Score our PSMs given a score method
-            ### STEP 8: Score our PSMs given a score method
-            score = py_protein_inference.scoring.Score(data_class=data)
-            score.score_psms(score_method=py_protein_inference_parameters.protein_score)
 
-            ### STEP 9: Run protein picker on the data
-            ### STEP 9: Run protein picker on the data
-            ### STEP 9: Run protein picker on the data
-            if py_protein_inference_parameters.picker:
+            score = py_protein_inference.scoring.Score(data=data)
+            score.score_psms(score_method=method_specific_parameters.protein_score)
+
+
+            if method_specific_parameters.picker:
                 data.protein_picker()
             else:
                 pass
 
-            ### STEP 10: Apply Inference
-            ### STEP 10: Apply Inference
-            ### STEP 10: Apply Inference
-            py_protein_inference.inference.Inference.run_inference(data_class=data, digest_class=digest)
 
-            ### STEP 11: Q value Calculations
-            ### STEP 11: Q value Calculations
-            ### STEP 11: Q value Calculations
+            py_protein_inference.inference.Inference.run_inference(data=data, digest=digest)
+
+
             data.calculate_q_values()
 
             self.datastore_dict[inference_method] = data
@@ -279,8 +252,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
         self.selected_method = self.determine_optimal_inference_method()
         self.selected_datastore = self.datastore_dict[self.selected_method]
 
-        export = py_protein_inference.export.Export(data_class=self.selected_datastore)
-        export.export_to_csv(directory=self.output_directory, export_type=py_protein_inference_parameters.export)
+        export = py_protein_inference.export.Export(data=self.selected_datastore)
+        export.export_to_csv(directory=self.output_directory, export_type=method_specific_parameters.export)
 
         if not skip_plot:
             self.generate_roc_plot(fdr_max=self.fdr_max, pdf_filename=self.roc_plot_filepath)
@@ -317,145 +290,145 @@ class HeuristicPipeline(ProteinInferencePipeline):
         del number_passing_proteins[key_to_delete]
 
         # Redo above on the restricted set of 3 methods
-        similarity_dict2 = {}
+        pared_similarity_dict = {}
         for key in number_passing_proteins.keys():
             cur_value = number_passing_proteins[key]
             other_values = [x for x in number_passing_proteins.values() if x != cur_value]
-            similarity_dict2[key] = cur_value/(numpy.mean(other_values))
+            pared_similarity_dict[key] = cur_value/(numpy.mean(other_values))
 
-        diff_dict2 = {x:abs(1-similarity_dict2[x]) for x in number_passing_proteins.keys()}
+        pared_diff_dict = {x:abs(1-pared_similarity_dict[x]) for x in number_passing_proteins.keys()}
 
         self.logger.info("Final Heuristic Scores")
-        self.logger.info(diff_dict2)
+        self.logger.info(pared_diff_dict)
 
         # Remove Inclusion and Exclusion if they are poor. IE if their heuristic scores are above an empirical threshold value
         # .2 was determined as a proper threshold in testing different databases (Uniprot, Swissprot, Swissprot no isoforms)
-        if Inference.EXCLUSION in diff_dict2.keys():
-            if diff_dict2[Inference.EXCLUSION] <= empirical_threshold:
-                self.logger.info("Keeping {} with score {}".format(Inference.EXCLUSION, diff_dict2[Inference.EXCLUSION]))
+        if Inference.EXCLUSION in pared_diff_dict.keys():
+            if pared_diff_dict[Inference.EXCLUSION] <= empirical_threshold:
+                self.logger.info("Keeping {} with score {}".format(Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION]))
 
             else:
                 # If not the remove it
-                self.logger.info("Removing {} with score {}".format(Inference.EXCLUSION, diff_dict2[Inference.EXCLUSION]))
-                del diff_dict2[Inference.EXCLUSION]
+                self.logger.info("Removing {} with score {}".format(Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION]))
+                del pared_diff_dict[Inference.EXCLUSION]
                 del number_passing_proteins[Inference.EXCLUSION]
 
-        if Inference.INCLUSION in diff_dict2.keys():
-            if diff_dict2[Inference.INCLUSION] <= empirical_threshold:
-                self.logger.info("Keeping {} with score {}".format(Inference.INCLUSION, diff_dict2[Inference.INCLUSION]))
+        if Inference.INCLUSION in pared_diff_dict.keys():
+            if pared_diff_dict[Inference.INCLUSION] <= empirical_threshold:
+                self.logger.info("Keeping {} with score {}".format(Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION]))
 
             else:
                 # If not then remove it
-                self.logger.info("Removing {} with score {}".format(Inference.INCLUSION, diff_dict2[Inference.INCLUSION]))
-                del diff_dict2[Inference.INCLUSION]
+                self.logger.info("Removing {} with score {}".format(Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION]))
+                del pared_diff_dict[Inference.INCLUSION]
                 del number_passing_proteins[Inference.INCLUSION]
 
-        remaining_inference_methods = list(diff_dict2.keys())
+        remaining_inference_methods = list(pared_diff_dict.keys())
 
         ## At this point we have 3, 2 or 1 inference types remaining... So lets do branching if statement for all possible combinations
         ## Each combination will have different rules based on empirical knowledgee
         if len(remaining_inference_methods)==3:
             if set([Inference.PARSIMONY, Inference.EXCLUSION, Inference.INCLUSION]) == set(remaining_inference_methods):
                 # If inclusion is over double parsimony remove it
-                if number_passing_proteins[Inference.INCLUSION] / 2 > number_passing_proteins[Inference.PARSIMONY]:
-                    self.logger.info("Removing {} with score {}".format(Inference.INCLUSION, diff_dict2[Inference.INCLUSION]))
-                    del diff_dict2[Inference.INCLUSION]
+                if number_passing_proteins[Inference.INCLUSION] / self.RATIO_CONSTANT > number_passing_proteins[Inference.PARSIMONY]:
+                    self.logger.info("Removing {} with score {}".format(Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION]))
+                    del pared_diff_dict[Inference.INCLUSION]
                     del number_passing_proteins[Inference.INCLUSION]
 
                 # If exclusion is less than half of parsimony remove it...
-                if number_passing_proteins[Inference.EXCLUSION] * 2 < number_passing_proteins[Inference.PARSIMONY]:
-                    self.logger.info("Removing {} with score {}".format(Inference.EXCLUSION, diff_dict2[Inference.EXCLUSION]))
-                    del diff_dict2[Inference.EXCLUSION]
+                if number_passing_proteins[Inference.EXCLUSION] * self.RATIO_CONSTANT < number_passing_proteins[Inference.PARSIMONY]:
+                    self.logger.info("Removing {} with score {}".format(Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION]))
+                    del pared_diff_dict[Inference.EXCLUSION]
                     del number_passing_proteins[Inference.EXCLUSION]
 
-                if len(diff_dict2.keys())==3:
+                if len(pared_diff_dict.keys())==3:
                     # if neither are removed select Exclusion. Since all methods are close to parsimony take exclusion because it wouldnt have removed too many hits
                     selected_method = Inference.EXCLUSION
-                    self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                    self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                     return selected_method
 
 
             elif set([Inference.PARSIMONY, Inference.PEPTIDE_CENTRIC, Inference.INCLUSION]) == set(remaining_inference_methods):
                 # If inclusion is double of parsimony remove it...
-                if number_passing_proteins[Inference.INCLUSION] / 2 > number_passing_proteins[Inference.PARSIMONY]:
-                    self.logger.info("Removing {} with score {}".format(Inference.INCLUSION, diff_dict2[Inference.INCLUSION]))
-                    del diff_dict2[Inference.INCLUSION]
+                if number_passing_proteins[Inference.INCLUSION] / self.RATIO_CONSTANT > number_passing_proteins[Inference.PARSIMONY]:
+                    self.logger.info("Removing {} with score {}".format(Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION]))
+                    del pared_diff_dict[Inference.INCLUSION]
                     del number_passing_proteins[Inference.INCLUSION]
 
                 # Check to see if inclusion is still present
-                if Inference.INCLUSION in diff_dict2.keys():
+                if Inference.INCLUSION in pared_diff_dict.keys():
                     # If inclusion is still present and double peptide-centric remove it...
-                    if number_passing_proteins[Inference.INCLUSION] / 2 > number_passing_proteins[Inference.PEPTIDE_CENTRIC]:
-                        self.logger.info("Removing {} with score {}".format(Inference.INCLUSION, diff_dict2[Inference.INCLUSION]))
-                        del diff_dict2[Inference.INCLUSION]
+                    if number_passing_proteins[Inference.INCLUSION] / self.RATIO_CONSTANT > number_passing_proteins[Inference.PEPTIDE_CENTRIC]:
+                        self.logger.info("Removing {} with score {}".format(Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION]))
+                        del pared_diff_dict[Inference.INCLUSION]
                         del number_passing_proteins[Inference.INCLUSION]
 
-                if len(diff_dict2.keys())==3:
+                if len(pared_diff_dict.keys())==3:
                     # if Inclusion is not removed select Inclusion.
                     selected_method = Inference.INCLUSION
-                    self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                    self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                     return selected_method
 
 
             elif set([Inference.PARSIMONY, Inference.EXCLUSION, Inference.PEPTIDE_CENTRIC]) == set(remaining_inference_methods):
                 # If exclusion is less than half of parsimony remove it...
-                if number_passing_proteins[Inference.EXCLUSION] * 2 < number_passing_proteins[Inference.PARSIMONY]:
-                    self.logger.info("Removing {} with score {}".format(Inference.EXCLUSION, diff_dict2[Inference.EXCLUSION]))
-                    del diff_dict2[Inference.EXCLUSION]
+                if number_passing_proteins[Inference.EXCLUSION] * self.RATIO_CONSTANT < number_passing_proteins[Inference.PARSIMONY]:
+                    self.logger.info("Removing {} with score {}".format(Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION]))
+                    del pared_diff_dict[Inference.EXCLUSION]
                     del number_passing_proteins[Inference.EXCLUSION]
 
                 # Check to see if exclusion is still present
-                if Inference.EXCLUSION in diff_dict2.keys():
+                if Inference.EXCLUSION in pared_diff_dict.keys():
                     # If exclusion is still present and less than half of peptide-centric remove it...
-                    if diff_dict2[Inference.EXCLUSION] * 2 < diff_dict2[Inference.PEPTIDE_CENTRIC]:
-                        self.logger.info("Removing {} with score {}".format(Inference.EXCLUSION, diff_dict2[Inference.EXCLUSION]))
-                        del diff_dict2[Inference.EXCLUSION]
+                    if pared_diff_dict[Inference.EXCLUSION] * self.RATIO_CONSTANT < pared_diff_dict[Inference.PEPTIDE_CENTRIC]:
+                        self.logger.info("Removing {} with score {}".format(Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION]))
+                        del pared_diff_dict[Inference.EXCLUSION]
                         del number_passing_proteins[Inference.EXCLUSION]
 
-                if len(diff_dict2.keys())==3:
+                if len(pared_diff_dict.keys())==3:
                     # if Exclusion is not removed select Exclusion. Since it is close to parsimony and peptide-centric take exclusion because it wouldnt have removed too many hits
                     selected_method = Inference.EXCLUSION
-                    self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                    self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                     return selected_method
 
 
             elif set([Inference.PEPTIDE_CENTRIC, Inference.EXCLUSION, Inference.INCLUSION]) == set(remaining_inference_methods):
                 # If inclusion is over double peptide-centric remove it
-                if number_passing_proteins[Inference.INCLUSION] / 2 > number_passing_proteins[Inference.PEPTIDE_CENTRIC]:
-                    self.logger.info("Removing {} with score {}".format(Inference.INCLUSION, diff_dict2[Inference.INCLUSION]))
-                    del diff_dict2[Inference.INCLUSION]
+                if number_passing_proteins[Inference.INCLUSION] / self.RATIO_CONSTANT > number_passing_proteins[Inference.PEPTIDE_CENTRIC]:
+                    self.logger.info("Removing {} with score {}".format(Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION]))
+                    del pared_diff_dict[Inference.INCLUSION]
                     del number_passing_proteins[Inference.INCLUSION]
 
                 # If exclusion is less than half of peptide-centric remove it...
-                if diff_dict2[Inference.EXCLUSION] * 2 < diff_dict2[Inference.PEPTIDE_CENTRIC]:
-                    self.logger.info("Removing {} with score {}".format(Inference.EXCLUSION, diff_dict2[Inference.EXCLUSION]))
-                    del diff_dict2[Inference.EXCLUSION]
+                if pared_diff_dict[Inference.EXCLUSION] * self.RATIO_CONSTANT < pared_diff_dict[Inference.PEPTIDE_CENTRIC]:
+                    self.logger.info("Removing {} with score {}".format(Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION]))
+                    del pared_diff_dict[Inference.EXCLUSION]
                     del number_passing_proteins[Inference.EXCLUSION]
 
-                if len(diff_dict2.keys())==3:
+                if len(pared_diff_dict.keys())==3:
                     # if neither are removed select Exclusion. Since both are close to peptide-centric take exclusion because it wouldnt have removed too many hits
                     selected_method = Inference.EXCLUSION
                     # If we have one remaining just return it
-                    self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                    self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                     return selected_method
 
             else:
                 pass
 
-        remaining_inference_methods = list(diff_dict2.keys())
+        remaining_inference_methods = list(pared_diff_dict.keys())
 
         if len(remaining_inference_methods)==2:
             if set([Inference.PEPTIDE_CENTRIC, Inference.EXCLUSION]) == set(remaining_inference_methods):
                 # Take peptide centric
                 selected_method = Inference.PEPTIDE_CENTRIC
-                self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                 return selected_method
 
 
             elif set([Inference.PEPTIDE_CENTRIC, Inference.INCLUSION]) == set(remaining_inference_methods):
                 # Take peptide centric
                 selected_method = Inference.PEPTIDE_CENTRIC
-                self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                 return selected_method
 
             elif set([Inference.PEPTIDE_CENTRIC, Inference.PARSIMONY]) == set(remaining_inference_methods):
@@ -463,24 +436,24 @@ class HeuristicPipeline(ProteinInferencePipeline):
                 # First If peptide centric is less than parsimony return parsimony
                 if number_passing_proteins[Inference.PEPTIDE_CENTRIC] < number_passing_proteins[Inference.PARSIMONY]:
                     selected_method = Inference.PARSIMONY
-                    self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                    self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                     return selected_method
 
                 # check to see if parsimony and peptide centric are close... If half of peptide centric is greater than parsimony pick parsimony
-                if number_passing_proteins[Inference.PEPTIDE_CENTRIC] / 2 > number_passing_proteins[Inference.PARSIMONY]:
+                if number_passing_proteins[Inference.PEPTIDE_CENTRIC] / self.RATIO_CONSTANT > number_passing_proteins[Inference.PARSIMONY]:
                     selected_method = Inference.PARSIMONY
-                    self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                    self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                     return selected_method
                 else:
                     # If not (Meaning the values are close... return peptide-centric)
                     selected_method = Inference.PEPTIDE_CENTRIC
-                    self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                    self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                     return selected_method
 
             elif set([Inference.EXCLUSION, Inference.INCLUSION]) == set(remaining_inference_methods):
                 # This situation should never occur
                 selected_method = Inference.INCLUSION
-                self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                 return selected_method
                 pass
 
@@ -490,33 +463,33 @@ class HeuristicPipeline(ProteinInferencePipeline):
                 # This is highly unlikely to happen
                 if number_passing_proteins[Inference.EXCLUSION] > number_passing_proteins[Inference.PARSIMONY]:
                     selected_method = Inference.EXCLUSION
-                    self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                    self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                     return selected_method
 
                 # check to see if parsimony and exclusion are close... If half of parsimony is greater than exclusion pick parsimony
                 # This means that exclusion is removing a lot of peptides
-                if number_passing_proteins[Inference.PARSIMONY] / 2 > number_passing_proteins[Inference.EXCLUSION]:
+                if number_passing_proteins[Inference.PARSIMONY] / self.RATIO_CONSTANT > number_passing_proteins[Inference.EXCLUSION]:
                     selected_method = Inference.PARSIMONY
-                    self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                    self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                     return selected_method
                 else:
                     # If not (Meaning the values are close... return exclusion)
                     selected_method = Inference.EXCLUSION
-                    self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                    self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                     return selected_method
 
             elif set([Inference.PARSIMONY, Inference.INCLUSION]) == set(remaining_inference_methods):
                 # take parsimony
                 selected_method = Inference.PARSIMONY
-                self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+                self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
                 return selected_method
 
-        remaining_inference_methods = list(diff_dict2.keys())
+        remaining_inference_methods = list(pared_diff_dict.keys())
 
         if len(remaining_inference_methods)==1:
-            selected_method = list(diff_dict2.keys())[0]
+            selected_method = list(pared_diff_dict.keys())[0]
             # If we have one remaining just return it
-            self.logger.info("Inference {} Selected with score {}".format(selected_method, diff_dict2[selected_method]))
+            self.logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
             return selected_method
 
         if len(remaining_inference_methods)==0:

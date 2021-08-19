@@ -103,7 +103,7 @@ class TestMultiplicativeWorkflow(TestCase):
             target_file=TARGET_FILE_MULTIPLICATIVE,
             decoy_file=DECOY_FILE_MULTIPLICATIVE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
             append_alt_from_db=False,
         )
         pep_and_prot_data.read_psms()
@@ -114,7 +114,7 @@ class TestMultiplicativeWorkflow(TestCase):
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
         data = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest_class=digest
+            pep_and_prot_data, digest=digest
         )
 
         ### Step 5: Restrict the PSM data
@@ -139,7 +139,7 @@ class TestMultiplicativeWorkflow(TestCase):
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
-        score = py_protein_inference.scoring.Score(data_class=data)
+        score = py_protein_inference.scoring.Score(data=data)
         score.score_psms(score_method=protein_inference_parameters.protein_score)
 
         ### STEP 9: Run protein picker on the data
@@ -158,25 +158,25 @@ class TestMultiplicativeWorkflow(TestCase):
         # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == py_protein_inference.inference.Inference.PARSIMONY:
             group = py_protein_inference.inference.Parsimony(
-                data_class=data, digest_class=digest
+                data=data, digest=digest
             )
             group.infer_proteins(glpkinout_directory=None, skip_running_glpk=None)
 
         if inference_type == py_protein_inference.inference.Inference.INCLUSION:
             group = py_protein_inference.inference.Inclusion(
-                data_class=data, digest_class=digest
+                data=data, digest=digest
             )
             group.infer_proteins()
 
         if inference_type == py_protein_inference.inference.Inference.EXCLUSION:
             group = py_protein_inference.inference.Exclusion(
-                data_class=data, digest_class=digest
+                data=data, digest=digest
             )
             group.infer_proteins()
 
         if inference_type == py_protein_inference.inference.Inference.PEPTIDE_CENTRIC:
             group = py_protein_inference.inference.PeptideCentric(
-                data_class=data, digest_class=digest
+                data=data, digest=digest
             )
             group.infer_proteins()
 
@@ -189,7 +189,7 @@ class TestMultiplicativeWorkflow(TestCase):
         ### STEP 12: Export to CSV
         ### STEP 12: Export to CSV
         export_type = protein_inference_parameters.export
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(
             directory=os.path.join(OUTPUT_DIR, "leads"), export_type=export_type
         )

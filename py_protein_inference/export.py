@@ -8,7 +8,7 @@ class Export(object):
     Class that handles exporting protein inference results to filesystem as csv files
 
     Attributes:
-        data_class (py_protein_inference.datastore.DataStore): Data Class
+        data (py_protein_inference.datastore.DataStore): Data Class
         filepath (str): Path to file to be written
 
     """
@@ -34,25 +34,25 @@ class Export(object):
         EXPORT_PSM_IDS,
     ]
 
-    def __init__(self, data_class):
+    def __init__(self, data):
         """
         Initialization method for the Export class
 
         Args:
-            data_class (py_protein_inference.datastore.DataStore): Data Class
+            data (py_protein_inference.datastore.DataStore): Data Object
 
         Example:
-            >>> export = py_protein_inference.export.Export(data_class=data)
+            >>> export = py_protein_inference.export.Export(data=data)
 
         """
-        self.data_class = data_class
+        self.data = data
         self.filepath = None
 
     def export_to_csv(self, directory, export_type="q_value"):
         """
         Method that dispatches to one of the many export methods given an export_type input
 
-        filepath is determined based on directory arg and information from data_class :py:class:`py_protein_inference.datastore.DataStore`
+        filepath is determined based on directory arg and information from data :py:class:`py_protein_inference.datastore.DataStore`
 
         This method sets the :attr:`filepath` variable.
 
@@ -61,7 +61,7 @@ class Export(object):
             export_type (str): Must be a value in :attr:`EXPORT_TYPES` and determines the output format
 
         Example:
-            >>> export = py_protein_inference.export.Export(data_class=data)
+            >>> export = py_protein_inference.export.Export(data=data)
             >>> export.export_to_csv(directory="/path/to/output/dir/", export_type="psms")
 
         """
@@ -70,7 +70,7 @@ class Export(object):
         if not directory:
             directory = os.getcwd()
 
-        data = self.data_class
+        data = self.data
         tag = data.parameter_file_object.tag
 
         if self.EXPORT_LEADS == export_type:
@@ -177,7 +177,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
 
         """
-        protein_objects = self.data_class.get_protein_objects(fdr_restricted=True)
+        protein_objects = self.data.get_protein_objects(fdr_restricted=True)
         protein_export_list = [
             [
                 "Protein",
@@ -216,7 +216,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
 
         """
-        protein_objects = self.data_class.get_protein_objects(fdr_restricted=True)
+        protein_objects = self.data.get_protein_objects(fdr_restricted=True)
         protein_export_list = [
             [
                 "Protein",
@@ -255,7 +255,7 @@ class Export(object):
             filename_out (str): Filename for the data to be written to
 
         """
-        protein_objects = self.data_class.get_protein_objects(fdr_restricted=True)
+        protein_objects = self.data.get_protein_objects(fdr_restricted=True)
         protein_export_list = [
             [
                 "Protein",
@@ -304,7 +304,7 @@ class Export(object):
                 "Peptides",
             ]
         ]
-        for groups in self.data_class.protein_group_objects:
+        for groups in self.data.protein_group_objects:
             lead_protein = groups.proteins[0]
             protein_export_list.append([lead_protein.identifier])
             protein_export_list[-1].append(lead_protein.score)
@@ -345,7 +345,7 @@ class Export(object):
                 "Other_Potential_Identifiers",
             ]
         ]
-        for groups in self.data_class.protein_group_objects:
+        for groups in self.data.protein_group_objects:
             lead_protein = groups.proteins[0]
             protein_export_list.append([lead_protein.identifier])
             protein_export_list[-1].append(lead_protein.score)
@@ -386,7 +386,7 @@ class Export(object):
                 "Peptides",
             ]
         ]
-        for groups in self.data_class.protein_group_objects:
+        for groups in self.data.protein_group_objects:
             for proteins in groups.proteins:
                 protein_export_list.append([proteins.identifier])
                 protein_export_list[-1].append(proteins.score)
@@ -416,7 +416,7 @@ class Export(object):
                 "Peptides",
             ]
         ]
-        for groups in self.data_class.protein_group_objects:
+        for groups in self.data.protein_group_objects:
             for proteins in groups.proteins:
                 protein_export_list.append([proteins.identifier])
                 protein_export_list[-1].append(proteins.score)
@@ -436,7 +436,7 @@ class Export(object):
 
     def csv_export_q_value_all_long(self, filename_out):
         """
-        Class that outputs all lead proteins with Q values.
+        Method that outputs all lead proteins with Q values.
 
         This method returns a long formatted result file with one peptide on each row
 
@@ -455,7 +455,7 @@ class Export(object):
                 "Peptides",
             ]
         ]
-        for groups in self.data_class.protein_group_objects:
+        for groups in self.data.protein_group_objects:
             lead_protein = groups.proteins[0]
             for peps in lead_protein.peptides:
                 protein_export_list.append([lead_protein.identifier])
@@ -495,7 +495,7 @@ class Export(object):
                 "Peptides",
             ]
         ]
-        for groups in self.data_class.protein_group_objects:
+        for groups in self.data.protein_group_objects:
             lead_protein = groups.proteins[0]
             protein_export_list.append([lead_protein.identifier])
             protein_export_list[-1].append(lead_protein.score)
@@ -535,7 +535,7 @@ class Export(object):
                 "Peptides",
             ]
         ]
-        for groups in self.data_class.protein_group_objects:
+        for groups in self.data.protein_group_objects:
             lead_protein = groups.proteins[0]
             protein_export_list.append([lead_protein.identifier])
             protein_export_list[-1].append(lead_protein.score)
@@ -577,7 +577,7 @@ class Export(object):
                 "Peptides",
             ]
         ]
-        for groups in self.data_class.protein_group_objects:
+        for groups in self.data.protein_group_objects:
             lead_protein = groups.proteins[0]
             protein_export_list.append([lead_protein.identifier])
             protein_export_list[-1].append(lead_protein.score)

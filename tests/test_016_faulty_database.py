@@ -115,7 +115,7 @@ class TestFaultyDatabasePipeline(TestCase):
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest_normal,
+            digest=digest_normal,
         )
         pep_and_prot_data.read_psms()
 
@@ -125,7 +125,7 @@ class TestFaultyDatabasePipeline(TestCase):
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest_missing_pep,
+            digest=digest_missing_pep,
         )
         pep_and_prot_data_miss_pep.read_psms()
 
@@ -135,7 +135,7 @@ class TestFaultyDatabasePipeline(TestCase):
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest_missing_prot,
+            digest=digest_missing_prot,
         )
         pep_and_prot_data_miss_prot.read_psms()
 
@@ -143,15 +143,15 @@ class TestFaultyDatabasePipeline(TestCase):
 
         # Load the digests and reader objects into datastore objects
         data_normal = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest_class=digest_normal
+            pep_and_prot_data, digest=digest_normal
         )
 
         data_miss_pep = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data_miss_pep, digest_class=digest_missing_pep
+            pep_and_prot_data_miss_pep, digest=digest_missing_pep
         )
 
         data_miss_prot = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data_miss_prot, digest_class=digest_missing_prot
+            pep_and_prot_data_miss_prot, digest=digest_missing_prot
         )
 
         for i in range(len(data_normal.main_data_form)):

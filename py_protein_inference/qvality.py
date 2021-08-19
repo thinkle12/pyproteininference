@@ -17,13 +17,13 @@ class CalculateQandPepValues(Qvality):
 
     Input is a DataStore object
 
-    Example: py_protein_inference.qvality.CalculateQandPepValues(data_class = data)
+    Example: py_protein_inference.qvality.CalculateQandPepValues(data = data)
 
     """
 
-    def __init__(self, data_class):
-        self.grouped_scored_data = data_class.grouped_scored_proteins
-        self.data_class = data_class
+    def __init__(self, data):
+        self.grouped_scored_data = data.grouped_scored_proteins
+        self.data = data
         self.uuid = uuid.uuid4()
         self.uuid_tag = str(self.uuid)
         self.temp_dir = tempfile.gettempdir()

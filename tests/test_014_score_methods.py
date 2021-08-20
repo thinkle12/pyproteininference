@@ -4,21 +4,13 @@ from pkg_resources import resource_filename
 
 import py_protein_inference
 
-TEST_DATABASE = resource_filename(
-    "py_protein_inference", "../tests/data/test_database.fasta"
-)
-PARAMETER_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_params_inclusion.yaml"
-)
+TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
+PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('py_protein_inference', '../tests/output/')
 
-TARGET_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_target.txt"
-)
-DECOY_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_decoy.txt"
-)
+TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
+DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy.txt")
 
 temp_dir = tempfile.gettempdir()
 
@@ -53,7 +45,7 @@ class TestScoreMethods(TestCase):
             decoy_file=DECOY_FILE,
             combined_files=None,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
             append_alt_from_db=False,
         )
         pep_and_prot_data.read_psms()
@@ -61,9 +53,7 @@ class TestScoreMethods(TestCase):
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
-        data = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest_class=digest
-        )
+        data = py_protein_inference.datastore.DataStore(pep_and_prot_data, digest=digest)
 
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
@@ -85,7 +75,7 @@ class TestScoreMethods(TestCase):
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
-        score = py_protein_inference.scoring.Score(data_class=data)
+        score = py_protein_inference.scoring.Score(data=data)
         score.score_psms(score_method="best_peptide_per_protein")
         self.assertEqual(data.scored_proteins[0].score, 3.5e-06)
 

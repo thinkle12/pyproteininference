@@ -4,12 +4,8 @@ from pkg_resources import resource_filename
 import py_protein_inference
 
 
-TEST_DATABASE = resource_filename(
-    "py_protein_inference", "../tests/data/test_database.fasta"
-)
-PARAMETER_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_params_inclusion.yaml"
-)
+TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
+PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
 
 
 class TestDigest(TestCase):

@@ -37,6 +37,7 @@ class ProteinInferenceParameter(object):
         logger (logger.logging): Logger object
 
     """
+
     PARENT_PARAMETER_KEY = "parameters"
 
     GENERAL_PARAMETER_KEY = "general"
@@ -48,57 +49,52 @@ class ProteinInferenceParameter(object):
     PARSIMONY_PARAMETER_KEY = "parsimony"
     PEPTIDE_CENTRIC_PARAMETER_KEY = "peptide_centric"
 
-    PARAMETER_MAIN_KEYS = {GENERAL_PARAMETER_KEY,
-                           DATA_RESTRICTION_PARAMETER_KEY,
-                           SCORE_PARAMETER_KEY,
-                           IDENTIFIERS_PARAMETER_KEY,
-                           INFERENCE_PARAMETER_KEY,
-                           DIGEST_PARAMETER_KEY,
-                           PARSIMONY_PARAMETER_KEY,
-                           PEPTIDE_CENTRIC_PARAMETER_KEY}
+    PARAMETER_MAIN_KEYS = {
+        GENERAL_PARAMETER_KEY,
+        DATA_RESTRICTION_PARAMETER_KEY,
+        SCORE_PARAMETER_KEY,
+        IDENTIFIERS_PARAMETER_KEY,
+        INFERENCE_PARAMETER_KEY,
+        DIGEST_PARAMETER_KEY,
+        PARSIMONY_PARAMETER_KEY,
+        PEPTIDE_CENTRIC_PARAMETER_KEY,
+    }
 
     EXPORT_PARAMETER = "export"
     FDR_PARAMETER = "fdr"
     PICKER_PARAMETER = "picker"
     TAG_PARAMETER = "tag"
 
-    GENERAL_PARAMETER_SUB_KEYS = {EXPORT_PARAMETER,
-                                  FDR_PARAMETER,
-                                  PICKER_PARAMETER,
-                                  TAG_PARAMETER}
+    GENERAL_PARAMETER_SUB_KEYS = {EXPORT_PARAMETER, FDR_PARAMETER, PICKER_PARAMETER, TAG_PARAMETER}
 
     PEP_RESTRICT_PARAMETER = "pep_restriction"
     PEPTIDE_LENGTH_RESTRICT_PARAMETER = "peptide_length_restriction"
     Q_VALUE_RESTRICT_PARAMETER = "q_value_restriction"
     CUSTOM_RESTRICT_PARAMETER = "custom_restriction"
 
-    DATA_RESTRICTION_PARAMETER_SUB_KEYS = {PEP_RESTRICT_PARAMETER,
-                                           PEPTIDE_LENGTH_RESTRICT_PARAMETER,
-                                           Q_VALUE_RESTRICT_PARAMETER,
-                                           CUSTOM_RESTRICT_PARAMETER}
+    DATA_RESTRICTION_PARAMETER_SUB_KEYS = {
+        PEP_RESTRICT_PARAMETER,
+        PEPTIDE_LENGTH_RESTRICT_PARAMETER,
+        Q_VALUE_RESTRICT_PARAMETER,
+        CUSTOM_RESTRICT_PARAMETER,
+    }
 
     PROTEIN_SCORE_PARAMETER = "protein_score"
     PSM_SCORE_PARAMETER = "psm_score"
     PSM_SCORE_TYPE_PARAMETER = "psm_score_type"
 
-    SCORE_PARAMETER_SUB_KEYS = {PROTEIN_SCORE_PARAMETER,
-                                PSM_SCORE_PARAMETER,
-                                PSM_SCORE_TYPE_PARAMETER}
+    SCORE_PARAMETER_SUB_KEYS = {PROTEIN_SCORE_PARAMETER, PSM_SCORE_PARAMETER, PSM_SCORE_TYPE_PARAMETER}
 
     DECOY_SYMBOL_PARAMETER = "decoy_symbol"
     ISOFORM_SYMBOL_PARAMETER = "isoform_symbol"
     REVIEWED_IDENTIFIER_PARAMETER = "reviewed_identifier_symbol"
 
-    IDENTIFIER_SUB_KEYS = {DECOY_SYMBOL_PARAMETER,
-                                ISOFORM_SYMBOL_PARAMETER,
-                                REVIEWED_IDENTIFIER_PARAMETER}
+    IDENTIFIER_SUB_KEYS = {DECOY_SYMBOL_PARAMETER, ISOFORM_SYMBOL_PARAMETER, REVIEWED_IDENTIFIER_PARAMETER}
 
     INFERENCE_TYPE_PARAMETER = "inference_type"
     GROUPING_TYPE_PARAMETER = "grouping_type"
 
-    INFERENCE_SUB_KEYS = {INFERENCE_TYPE_PARAMETER,
-                          GROUPING_TYPE_PARAMETER}
-
+    INFERENCE_SUB_KEYS = {INFERENCE_TYPE_PARAMETER, GROUPING_TYPE_PARAMETER}
 
     DIGEST_TYPE_PARAMETER = "digest_type"
     MISSED_CLEAV_PARAMETER = "missed_cleavages"
@@ -109,17 +105,14 @@ class ProteinInferenceParameter(object):
     GLPK_PATH_PARAMETER = "glpk_path"
     SHARED_PEPTIDES_PARAMETER = "shared_peptides"
 
-    PARSIMONY_SUB_KEYS = {LP_SOLVER_PARAMETER,
-                          GLPK_PATH_PARAMETER,
-                          SHARED_PEPTIDES_PARAMETER}
+    PARSIMONY_SUB_KEYS = {LP_SOLVER_PARAMETER, GLPK_PATH_PARAMETER, SHARED_PEPTIDES_PARAMETER}
 
     MAX_IDENTIFIERS_PARAMETER = "max_identifiers"
 
     PEPTIDE_CENTRIC_SUB_KEYS = {MAX_IDENTIFIERS_PARAMETER}
 
-
     def __init__(self, yaml_param_filepath, validate=True):
-        """ Class to store Protein Inference parameter information as an object
+        """Class to store Protein Inference parameter information as an object
 
         Args:
             yaml_param_filepath (str): path to properly formatted parameter file specific to Protein Inference
@@ -157,9 +150,7 @@ class ProteinInferenceParameter(object):
         self.grouping_type = None
         self.max_identifiers_peptide_centric = None
         self.lp_solver = None
-        self.logger = getLogger(
-            "py_protein_inference.parameters.ProteinInferenceParameter.validate_parameters"
-        )
+        self.logger = getLogger("py_protein_inference.parameters.ProteinInferenceParameter.validate_parameters")
         self.validate = validate
 
         self.convert_to_object()
@@ -192,10 +183,14 @@ class ProteinInferenceParameter(object):
             if self.validate:
                 self._validate_parameter_shape(yaml_params=yaml_params)
 
-            self.digest_type = yaml_params[self.PARENT_PARAMETER_KEY][self.DIGEST_PARAMETER_KEY][self.DIGEST_TYPE_PARAMETER]
+            self.digest_type = yaml_params[self.PARENT_PARAMETER_KEY][self.DIGEST_PARAMETER_KEY][
+                self.DIGEST_TYPE_PARAMETER
+            ]
             self.export = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.EXPORT_PARAMETER]
             self.fdr = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.FDR_PARAMETER]
-            self.glpk_path = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][self.GLPK_PATH_PARAMETER]
+            self.glpk_path = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][
+                self.GLPK_PATH_PARAMETER
+            ]
             self.missed_cleavages = yaml_params[self.PARENT_PARAMETER_KEY][self.DIGEST_PARAMETER_KEY][
                 self.MISSED_CLEAV_PARAMETER
             ]
@@ -203,18 +198,24 @@ class ProteinInferenceParameter(object):
             self.restrict_pep = yaml_params[self.PARENT_PARAMETER_KEY][self.DATA_RESTRICTION_PARAMETER_KEY][
                 self.PEP_RESTRICT_PARAMETER
             ]
-            self.restrict_peptide_length = yaml_params[self.PARENT_PARAMETER_KEY][
-                self.DATA_RESTRICTION_PARAMETER_KEY
-            ][self.PEPTIDE_LENGTH_RESTRICT_PARAMETER]
+            self.restrict_peptide_length = yaml_params[self.PARENT_PARAMETER_KEY][self.DATA_RESTRICTION_PARAMETER_KEY][
+                self.PEPTIDE_LENGTH_RESTRICT_PARAMETER
+            ]
             self.restrict_q = yaml_params[self.PARENT_PARAMETER_KEY][self.DATA_RESTRICTION_PARAMETER_KEY][
                 self.Q_VALUE_RESTRICT_PARAMETER
             ]
             self.restrict_custom = yaml_params[self.PARENT_PARAMETER_KEY][self.DATA_RESTRICTION_PARAMETER_KEY][
                 self.CUSTOM_RESTRICT_PARAMETER
             ]
-            self.protein_score = yaml_params[self.PARENT_PARAMETER_KEY][self.SCORE_PARAMETER_KEY][self.PROTEIN_SCORE_PARAMETER]
-            self.psm_score_type = yaml_params[self.PARENT_PARAMETER_KEY][self.SCORE_PARAMETER_KEY][self.PSM_SCORE_TYPE_PARAMETER]
-            self.decoy_symbol = yaml_params[self.PARENT_PARAMETER_KEY][self.IDENTIFIERS_PARAMETER_KEY][self.DECOY_SYMBOL_PARAMETER]
+            self.protein_score = yaml_params[self.PARENT_PARAMETER_KEY][self.SCORE_PARAMETER_KEY][
+                self.PROTEIN_SCORE_PARAMETER
+            ]
+            self.psm_score_type = yaml_params[self.PARENT_PARAMETER_KEY][self.SCORE_PARAMETER_KEY][
+                self.PSM_SCORE_TYPE_PARAMETER
+            ]
+            self.decoy_symbol = yaml_params[self.PARENT_PARAMETER_KEY][self.IDENTIFIERS_PARAMETER_KEY][
+                self.DECOY_SYMBOL_PARAMETER
+            ]
             self.isoform_symbol = yaml_params[self.PARENT_PARAMETER_KEY][self.IDENTIFIERS_PARAMETER_KEY][
                 self.ISOFORM_SYMBOL_PARAMETER
             ]
@@ -226,21 +227,25 @@ class ProteinInferenceParameter(object):
             ]
             self.tag = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.TAG_PARAMETER]
             self.psm_score = yaml_params[self.PARENT_PARAMETER_KEY][self.SCORE_PARAMETER_KEY][self.PSM_SCORE_PARAMETER]
-            self.grouping_type = yaml_params[self.PARENT_PARAMETER_KEY][self.INFERENCE_PARAMETER_KEY][self.GROUPING_TYPE_PARAMETER]
+            self.grouping_type = yaml_params[self.PARENT_PARAMETER_KEY][self.INFERENCE_PARAMETER_KEY][
+                self.GROUPING_TYPE_PARAMETER
+            ]
             self.max_identifiers_peptide_centric = yaml_params[self.PARENT_PARAMETER_KEY][
                 self.PEPTIDE_CENTRIC_PARAMETER_KEY
             ][self.MAX_IDENTIFIERS_PARAMETER]
-            self.lp_solver = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][self.LP_SOLVER_PARAMETER]
+            self.lp_solver = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][
+                self.LP_SOLVER_PARAMETER
+            ]
             try:
                 # Do try except here to make old param files backwards compatible
-                self.shared_peptides = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][self.SHARED_PEPTIDES_PARAMETER]
+                self.shared_peptides = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][
+                    self.SHARED_PEPTIDES_PARAMETER
+                ]
             except KeyError:
                 self.shared_peptides = Inference.ALL_SHARED_PEPTIDES
 
         else:
-            self.logger.warning(
-                "Yaml parameter file not found, parameters set to default"
-            )
+            self.logger.warning("Yaml parameter file not found, parameters set to default")
             self.digest_type = "trypsin"
             self.export = "q_value"
             self.fdr = 0.01
@@ -327,11 +332,7 @@ class ProteinInferenceParameter(object):
                 self.logger.info("FDR Input {}".format(self.fdr))
 
         except ValueError:
-            raise ValueError(
-                "FDR must be a decimal between 0 and 1, FDR provided: {}".format(
-                    self.fdr
-                )
-            )
+            raise ValueError("FDR must be a decimal between 0 and 1, FDR provided: {}".format(self.fdr))
 
         try:
             if 0 <= float(self.restrict_pep) <= 1:
@@ -365,22 +366,15 @@ class ProteinInferenceParameter(object):
 
         try:
             int(self.missed_cleavages)
-            self.logger.info(
-                "Missed Cleavages selected: {}".format(self.missed_cleavages)
-            )
+            self.logger.info("Missed Cleavages selected: {}".format(self.missed_cleavages))
         except ValueError:
             raise ValueError(
-                "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(
-                    self.missed_cleavages
-                )
+                "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(self.missed_cleavages)
             )
 
         try:
             int(self.restrict_peptide_length)
-            self.logger.info(
-                "Peptide Length Restriction: Len {}".format(
-                    self.restrict_peptide_length
-                ))
+            self.logger.info("Peptide Length Restriction: Len {}".format(self.restrict_peptide_length))
         except ValueError:
             if not self.restrict_peptide_length or self.restrict_peptide_length.lower() == "none":
                 self.restrict_peptide_length = None
@@ -390,7 +384,7 @@ class ProteinInferenceParameter(object):
                     "Peptide Length Restriction must be an integer, Provided Peptide Length Restriction value: {}".format(
                         self.restrict_peptide_length
                     )
-            )
+                )
 
         try:
             float(self.restrict_custom)
@@ -401,9 +395,7 @@ class ProteinInferenceParameter(object):
                 self.logger.info("Not Restricting by Custom Value")
             else:
                 raise ValueError(
-                    "Custom restriction must be a number, Custom restriction provided: {}".format(
-                        self.restrict_custom
-                    )
+                    "Custom restriction must be a number, Custom restriction provided: {}".format(self.restrict_custom)
                 )
 
     def _validate_bools(self):
@@ -418,9 +410,7 @@ class ProteinInferenceParameter(object):
                 self.logger.info("Parameters loaded to NOT run Picker")
         else:
             raise ValueError(
-                "Picker Variable must be set to True or False, Picker Variable provided: {}".format(
-                    self.picker
-                )
+                "Picker Variable must be set to True or False, Picker Variable provided: {}".format(self.picker)
             )
 
     def _validate_score_method(self):
@@ -574,25 +564,12 @@ class ProteinInferenceParameter(object):
 
         """
         if type(self.decoy_symbol) == str:
-            self.logger.info(
-                "Decoy Symbol set to: '{}'".format(
-                    self.decoy_symbol
-                )
-            )
+            self.logger.info("Decoy Symbol set to: '{}'".format(self.decoy_symbol))
         else:
-            raise ValueError(
-                "Decoy Symbol must be a string, provided value: {}".format(
-                    self.decoy_symbol
-                )
-            )
-
+            raise ValueError("Decoy Symbol must be a string, provided value: {}".format(self.decoy_symbol))
 
         if type(self.isoform_symbol) == str:
-            self.logger.info(
-                "Isoform Symbol set to: '{}'".format(
-                    self.isoform_symbol
-                )
-            )
+            self.logger.info("Isoform Symbol set to: '{}'".format(self.isoform_symbol))
             if self.isoform_symbol.lower() == "none" or not self.isoform_symbol:
                 self.isoform_symbol = None
                 self.logger.info("Isoform Symbol set to None")
@@ -600,18 +577,10 @@ class ProteinInferenceParameter(object):
             if self.isoform_symbol:
                 self.isoform_symbol = None
                 self.logger.info("Isoform Symbol set to None")
-            raise ValueError(
-                "Isoform Symbol must be a string, provided value: {}".format(
-                    self.isoform_symbol
-                )
-            )
+            raise ValueError("Isoform Symbol must be a string, provided value: {}".format(self.isoform_symbol))
 
         if type(self.reviewed_identifier_symbol) == str:
-            self.logger.info(
-                "Reviewed Identifier Symbol set to: '{}'".format(
-                    self.reviewed_identifier_symbol
-                )
-            )
+            self.logger.info("Reviewed Identifier Symbol set to: '{}'".format(self.reviewed_identifier_symbol))
             if self.reviewed_identifier_symbol.lower() == "none" or not self.reviewed_identifier_symbol:
                 self.reviewed_identifier_symbol = None
                 self.logger.info("Reviewed Identifier Symbol set to None")
@@ -629,12 +598,18 @@ class ProteinInferenceParameter(object):
         if self.PARENT_PARAMETER_KEY in yaml_params.keys():
             self.logger.info("Main Parameter Key is Present")
         else:
-            raise ValueError("Key {} needs to be defined as the outermost parameter group".format(self.PARENT_PARAMETER_KEY))
+            raise ValueError(
+                "Key {} needs to be defined as the outermost parameter group".format(self.PARENT_PARAMETER_KEY)
+            )
 
         if self.PARAMETER_MAIN_KEYS.issubset(yaml_params[self.PARENT_PARAMETER_KEY]):
             self.logger.info("All Sub Parameter Keys Present")
         else:
-            raise ValueError("All of the following values: {}. Need to be Sub Parameters in the Yaml Parameter file".format(", ".join(self.PARAMETER_MAIN_KEYS), ))
+            raise ValueError(
+                "All of the following values: {}. Need to be Sub Parameters in the Yaml Parameter file".format(
+                    ", ".join(self.PARAMETER_MAIN_KEYS),
+                )
+            )
 
         try:
             general_params = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY]
@@ -642,7 +617,11 @@ class ProteinInferenceParameter(object):
                 if gkey in general_params.keys():
                     pass
                 else:
-                    raise ValueError("General Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the general parameter field".format(gkey))
+                    raise ValueError(
+                        "General Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the general parameter field".format(
+                            gkey
+                        )
+                    )
 
         except KeyError:
             raise ValueError("'general' sub Parameter not defined in the parameter file")
@@ -653,7 +632,11 @@ class ProteinInferenceParameter(object):
                 if drkey in data_res_params.keys():
                     pass
                 else:
-                    raise ValueError("Data Restriction Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the data_restriction parameter field".format(drkey))
+                    raise ValueError(
+                        "Data Restriction Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the data_restriction parameter field".format(
+                            drkey
+                        )
+                    )
 
         except KeyError:
             raise ValueError("'data_restriction' sub Parameter not defined in the parameter file")
@@ -664,7 +647,11 @@ class ProteinInferenceParameter(object):
                 if skey in score_params.keys():
                     pass
                 else:
-                    raise ValueError("Score Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the score parameter field".format(skey))
+                    raise ValueError(
+                        "Score Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the score parameter field".format(
+                            skey
+                        )
+                    )
 
         except KeyError:
             raise ValueError("'score' sub Parameter not defined in the parameter file")
@@ -675,7 +662,11 @@ class ProteinInferenceParameter(object):
                 if ikey in id_params.keys():
                     pass
                 else:
-                    raise ValueError("Identifiers Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the identifiers parameter field".format(ikey))
+                    raise ValueError(
+                        "Identifiers Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the identifiers parameter field".format(
+                            ikey
+                        )
+                    )
 
         except KeyError:
             raise ValueError("'identifiers' sub Parameter not defined in the parameter file")
@@ -686,7 +677,11 @@ class ProteinInferenceParameter(object):
                 if infkey in inf_params.keys():
                     pass
                 else:
-                    raise ValueError("Inference Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the inference parameter field".format(infkey))
+                    raise ValueError(
+                        "Inference Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the inference parameter field".format(
+                            infkey
+                        )
+                    )
 
         except KeyError:
             raise ValueError("'inference' sub Parameter not defined in the parameter file")
@@ -697,7 +692,11 @@ class ProteinInferenceParameter(object):
                 if dkey in digest_params.keys():
                     pass
                 else:
-                    raise ValueError("Digest Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the digest parameter field".format(dkey))
+                    raise ValueError(
+                        "Digest Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the digest parameter field".format(
+                            dkey
+                        )
+                    )
 
         except KeyError:
             raise ValueError("'digest' sub Parameter not defined in the parameter file")
@@ -708,7 +707,11 @@ class ProteinInferenceParameter(object):
                 if pkey in parsimony_params.keys():
                     pass
                 else:
-                    raise ValueError("Parsimony Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the parsimony parameter field".format(pkey))
+                    raise ValueError(
+                        "Parsimony Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the parsimony parameter field".format(
+                            pkey
+                        )
+                    )
 
         except KeyError:
             raise ValueError("'parsimony' sub Parameter not defined in the parameter file")
@@ -719,20 +722,24 @@ class ProteinInferenceParameter(object):
                 if pckey in pep_cen_params.keys():
                     pass
                 else:
-                    raise ValueError("Peptide Centric Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the peptide_centric parameter field".format(pckey))
+                    raise ValueError(
+                        "Peptide Centric Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the peptide_centric parameter field".format(
+                            pckey
+                        )
+                    )
 
         except KeyError:
             raise ValueError("'peptide_centric' sub Parameter not defined in the parameter file")
 
-    def override_q_restrict(self, data_class):
+    def override_q_restrict(self, data):
         """
         ProteinInferenceParameter method to override restrict_q if the input data does not contain q values.
 
         Args:
-            data_class (py_protein_inference.datastore.DataStore): Data class
+            data (py_protein_inference.datastore.DataStore): Data Object
 
         """
-        data_has_q = data_class.input_has_q()
+        data_has_q = data.input_has_q()
         if data_has_q:
             pass
         else:
@@ -742,15 +749,15 @@ class ProteinInferenceParameter(object):
                 )
                 self.restrict_q = None
 
-    def override_pep_restrict(self, data_class):
+    def override_pep_restrict(self, data):
         """
         ProteinInferenceParameter method to override restrict_pep if the input data does not contain pep values.
 
         Args:
-            data_class (py_protein_inference.datastore.DataStore): Data class
+            data (py_protein_inference.datastore.DataStore): Data Object
 
         """
-        data_has_pep = data_class.input_has_pep()
+        data_has_pep = data.input_has_pep()
         if data_has_pep:
             pass
         else:
@@ -760,15 +767,15 @@ class ProteinInferenceParameter(object):
                 )
                 self.restrict_pep = None
 
-    def override_custom_restrict(self, data_class):
+    def override_custom_restrict(self, data):
         """
         ProteinInferenceParameter method to override restrict_custom if the input data does not contain custom score values.
 
         Args:
-            data_class (py_protein_inference.datastore.DataStore): Data class
+            data (py_protein_inference.datastore.DataStore): Data Object
 
         """
-        data_has_custom = data_class.input_has_custom()
+        data_has_custom = data.input_has_custom()
         if data_has_custom:
             pass
         else:
@@ -778,19 +785,18 @@ class ProteinInferenceParameter(object):
                 )
                 self.restrict_custom = None
 
-
-    def fix_parameters_from_datastore(self,data_class):
+    def fix_parameters_from_datastore(self, data):
         """
         ProteinInferenceParameter method to override restriction values in the parameter file if those scores do not exist in the input files
 
         Args:
-            data_class (py_protein_inference.datastore.DataStore): Data class
+            data (py_protein_inference.datastore.DataStore): Data Object
 
         """
 
-        self.override_q_restrict(data_class=data_class)
-        self.override_pep_restrict(data_class=data_class)
-        self.override_custom_restrict(data_class=data_class)
+        self.override_q_restrict(data=data)
+        self.override_pep_restrict(data=data)
+        self.override_custom_restrict(data=data)
 
     def _fix_none_parameters(self):
         """
@@ -802,7 +808,6 @@ class ProteinInferenceParameter(object):
         self._fix_glpk_path()
         self._fix_lp_solver()
         self._fix_shared_peptides()
-
 
     def _fix_grouping_type(self):
         """

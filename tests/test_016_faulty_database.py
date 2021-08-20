@@ -15,24 +15,16 @@ from py_protein_inference.parameters import ProteinInferenceParameter
 import os
 import logging
 
-TEST_DATABASE_ORIGINAL = resource_filename(
-    "py_protein_inference", "../tests/data/test_database.fasta"
-)
+TEST_DATABASE_ORIGINAL = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 TEST_DATABASE_MISSING_PEP = resource_filename(
     "py_protein_inference", "../tests/data/test_database_missing_peptide.fasta"
 )
 TEST_DATABASE_MISSING_PROT = resource_filename(
     "py_protein_inference", "../tests/data/test_database_missing_protein.fasta"
 )
-TARGET_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_target.txt"
-)
-DECOY_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_decoy.txt"
-)
-PARAMETER_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_params_inclusion.yaml"
-)
+TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
+DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy.txt")
+PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('py_protein_inference', '../tests/output/')
 for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
@@ -67,17 +59,13 @@ GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(
-    "py_protein_inference.tests.test_016_test_faulty_database_pipeline"
-)
+logger = logging.getLogger("py_protein_inference.tests.test_016_test_faulty_database_pipeline")
 
 
 class TestFaultyDatabasePipeline(TestCase):
     def test_faulty_database_pipeline(self):
 
-        protein_inference_parameters = ProteinInferenceParameter(
-            yaml_param_filepath=PARAMETER_FILE
-        )
+        protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE)
 
         # Perform digest on each database
         digest_normal = in_silico_digest.InSilicoDigest(
@@ -115,7 +103,7 @@ class TestFaultyDatabasePipeline(TestCase):
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest_normal,
+            digest=digest_normal,
         )
         pep_and_prot_data.read_psms()
 
@@ -125,7 +113,7 @@ class TestFaultyDatabasePipeline(TestCase):
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest_missing_pep,
+            digest=digest_missing_pep,
         )
         pep_and_prot_data_miss_pep.read_psms()
 
@@ -135,23 +123,19 @@ class TestFaultyDatabasePipeline(TestCase):
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest_missing_prot,
+            digest=digest_missing_prot,
         )
         pep_and_prot_data_miss_prot.read_psms()
 
         self.assertEqual(len(pep_and_prot_data_miss_prot.psms), 27)
 
         # Load the digests and reader objects into datastore objects
-        data_normal = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest_class=digest_normal
-        )
+        data_normal = py_protein_inference.datastore.DataStore(pep_and_prot_data, digest=digest_normal)
 
-        data_miss_pep = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data_miss_pep, digest_class=digest_missing_pep
-        )
+        data_miss_pep = py_protein_inference.datastore.DataStore(pep_and_prot_data_miss_pep, digest=digest_missing_pep)
 
         data_miss_prot = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data_miss_prot, digest_class=digest_missing_prot
+            pep_and_prot_data_miss_prot, digest=digest_missing_prot
         )
 
         for i in range(len(data_normal.main_data_form)):
@@ -231,9 +215,7 @@ class TestFaultyDatabasePipeline(TestCase):
         for peps in stripped_peptides:
             self.assertIn(peps, digest_normal.peptide_to_protein_dictionary.keys())
             self.assertIn(peps, digest_missing_pep.peptide_to_protein_dictionary.keys())
-            self.assertIn(
-                peps, digest_missing_prot.peptide_to_protein_dictionary.keys()
-            )
+            self.assertIn(peps, digest_missing_prot.peptide_to_protein_dictionary.keys())
             self.assertSetEqual(
                 digest_normal.peptide_to_protein_dictionary[peps],
                 digest_missing_pep.peptide_to_protein_dictionary[peps],
@@ -245,12 +227,8 @@ class TestFaultyDatabasePipeline(TestCase):
 
         for prots in proteins:
             self.assertIn(prots, digest_normal.protein_to_peptide_dictionary.keys())
-            self.assertIn(
-                prots, digest_missing_pep.protein_to_peptide_dictionary.keys()
-            )
-            self.assertIn(
-                prots, digest_missing_prot.protein_to_peptide_dictionary.keys()
-            )
+            self.assertIn(prots, digest_missing_pep.protein_to_peptide_dictionary.keys())
+            self.assertIn(prots, digest_missing_prot.protein_to_peptide_dictionary.keys())
 
         # Check to make sure datastore dictionaries are equal
         self.assertDictEqual(

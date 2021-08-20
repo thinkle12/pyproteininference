@@ -24,8 +24,8 @@ class ProteinInferencePipeline(object):
         id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
         append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
         logger (logging.logger): Logger object for logging
-        data_class (py_protein_inference.datastore.DataStore): Data Class
-        digest_class (py_protein_inference.in_silico_digest.Digest): Digest Class
+        data (py_protein_inference.datastore.DataStore): Data Class
+        digest (py_protein_inference.in_silico_digest.Digest): Digest Class
 
     """
 
@@ -75,9 +75,7 @@ class ProteinInferencePipeline(object):
             >>>     append_alt_from_db=append_alt,
             >>> )
         """
-        self.logger = logging.getLogger(
-            "py_protein_inference.pipeline.ProteinInferencePipeline"
-        )
+        self.logger = logging.getLogger("py_protein_inference.pipeline.ProteinInferencePipeline")
 
         # set up our logger
         logging.basicConfig(
@@ -105,7 +103,6 @@ class ProteinInferencePipeline(object):
         self._set_output_directory()
 
         self._log_append_alt_from_db()
-
 
     def execute(self):
         """
@@ -162,11 +159,7 @@ class ProteinInferencePipeline(object):
             id_splitting=self.id_splitting,
         )
         if self.database_file:
-            self.logger.info(
-                "Running In Silico Database Digest on file {}".format(
-                    self.database_file
-                )
-            )
+            self.logger.info("Running In Silico Database Digest on file {}".format(self.database_file))
             digest.digest_fasta_database()
         else:
             self.logger.warning(
@@ -181,17 +174,15 @@ class ProteinInferencePipeline(object):
             decoy_file=self.decoy_files,
             combined_files=self.combined_files,
             parameter_file_object=py_protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
             append_alt_from_db=self.append_alt_from_db,
         )
         reader.read_psms()
 
-        ### STEP 4: Initiate the datastore class ###
-        ### STEP 4: Initiate the datastore class ###
-        ### STEP 4: Initiate the datastore class ###
-        data = py_protein_inference.datastore.DataStore(
-            reader_class=reader, digest_class=digest
-        )
+        ### STEP 4: Initiate the datastore object ###
+        ### STEP 4: Initiate the datastore object ###
+        ### STEP 4: Initiate the datastore object ###
+        data = py_protein_inference.datastore.DataStore(reader=reader, digest=digest)
 
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
@@ -213,7 +204,7 @@ class ProteinInferencePipeline(object):
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
-        score = py_protein_inference.scoring.Score(data_class=data)
+        score = py_protein_inference.scoring.Score(data=data)
         score.score_psms(score_method=py_protein_inference_parameters.protein_score)
 
         ### STEP 9: Run protein picker on the data
@@ -227,7 +218,7 @@ class ProteinInferencePipeline(object):
         ### STEP 10: Apply Inference
         ### STEP 10: Apply Inference
         ### STEP 10: Apply Inference
-        py_protein_inference.inference.Inference.run_inference(data_class=data, digest_class=digest)
+        py_protein_inference.inference.Inference.run_inference(data=data, digest=digest)
 
         ### STEP 11: Q value Calculations
         ### STEP 11: Q value Calculations
@@ -237,7 +228,7 @@ class ProteinInferencePipeline(object):
         ### STEP 12: Export to CSV
         ### STEP 12: Export to CSV
         ### STEP 12: Export to CSV
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(directory=self.output_directory, export_type=py_protein_inference_parameters.export)
 
         self.data = data
@@ -312,21 +303,15 @@ class ProteinInferencePipeline(object):
         reassigns these files to the target_files, decoy_files, and combined_files to be used in :py:class:`py_protein_inference.reader.Reader` object
         """
         if self.target_directory and self.decoy_directory:
-            self.logger.info(
-                "Transforming target_directory and decoy_directory into files"
-            )
+            self.logger.info("Transforming target_directory and decoy_directory into files")
             target_files = os.listdir(self.target_directory)
             target_files_full = [
-                os.path.join(self.target_directory, x)
-                for x in target_files
-                if x.endswith(".txt") or x.endswith(".tsv")
+                os.path.join(self.target_directory, x) for x in target_files if x.endswith(".txt") or x.endswith(".tsv")
             ]
 
             decoy_files = os.listdir(self.decoy_directory)
             decoy_files_full = [
-                os.path.join(self.decoy_directory, x)
-                for x in decoy_files
-                if x.endswith(".txt") or x.endswith(".tsv")
+                os.path.join(self.decoy_directory, x) for x in decoy_files if x.endswith(".txt") or x.endswith(".tsv")
             ]
 
             self.target_files = target_files_full

@@ -14,18 +14,10 @@ import py_protein_inference
 import logging
 
 
-TEST_DATABASE = resource_filename(
-    "py_protein_inference", "../tests/data/test_database.fasta"
-)
-TARGET_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_target.txt"
-)
-DECOY_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_decoy.txt"
-)
-PARAMETER_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_params_parsimony_glpk.yaml"
-)
+TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
+TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
+DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy.txt")
+PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_parsimony_glpk.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('py_protein_inference', '../tests/output/')
 GLPKINOUT_PATH = resource_filename("py_protein_inference", "../tests/glpkinout/")
@@ -55,9 +47,7 @@ class TestExportTypes(TestCase):
         self.assertEqual(protein_inference_parameters.restrict_pep, 0.9)
         self.assertEqual(protein_inference_parameters.restrict_peptide_length, 7)
         self.assertEqual(protein_inference_parameters.restrict_q, 0.9)
-        self.assertEqual(
-            protein_inference_parameters.protein_score, "multiplicative_log"
-        )
+        self.assertEqual(protein_inference_parameters.protein_score, "multiplicative_log")
         self.assertEqual(protein_inference_parameters.psm_score, "posterior_error_prob")
         self.assertEqual(protein_inference_parameters.psm_score_type, "multiplicative")
         self.assertEqual(protein_inference_parameters.decoy_symbol, "##")
@@ -66,9 +56,7 @@ class TestExportTypes(TestCase):
         self.assertEqual(protein_inference_parameters.inference_type, "parsimony")
         self.assertEqual(protein_inference_parameters.tag, "test_parsimony")
         self.assertEqual(protein_inference_parameters.grouping_type, "shared_peptides")
-        self.assertEqual(
-            protein_inference_parameters.max_identifiers_peptide_centric, 5
-        )
+        self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
         self.assertEqual(protein_inference_parameters.lp_solver, "glpk")
 
         ### STEP 2: Start with running an In Silico Digestion ###
@@ -93,7 +81,7 @@ class TestExportTypes(TestCase):
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
             append_alt_from_db=False,
         )
         pep_and_prot_data.read_psms()
@@ -103,9 +91,7 @@ class TestExportTypes(TestCase):
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
-        data = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest_class=digest
-        )
+        data = py_protein_inference.datastore.DataStore(pep_and_prot_data, digest=digest)
 
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
@@ -129,7 +115,7 @@ class TestExportTypes(TestCase):
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
         ### STEP 8: Score our PSMs given a score method
-        score = py_protein_inference.scoring.Score(data_class=data)
+        score = py_protein_inference.scoring.Score(data=data)
         score.score_psms(score_method=protein_inference_parameters.protein_score)
 
         ### STEP 9: Run protein picker on the data
@@ -147,23 +133,15 @@ class TestExportTypes(TestCase):
 
         # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == py_protein_inference.inference.Inference.PARSIMONY:
-            group = py_protein_inference.inference.Parsimony(
-                data_class=data, digest_class=digest
-            )
-            group.infer_proteins(
-                glpkinout_directory=GLPKINOUT_PATH, skip_running_glpk=SKIP_RUNNING_GLPK
-            )
+            group = py_protein_inference.inference.Parsimony(data=data, digest=digest)
+            group.infer_proteins(glpkinout_directory=GLPKINOUT_PATH, skip_running_glpk=SKIP_RUNNING_GLPK)
 
         if inference_type == py_protein_inference.inference.Inference.INCLUSION:
-            group = py_protein_inference.inference.Inclusion(
-                data_class=data, digest_class=digest
-            )
+            group = py_protein_inference.inference.Inclusion(data=data, digest=digest)
             group.infer_proteins()
 
         if inference_type == py_protein_inference.inference.Inference.EXCLUSION:
-            group = py_protein_inference.inference.Exclusion(
-                data_class=data, digest_class=digest
-            )
+            group = py_protein_inference.inference.Exclusion(data=data, digest=digest)
             group.infer_proteins()
 
         ### STEP 11: Run FDR and Q value Calculations
@@ -172,7 +150,7 @@ class TestExportTypes(TestCase):
         data.calculate_q_values()
 
         export_type = "peptides"
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(directory=OUTPUT_DIR, export_type=export_type)
 
         output = []
@@ -196,7 +174,7 @@ class TestExportTypes(TestCase):
         )
 
         export_type = "psms"
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(directory=OUTPUT_DIR, export_type=export_type)
 
         output = []
@@ -220,7 +198,7 @@ class TestExportTypes(TestCase):
         )
 
         export_type = "psm_ids"
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(directory=OUTPUT_DIR, export_type=export_type)
 
         output = []
@@ -244,7 +222,7 @@ class TestExportTypes(TestCase):
         )
 
         export_type = "q_value"
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(directory=OUTPUT_DIR, export_type=export_type)
 
         output = []
@@ -279,7 +257,7 @@ class TestExportTypes(TestCase):
         )
 
         export_type = "q_value_all"
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(directory=OUTPUT_DIR, export_type=export_type)
 
         output = []
@@ -314,7 +292,7 @@ class TestExportTypes(TestCase):
         )
 
         export_type = "q_value_comma_sep"
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(directory=OUTPUT_DIR, export_type=export_type)
 
         output = []
@@ -339,7 +317,7 @@ class TestExportTypes(TestCase):
         )
 
         export_type = "leads"
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(directory=OUTPUT_DIR, export_type=export_type)
 
         output = []
@@ -367,7 +345,7 @@ class TestExportTypes(TestCase):
         )
 
         export_type = "all"
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(directory=OUTPUT_DIR, export_type=export_type)
 
         output = []
@@ -390,7 +368,7 @@ class TestExportTypes(TestCase):
         )
 
         export_type = "comma_sep"
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(directory=OUTPUT_DIR, export_type=export_type)
 
         output = []

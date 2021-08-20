@@ -14,9 +14,7 @@ from py_protein_inference.parameters import ProteinInferenceParameter
 import logging
 
 
-TEST_DATABASE = resource_filename(
-    "py_protein_inference", "../tests/data/test_database.fasta"
-)
+TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 
 TARGET_FILE_MULTIPLICATIVE = resource_filename(
     "py_protein_inference", "../tests/data/test_perc_data_target_multiplicative.txt"
@@ -28,12 +26,8 @@ PARAMETER_FILE_MULTIPLICATIVE = resource_filename(
     "py_protein_inference", "../tests/data/test_params_multiplicative_custom_score.yaml"
 )
 
-TARGET_FILE_ADDITIVE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_target_additive.txt"
-)
-DECOY_FILE_ADDITIVE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_decoy_additive.txt"
-)
+TARGET_FILE_ADDITIVE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target_additive.txt")
+DECOY_FILE_ADDITIVE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy_additive.txt")
 PARAMETER_FILE_ADDITIVE = resource_filename(
     "py_protein_inference", "../tests/data/test_params_additive_custom_score.yaml"
 )
@@ -46,9 +40,7 @@ logger = logging.getLogger("py_protein_inference.tests.test_019_custom_score_res
 class TestCustomRestrict(TestCase):
     def test_override_params_and_mult_restrict(self):
 
-        protein_inference_parameters = ProteinInferenceParameter(
-            yaml_param_filepath=PARAMETER_FILE_MULTIPLICATIVE
-        )
+        protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE_MULTIPLICATIVE)
 
         # Redefine some of the param options...
         protein_inference_parameters.restrict_pep = 0.9
@@ -69,15 +61,13 @@ class TestCustomRestrict(TestCase):
             target_file=TARGET_FILE_MULTIPLICATIVE,
             decoy_file=DECOY_FILE_MULTIPLICATIVE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
         )
         pep_and_prot_data.read_psms()
 
         self.assertEqual(len(pep_and_prot_data.psms), 27)
 
-        data = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest_class=digest
-        )
+        data = py_protein_inference.datastore.DataStore(pep_and_prot_data, digest=digest)
 
         data.restrict_psm_data()
 
@@ -90,9 +80,7 @@ class TestCustomRestrict(TestCase):
 
     def test_override_params_and_add_restrict(self):
 
-        protein_inference_parameters = ProteinInferenceParameter(
-            yaml_param_filepath=PARAMETER_FILE_ADDITIVE
-        )
+        protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE_ADDITIVE)
 
         # Redefine some of the param options...
         protein_inference_parameters.restrict_pep = 0.9
@@ -113,15 +101,13 @@ class TestCustomRestrict(TestCase):
             target_file=TARGET_FILE_ADDITIVE,
             decoy_file=DECOY_FILE_ADDITIVE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
         )
         pep_and_prot_data.read_psms()
 
         self.assertEqual(len(pep_and_prot_data.psms), 27)
 
-        data = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest_class=digest
-        )
+        data = py_protein_inference.datastore.DataStore(pep_and_prot_data, digest=digest)
 
         data.restrict_psm_data()
 

@@ -22,9 +22,7 @@ class Reader(object):
 
     MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
 
-    def __init__(
-        self, target_file=None, decoy_file=None, combined_files=None, directory=None
-    ):
+    def __init__(self, target_file=None, decoy_file=None, combined_files=None, directory=None):
         """
 
         Args:
@@ -58,36 +56,18 @@ class Reader(object):
         # We will have to read the file n twice but I dont think it will matter...
         # This way we can skip the digest which takes up a bunch of memory... And we can digest just based on whats in the file... :)
         price_count = itertools.count(1)
-        return [
-            "alternative_protein_{}".format(next(price_count)) if f == "" else f
-            for f in fieldnames
-        ]
+        return ["alternative_protein_{}".format(next(price_count)) if f == "" else f for f in fieldnames]
 
     def _validate_input(self):
         """
         Internal method to validate the input to Reader
 
         """
-        if (
-            self.target_file
-            and self.decoy_file
-            and not self.combined_files
-            and not self.directory
-        ):
+        if self.target_file and self.decoy_file and not self.combined_files and not self.directory:
             self.logger.info("Validating input as target_file and decoy_file")
-        elif (
-            self.combined_files
-            and not self.target_file
-            and not self.decoy_file
-            and not self.directory
-        ):
+        elif self.combined_files and not self.target_file and not self.decoy_file and not self.directory:
             self.logger.info("Validating input as combined_files")
-        elif (
-            self.directory
-            and not self.combined_files
-            and not self.decoy_file
-            and not self.target_file
-        ):
+        elif self.directory and not self.combined_files and not self.decoy_file and not self.target_file:
             self.logger.info("Validating input as combined_directory")
         else:
             raise ValueError(
@@ -126,16 +106,11 @@ class Reader(object):
             for alt_proteins in identifiers_sorted[:max_proteins]:
                 # If the identifier is not already in possible proteins and if then len of poss prot is less than the max...
                 # Then append
-                if (
-                    alt_proteins not in psm.possible_proteins
-                    and len(psm.possible_proteins) < max_proteins
-                ):
+                if alt_proteins not in psm.possible_proteins and len(psm.possible_proteins) < max_proteins:
                     psm.possible_proteins.append(alt_proteins)
         # Next if the len of possible proteins is greater than max then restrict the list length...
         if len(psm.possible_proteins) > max_proteins:
-            psm.possible_proteins = [
-                psm.possible_proteins[x] for x in range(max_proteins)
-            ]
+            psm.possible_proteins = [psm.possible_proteins[x] for x in range(max_proteins)]
         else:
             pass
 
@@ -148,13 +123,14 @@ class Reader(object):
 
 class PercolatorReader(Reader):
     """
-    The following class takes a percolator target file and a percolator decoy file  or combined files/directory and creates standard :py:class:`py_protein_inference.physical.Psm` objects.
+    The following class takes a percolator target file and a percolator decoy file
+    or combined files/directory and creates standard :py:class:`py_protein_inference.physical.Psm` objects.
     This reader class is used as input for :py:class:`py_protein_inference.datastore.DataStore`
 
     Percolator Output is formatted as follows:
-    with each entry being tabbed delimited
-    PSMId	 score	q-value	posterior_error_prob	peptide	proteinIds
-    116108.15139.15139.6.dta	 3.44016	 0.000479928	7.60258e-10	K.MVVSMTLGLHPWIANIDDTQYLAAK.R	CNDP1_HUMAN|Q96KN2	B4E180_HUMAN|B4E180	A8K1K1_HUMAN|A8K1K1	J3KRP0_HUMAN|J3KRP0
+    with each entry being tabbed delimited (Comma separated showed below)
+    PSMId   score   q-value posterior_error_prob    peptide proteinIds
+    116108.15139.15139.6.dta    3.44016 0.000479928 7.60258e-10 K.MVVSMTLGLHPWIANIDDTQYLAAK.R   CNDP1_HUMAN|Q96KN2  B4E180_HUMAN|B4E180 A8K1K1_HUMAN|A8K1K1 J3KRP0_HUMAN|J3KRP0
 
     Attributes:
         target_file (str/list): Path to Target PSM result files
@@ -181,7 +157,7 @@ class PercolatorReader(Reader):
 
     def __init__(
         self,
-        digest_class,
+        digest,
         parameter_file_object,
         append_alt_from_db=True,
         target_file=None,
@@ -192,7 +168,7 @@ class PercolatorReader(Reader):
         """
 
         Args:
-            digest_class (py_protein_inference.in_silico_digest.Digest):
+            digest (py_protein_inference.in_silico_digest.Digest):
             parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
             target_file (str/list): Path to Target PSM result files
@@ -205,7 +181,7 @@ class PercolatorReader(Reader):
 
         Example:
             >>> py_protein_inference.reader.PercolatorReader(target_file = "example_target.txt",
-            >>>     decoy_file = "example_decoy.txt", digest_class=digest,parameter_file_object=pi_params)
+            >>>     decoy_file = "example_decoy.txt", digest=digest,parameter_file_object=pi_params)
         """
         self.target_file = target_file
         self.decoy_file = decoy_file
@@ -215,14 +191,13 @@ class PercolatorReader(Reader):
 
         self.psms = None
         self.search_id = None
-        self.digest_class = digest_class
+        self.digest = digest
         self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
         self.logger = getLogger("py_protein_inference.reader.PercolatorReader.read_psms")
 
         self._validate_input()
-
 
     def read_psms(self):
         """
@@ -234,7 +209,7 @@ class PercolatorReader(Reader):
 
         Example:
             >>> reader = py_protein_inference.reader.PercolatorReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt",
-            >>>     digest_class=digest, parameter_file_object=pi_params)
+            >>>     digest=digest, parameter_file_object=pi_params)
             >>> reader.read_psms()
 
         """
@@ -324,7 +299,7 @@ class PercolatorReader(Reader):
                 all = all + combined_psm_result_rows
             perc_all = all
 
-        peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
+        peptide_to_protein_dictionary = self.digest.peptide_to_protein_dictionary
 
         perc_all_filtered = []
         for psms in perc_all:
@@ -348,7 +323,7 @@ class PercolatorReader(Reader):
 
         list_of_psm_objects = []
         peptide_tracker = set()
-        all_sp_proteins = set(self.digest_class.swiss_prot_protein_set)
+        all_sp_proteins = set(self.digest.swiss_prot_protein_set)
         # We only want to get unique peptides... using all messes up scoring...
         # Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
 
@@ -371,14 +346,11 @@ class PercolatorReader(Reader):
                     poss_proteins = list(
                         set(
                             psm_info[
-                                self.PROTEINIDS_INDEX : self.PROTEINIDS_INDEX
-                                + self.MAX_ALLOWED_ALTERNATIVE_PROTEINS
+                                self.PROTEINIDS_INDEX : self.PROTEINIDS_INDEX + self.MAX_ALLOWED_ALTERNATIVE_PROTEINS
                             ]
                         )
                     )
-                combined_psm_result_rows.possible_proteins = (
-                    poss_proteins  # Restrict to 50 total possible proteins...
-                )
+                combined_psm_result_rows.possible_proteins = poss_proteins  # Restrict to 50 total possible proteins...
                 combined_psm_result_rows.psm_id = psm_info[self.PSMID_INDEX]
 
                 # Split peptide if flanking
@@ -403,16 +375,10 @@ class PercolatorReader(Reader):
                         )
                     )
                     for poss_prot in combined_psm_result_rows.possible_proteins:
-                        self.digest_class.peptide_to_protein_dictionary.setdefault(
-                            current_peptide, set()
-                        ).add(poss_prot)
-                        self.digest_class.protein_to_peptide_dictionary.setdefault(
-                            poss_prot, set()
-                        ).add(current_peptide)
+                        self.digest.peptide_to_protein_dictionary.setdefault(current_peptide, set()).add(poss_prot)
+                        self.digest.protein_to_peptide_dictionary.setdefault(poss_prot, set()).add(current_peptide)
                         self.logger.info(
-                            "Adding Peptide {} and Protein {} to Digest dictionaries".format(
-                                current_peptide, poss_prot
-                            )
+                            "Adding Peptide {} and Protein {} to Digest dictionaries".format(current_peptide, poss_prot)
                         )
 
                 # Sort Alt Proteins by Swissprot then Trembl...
@@ -432,7 +398,9 @@ class PercolatorReader(Reader):
                 )
 
                 # Remove blank alt proteins
-                combined_psm_result_rows.possible_proteins = [x for x in combined_psm_result_rows.possible_proteins if x != ""]
+                combined_psm_result_rows.possible_proteins = [
+                    x for x in combined_psm_result_rows.possible_proteins if x != ""
+                ]
 
                 list_of_psm_objects.append(combined_psm_result_rows)
                 peptide_tracker.add(current_peptide)
@@ -452,7 +420,7 @@ class ProteologicPostSearchReader(Reader):
         proteologic_object (list): List of proteologic post search objects
         search_id (int): Search ID or Search IDs associated with the data
         postsearch_id: PostSearch ID or PostSearch IDs associated with the data
-        digest_class (py_protein_inference.in_silico_digest.Digest):
+        digest (py_protein_inference.in_silico_digest.Digest):
         parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
         append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
         logger (logger.logging): Logger object
@@ -464,7 +432,7 @@ class ProteologicPostSearchReader(Reader):
         proteologic_object,
         search_id,
         postsearch_id,
-        digest_class,
+        digest,
         parameter_file_object,
         append_alt_from_db=True,
     ):
@@ -474,7 +442,7 @@ class ProteologicPostSearchReader(Reader):
             proteologic_object (list): List of proteologic post search objects
             search_id (int): Search ID or Search IDs associated with the data
             postsearch_id: PostSearch ID or PostSearch IDs associated with the data
-            digest_class (py_protein_inference.in_silico_digest.Digest):
+            digest (py_protein_inference.in_silico_digest.Digest):
             parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
 
@@ -487,13 +455,11 @@ class ProteologicPostSearchReader(Reader):
         self.postsearch_id = postsearch_id
 
         self.psms = None
-        self.digest_class = digest_class
+        self.digest = digest
         self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
-        self.logger = getLogger(
-            "py_protein_inference.reader.ProteologicPostSearchReader.read_psms"
-        )
+        self.logger = getLogger("py_protein_inference.reader.ProteologicPostSearchReader.read_psms")
 
     def read_psms(self):
         """
@@ -516,11 +482,11 @@ class ProteologicPostSearchReader(Reader):
         # Sort this by posterior error prob...
         list_of_psms = sorted(list_of_psms, key=lambda x: float(x.psm_filter.pepvalue))
 
-        peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
+        peptide_to_protein_dictionary = self.digest.peptide_to_protein_dictionary
 
         list_of_psm_objects = []
         peptide_tracker = set()
-        all_sp_proteins = set(self.digest_class.swiss_prot_protein_set)
+        all_sp_proteins = set(self.digest.swiss_prot_protein_set)
         # Peptide tracker is used because we only want UNIQUE peptides...
         # The data is sorted by percolator score... or at least it should be...
         # Or sorted by posterior error probability
@@ -536,9 +502,7 @@ class ProteologicPostSearchReader(Reader):
                 p.qvalue = float(peps.psm_filter.q_value)
                 p.pepvalue = float(peps.psm_filter.pepvalue)
                 if peps.peptide.protein not in peps.alternative_proteins:
-                    p.possible_proteins = [
-                        peps.peptide.protein
-                    ] + peps.alternative_proteins
+                    p.possible_proteins = [peps.peptide.protein] + peps.alternative_proteins
                 else:
                     p.possible_proteins = peps.alternative_proteins
 
@@ -567,16 +531,10 @@ class ProteologicPostSearchReader(Reader):
                         )
                     )
                     for poss_prot in p.possible_proteins:
-                        self.digest_class.peptide_to_protein_dictionary.setdefault(
-                            current_peptide, set()
-                        ).add(poss_prot)
-                        self.digest_class.protein_to_peptide_dictionary.setdefault(
-                            poss_prot, set()
-                        ).add(current_peptide)
+                        self.digest.peptide_to_protein_dictionary.setdefault(current_peptide, set()).add(poss_prot)
+                        self.digest.protein_to_peptide_dictionary.setdefault(poss_prot, set()).add(current_peptide)
                         self.logger.info(
-                            "Adding Peptide {} and Protein {} to Digest dictionaries".format(
-                                current_peptide, poss_prot
-                            )
+                            "Adding Peptide {} and Protein {} to Digest dictionaries".format(current_peptide, poss_prot)
                         )
 
                 # Sort Alt Proteins by Swissprot then Trembl...
@@ -607,12 +565,13 @@ class ProteologicPostSearchReader(Reader):
 
 class GenericReader(Reader):
     """
-    The following class takes a percolator like target file and a percolator like decoy file and creates standard :py:class:`py_protein_inference.physical.Psm` objects.
+    The following class takes a percolator like target file and a percolator like decoy file
+    and creates standard :py:class:`py_protein_inference.physical.Psm` objects.
 
     Percolator Like Output is formatted as follows:
-    with each entry being tabbed delimited
-    PSMId	 score	q-value	posterior_error_prob	peptide	proteinIds
-    116108.15139.15139.6.dta	 3.44016	 0.000479928	7.60258e-10	K.MVVSMTLGLHPWIANIDDTQYLAAK.R	CNDP1_HUMAN|Q96KN2	B4E180_HUMAN|B4E180	A8K1K1_HUMAN|A8K1K1	J3KRP0_HUMAN|J3KRP0
+    with each entry being tabbed delimited (Comma separated showed below)
+    PSMId   score    q-value   posterior_error_prob peptide    proteinIds
+    116108.15139.15139.6.dta    3.44016   0.000479928  7.60258e-10 K.MVVSMTLGLHPWIANIDDTQYLAAK.R  CNDP1_HUMAN|Q96KN2  B4E180_HUMAN|B4E180 A8K1K1_HUMAN|A8K1K1    J3KRP0_HUMAN|J3KRP0
 
     Custom columns can be added and used as scoring input. Please see README.md for more information
 
@@ -625,7 +584,7 @@ class GenericReader(Reader):
         logger (logger.logging): Logger object
         load_custom_score (bool): True/False on whether or not to load a custom score. Depends on scoring_variable
         scoring_variable (str): String to indicate which column in the input file is to be used as the scoring input
-        digest_class (py_protein_inference.in_silico_digest.Digest):
+        digest (py_protein_inference.in_silico_digest.Digest):
         parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
         append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
 
@@ -643,7 +602,7 @@ class GenericReader(Reader):
 
     def __init__(
         self,
-        digest_class,
+        digest,
         parameter_file_object,
         append_alt_from_db=True,
         target_file=None,
@@ -654,7 +613,7 @@ class GenericReader(Reader):
         """
 
         Args:
-            digest_class (py_protein_inference.in_silico_digest.Digest):
+            digest (py_protein_inference.in_silico_digest.Digest):
             parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
             target_file (str/list): Path to Target PSM result files
@@ -667,7 +626,7 @@ class GenericReader(Reader):
 
         Example:
             >>> py_protein_inference.reader.GenericReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt",
-            >>>     digest_class=digest, parameter_file_object=pi_params)
+            >>>     digest=digest, parameter_file_object=pi_params)
         """
         self.target_file = target_file
         self.decoy_file = decoy_file
@@ -676,7 +635,7 @@ class GenericReader(Reader):
 
         self.psms = None
         self.search_id = None
-        self.digest_class = digest_class
+        self.digest = digest
         self.load_custom_score = False
 
         self.append_alt_from_db = append_alt_from_db
@@ -688,10 +647,7 @@ class GenericReader(Reader):
 
         self._validate_input()
 
-        if (
-            self.scoring_variable != self.Q_VALUE
-            and self.scoring_variable != self.POSTERIOR_ERROR_PROB
-        ):
+        if self.scoring_variable != self.Q_VALUE and self.scoring_variable != self.POSTERIOR_ERROR_PROB:
             self.load_custom_score = True
             self.logger.info(
                 "Pulling custom column based on parameter file input for score, Column: {}".format(
@@ -706,8 +662,7 @@ class GenericReader(Reader):
             )
 
         self.MAX_ALTERNATIVE_PROTEIN_COLUMN_NAMES = [
-            self.EXTRA_PROTEIN_IDS.format(x)
-            for x in range(1, self.MAX_ALLOWED_ALTERNATIVE_PROTEINS + 1)
+            self.EXTRA_PROTEIN_IDS.format(x) for x in range(1, self.MAX_ALLOWED_ALTERNATIVE_PROTEINS + 1)
         ]
 
         # If we select to not run inference at all
@@ -725,7 +680,7 @@ class GenericReader(Reader):
 
         Example:
             >>> reader = py_protein_inference.reader.GenericReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt",
-            >>>     digest_class=digest, parameter_file_object=pi_params)
+            >>>     digest=digest, parameter_file_object=pi_params)
             >>> reader.read_psms()
 
         """
@@ -841,11 +796,7 @@ class GenericReader(Reader):
                 reverse=False,
             )
         except KeyError:
-            self.logger.info(
-                "Cannot Sort by {} the values do not exist".format(
-                    self.POSTERIOR_ERROR_PROB
-                )
-            )
+            self.logger.info("Cannot Sort by {} the values do not exist".format(self.POSTERIOR_ERROR_PROB))
             self.logger.info("Sorting by {}".format(self.scoring_variable))
             if self.parameter_file_object.psm_score_type == Score.ADDITIVE_SCORE_TYPE:
                 all_psms = sorted(
@@ -867,11 +818,11 @@ class GenericReader(Reader):
 
         list_of_psm_objects = []
         peptide_tracker = set()
-        all_sp_proteins = set(self.digest_class.swiss_prot_protein_set)
+        all_sp_proteins = set(self.digest.swiss_prot_protein_set)
         # We only want to get unique peptides... using all messes up scoring...
         # Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
 
-        peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
+        peptide_to_protein_dictionary = self.digest.peptide_to_protein_dictionary
 
         # TODO
         # make this for loop a generator...
@@ -901,14 +852,10 @@ class GenericReader(Reader):
                     psm.custom_score = float(psm_info[self.scoring_variable])
                 psm.possible_proteins = []
                 psm.possible_proteins.append(psm_info[self.PROTEIN_IDS])
-                for (
-                    alternative_protein_keys
-                ) in self.MAX_ALTERNATIVE_PROTEIN_COLUMN_NAMES:
+                for alternative_protein_keys in self.MAX_ALTERNATIVE_PROTEIN_COLUMN_NAMES:
                     try:
                         if psm_info[alternative_protein_keys]:
-                            psm.possible_proteins.append(
-                                psm_info[alternative_protein_keys]
-                            )
+                            psm.possible_proteins.append(psm_info[alternative_protein_keys])
                     except KeyError:
                         break
                 # Remove potential Repeats
@@ -940,16 +887,10 @@ class GenericReader(Reader):
                         )
                     )
                     for poss_prot in psm.possible_proteins:
-                        self.digest_class.peptide_to_protein_dictionary.setdefault(
-                            current_peptide, set()
-                        ).add(poss_prot)
-                        self.digest_class.protein_to_peptide_dictionary.setdefault(
-                            poss_prot, set()
-                        ).add(current_peptide)
+                        self.digest.peptide_to_protein_dictionary.setdefault(current_peptide, set()).add(poss_prot)
+                        self.digest.protein_to_peptide_dictionary.setdefault(poss_prot, set()).add(current_peptide)
                         self.logger.info(
-                            "Adding Peptide {} and Protein {} to Digest dictionaries".format(
-                                current_peptide, poss_prot
-                            )
+                            "Adding Peptide {} and Protein {} to Digest dictionaries".format(current_peptide, poss_prot)
                         )
 
                 # Sort Alt Proteins by Swissprot then Trembl...

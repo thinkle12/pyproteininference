@@ -116,6 +116,7 @@ parser.add_argument(
     "This is typically not necessary. So leave this blank unless you know what you are doing.",
 )
 
+
 def main():
     """
     Script function for running the execute method of the ProteinInferencePipeline class
@@ -137,6 +138,7 @@ def main():
         id_splitting=args.id_splitting,
     )
     pipeline.execute()
+
 
 if __name__ == "__main__":
     main()

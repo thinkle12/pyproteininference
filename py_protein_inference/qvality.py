@@ -17,25 +17,19 @@ class CalculateQandPepValues(Qvality):
 
     Input is a DataStore object
 
-    Example: py_protein_inference.qvality.CalculateQandPepValues(data_class = data)
+    Example: py_protein_inference.qvality.CalculateQandPepValues(data = data)
 
     """
 
-    def __init__(self, data_class):
-        self.grouped_scored_data = data_class.grouped_scored_proteins
-        self.data_class = data_class
+    def __init__(self, data):
+        self.grouped_scored_data = data.grouped_scored_proteins
+        self.data = data
         self.uuid = uuid.uuid4()
         self.uuid_tag = str(self.uuid)
         self.temp_dir = tempfile.gettempdir()
-        self.target_score_file = os.path.join(
-            self.temp_dir, "target_scores-{}".format(self.uuid_tag)
-        )
-        self.decoy_score_file = os.path.join(
-            self.temp_dir, "decoy_scores-{}".format(self.uuid_tag)
-        )
-        self.qvality_output_filename = os.path.join(
-            self.temp_dir, "qvality_output-{}".format(self.uuid_tag)
-        )
+        self.target_score_file = os.path.join(self.temp_dir, "target_scores-{}".format(self.uuid_tag))
+        self.decoy_score_file = os.path.join(self.temp_dir, "decoy_scores-{}".format(self.uuid_tag))
+        self.qvality_output_filename = os.path.join(self.temp_dir, "qvality_output-{}".format(self.uuid_tag))
 
     def execute(self):
         logger = getLogger("py_protein_inference.qvality.CalculateQandPepValues.execute")
@@ -57,10 +51,7 @@ class CalculateQandPepValues(Qvality):
             for d in decoys:
                 f.write(d + "\n")
         p = subprocess.Popen(
-            "qvality {} {} -o {}".forat(
-                self.target_score_file,
-                self.decoy_score_file,
-                self.qvality_output_filename),
+            "qvality {} {} -o {}".forat(self.target_score_file, self.decoy_score_file, self.qvality_output_filename),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=True,

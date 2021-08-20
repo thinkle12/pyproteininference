@@ -133,6 +133,7 @@ parser.add_argument(
     type=float,
 )
 
+
 def main():
     """
     Script function for running the execute method of the ProteinInferencePipeline class
@@ -153,9 +154,10 @@ def main():
         append_alt_from_db=args.append_alt,
         id_splitting=args.id_splitting,
         roc_plot_filepath=args.roc_plot_filepath,
-        fdr_max=args.fdr_max
+        fdr_max=args.fdr_max,
     )
     pipeline.execute()
+
 
 if __name__ == "__main__":
     main()

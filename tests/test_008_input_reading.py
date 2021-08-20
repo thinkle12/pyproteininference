@@ -87,7 +87,7 @@ class TestReader(TestCase):
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
         )
         pep_and_prot_data.read_psms()
 
@@ -97,7 +97,7 @@ class TestReader(TestCase):
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
         )
         pep_and_prot_data_perc.read_psms()
 
@@ -119,7 +119,7 @@ class TestReader(TestCase):
             target_file=[TARGET_FILE, TARGET_FILE],
             decoy_file=[DECOY_FILE, DECOY_FILE],
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
         )
         pep_and_prot_data.read_psms()
 
@@ -129,7 +129,7 @@ class TestReader(TestCase):
             target_file=[TARGET_FILE, TARGET_FILE],
             decoy_file=[DECOY_FILE, DECOY_FILE],
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
         )
         pep_and_prot_data_perc.read_psms()
 
@@ -177,7 +177,7 @@ class TestReader(TestCase):
             target_file=TARGET_FILE_ADDITIVE,
             decoy_file=DECOY_FILE_ADDITIVE,
             parameter_file_object=protein_inference_parameters_add,
-            digest_class=digest,
+            digest=digest,
         )
         pep_and_prot_data_add.read_psms()
 
@@ -212,7 +212,7 @@ class TestReader(TestCase):
             target_file=TARGET_FILE_MULTIPLICATIVE,
             decoy_file=DECOY_FILE_MULTIPLICATIVE,
             parameter_file_object=protein_inference_parameters_mult,
-            digest_class=digest,
+            digest=digest,
             append_alt_from_db=False,
         )
         pep_and_prot_data_mult.read_psms()

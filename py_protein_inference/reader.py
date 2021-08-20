@@ -181,7 +181,7 @@ class PercolatorReader(Reader):
 
     def __init__(
         self,
-        digest_class,
+        digest,
         parameter_file_object,
         append_alt_from_db=True,
         target_file=None,
@@ -192,7 +192,7 @@ class PercolatorReader(Reader):
         """
 
         Args:
-            digest_class (py_protein_inference.in_silico_digest.Digest):
+            digest (py_protein_inference.in_silico_digest.Digest):
             parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
             target_file (str/list): Path to Target PSM result files
@@ -205,7 +205,7 @@ class PercolatorReader(Reader):
 
         Example:
             >>> py_protein_inference.reader.PercolatorReader(target_file = "example_target.txt",
-            >>>     decoy_file = "example_decoy.txt", digest_class=digest,parameter_file_object=pi_params)
+            >>>     decoy_file = "example_decoy.txt", digest=digest,parameter_file_object=pi_params)
         """
         self.target_file = target_file
         self.decoy_file = decoy_file
@@ -215,7 +215,7 @@ class PercolatorReader(Reader):
 
         self.psms = None
         self.search_id = None
-        self.digest_class = digest_class
+        self.digest = digest
         self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
@@ -234,7 +234,7 @@ class PercolatorReader(Reader):
 
         Example:
             >>> reader = py_protein_inference.reader.PercolatorReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt",
-            >>>     digest_class=digest, parameter_file_object=pi_params)
+            >>>     digest=digest, parameter_file_object=pi_params)
             >>> reader.read_psms()
 
         """
@@ -324,7 +324,7 @@ class PercolatorReader(Reader):
                 all = all + combined_psm_result_rows
             perc_all = all
 
-        peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
+        peptide_to_protein_dictionary = self.digest.peptide_to_protein_dictionary
 
         perc_all_filtered = []
         for psms in perc_all:
@@ -348,7 +348,7 @@ class PercolatorReader(Reader):
 
         list_of_psm_objects = []
         peptide_tracker = set()
-        all_sp_proteins = set(self.digest_class.swiss_prot_protein_set)
+        all_sp_proteins = set(self.digest.swiss_prot_protein_set)
         # We only want to get unique peptides... using all messes up scoring...
         # Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
 
@@ -403,10 +403,10 @@ class PercolatorReader(Reader):
                         )
                     )
                     for poss_prot in combined_psm_result_rows.possible_proteins:
-                        self.digest_class.peptide_to_protein_dictionary.setdefault(
+                        self.digest.peptide_to_protein_dictionary.setdefault(
                             current_peptide, set()
                         ).add(poss_prot)
-                        self.digest_class.protein_to_peptide_dictionary.setdefault(
+                        self.digest.protein_to_peptide_dictionary.setdefault(
                             poss_prot, set()
                         ).add(current_peptide)
                         self.logger.info(
@@ -452,7 +452,7 @@ class ProteologicPostSearchReader(Reader):
         proteologic_object (list): List of proteologic post search objects
         search_id (int): Search ID or Search IDs associated with the data
         postsearch_id: PostSearch ID or PostSearch IDs associated with the data
-        digest_class (py_protein_inference.in_silico_digest.Digest):
+        digest (py_protein_inference.in_silico_digest.Digest):
         parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
         append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
         logger (logger.logging): Logger object
@@ -464,7 +464,7 @@ class ProteologicPostSearchReader(Reader):
         proteologic_object,
         search_id,
         postsearch_id,
-        digest_class,
+        digest,
         parameter_file_object,
         append_alt_from_db=True,
     ):
@@ -474,7 +474,7 @@ class ProteologicPostSearchReader(Reader):
             proteologic_object (list): List of proteologic post search objects
             search_id (int): Search ID or Search IDs associated with the data
             postsearch_id: PostSearch ID or PostSearch IDs associated with the data
-            digest_class (py_protein_inference.in_silico_digest.Digest):
+            digest (py_protein_inference.in_silico_digest.Digest):
             parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
 
@@ -487,7 +487,7 @@ class ProteologicPostSearchReader(Reader):
         self.postsearch_id = postsearch_id
 
         self.psms = None
-        self.digest_class = digest_class
+        self.digest = digest
         self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
@@ -516,11 +516,11 @@ class ProteologicPostSearchReader(Reader):
         # Sort this by posterior error prob...
         list_of_psms = sorted(list_of_psms, key=lambda x: float(x.psm_filter.pepvalue))
 
-        peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
+        peptide_to_protein_dictionary = self.digest.peptide_to_protein_dictionary
 
         list_of_psm_objects = []
         peptide_tracker = set()
-        all_sp_proteins = set(self.digest_class.swiss_prot_protein_set)
+        all_sp_proteins = set(self.digest.swiss_prot_protein_set)
         # Peptide tracker is used because we only want UNIQUE peptides...
         # The data is sorted by percolator score... or at least it should be...
         # Or sorted by posterior error probability
@@ -567,10 +567,10 @@ class ProteologicPostSearchReader(Reader):
                         )
                     )
                     for poss_prot in p.possible_proteins:
-                        self.digest_class.peptide_to_protein_dictionary.setdefault(
+                        self.digest.peptide_to_protein_dictionary.setdefault(
                             current_peptide, set()
                         ).add(poss_prot)
-                        self.digest_class.protein_to_peptide_dictionary.setdefault(
+                        self.digest.protein_to_peptide_dictionary.setdefault(
                             poss_prot, set()
                         ).add(current_peptide)
                         self.logger.info(
@@ -625,7 +625,7 @@ class GenericReader(Reader):
         logger (logger.logging): Logger object
         load_custom_score (bool): True/False on whether or not to load a custom score. Depends on scoring_variable
         scoring_variable (str): String to indicate which column in the input file is to be used as the scoring input
-        digest_class (py_protein_inference.in_silico_digest.Digest):
+        digest (py_protein_inference.in_silico_digest.Digest):
         parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
         append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
 
@@ -643,7 +643,7 @@ class GenericReader(Reader):
 
     def __init__(
         self,
-        digest_class,
+        digest,
         parameter_file_object,
         append_alt_from_db=True,
         target_file=None,
@@ -654,7 +654,7 @@ class GenericReader(Reader):
         """
 
         Args:
-            digest_class (py_protein_inference.in_silico_digest.Digest):
+            digest (py_protein_inference.in_silico_digest.Digest):
             parameter_file_object (py_protein_inference.parameters.ProteinInferenceParameter):
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are not in the input files
             target_file (str/list): Path to Target PSM result files
@@ -667,7 +667,7 @@ class GenericReader(Reader):
 
         Example:
             >>> py_protein_inference.reader.GenericReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt",
-            >>>     digest_class=digest, parameter_file_object=pi_params)
+            >>>     digest=digest, parameter_file_object=pi_params)
         """
         self.target_file = target_file
         self.decoy_file = decoy_file
@@ -676,7 +676,7 @@ class GenericReader(Reader):
 
         self.psms = None
         self.search_id = None
-        self.digest_class = digest_class
+        self.digest = digest
         self.load_custom_score = False
 
         self.append_alt_from_db = append_alt_from_db
@@ -725,7 +725,7 @@ class GenericReader(Reader):
 
         Example:
             >>> reader = py_protein_inference.reader.GenericReader(target_file = "example_target.txt", decoy_file = "example_decoy.txt",
-            >>>     digest_class=digest, parameter_file_object=pi_params)
+            >>>     digest=digest, parameter_file_object=pi_params)
             >>> reader.read_psms()
 
         """
@@ -867,11 +867,11 @@ class GenericReader(Reader):
 
         list_of_psm_objects = []
         peptide_tracker = set()
-        all_sp_proteins = set(self.digest_class.swiss_prot_protein_set)
+        all_sp_proteins = set(self.digest.swiss_prot_protein_set)
         # We only want to get unique peptides... using all messes up scoring...
         # Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
 
-        peptide_to_protein_dictionary = self.digest_class.peptide_to_protein_dictionary
+        peptide_to_protein_dictionary = self.digest.peptide_to_protein_dictionary
 
         # TODO
         # make this for loop a generator...
@@ -940,10 +940,10 @@ class GenericReader(Reader):
                         )
                     )
                     for poss_prot in psm.possible_proteins:
-                        self.digest_class.peptide_to_protein_dictionary.setdefault(
+                        self.digest.peptide_to_protein_dictionary.setdefault(
                             current_peptide, set()
                         ).add(poss_prot)
-                        self.digest_class.protein_to_peptide_dictionary.setdefault(
+                        self.digest.protein_to_peptide_dictionary.setdefault(
                             poss_prot, set()
                         ).add(current_peptide)
                         self.logger.info(

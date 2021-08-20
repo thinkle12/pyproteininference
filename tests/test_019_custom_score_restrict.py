@@ -69,14 +69,14 @@ class TestCustomRestrict(TestCase):
             target_file=TARGET_FILE_MULTIPLICATIVE,
             decoy_file=DECOY_FILE_MULTIPLICATIVE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
         )
         pep_and_prot_data.read_psms()
 
         self.assertEqual(len(pep_and_prot_data.psms), 27)
 
         data = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest_class=digest
+            pep_and_prot_data, digest=digest
         )
 
         data.restrict_psm_data()
@@ -113,14 +113,14 @@ class TestCustomRestrict(TestCase):
             target_file=TARGET_FILE_ADDITIVE,
             decoy_file=DECOY_FILE_ADDITIVE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
         )
         pep_and_prot_data.read_psms()
 
         self.assertEqual(len(pep_and_prot_data.psms), 27)
 
         data = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest_class=digest
+            pep_and_prot_data, digest=digest
         )
 
         data.restrict_psm_data()

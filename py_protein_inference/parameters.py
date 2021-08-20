@@ -724,15 +724,15 @@ class ProteinInferenceParameter(object):
         except KeyError:
             raise ValueError("'peptide_centric' sub Parameter not defined in the parameter file")
 
-    def override_q_restrict(self, data_class):
+    def override_q_restrict(self, data):
         """
         ProteinInferenceParameter method to override restrict_q if the input data does not contain q values.
 
         Args:
-            data_class (py_protein_inference.datastore.DataStore): Data class
+            data (py_protein_inference.datastore.DataStore): Data Object
 
         """
-        data_has_q = data_class.input_has_q()
+        data_has_q = data.input_has_q()
         if data_has_q:
             pass
         else:
@@ -742,15 +742,15 @@ class ProteinInferenceParameter(object):
                 )
                 self.restrict_q = None
 
-    def override_pep_restrict(self, data_class):
+    def override_pep_restrict(self, data):
         """
         ProteinInferenceParameter method to override restrict_pep if the input data does not contain pep values.
 
         Args:
-            data_class (py_protein_inference.datastore.DataStore): Data class
+            data (py_protein_inference.datastore.DataStore): Data Object
 
         """
-        data_has_pep = data_class.input_has_pep()
+        data_has_pep = data.input_has_pep()
         if data_has_pep:
             pass
         else:
@@ -760,15 +760,15 @@ class ProteinInferenceParameter(object):
                 )
                 self.restrict_pep = None
 
-    def override_custom_restrict(self, data_class):
+    def override_custom_restrict(self, data):
         """
         ProteinInferenceParameter method to override restrict_custom if the input data does not contain custom score values.
 
         Args:
-            data_class (py_protein_inference.datastore.DataStore): Data class
+            data (py_protein_inference.datastore.DataStore): Data Object
 
         """
-        data_has_custom = data_class.input_has_custom()
+        data_has_custom = data.input_has_custom()
         if data_has_custom:
             pass
         else:
@@ -779,18 +779,18 @@ class ProteinInferenceParameter(object):
                 self.restrict_custom = None
 
 
-    def fix_parameters_from_datastore(self,data_class):
+    def fix_parameters_from_datastore(self, data):
         """
         ProteinInferenceParameter method to override restriction values in the parameter file if those scores do not exist in the input files
 
         Args:
-            data_class (py_protein_inference.datastore.DataStore): Data class
+            data (py_protein_inference.datastore.DataStore): Data Object
 
         """
 
-        self.override_q_restrict(data_class=data_class)
-        self.override_pep_restrict(data_class=data_class)
-        self.override_custom_restrict(data_class=data_class)
+        self.override_q_restrict(data=data)
+        self.override_pep_restrict(data=data)
+        self.override_custom_restrict(data=data)
 
     def _fix_none_parameters(self):
         """

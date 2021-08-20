@@ -70,14 +70,14 @@ class TestImproperMethodCalls(TestCase):
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
-            digest_class=digest,
+            digest=digest,
             append_alt_from_db=False,
         )
 
         # Validate that we will get a ValueError if we try to load the DataStore object WITHOUT running read_psms from Reader class
         with self.assertRaises(ValueError):
             data = py_protein_inference.datastore.DataStore(
-                pep_and_prot_data, digest_class=digest
+                pep_and_prot_data, digest=digest
             )
 
         # Now read the psms
@@ -85,7 +85,7 @@ class TestImproperMethodCalls(TestCase):
 
         # Now load data object properly...
         data = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest_class=digest
+            pep_and_prot_data, digest=digest
         )
 
         # Try to run restrict_psm_data with empty data...
@@ -99,7 +99,7 @@ class TestImproperMethodCalls(TestCase):
 
         # Reload data object properly again
         data = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest_class=digest
+            pep_and_prot_data, digest=digest
         )
 
         # Run data restrict
@@ -111,7 +111,7 @@ class TestImproperMethodCalls(TestCase):
 
         # Try to initialize a Score object without running create_scoring_input
         with self.assertRaises(ValueError):
-            score = py_protein_inference.scoring.Score(data_class=data)
+            score = py_protein_inference.scoring.Score(data=data)
 
         # Finally intiate scoring input properly
         data.create_scoring_input()
@@ -123,31 +123,31 @@ class TestImproperMethodCalls(TestCase):
         # Try to run inference without scored data...
         with self.assertRaises(ValueError):
             group = py_protein_inference.inference.PeptideCentric(
-                data_class=data, digest_class=digest
+                data=data, digest=digest
             )
 
         with self.assertRaises(ValueError):
             group = py_protein_inference.inference.Parsimony(
-                data_class=data, digest_class=digest
+                data=data, digest=digest
             )
 
         with self.assertRaises(ValueError):
             group = py_protein_inference.inference.Exclusion(
-                data_class=data, digest_class=digest
+                data=data, digest=digest
             )
 
         with self.assertRaises(ValueError):
             group = py_protein_inference.inference.Inclusion(
-                data_class=data, digest_class=digest
+                data=data, digest=digest
             )
 
         with self.assertRaises(ValueError):
             group = py_protein_inference.inference.FirstProtein(
-                data_class=data, digest_class=digest
+                data=data, digest=digest
             )
 
         # Score psms properly
-        score = py_protein_inference.scoring.Score(data_class=data)
+        score = py_protein_inference.scoring.Score(data=data)
         score.score_psms(score_method=protein_inference_parameters.protein_score)
 
         # Run picker properly
@@ -159,7 +159,7 @@ class TestImproperMethodCalls(TestCase):
 
         # Run inference properly
         group = py_protein_inference.inference.PeptideCentric(
-            data_class=data, digest_class=digest
+            data=data, digest=digest
         )
         group.infer_proteins()
 
@@ -168,7 +168,7 @@ class TestImproperMethodCalls(TestCase):
 
         # Export as normal
         export_type = protein_inference_parameters.export
-        export = py_protein_inference.export.Export(data_class=data)
+        export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(
             directory=os.path.join(OUTPUT_DIR, "leads"), export_type=export_type
         )

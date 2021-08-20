@@ -16,18 +16,10 @@ from py_protein_inference.parameters import ProteinInferenceParameter
 import os
 import logging
 
-TEST_DATABASE = resource_filename(
-    "py_protein_inference", "../tests/data/test_database.fasta"
-)
-TARGET_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_target.txt"
-)
-DECOY_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_decoy.txt"
-)
-PARAMETER_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_params_inclusion.yaml"
-)
+TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
+TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
+DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy.txt")
+PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('py_protein_inference', '../tests/output/')
 for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
@@ -71,9 +63,7 @@ class TestLoadInclusionWorkflow(TestCase):
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
-        protein_inference_parameters = ProteinInferenceParameter(
-            yaml_param_filepath=PARAMETER_FILE
-        )
+        protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE)
 
         # TODO check to make sure proper parameters are being loaded
         self.assertEqual(protein_inference_parameters.digest_type, "trypsin")
@@ -85,9 +75,7 @@ class TestLoadInclusionWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.restrict_pep, 0.9)
         self.assertEqual(protein_inference_parameters.restrict_peptide_length, 7)
         self.assertEqual(protein_inference_parameters.restrict_q, 0.9)
-        self.assertEqual(
-            protein_inference_parameters.protein_score, "multiplicative_log"
-        )
+        self.assertEqual(protein_inference_parameters.protein_score, "multiplicative_log")
         self.assertEqual(protein_inference_parameters.psm_score, "posterior_error_prob")
         self.assertEqual(protein_inference_parameters.psm_score_type, "multiplicative")
         self.assertEqual(protein_inference_parameters.decoy_symbol, "##")
@@ -96,9 +84,7 @@ class TestLoadInclusionWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.inference_type, "inclusion")
         self.assertEqual(protein_inference_parameters.tag, "test_inclusion")
         self.assertEqual(protein_inference_parameters.grouping_type, None)
-        self.assertEqual(
-            protein_inference_parameters.max_identifiers_peptide_centric, 5
-        )
+        self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
         self.assertEqual(protein_inference_parameters.lp_solver, None)
 
         ### STEP 2: Start with running an In Silico Digestion ###
@@ -133,9 +119,7 @@ class TestLoadInclusionWorkflow(TestCase):
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
         ### STEP 4: Initiate the datastore class ###
-        data = py_protein_inference.datastore.DataStore(
-            pep_and_prot_data, digest=digest
-        )
+        data = py_protein_inference.datastore.DataStore(pep_and_prot_data, digest=digest)
 
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
@@ -177,21 +161,15 @@ class TestLoadInclusionWorkflow(TestCase):
 
         # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == py_protein_inference.inference.Inference.PARSIMONY:
-            group = py_protein_inference.inference.Parsimony(
-                data=data, digest=digest
-            )
+            group = py_protein_inference.inference.Parsimony(data=data, digest=digest)
             group.infer_proteins()
 
         if inference_type == py_protein_inference.inference.Inference.INCLUSION:
-            group = py_protein_inference.inference.Inclusion(
-                data=data, digest=digest
-            )
+            group = py_protein_inference.inference.Inclusion(data=data, digest=digest)
             group.infer_proteins()
 
         if inference_type == py_protein_inference.inference.Inference.EXCLUSION:
-            group = py_protein_inference.inference.Exclusion(
-                data=data, digest=digest
-            )
+            group = py_protein_inference.inference.Exclusion(data=data, digest=digest)
             group.infer_proteins()
 
         ### STEP 11: Run FDR and Q value Calculations
@@ -204,9 +182,7 @@ class TestLoadInclusionWorkflow(TestCase):
         ### STEP 12: Export to CSV
         export_type = protein_inference_parameters.export
         export = py_protein_inference.export.Export(data=data)
-        export.export_to_csv(
-            directory=os.path.join(OUTPUT_DIR, "leads"), export_type=export_type
-        )
+        export.export_to_csv(directory=os.path.join(OUTPUT_DIR, "leads"), export_type=export_type)
 
         logger.info("Protein Inference Finished")
 
@@ -223,22 +199,12 @@ class TestLoadInclusionWorkflow(TestCase):
         for i in range(len(protein_groups)):
             lead_protein = protein_groups[i].proteins[0]
             self.assertEqual(lead_protein.identifier, lead_output[i][IDENTIFIER_INDEX])
-            self.assertAlmostEqual(
-                lead_protein.score, float(lead_output[i][SCORE_INDEX])
-            )
-            self.assertEqual(
-                protein_groups[i].q_value, float(lead_output[i][Q_VALUE_INDEX])
-            )
-            self.assertEqual(
-                protein_groups[i].number_id, int(lead_output[i][GROUP_ID_INDEX])
-            )
-            self.assertEqual(
-                lead_protein.peptides, set(lead_output[i][PEPTIDES_INDEX:])
-            )
+            self.assertAlmostEqual(lead_protein.score, float(lead_output[i][SCORE_INDEX]))
+            self.assertEqual(protein_groups[i].q_value, float(lead_output[i][Q_VALUE_INDEX]))
+            self.assertEqual(protein_groups[i].number_id, int(lead_output[i][GROUP_ID_INDEX]))
+            self.assertEqual(lead_protein.peptides, set(lead_output[i][PEPTIDES_INDEX:]))
 
-        export.export_to_csv(
-            directory=os.path.join(OUTPUT_DIR, "all"), export_type="q_value_all"
-        )
+        export.export_to_csv(directory=os.path.join(OUTPUT_DIR, "all"), export_type="q_value_all")
 
         all_output = []
         with open(ALL_OUTPUT_FILE, "r") as all_output_file:
@@ -257,12 +223,8 @@ class TestLoadInclusionWorkflow(TestCase):
         del all_output_new[0]
 
         for i in range(len(all_output)):
-            self.assertEqual(
-                all_output_new[i][IDENTIFIER_INDEX], all_output[i][IDENTIFIER_INDEX]
-            )
-            self.assertAlmostEqual(
-                float(all_output_new[i][SCORE_INDEX]), float(all_output[i][SCORE_INDEX])
-            )
+            self.assertEqual(all_output_new[i][IDENTIFIER_INDEX], all_output[i][IDENTIFIER_INDEX])
+            self.assertAlmostEqual(float(all_output_new[i][SCORE_INDEX]), float(all_output[i][SCORE_INDEX]))
             self.assertEqual(
                 float(all_output_new[i][Q_VALUE_INDEX]),
                 float(all_output[i][Q_VALUE_INDEX]),
@@ -276,9 +238,7 @@ class TestLoadInclusionWorkflow(TestCase):
                 set(all_output[i][PEPTIDES_INDEX:]),
             )
 
-        export.export_to_csv(
-            directory=os.path.join(OUTPUT_DIR, "peptides"), export_type="peptides"
-        )
+        export.export_to_csv(directory=os.path.join(OUTPUT_DIR, "peptides"), export_type="peptides")
 
         peptide_output = []
         with open(PEPTIDE_OUTPUT_FILE, "r") as peptide_output_file:
@@ -318,9 +278,7 @@ class TestLoadInclusionWorkflow(TestCase):
                 set(peptide_output[i][PEPTIDES_INDEX:]),
             )
 
-        export.export_to_csv(
-            directory=os.path.join(OUTPUT_DIR, "psms"), export_type="psms"
-        )
+        export.export_to_csv(directory=os.path.join(OUTPUT_DIR, "psms"), export_type="psms")
 
         psm_output = []
         with open(PSM_OUTPUT_FILE, "r") as psm_output_file:
@@ -339,12 +297,8 @@ class TestLoadInclusionWorkflow(TestCase):
         del psm_output_new[0]
 
         for i in range(len(psm_output)):
-            self.assertEqual(
-                psm_output_new[i][IDENTIFIER_INDEX], psm_output[i][IDENTIFIER_INDEX]
-            )
-            self.assertAlmostEqual(
-                float(psm_output_new[i][SCORE_INDEX]), float(psm_output[i][SCORE_INDEX])
-            )
+            self.assertEqual(psm_output_new[i][IDENTIFIER_INDEX], psm_output[i][IDENTIFIER_INDEX])
+            self.assertAlmostEqual(float(psm_output_new[i][SCORE_INDEX]), float(psm_output[i][SCORE_INDEX]))
             self.assertEqual(
                 float(psm_output_new[i][Q_VALUE_INDEX]),
                 float(psm_output[i][Q_VALUE_INDEX]),
@@ -358,9 +312,7 @@ class TestLoadInclusionWorkflow(TestCase):
                 set(psm_output[i][PEPTIDES_INDEX:]),
             )
 
-        export.export_to_csv(
-            directory=os.path.join(OUTPUT_DIR, "psm_ids"), export_type="psm_ids"
-        )
+        export.export_to_csv(directory=os.path.join(OUTPUT_DIR, "psm_ids"), export_type="psm_ids")
 
         psm_id_output = []
         with open(PSM_ID_OUTPUT_FILE, "r") as psm_id_output_file:
@@ -420,10 +372,6 @@ class TestLoadInclusionWorkflow(TestCase):
             lead_protein = protein_groups[i].proteins[0]
             self.assertEqual(lead_protein_pipeline.identifier, lead_protein.identifier)
             self.assertAlmostEqual(lead_protein_pipeline.score, lead_protein.score)
-            self.assertEqual(
-                pipeline_protein_groups[i].q_value, protein_groups[i].q_value
-            )
-            self.assertEqual(
-                pipeline_protein_groups[i].number_id, protein_groups[i].number_id
-            )
+            self.assertEqual(pipeline_protein_groups[i].q_value, protein_groups[i].q_value)
+            self.assertEqual(pipeline_protein_groups[i].number_id, protein_groups[i].number_id)
             self.assertEqual(lead_protein_pipeline.peptides, lead_protein.peptides)

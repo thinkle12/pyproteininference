@@ -23,6 +23,7 @@ class Digest(object):
         max_peptide_length (int): Max peptide length to keep for analysis.
 
     """
+
     TRYPSIN = "trypsin"
     LYSC = "lysc"
     LIST_OF_DIGEST_TYPES = [TRYPSIN, LYSC]
@@ -64,7 +65,15 @@ class InSilicoDigest(Digest):
     This class represents a custom written in silico digest
     """
 
-    def __init__(self, database_path, digest_type, missed_cleavages, reviewed_identifier_symbol, max_peptide_length, id_splitting=True):
+    def __init__(
+        self,
+        database_path,
+        digest_type,
+        missed_cleavages,
+        reviewed_identifier_symbol,
+        max_peptide_length,
+        id_splitting=True,
+    ):
         """
         The following class creates protein to peptide, peptide to protein, and reviewed protein mappings.
 
@@ -311,9 +320,7 @@ class InSilicoDigest(Digest):
             for peptide in peptide_list:
                 pep_dict.setdefault(peptide, set()).add(identifier_stripped)
 
-        self.logger.info(
-            "Digest finished, peptide and protein dictionaries created based on the provided database"
-        )
+        self.logger.info("Digest finished, peptide and protein dictionaries created based on the provided database")
 
         self.swiss_prot_protein_set = sp_set
         self.peptide_to_protein_dictionary = pep_dict
@@ -327,7 +334,15 @@ class PyteomicsDigest(Digest):
     This class represents a pyteomics implementation of an in silico digest
     """
 
-    def __init__(self, database_path, digest_type, missed_cleavages, reviewed_identifier_symbol, max_peptide_length, id_splitting=True):
+    def __init__(
+        self,
+        database_path,
+        digest_type,
+        missed_cleavages,
+        reviewed_identifier_symbol,
+        max_peptide_length,
+        id_splitting=True,
+    ):
         """
         The following class creates protein to peptide, peptide to protein, and reviewed protein mappings.
 

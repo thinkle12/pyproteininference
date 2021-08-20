@@ -83,7 +83,7 @@ class Protein(object):
          Returns:
              list: List of Psm identifiers
 
-         """
+        """
         psms = [x.identifier for x in self.psms]
         return psms
 
@@ -94,7 +94,7 @@ class Protein(object):
          Returns:
              list: List of Psm identifiers that have no mods or flanking AAs
 
-         """
+        """
         psms = [x.stripped_peptide for x in self.psms]
         return psms
 
@@ -105,7 +105,7 @@ class Protein(object):
          Returns:
              set: Set of peptide strings
 
-         """
+        """
         unique_peptides = set(self.get_psm_identifiers())
         return unique_peptides
 
@@ -116,7 +116,7 @@ class Protein(object):
          Returns:
              set: Set of peptide strings that are stripped of mods and flanking AAs
 
-         """
+        """
         stripped_peptide_identifiers = set(self.get_stripped_psm_identifiers())
         return stripped_peptide_identifiers
 
@@ -127,7 +127,7 @@ class Protein(object):
          Returns:
              int: Number of Psms
 
-         """
+        """
         num_psms = len(self.get_psm_identifiers())
         return num_psms
 
@@ -138,7 +138,7 @@ class Protein(object):
          Returns:
              int: Number of peptides
 
-         """
+        """
         num_peptides = len(self.get_unique_peptide_identifiers())
         return num_peptides
 
@@ -149,7 +149,7 @@ class Protein(object):
          Returns:
             list: List of Psm Ids
 
-         """
+        """
         psm_ids = [x.psm_id for x in self.psms]
         return psm_ids
 
@@ -274,9 +274,7 @@ class Psm(object):
             peptide = peptide_split[0]
         else:
             # If we split the peptide and it is not length 1 or 3 then try to split with pro
-            peptide = cls.split_peptide_pro(
-                peptide_string=peptide_string, delimiter=delimiter
-            )
+            peptide = cls.split_peptide_pro(peptide_string=peptide_string, delimiter=delimiter)
 
         return peptide
 
@@ -320,9 +318,7 @@ class Psm(object):
         """
         # Assign a main score based on user input
         if score not in self.SCORE_ATTRIBUTE_NAMES:
-            raise ValueError(
-                "Scores must either be one of: '{}'".format(", ".join(self.SCORE_ATTRIBUTE_NAMES))
-            )
+            raise ValueError("Scores must either be one of: '{}'".format(", ".join(self.SCORE_ATTRIBUTE_NAMES)))
         else:
             self.main_score = getattr(self, score)
 

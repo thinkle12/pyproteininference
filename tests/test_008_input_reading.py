@@ -17,25 +17,13 @@ import os
 import logging
 
 
-TEST_DATABASE = resource_filename(
-    "py_protein_inference", "../tests/data/test_database.fasta"
-)
-TARGET_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_target.txt"
-)
-DECOY_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_decoy.txt"
-)
-PARAMETER_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_params_peptide_centric.yaml"
-)
+TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
+TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
+DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy.txt")
+PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_peptide_centric.yaml")
 
-TARGET_FILE_ADDITIVE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_target_additive.txt"
-)
-DECOY_FILE_ADDITIVE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_decoy_additive.txt"
-)
+TARGET_FILE_ADDITIVE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target_additive.txt")
+DECOY_FILE_ADDITIVE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy_additive.txt")
 
 TARGET_FILE_MULTIPLICATIVE = resource_filename(
     "py_protein_inference", "../tests/data/test_perc_data_target_multiplicative.txt"
@@ -61,9 +49,7 @@ class TestReader(TestCase):
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
-        protein_inference_parameters = ProteinInferenceParameter(
-            yaml_param_filepath=PARAMETER_FILE
-        )
+        protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE)
 
         ### STEP 2: Start with running an In Silico Digestion ###
         ### STEP 2: Start with running an In Silico Digestion ###
@@ -151,9 +137,7 @@ class TestReader(TestCase):
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
-        protein_inference_parameters_add = ProteinInferenceParameter(
-            yaml_param_filepath=PARAMETER_FILE_ADDITIVE
-        )
+        protein_inference_parameters_add = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE_ADDITIVE)
 
         ### STEP 2: Start with running an In Silico Digestion ###
         ### STEP 2: Start with running an In Silico Digestion ###
@@ -186,9 +170,7 @@ class TestReader(TestCase):
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
-        protein_inference_parameters_mult = ProteinInferenceParameter(
-            yaml_param_filepath=PARAMETER_FILE_MULTIPLICATIVE
-        )
+        protein_inference_parameters_mult = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE_MULTIPLICATIVE)
 
         ### STEP 2: Start with running an In Silico Digestion ###
         ### STEP 2: Start with running an In Silico Digestion ###

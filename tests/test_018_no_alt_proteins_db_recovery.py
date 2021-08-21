@@ -23,6 +23,7 @@ Q_VALUE_INDEX = 2
 GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
 
+
 class TestAltProteinDbRecovery(TestCase):
     def test_alt_protein_db_recovery(self):
 

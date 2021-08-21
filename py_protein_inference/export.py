@@ -12,6 +12,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
+
 class Export(object):
     """
     Class that handles exporting protein inference results to filesystem as csv files

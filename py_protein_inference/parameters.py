@@ -16,6 +16,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
+
 class ProteinInferenceParameter(object):
     """
     Class that handles data retrieval, storage, and validation of Protein Inference Parameters
@@ -751,9 +752,7 @@ class ProteinInferenceParameter(object):
             pass
         else:
             if self.restrict_q:
-                logger.warning(
-                    "No Q values found in the input data, overriding parameters to not filter on Q value"
-                )
+                logger.warning("No Q values found in the input data, overriding parameters to not filter on Q value")
                 self.restrict_q = None
 
     def override_pep_restrict(self, data):

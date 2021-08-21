@@ -17,6 +17,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
+
 class Reader(object):
     """
     Main Reader Class which is parent to all reader subclasses

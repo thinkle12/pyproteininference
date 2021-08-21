@@ -22,6 +22,7 @@ PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_p
 
 OUTPUT_DIR = tempfile.gettempdir()
 
+
 class TestImproperMethodCalls(TestCase):
     def test_incorrect_method_calls(self):
 

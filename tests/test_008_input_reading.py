@@ -38,6 +38,7 @@ PARAMETER_FILE_MULTIPLICATIVE = resource_filename(
     "py_protein_inference", "../tests/data/test_params_multiplicative_custom_score.yaml"
 )
 
+
 class TestReader(TestCase):
     def test_generic_and_percolator_readers(self):
 

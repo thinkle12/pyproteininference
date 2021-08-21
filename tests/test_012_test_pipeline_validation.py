@@ -29,6 +29,7 @@ shutil.copyfile(str(TARGET_FILE), os.path.join(TARGET_DIRECTORY, "target_file.tx
 shutil.copyfile(DECOY_FILE, os.path.join(DECOY_DIRECTORY, "decoy_file.txt"))
 COMBINED_DIRECTORY = resource_filename("py_protein_inference", "../tests/data/combined_files")
 
+
 class TestPipelineValidation(TestCase):
     def test_validation(self):
 

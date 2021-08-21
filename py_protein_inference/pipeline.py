@@ -14,6 +14,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
+
 class ProteinInferencePipeline(object):
     """
     This is the main Protein Inference class which houses the logic of the entire data analysis pipeline.

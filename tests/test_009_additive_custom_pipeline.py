@@ -57,6 +57,7 @@ Q_VALUE_INDEX = 2
 GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
 
+
 class TestAdditiveWorkflow(TestCase):
     def test_workflow_additive_custom(self):
 

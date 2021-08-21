@@ -268,7 +268,6 @@ class Inclusion(Inference):
 
         """
 
-
         sp_protein_set = set(self.digest.swiss_prot_protein_set)
 
         prot_pep_dict = self.data.protein_to_peptide_dictionary()
@@ -416,7 +415,6 @@ class Parsimony(Inference):
             list: list of lists of :py:class:`py_protein_inference.physical.Protein` objects
 
         """
-
 
         logger.info("Grouping Peptides with Grouping Type: {}".format(grouping_type))
         logger.info("Grouping Peptides with Inference Type: {}".format(self.PARSIMONY))
@@ -662,7 +660,6 @@ class Parsimony(Inference):
 
         """
 
-
         if not protein_list[0].reviewed:
             # If the lead is unreviewed attempt to replace it...
             # Start to loop through protein_list which is the current group...
@@ -758,7 +755,6 @@ class Parsimony(Inference):
 
 
         """
-
 
         if protein_list[0].reviewed:
             if self.data.parameter_file_object.isoform_symbol in protein_list[0].identifier:
@@ -1514,7 +1510,6 @@ class Parsimony(Inference):
 
     def _assign_shared_peptides(self, shared_pep_type="all"):
 
-
         if not self.data.grouped_scored_proteins and self.data.protein_group_objects:
             raise ValueError(
                 "Grouped Protein objects could not be found. Please run 'infer_proteins' method of the Parsimony class"
@@ -1609,7 +1604,6 @@ class FirstProtein(Inference):
 
         """
 
-
         grouped_proteins = self._create_protein_groups(scored_proteins=self.scored_data)
 
         # Get the higher or lower variable
@@ -1674,7 +1668,6 @@ class PeptideCentric(Inference):
 
         """
 
-
         # Get the higher or lower variable
         hl = self.data.higher_or_lower()
 
@@ -1704,7 +1697,6 @@ class PeptideCentric(Inference):
                 a list of grouped :py:class:`py_protein_inference.physical.Protein` objects (key:"grouped_protein_objects")
 
         """
-
 
         grouped_protein_objects = self.data.get_protein_data()
 

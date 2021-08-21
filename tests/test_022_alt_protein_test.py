@@ -24,6 +24,7 @@ for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
     if not os.path.exists(os.path.join(OUTPUT_DIR, sub_dir)):
         os.makedirs(os.path.join(OUTPUT_DIR, sub_dir))
 
+
 class TestAltProteinRead(TestCase):
     def test_alt_protein_reader(self):
 

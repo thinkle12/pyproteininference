@@ -75,9 +75,7 @@ class ProteinInferencePipeline(object):
             >>>     append_alt_from_db=append_alt,
             >>> )
         """
-        self.logger = logging.getLogger(
-            "py_protein_inference.pipeline.ProteinInferencePipeline"
-        )
+        self.logger = logging.getLogger("py_protein_inference.pipeline.ProteinInferencePipeline")
 
         # set up our logger
         logging.basicConfig(
@@ -105,7 +103,6 @@ class ProteinInferencePipeline(object):
         self._set_output_directory()
 
         self._log_append_alt_from_db()
-
 
     def execute(self):
         """
@@ -162,11 +159,7 @@ class ProteinInferencePipeline(object):
             id_splitting=self.id_splitting,
         )
         if self.database_file:
-            self.logger.info(
-                "Running In Silico Database Digest on file {}".format(
-                    self.database_file
-                )
-            )
+            self.logger.info("Running In Silico Database Digest on file {}".format(self.database_file))
             digest.digest_fasta_database()
         else:
             self.logger.warning(
@@ -189,9 +182,7 @@ class ProteinInferencePipeline(object):
         ### STEP 4: Initiate the datastore object ###
         ### STEP 4: Initiate the datastore object ###
         ### STEP 4: Initiate the datastore object ###
-        data = py_protein_inference.datastore.DataStore(
-            reader=reader, digest=digest
-        )
+        data = py_protein_inference.datastore.DataStore(reader=reader, digest=digest)
 
         ### Step 5: Restrict the PSM data
         ### Step 5: Restrict the PSM data
@@ -312,21 +303,15 @@ class ProteinInferencePipeline(object):
         reassigns these files to the target_files, decoy_files, and combined_files to be used in :py:class:`py_protein_inference.reader.Reader` object
         """
         if self.target_directory and self.decoy_directory:
-            self.logger.info(
-                "Transforming target_directory and decoy_directory into files"
-            )
+            self.logger.info("Transforming target_directory and decoy_directory into files")
             target_files = os.listdir(self.target_directory)
             target_files_full = [
-                os.path.join(self.target_directory, x)
-                for x in target_files
-                if x.endswith(".txt") or x.endswith(".tsv")
+                os.path.join(self.target_directory, x) for x in target_files if x.endswith(".txt") or x.endswith(".tsv")
             ]
 
             decoy_files = os.listdir(self.decoy_directory)
             decoy_files_full = [
-                os.path.join(self.decoy_directory, x)
-                for x in decoy_files
-                if x.endswith(".txt") or x.endswith(".tsv")
+                os.path.join(self.decoy_directory, x) for x in decoy_files if x.endswith(".txt") or x.endswith(".tsv")
             ]
 
             self.target_files = target_files_full

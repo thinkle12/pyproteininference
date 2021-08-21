@@ -40,10 +40,9 @@ class Inference(object):
 
     GROUPING_TYPES = [SUBSET_PEPTIDES, SHARED_PEPTIDES, NONE_GROUPING]
 
-    PULP ="pulp"
+    PULP = "pulp"
     GLPK = "glpk"
     LP_SOLVERS = [PULP, GLPK]
-
 
     ALL_SHARED_PEPTIDES = "all"
     BEST_SHARED_PEPTIDES = "best"
@@ -129,18 +128,11 @@ class Inference(object):
             # Set peptide variable if the peptide is in the restricted peptide set
             # Sort the peptides alphabetically
             protein_objects.peptides = set(
-                sorted(
-                    [
-                        x
-                        for x in prot_pep_dict[cur_protein_identifier]
-                        if x in restricted_peptides_set
-                    ]
-                )
+                sorted([x for x in prot_pep_dict[cur_protein_identifier] if x in restricted_peptides_set])
             )
             protein_list_group = [protein_objects]
             grouped_proteins.append(protein_list_group)
-        return(grouped_proteins)
-
+        return grouped_proteins
 
     def _apply_protein_group_ids(self, grouped_protein_objects):
         """
@@ -155,9 +147,7 @@ class Inference(object):
 
 
         """
-        logger = getLogger(
-            "py_protein_inference.inference.Inference._apply_protein_group_ids"
-        )
+        logger = getLogger("py_protein_inference.inference.Inference._apply_protein_group_ids")
 
         sp_protein_set = set(self.digest.swiss_prot_protein_set)
 
@@ -195,6 +185,7 @@ class Inference(object):
         }
 
         return return_dict
+
 
 class Inclusion(Inference):
     """
@@ -270,9 +261,7 @@ class Inclusion(Inference):
 
         """
 
-        logger = getLogger(
-            "py_protein_inference.inference.Inference._apply_protein_group_ids"
-        )
+        logger = getLogger("py_protein_inference.inference.Inference._apply_protein_group_ids")
 
         sp_protein_set = set(self.digest.swiss_prot_protein_set)
 
@@ -322,6 +311,7 @@ class Exclusion(Inference):
         scored_data (list): a List of scored Protein objects :py:class:`py_protein_inference.physical.Protein`
 
     """
+
     def __init__(self, data, digest):
         """
         Initialization method of the Exclusion Class
@@ -386,6 +376,7 @@ class Parsimony(Inference):
         lead_protein_set (set): Set of protein strings that are classified as leads from the LP solver
 
     """
+
     def __init__(self, data, digest):
         """
         Initialization method of the Parsimony object
@@ -400,7 +391,6 @@ class Parsimony(Inference):
         self.scored_data = self.data.get_protein_data()
         self.lead_protein_set = None
         self.parameter_file_object = data.parameter_file_object
-
 
     def _create_protein_groups(
         self,
@@ -445,9 +435,7 @@ class Parsimony(Inference):
         protein_tracker = set()
         restricted_peptides_set = set(self.data.restricted_peptides)
         try:
-            picked_removed = set(
-                [x.identifier for x in self.data.picked_proteins_removed]
-            )
+            picked_removed = set([x.identifier for x in self.data.picked_proteins_removed])
         except TypeError:
             picked_removed = set([])
 
@@ -462,13 +450,7 @@ class Parsimony(Inference):
                 # Set peptide variable if the peptide is in the restricted peptide set
                 # Sort the peptides alphabetically
                 protein_objects.peptides = set(
-                    sorted(
-                        [
-                            x
-                            for x in prot_pep_dict[cur_protein_identifier]
-                            if x in restricted_peptides_set
-                        ]
-                    )
+                    sorted([x for x in prot_pep_dict[cur_protein_identifier] if x in restricted_peptides_set])
                 )
                 protein_list_group = [protein_objects]
                 current_peptides = prot_pep_dict[cur_protein_identifier]
@@ -489,13 +471,12 @@ class Parsimony(Inference):
                         if not potential_protein_list:
                             logger.warning(
                                 "Protein {} and Peptide {} is not in database...".format(
-                                    protein_objects.identifier,
-                                    peptide
+                                    protein_objects.identifier, peptide
                                 )
                             )
 
                         # Assign proteins to groups based on shared peptide... unless the protein is equivalent to the current identifier
-                        if grouping_type!=self.NONE_GROUPING:
+                        if grouping_type != self.NONE_GROUPING:
                             for protein in potential_protein_list:
                                 # If statement below to avoid grouping the same protein twice and to not group the lead
                                 if (
@@ -513,27 +494,17 @@ class Parsimony(Inference):
                                                 sorted(
                                                     [
                                                         x
-                                                        for x in prot_pep_dict[
-                                                            current_protein_object.identifier
-                                                        ]
+                                                        for x in prot_pep_dict[current_protein_object.identifier]
                                                         if x in restricted_peptides_set
                                                     ]
                                                 )
                                             )
                                         if grouping_type == self.SHARED_PEPTIDES:
-                                            current_grouped_proteins.add(
-                                                current_protein_object
-                                            )
+                                            current_grouped_proteins.add(current_protein_object)
                                         elif grouping_type == self.SUBSET_PEPTIDES:
-                                            if current_protein_object.peptides.issubset(
-                                                protein_objects.peptides
-                                            ):
-                                                current_grouped_proteins.add(
-                                                    current_protein_object
-                                                )
-                                                protein_tracker.add(
-                                                    current_protein_object
-                                                )
+                                            if current_protein_object.peptides.issubset(protein_objects.peptides):
+                                                current_grouped_proteins.add(current_protein_object)
+                                                protein_tracker.add(current_protein_object)
                                             else:
                                                 pass
                                         else:
@@ -557,7 +528,6 @@ class Parsimony(Inference):
                 # Then append this sub group to the main list
                 # The variable grouped_proteins is now a list of lists which each element being a Protein object and each list of protein objects corresponding to a group
                 grouped_proteins.append(protein_list_group)
-
 
         return grouped_proteins
 
@@ -584,9 +554,7 @@ class Parsimony(Inference):
 
 
         """
-        logger = getLogger(
-            "py_protein_inference.inference.Inference._swissprot_and_isoform_override"
-        )
+        logger = getLogger("py_protein_inference.inference.Inference._swissprot_and_isoform_override")
 
         sp_protein_set = set(self.digest.swiss_prot_protein_set)
         scored_proteins = list(scored_data)
@@ -597,11 +565,7 @@ class Parsimony(Inference):
         # Get the higher or lower variable
         higher_or_lower = self.data.higher_or_lower()
 
-        logger.info(
-            "Applying Group IDs... and Executing {} Swissprot Override...".format(
-                override_type
-            )
-        )
+        logger.info("Applying Group IDs... and Executing {} Swissprot Override...".format(override_type))
         # Here we create group ID's for all groups and do some sorting
         grouped_protein_objects = []
         group_id = 0
@@ -638,8 +602,9 @@ class Parsimony(Inference):
                     pass
 
             # Sort protein sub group
-            protein_list = datastore.DataStore.sort_protein_sub_groups(protein_list=protein_list,
-                                                                       higher_or_lower=higher_or_lower)
+            protein_list = datastore.DataStore.sort_protein_sub_groups(
+                protein_list=protein_list, higher_or_lower=higher_or_lower
+            )
 
             # grouped_protein_objects is the MAIN list of lists with grouped protein objects
             grouped_protein_objects.append(protein_list)
@@ -647,19 +612,21 @@ class Parsimony(Inference):
             # If the lead is unreviewed then try to replace it with the best reviewed hit
             # Run swissprot override
             if self.data.parameter_file_object.reviewed_identifier_symbol:
-                sp_override = self._swissprot_override(protein_list=protein_list,
-                                                         leads=leads,
-                                                         grouped_protein_objects=grouped_protein_objects,
-                                                         override_type=override_type)
+                sp_override = self._swissprot_override(
+                    protein_list=protein_list,
+                    leads=leads,
+                    grouped_protein_objects=grouped_protein_objects,
+                    override_type=override_type,
+                )
                 grouped_protein_objects = sp_override["grouped_protein_objects"]
                 leads = sp_override["leads"]
                 protein_list = sp_override["protein_list"]
 
             # Run isoform override If we want to run isoform_override and if the isoform symbol exists...
             if isoform_override and self.data.parameter_file_object.isoform_symbol:
-                iso_override = self._isoform_override(protein_list=protein_list,
-                                                         leads=leads,
-                                                         grouped_protein_objects=grouped_protein_objects)
+                iso_override = self._isoform_override(
+                    protein_list=protein_list, leads=leads, grouped_protein_objects=grouped_protein_objects
+                )
                 grouped_protein_objects = iso_override["grouped_protein_objects"]
                 leads = iso_override["leads"]
                 protein_list = iso_override["protein_list"]
@@ -682,8 +649,8 @@ class Parsimony(Inference):
         Args:
             protein_list (list): List of grouped :py:class:`py_protein_inference.physical.Protein` objects
             leads (set): Set of string protien identifiers that have been identified as a lead
-            grouped_protein_objects (list): List of protein_list lists 
-            override_type (str): "soft" or "hard" on how to override non reviewed identifiers. "soft" is preferred 
+            grouped_protein_objects (list): List of protein_list lists
+            override_type (str): "soft" or "hard" on how to override non reviewed identifiers. "soft" is preferred
 
         Returns:
             dict: leads (set): Set of string protien identifiers that have been identified as a lead. Updated to reflect lead changes
@@ -692,9 +659,7 @@ class Parsimony(Inference):
 
         """
 
-        logger = getLogger(
-            "py_protein_inference.inference.Inference._swissprot_override"
-        )
+        logger = getLogger("py_protein_inference.inference.Inference._swissprot_override")
 
         if not protein_list[0].reviewed:
             # If the lead is unreviewed attempt to replace it...
@@ -706,15 +671,13 @@ class Parsimony(Inference):
 
                     if override_type == "soft":
                         # If the lead proteins peptides are a subset of the best swissprot.... then swap the proteins... (meaning equal peptides or the swissprot completely covers the tremble reference)
-                        if best_swiss_prot_prot.identifier not in leads and set(
-                                protein_list[0].peptides
-                        ).issubset(set(best_swiss_prot_prot.peptides)):
+                        if best_swiss_prot_prot.identifier not in leads and set(protein_list[0].peptides).issubset(
+                            set(best_swiss_prot_prot.peptides)
+                        ):
                             # We use -1 as the idex of grouped_protein_objects because the current 'protein_list' is the last entry appended to scores grouped
                             # Essentially grouped_protein_objects[-1]==protein_list
                             # We need this syntax so we can switch the location of the unreviewed lead identifier with the best reviewed identifier in grouped_protein_objects
-                            swiss_prot_override_index = grouped_protein_objects[-1].index(
-                                best_swiss_prot_prot
-                            )
+                            swiss_prot_override_index = grouped_protein_objects[-1].index(best_swiss_prot_prot)
                             cur_tr_lead = grouped_protein_objects[-1][0]
                             (
                                 grouped_protein_objects[-1][0],
@@ -723,11 +686,13 @@ class Parsimony(Inference):
                                 grouped_protein_objects[-1][swiss_prot_override_index],
                                 grouped_protein_objects[-1][0],
                             )
-                            grouped_protein_objects[-1][
-                                swiss_prot_override_index
-                            ], grouped_protein_objects[-1][0]
+                            grouped_protein_objects[-1][swiss_prot_override_index], grouped_protein_objects[-1][0]
                             new_sp_lead = grouped_protein_objects[-1][0]
-                            logger.info("Overriding Unreviewed {} with Reviewed {}".format(cur_tr_lead.identifier, new_sp_lead.identifier))
+                            logger.info(
+                                "Overriding Unreviewed {} with Reviewed {}".format(
+                                    cur_tr_lead.identifier, new_sp_lead.identifier
+                                )
+                            )
 
                             # Append new_sp_lead protein to leads, to make sure we dont repeat leads
                             leads.add(new_sp_lead.identifier)
@@ -741,9 +706,7 @@ class Parsimony(Inference):
                             # We use -1 as the index of grouped_protein_objects because the current 'protein_list' is the last entry appended to grouped_protein_objects
                             # Essentially grouped_protein_objects[-1]==protein_list
                             # We need this syntax so we can switch the location of the unreviewed lead identifier with the best reviewed identifier in grouped_protein_objects
-                            swiss_prot_override_index = grouped_protein_objects[-1].index(
-                                best_swiss_prot_prot
-                            )
+                            swiss_prot_override_index = grouped_protein_objects[-1].index(best_swiss_prot_prot)
                             cur_tr_lead = grouped_protein_objects[-1][0]
                             logger.info(cur_tr_lead.identifier)
                             # Re-assigning the value within the index will also reassign the value in protein_list...
@@ -772,22 +735,19 @@ class Parsimony(Inference):
         else:
             leads.add(protein_list[0].identifier)
 
-        return_dict = {"leads": leads,
-                       "grouped_protein_objects": grouped_protein_objects,
-                       "protein_list":protein_list}
+        return_dict = {"leads": leads, "grouped_protein_objects": grouped_protein_objects, "protein_list": protein_list}
 
-        return(return_dict)
-
+        return return_dict
 
     def _isoform_override(self, protein_list, grouped_protein_objects, leads):
         """
         This method re-assigns protein group leads if the lead is an isoform protein and if the protein group contains a canonical protein that contains the exact same set of peptides as the isoform lead.
         This method is here to provide consistency to the output
-        
+
         Args:
             protein_list (list): List of grouped :py:class:`py_protein_inference.physical.Protein` objects
             leads (set): Set of string protien identifiers that have been identified as a lead
-            grouped_protein_objects (list): List of protein_list lists 
+            grouped_protein_objects (list): List of protein_list lists
 
         Returns:
             dict: leads (set): Set of string protien identifiers that have been identified as a lead. Updated to reflect lead changes
@@ -797,55 +757,39 @@ class Parsimony(Inference):
 
         """
 
-        logger = getLogger(
-            "py_protein_inference.inference.Inference._isoform_override"
-        )
+        logger = getLogger("py_protein_inference.inference.Inference._isoform_override")
 
         if protein_list[0].reviewed:
-            if (
-                    self.data.parameter_file_object.isoform_symbol
-                    in protein_list[0].identifier
-            ):
-                pure_id = protein_list[0].identifier.split(
-                    self.data.parameter_file_object.isoform_symbol
-                )[0]
+            if self.data.parameter_file_object.isoform_symbol in protein_list[0].identifier:
+                pure_id = protein_list[0].identifier.split(self.data.parameter_file_object.isoform_symbol)[0]
                 # Start to loop through protein_list which is the current group...
                 for potential_replacement in protein_list[1:]:
                     isoform_override = potential_replacement
                     if (
-                            isoform_override.identifier == pure_id
-                            and isoform_override.identifier not in leads
-                            and set(protein_list[0].peptides).issubset(
-                        set(isoform_override.peptides)
-                    )
+                        isoform_override.identifier == pure_id
+                        and isoform_override.identifier not in leads
+                        and set(protein_list[0].peptides).issubset(set(isoform_override.peptides))
                     ):
-                        isoform_override_index = grouped_protein_objects[-1].index(
-                            isoform_override
-                        )
+                        isoform_override_index = grouped_protein_objects[-1].index(isoform_override)
                         cur_iso_lead = grouped_protein_objects[-1][0]
                         # Re-assigning the value within the index will also reassign the value in protein_list...
                         # This is because grouped_protein_objects[-1] equals protein_list
                         # So we do not have to reassign values in protein_list
-                        (
-                            grouped_protein_objects[-1][0],
-                            grouped_protein_objects[-1][isoform_override_index],
-                        ) = (
+                        (grouped_protein_objects[-1][0], grouped_protein_objects[-1][isoform_override_index],) = (
                             grouped_protein_objects[-1][isoform_override_index],
                             grouped_protein_objects[-1][0],
                         )
-                        grouped_protein_objects[-1][
-                            isoform_override_index
-                        ], grouped_protein_objects[-1][0]
+                        grouped_protein_objects[-1][isoform_override_index], grouped_protein_objects[-1][0]
 
                         new_iso_lead = grouped_protein_objects[-1][0]
-                        logger.info("Overriding Isoform {} with {}".format(cur_iso_lead.identifier,new_iso_lead.identifier))
+                        logger.info(
+                            "Overriding Isoform {} with {}".format(cur_iso_lead.identifier, new_iso_lead.identifier)
+                        )
                         leads.add(protein_list[0].identifier)
 
-        return_dict = {"leads": leads,
-                       "grouped_protein_objects": grouped_protein_objects,
-                       "protein_list":protein_list}
+        return_dict = {"leads": leads, "grouped_protein_objects": grouped_protein_objects, "protein_list": protein_list}
 
-        return(return_dict)
+        return return_dict
 
     def _reassign_protein_group_leads(self, protein_group_objects):
         """
@@ -854,7 +798,7 @@ class Parsimony(Inference):
 
         Args:
             protein_group_objects (list): List of :py:class:`py_protein_inference.physical.ProteinGroup` objects
-            
+
         Returns:
             list: List of :py:class:`py_protein_inference.physical.ProteinGroup` objects where leads have been reassigned properly
 
@@ -875,13 +819,9 @@ class Parsimony(Inference):
         # Therefore, in the model proteins a and b are equivalent in that they map to 2 peptides together - 1 and 2. peptide 3 maps to a but also to c...
         # Sometimes the model (glpk) will spit out protein b as the lead... we wish to swap protein b as the lead with protein a because it will likely have a better score...
         logger.info("Potentially Reassigning Protein Group leads...")
-        lead_protein_set = set(
-            [x.proteins[0].identifier for x in protein_group_objects]
-        )
+        lead_protein_set = set([x.proteins[0].identifier for x in protein_group_objects])
         for i in range(len(protein_group_objects)):
-            for j in range(
-                1, len(protein_group_objects[i].proteins)
-            ):  # Loop over all sub proteins in the group...
+            for j in range(1, len(protein_group_objects[i].proteins)):  # Loop over all sub proteins in the group...
                 # if the lead proteins peptides are a subset of one of its proteins in the group, and the secondary protein is not a lead protein and its score is better than the leads... and it has more peptides...
                 new_lead = protein_group_objects[i].proteins[j]
                 old_lead = protein_group_objects[i].proteins[0]
@@ -966,22 +906,18 @@ class Parsimony(Inference):
         # Therefore, in the model proteins a and b are equivalent in that they map to 2 peptides together - 1 and 2. peptide 3 maps to a but also to c...
         # Sometimes the model (glpk) will spit out protein b as the lead... we wish to swap protein b as the lead with protein a because it will likely have a better score...
         logger.info("Potentially Reassigning Proteoin List leads...")
-        lead_protein_set = set(
-            [x[0].identifier for x in grouped_protein_objects]
-        )
+        lead_protein_set = set([x[0].identifier for x in grouped_protein_objects])
         for i in range(len(grouped_protein_objects)):
-            for j in range(
-                    1, len(grouped_protein_objects[i])
-            ):  # Loop over all sub proteins in the group...
+            for j in range(1, len(grouped_protein_objects[i])):  # Loop over all sub proteins in the group...
                 # if the lead proteins peptides are a subset of one of its proteins in the group, and the secondary protein is not a lead protein and its score is better than the leads... and it has more peptides...
                 new_lead = grouped_protein_objects[i][j]
                 old_lead = grouped_protein_objects[i][0]
                 if higher_or_lower == datastore.DataStore.HIGHER_PSM_SCORE:
                     if (
-                            set(old_lead.peptides).issubset(set(new_lead.peptides))
-                            and new_lead.identifier not in lead_protein_set
-                            and old_lead.score <= new_lead.score
-                            and len(old_lead.peptides) < len(new_lead.peptides)
+                        set(old_lead.peptides).issubset(set(new_lead.peptides))
+                        and new_lead.identifier not in lead_protein_set
+                        and old_lead.score <= new_lead.score
+                        and len(old_lead.peptides) < len(new_lead.peptides)
                     ):
                         logger.info(
                             "protein {} will replace protein {} as lead, with index {}, New Num Peptides: {}, Old Num Peptides: {}".format(
@@ -1004,10 +940,10 @@ class Parsimony(Inference):
 
                 if higher_or_lower == datastore.DataStore.LOWER_PSM_SCORE:
                     if (
-                            set(old_lead.peptides).issubset(set(new_lead.peptides))
-                            and new_lead.identifier not in lead_protein_set
-                            and old_lead.score >= new_lead.score
-                            and len(old_lead.peptides) < len(new_lead.peptides)
+                        set(old_lead.peptides).issubset(set(new_lead.peptides))
+                        and new_lead.identifier not in lead_protein_set
+                        and old_lead.score >= new_lead.score
+                        and len(old_lead.peptides) < len(new_lead.peptides)
                     ):
                         logger.info(
                             "protein {} will replace protein {} as lead, with index {}, New Num Peptides: {}, Old Num Peptides: {}".format(
@@ -1053,25 +989,13 @@ class Parsimony(Inference):
         # Here we get the protein to peptide dictionary...
         prot_pep_dict = self.data.protein_to_peptide_dictionary()
 
-        identifiers_sorted = self.data.get_sorted_identifiers(
-            scored=True
-        )
+        identifiers_sorted = self.data.get_sorted_identifiers(scored=True)
 
         # Get all the proteins that we scored and the ones picked if picker was ran...
-        data_proteins = sorted(
-            [
-                x
-                for x in self.data.protein_peptide_dictionary.keys()
-                if x in identifiers_sorted
-            ]
-        )
+        data_proteins = sorted([x for x in self.data.protein_peptide_dictionary.keys() if x in identifiers_sorted])
         # Get the set of peptides for each protein...
-        data_peptides = [
-            set(self.data.protein_peptide_dictionary[x]) for x in data_proteins
-        ]
-        flat_peptides_in_data = set(
-            [item for sublist in data_peptides for item in sublist]
-        )
+        data_peptides = [set(self.data.protein_peptide_dictionary[x]) for x in data_proteins]
+        flat_peptides_in_data = set([item for sublist in data_peptides for item in sublist])
         peptide_sets = []
         # Loop over the list of peptides...
         for k in range(len(data_peptides)):
@@ -1091,10 +1015,7 @@ class Parsimony(Inference):
         # Get them all...
         all_peptides = [x for x in data_peptides]
         # Remove redundant sets...
-        non_redundant_peptide_sets = [
-            set(i)
-            for i in OrderedDict.fromkeys(frozenset(item) for item in peptide_sets)
-        ]
+        non_redundant_peptide_sets = [set(i) for i in OrderedDict.fromkeys(frozenset(item) for item in peptide_sets)]
 
         # Loop over the restricted list of peptides...
         ind_list = []
@@ -1103,9 +1024,7 @@ class Parsimony(Inference):
             ind_list.append(all_peptides.index(peptide_set))
 
         # Get the protein based on the index
-        restricted_proteins = [
-            data_proteins[x] for x in range(len(data_peptides)) if x in ind_list
-        ]
+        restricted_proteins = [data_proteins[x] for x in range(len(data_peptides)) if x in ind_list]
 
         # Here we get the list of all proteins
         plist = []
@@ -1121,9 +1040,7 @@ class Parsimony(Inference):
         unique_prots_sorted = [x for x in identifiers_sorted if x in unique_prots]
 
         if len(unique_prots) != len(unique_prots_sorted):
-            raise ValueError(
-                "Sorted proteins length is not equal to unsorted length..."
-            )
+            raise ValueError("Sorted proteins length is not equal to unsorted length...")
 
         # Setup default dictionaries
         dd_num = collections.defaultdict(list)
@@ -1144,10 +1061,7 @@ class Parsimony(Inference):
 
         # Not sure if this header string is correct or if it needs to be here...
         fileout.write("/* sets */" + "\n" + "set PROTEINS;" + "\n" + "\n" + "\n")
-        fileout.write(
-            "/* decision variables: yi, i in {1,..,5}. yi = 1 -> protein i is selected */"
-            + "\n"
-        )
+        fileout.write("/* decision variables: yi, i in {1,..,5}. yi = 1 -> protein i is selected */" + "\n")
         fileout.write("var y {i in PROTEINS} binary >=0;" + "\n")
         fileout.write("/* objective function */" + "\n")
         fileout.write("minimize z: sum{i in PROTEINS} y[i];" + "\n" + "\n")
@@ -1158,18 +1072,14 @@ class Parsimony(Inference):
         # s.t. c2: y[14145]+y[4857]+y[4858]+y[10143]+y[2966] >=1;
         # s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1;
         # Each of the lines (constants, c1,c2,c3) is a peptide and each of the y[x] is a protein
-        total_sorted_peptides = sorted(
-            list(set(flat_peptides_in_data))
-        )  # Sort peptides alphabetically first...
+        total_sorted_peptides = sorted(list(set(flat_peptides_in_data)))  # Sort peptides alphabetically first...
         for j in range(len(total_sorted_peptides)):
             peptides_glpsol_format = [
                 "y[{}]".format(dd_num[x][0])
                 for x in sorted(pep_prot_dict[total_sorted_peptides[j]])
                 if x in unique_protein_set
             ]
-            fileout.write(
-                "s.t. c" + str(j + 1) + ": " + "+".join(peptides_glpsol_format) + " >=1;" + "\n"
-            )
+            fileout.write("s.t. c" + str(j + 1) + ": " + "+".join(peptides_glpsol_format) + " >=1;" + "\n")
 
         # Finish writing the rest of the file and close it
         fileout.write("\n")
@@ -1207,7 +1117,7 @@ class Parsimony(Inference):
         # Run GLPK with the following command
         if not skip_running:
             p = subprocess.Popen(
-                "{} -m {} -o {}".format(path_to_glpsol,glpkin,glpkout),
+                "{} -m {} -o {}".format(path_to_glpsol, glpkin, glpkout),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 shell=True,
@@ -1222,15 +1132,9 @@ class Parsimony(Inference):
             logger.info("End Command line Stderr")
 
             if output[0] == "":
-                raise ValueError(
-                    "Glpk did not produce any output... See potential error output above"
-                )
+                raise ValueError("Glpk did not produce any output... See potential error output above")
         else:
-            logger.info(
-                "Not running GLPK, File {} will be used downstream in grouping".format(
-                    glpkout
-                )
-            )
+            logger.info("Not running GLPK, File {} will be used downstream in grouping".format(glpkout))
 
         ###Define indicies better and make this code more readable...
         ###Define indicies in init and show commented examples of how the data looks...
@@ -1284,9 +1188,7 @@ class Parsimony(Inference):
         glpk_out = glpk_out.split("\n")
 
         # Cant find a better way to do this... there are modules out there that work with glpk...
-        start = glpk_out.index(
-            "   No. Column name       Activity     Lower bound   Upper bound"
-        )
+        start = glpk_out.index("   No. Column name       Activity     Lower bound   Upper bound")
 
         restricted_glpk_out = []
         # Fix this -13 and +2... not really sure how
@@ -1314,9 +1216,7 @@ class Parsimony(Inference):
                     passing_protein_number = int(numbers[k])
                     lead_proteins.append(dd_prot_nums[passing_protein_number][0])
                 except IndexError:
-                    logger.warning(
-                        "No Protein for Protein Number {}".format(passing_protein_number)
-                    )
+                    logger.warning("No Protein for Protein Number {}".format(passing_protein_number))
 
         lead_protein_set = set(lead_proteins)
         self.lead_protein_set = lead_protein_set
@@ -1336,9 +1236,7 @@ class Parsimony(Inference):
                 lead_protein_identifiers.append(protein_object.identifier)
             else:
                 # Why are some proteins not being found when we run exclusion???
-                logger.warning(
-                    "Protein {} not found with protein finder...".format(proteins)
-                )
+                logger.warning("Protein {} not found with protein finder...".format(proteins))
 
         self.lead_protein_objects = lead_protein_objects
 
@@ -1374,13 +1272,10 @@ class Parsimony(Inference):
 
         # Run lead reassignment for the group objets and protein objects
         protein_group_objects = self._reassign_protein_group_leads(
-            protein_group_objects = protein_group_objects, 
+            protein_group_objects=protein_group_objects,
         )
-        
-        grouped_protein_objects = self._reassign_protein_list_leads(
-            grouped_protein_objects=grouped_protein_objects
 
-        )
+        grouped_protein_objects = self._reassign_protein_list_leads(grouped_protein_objects=grouped_protein_objects)
 
         logger.info("Re Sorting Results based on lead Protein Score")
         grouped_protein_objects = datastore.DataStore.sort_protein_objects(
@@ -1409,25 +1304,13 @@ class Parsimony(Inference):
 
         prot_pep_dict = self.data.protein_to_peptide_dictionary()
 
-        identifiers_sorted = self.data.get_sorted_identifiers(
-            scored=True
-        )
+        identifiers_sorted = self.data.get_sorted_identifiers(scored=True)
 
         # Get all the proteins that we scored and the ones picked if picker was ran...
-        data_proteins = sorted(
-            [
-                x
-                for x in self.data.protein_peptide_dictionary.keys()
-                if x in identifiers_sorted
-            ]
-        )
+        data_proteins = sorted([x for x in self.data.protein_peptide_dictionary.keys() if x in identifiers_sorted])
         # Get the set of peptides for each protein...
-        data_peptides = [
-            set(self.data.protein_peptide_dictionary[x]) for x in data_proteins
-        ]
-        flat_peptides_in_data = set(
-            [item for sublist in data_peptides for item in sublist]
-        )
+        data_peptides = [set(self.data.protein_peptide_dictionary[x]) for x in data_proteins]
+        flat_peptides_in_data = set([item for sublist in data_peptides for item in sublist])
 
         peptide_sets = []
         # Loop over the list of peptides...
@@ -1450,10 +1333,7 @@ class Parsimony(Inference):
         # Get them all...
         all_peptides = [x for x in data_peptides]
         # Remove redundant sets...
-        non_redundant_peptide_sets = [
-            set(i)
-            for i in OrderedDict.fromkeys(frozenset(item) for item in peptide_sets)
-        ]
+        non_redundant_peptide_sets = [set(i) for i in OrderedDict.fromkeys(frozenset(item) for item in peptide_sets)]
 
         # Loop over  the restricted list of peptides...
         ind_list = []
@@ -1462,9 +1342,7 @@ class Parsimony(Inference):
             ind_list.append(all_peptides.index(pep_sets))
 
         # Get the protein based on the index
-        restricted_proteins = [
-            data_proteins[x] for x in range(len(data_peptides)) if x in ind_list
-        ]
+        restricted_proteins = [data_proteins[x] for x in range(len(data_peptides)) if x in ind_list]
 
         # Here we get the list of all proteins
         plist = []
@@ -1480,9 +1358,7 @@ class Parsimony(Inference):
         unique_prots_sorted = [x for x in identifiers_sorted if x in unique_prots]
 
         # Define the protein variables with a lower bound of 0 and catgeory Integer
-        prots = pulp.LpVariable.dicts(
-            "prot", indexs=unique_prots_sorted, lowBound=0, cat="Integer"
-        )
+        prots = pulp.LpVariable.dicts("prot", indexs=unique_prots_sorted, lowBound=0, cat="Integer")
 
         # Define our Lp Problem which is to Minimize our objective function
         prob = pulp.LpProblem("Parsimony_Problem", pulp.LpMinimize)
@@ -1500,21 +1376,11 @@ class Parsimony(Inference):
         for peptides in sorted(list(pep_prot_dict.keys())):
             try:
                 prob += (
-                    pulp.lpSum(
-                        [
-                            prots[i]
-                            for i in sorted(list(pep_prot_dict[peptides]))
-                            if i in unique_protein_set
-                        ]
-                    )
+                    pulp.lpSum([prots[i] for i in sorted(list(pep_prot_dict[peptides])) if i in unique_protein_set])
                     >= 1
                 )
             except KeyError:
-                logger.info(
-                    "Not including protein {} in pulp model".format(
-                        pep_prot_dict[peptides]
-                    )
-                )
+                logger.info("Not including protein {} in pulp model".format(pep_prot_dict[peptides]))
 
         prob.solve()
 
@@ -1534,9 +1400,7 @@ class Parsimony(Inference):
             else:
                 if parsimony_value == 1:
                     # Why are some proteins not being found when we run exclusion???
-                    logger.warning(
-                        "Protein {} not found with protein finder...".format(proteins)
-                    )
+                    logger.warning("Protein {} not found with protein finder...".format(proteins))
                 else:
                     pass
 
@@ -1574,10 +1438,7 @@ class Parsimony(Inference):
             protein_group_objects=protein_group_objects,
         )
 
-        grouped_protein_objects = self._reassign_protein_list_leads(
-            grouped_protein_objects=grouped_protein_objects
-
-        )
+        grouped_protein_objects = self._reassign_protein_list_leads(grouped_protein_objects=grouped_protein_objects)
 
         logger.info("Re Sorting Results based on lead Protein Score")
         grouped_protein_objects = datastore.DataStore.sort_protein_objects(
@@ -1616,11 +1477,7 @@ class Parsimony(Inference):
             try:
                 os.mkdir(glpkinout_directory)
             except OSError:
-                logger.warning(
-                    "Directory {} cannot be created or already exists".format(
-                        glpkinout_directory
-                    )
-                )
+                logger.warning("Directory {} cannot be created or already exists".format(glpkinout_directory))
 
             self._setup_glpk(
                 glpkin_filename=os.path.join(
@@ -1651,23 +1508,28 @@ class Parsimony(Inference):
             )
 
         else:
-            raise ValueError("Parsimony cannot run if lp_solver parameter value is not one of the following: {}".format(", ".join(Inference.LP_SOLVERS)))
+            raise ValueError(
+                "Parsimony cannot run if lp_solver parameter value is not one of the following: {}".format(
+                    ", ".join(Inference.LP_SOLVERS)
+                )
+            )
 
         # Call assign shared peptides
         self._assign_shared_peptides(shared_pep_type=self.parameter_file_object.shared_peptides)
-
 
     def _assign_shared_peptides(self, shared_pep_type="all"):
 
         logger = getLogger("py_protein_inference.inference.Parsimony._assign_shared_peptides")
 
         if not self.data.grouped_scored_proteins and self.data.protein_group_objects:
-            raise ValueError("Grouped Protein objects could not be found. Please run 'infer_proteins' method of the Parsimony class")
+            raise ValueError(
+                "Grouped Protein objects could not be found. Please run 'infer_proteins' method of the Parsimony class"
+            )
 
-        if shared_pep_type==self.ALL_SHARED_PEPTIDES:
+        if shared_pep_type == self.ALL_SHARED_PEPTIDES:
             pass
 
-        elif shared_pep_type==self.BEST_SHARED_PEPTIDES:
+        elif shared_pep_type == self.BEST_SHARED_PEPTIDES:
             logger.info("Assigning Shared Peptides from Parsimony to the Best Scoring Protein")
             raw_peptide_tracker = set()
             peptide_tracker = set()
@@ -1725,6 +1587,7 @@ class FirstProtein(Inference):
         digest (py_protein_inference.in_silico_digest.Digest): Digest Object
 
     """
+
     def __init__(self, data, digest):
         """
         FirstProtein Inference initialization method
@@ -1788,6 +1651,7 @@ class PeptideCentric(Inference):
         digest (py_protein_inference.in_silico_digest.Digest): Digest Object
 
     """
+
     def __init__(self, data, digest):
         """
         PeptideCentric Inference initialization method
@@ -1849,9 +1713,7 @@ class PeptideCentric(Inference):
 
         """
 
-        logger = getLogger(
-            "py_protein_inference.inference.Inference._apply_protein_group_ids"
-        )
+        logger = getLogger("py_protein_inference.inference.Inference._apply_protein_group_ids")
 
         grouped_protein_objects = self.data.get_protein_data()
 
@@ -1861,10 +1723,7 @@ class PeptideCentric(Inference):
         protein_group_objects = []
         for protein_group in grouped_protein_objects:
             protein_group.peptides = set(
-                [
-                    Psm.split_peptide(peptide_string=x)
-                    for x in list(protein_group.raw_peptides)
-                ]
+                [Psm.split_peptide(peptide_string=x) for x in list(protein_group.raw_peptides)]
             )
             protein_list = []
             group_id = group_id + 1

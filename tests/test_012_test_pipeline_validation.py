@@ -8,24 +8,14 @@ import logging
 import shutil
 
 
-TEST_DATABASE = resource_filename(
-    "py_protein_inference", "../tests/data/test_database.fasta"
-)
-PARAMETER_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_params_inclusion.yaml"
-)
+TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
+PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('py_protein_inference', '../tests/output/')
 
-TARGET_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_target.txt"
-)
-DECOY_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_decoy.txt"
-)
-COMBINED_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/combined_files/test_combined_data.txt"
-)
+TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
+DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy.txt")
+COMBINED_FILE = resource_filename("py_protein_inference", "../tests/data/combined_files/test_combined_data.txt")
 
 temp_dir = tempfile.gettempdir()
 
@@ -38,9 +28,7 @@ if not os.path.exists(DECOY_DIRECTORY):
 
 shutil.copyfile(str(TARGET_FILE), os.path.join(TARGET_DIRECTORY, "target_file.txt"))
 shutil.copyfile(DECOY_FILE, os.path.join(DECOY_DIRECTORY, "decoy_file.txt"))
-COMBINED_DIRECTORY = resource_filename(
-    "py_protein_inference", "../tests/data/combined_files"
-)
+COMBINED_DIRECTORY = resource_filename("py_protein_inference", "../tests/data/combined_files")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("py_protein_inference.tests.test_012_test_pipeline_validation")

@@ -12,6 +12,7 @@ class Export(object):
         filepath (str): Path to file to be written
 
     """
+
     EXPORT_LEADS = "leads"
     EXPORT_ALL = "all"
     EXPORT_COMMA_SEP = "comma_sep"
@@ -74,93 +75,57 @@ class Export(object):
         tag = data.parameter_file_object.tag
 
         if self.EXPORT_LEADS == export_type:
-            filename = "{}_leads_{}_{}.csv".format(
-                tag, data.short_protein_score, data.psm_score
-            )
+            filename = "{}_leads_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
-            logger.info(
-                "Exporting Protein Inference Data to File: {}".format(complete_filepath)
-            )
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_leads_restricted(filename_out=complete_filepath)
 
         if self.EXPORT_ALL == export_type:
-            filename = "{}_all_{}_{}.csv".format(
-                tag, data.short_protein_score, data.psm_score
-            )
+            filename = "{}_all_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
-            logger.info(
-                "Exporting Protein Inference Data to File: {}".format(complete_filepath)
-            )
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_all_restricted(complete_filepath)
 
         if self.EXPORT_COMMA_SEP == export_type:
-            filename = "{}_comma_sep_{}_{}.csv".format(
-                tag, data.short_protein_score, data.psm_score
-            )
+            filename = "{}_comma_sep_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
-            logger.info(
-                "Exporting Protein Inference Data to File: {}".format(complete_filepath)
-            )
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_comma_sep_restricted(complete_filepath)
 
         if self.EXPORT_Q_VALUE_COMMA_SEP == export_type:
-            filename = "{}_q_value_comma_sep_{}_{}.csv".format(
-                tag, data.short_protein_score, data.psm_score
-            )
+            filename = "{}_q_value_comma_sep_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
-            logger.info(
-                "Exporting Protein Inference Data to File: {}".format(complete_filepath)
-            )
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_comma_sep(complete_filepath)
 
         if self.EXPORT_Q_VALUE == export_type:
-            filename = "{}_q_value_leads_{}_{}.csv".format(
-                tag, data.short_protein_score, data.psm_score
-            )
+            filename = "{}_q_value_leads_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
-            logger.info(
-                "Exporting Protein Inference Data to File: {}".format(complete_filepath)
-            )
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads(complete_filepath)
 
         if self.EXPORT_Q_VALUE_ALL == export_type:
-            filename = "{}_q_value_all_{}_{}.csv".format(
-                tag, data.short_protein_score, data.psm_score
-            )
+            filename = "{}_q_value_all_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
-            logger.info(
-                "Exporting Protein Inference Data to File: {}".format(complete_filepath)
-            )
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_all(complete_filepath)
 
         if self.EXPORT_PEPTIDES == export_type:
-            filename = "{}_q_value_leads_peptides_{}_{}.csv".format(
-                tag, data.short_protein_score, data.psm_score
-            )
+            filename = "{}_q_value_leads_peptides_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
-            logger.info(
-                "Exporting Protein Inference Data to File: {}".format(complete_filepath)
-            )
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads_peptides(complete_filepath)
 
         if self.EXPORT_PSMS == export_type:
-            filename = "{}_q_value_leads_psms_{}_{}.csv".format(
-                tag, data.short_protein_score, data.psm_score
-            )
+            filename = "{}_q_value_leads_psms_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
-            logger.info(
-                "Exporting Protein Inference Data to File: {}".format(complete_filepath)
-            )
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads_psms(complete_filepath)
 
         if self.EXPORT_PSM_IDS == export_type:
-            filename = "{}_q_value_leads_psm_ids_{}_{}.csv".format(
-                tag, data.short_protein_score, data.psm_score
-            )
+            filename = "{}_q_value_leads_psm_ids_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
-            logger.info(
-                "Exporting Protein Inference Data to File: {}".format(complete_filepath)
-            )
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads_psm_ids(complete_filepath)
 
         self.filepath = complete_filepath
@@ -546,9 +511,7 @@ class Export(object):
             else:
                 protein_export_list[-1].append("Unreviewed")
             protein_export_list[-1].append(groups.number_id)
-            psms = peptide_delimiter.join(
-                sorted([x.non_flanking_peptide for x in lead_protein.psms])
-            )
+            psms = peptide_delimiter.join(sorted([x.non_flanking_peptide for x in lead_protein.psms]))
             protein_export_list[-1].append(psms)
 
         with open(filename_out, "w") as f:

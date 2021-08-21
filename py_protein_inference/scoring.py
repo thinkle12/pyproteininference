@@ -110,7 +110,9 @@ class Score(object):
 
         if score_method not in self.SCORE_METHODS:
             raise ValueError(
-                "score method '{}' is not a proper method. Score method must be one of the following: '{}'".format(score_method, ", ".join(self.SCORE_METHODS))
+                "score method '{}' is not a proper method. Score method must be one of the following: '{}'".format(
+                    score_method, ", ".join(self.SCORE_METHODS)
+                )
             )
         else:
             if score_method == self.BEST_PEPTIDE_PER_PROTEIN:
@@ -139,7 +141,7 @@ class Score(object):
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.best_peptide_per_protein()
 
-         """
+        """
         logger = getLogger("py_protein_inference.scoring.Score.best_peptide_per_protein")
 
         all_scores = []
@@ -193,7 +195,7 @@ class Score(object):
         Examples:
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.multiplicative_log()
-         """
+        """
         logger = getLogger("py_protein_inference.scoring.Score.multiplicative_log")
 
         # Instead of making all_scores a list... make it a generator??
@@ -230,10 +232,8 @@ class Score(object):
         Examples:
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.down_weighted_multiplicative_log()
-         """
-        logger = getLogger(
-            "py_protein_inference.scoring.Score.down_weighted_multiplicative_log"
-        )
+        """
+        logger = getLogger("py_protein_inference.scoring.Score.down_weighted_multiplicative_log")
 
         score_list = []
         for proteins in self.pre_score_data:
@@ -272,7 +272,7 @@ class Score(object):
         Examples:
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.top_two_combied()
-         """
+        """
         logger = getLogger("py_protein_inference.scoring.Score.top_two_combied")
 
         all_scores = []
@@ -310,7 +310,7 @@ class Score(object):
         Examples:
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.down_weighted_v2()
-         """
+        """
         logger = getLogger("py_protein_inference.scoring.Score.down_weighted_v2")
 
         all_scores = []
@@ -347,10 +347,8 @@ class Score(object):
         Examples:
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.iterative_down_weighted_log()
-         """
-        logger = getLogger(
-            "py_protein_inference.scoring.Score.iterative_down_weighted_log"
-        )
+        """
+        logger = getLogger("py_protein_inference.scoring.Score.iterative_down_weighted_log")
 
         all_scores = []
         logger.info("Scoring Proteins with IDWL method")
@@ -388,7 +386,7 @@ class Score(object):
         Examples:
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.geometric_mean_log()
-         """
+        """
         logger = getLogger("py_protein_inference.scoring.Score.geometric_mean_log")
 
         all_scores = []
@@ -450,7 +448,7 @@ class Score(object):
         Examples:
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.additive()
-         """
+        """
         logger = getLogger("py_protein_inference.scoring.Score.additive")
 
         all_scores = []

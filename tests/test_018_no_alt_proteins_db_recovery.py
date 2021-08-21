@@ -13,18 +13,10 @@ from py_protein_inference import in_silico_digest
 from py_protein_inference.parameters import ProteinInferenceParameter
 import logging
 
-TEST_DATABASE = resource_filename(
-    "py_protein_inference", "../tests/data/test_database.fasta"
-)
-TARGET_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_target_no_alt_prot.txt"
-)
-DECOY_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_perc_data_decoy_no_alt_prot.txt"
-)
-PARAMETER_FILE = resource_filename(
-    "py_protein_inference", "../tests/data/test_params_inclusion.yaml"
-)
+TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
+TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target_no_alt_prot.txt")
+DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy_no_alt_prot.txt")
+PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
 
 IDENTIFIER_INDEX = 0
 SCORE_INDEX = 1
@@ -42,9 +34,7 @@ class TestAltProteinDbRecovery(TestCase):
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
         ### STEP 1: Load parameter file ###
-        protein_inference_parameters = ProteinInferenceParameter(
-            yaml_param_filepath=PARAMETER_FILE
-        )
+        protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE)
 
         ### STEP 2: Start with running an In Silico Digestion ###
         ### STEP 2: Start with running an In Silico Digestion ###

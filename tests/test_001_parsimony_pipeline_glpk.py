@@ -98,6 +98,7 @@ Q_VALUE_INDEX = 2
 GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
 
+
 class TestLoadParsimonyGlpkWorkflow(TestCase):
     def test_workflow_parsimony_glpk(self):
 

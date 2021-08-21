@@ -51,6 +51,7 @@ Q_VALUE_INDEX = 2
 GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
 
+
 class TestMissingDatabasePipeline(TestCase):
     def test_missing_database_pipeline(self):
 

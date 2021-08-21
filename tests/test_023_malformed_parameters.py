@@ -18,6 +18,7 @@ OUTPUT_DIR = tempfile.gettempdir()
 
 NEW_PARAMETER_FILE = os.path.join(OUTPUT_DIR, "malformed_protein_inference_params.yaml")
 
+
 class TestMalformedParameters(TestCase):
     def test_malformed_parameters(self):
 

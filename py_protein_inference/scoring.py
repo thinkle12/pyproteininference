@@ -13,6 +13,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
+
 class Score(object):
     """
     Score class that contains methods to do a variety of scoring methods on the :py:class:`py_protein_inference.physical.Psm` objects

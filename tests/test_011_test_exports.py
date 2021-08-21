@@ -22,6 +22,7 @@ OUTPUT_DIR = tempfile.gettempdir()
 GLPKINOUT_PATH = resource_filename("py_protein_inference", "../tests/glpkinout/")
 SKIP_RUNNING_GLPK = True
 
+
 class TestExportTypes(TestCase):
     def test_export_types(self):
 

@@ -15,6 +15,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
+
 class Qvality(object):
     def __init__(self):
         None

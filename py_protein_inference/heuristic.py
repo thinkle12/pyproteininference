@@ -566,9 +566,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
         if len(remaining_inference_methods) == 1:
             selected_method = list(pared_diff_dict.keys())[0]
             # If we have one remaining just return it
-            logger.info(
-                "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
-            )
+            logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
             return selected_method
 
         if len(remaining_inference_methods) == 0:

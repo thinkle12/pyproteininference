@@ -55,6 +55,7 @@ Q_VALUE_INDEX = 2
 GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
 
+
 class TestLoadParsimonyGlpkNoneTypeParamsWorkflow(TestCase):
     # @unittest.skip("Skipping Pulp Test, No CBC executable in build env")
     def test_workflow_parsimony_glpk_none_type(self):

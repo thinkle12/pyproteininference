@@ -11,17 +11,12 @@ from pkg_resources import resource_filename
 
 from py_protein_inference.parameters import ProteinInferenceParameter
 import yaml
-import logging
 import os
 
 PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
 
 NEW_PARAMETER_FILE = os.path.join(OUTPUT_DIR, "malformed_protein_inference_params.yaml")
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("py_protein_inference.tests.test_023_malformed_parameters")
-
 
 class TestMalformedParameters(TestCase):
     def test_malformed_parameters(self):

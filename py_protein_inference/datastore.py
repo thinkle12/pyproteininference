@@ -1,9 +1,19 @@
+import sys
 import collections
 from Bio import SeqIO
-from logging import getLogger
+import logging
 from py_protein_inference.physical import Protein, Psm
 from py_protein_inference.inference import Inference
 from py_protein_inference.scoring import Score
+
+logger = logging.getLogger(__name__)
+
+# set up our logger
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
 
 class DataStore(object):
@@ -33,7 +43,6 @@ class DataStore(object):
         digest (py_protein_inference.in_silico_digest.Digest): Digest object :py:class:`py_protein_inference.in_silico_digest.Digest`
         SCORE_MAPPER (dict): Dictionary that maps potential scores in input files to internal score names
         CUSTOM_SCORE_KEY (str): String that indicates a custom score is being used
-        logger (logger.logging): Logger object for logging
 
     """
 
@@ -85,8 +94,6 @@ class DataStore(object):
         self.protein_group_objects = []  # List of sorted protein group objects
         self.decoy_symbol = self.parameter_file_object.decoy_symbol  # Decoy symbol from parameter file
         self.digest = digest  # Digest object
-
-        self.logger = getLogger("py_protein_inference.datastore.DataStore")
 
         # Run Checks and Validations
         if validate:
@@ -389,8 +396,6 @@ class DataStore(object):
         # Validate that we have the main data variable
         self._validate_main_data_form()
 
-        logger = getLogger("py_protein_inference.datastore.DataStore.restrict_psm_data")
-
         logger.info("Restricting PSM data")
 
         peptide_length = self.parameter_file_object.restrict_peptide_length
@@ -501,7 +506,6 @@ class DataStore(object):
             >>> data.create_scoring_input()
         """
 
-        logger = getLogger("py_protein_inference.datastore.DataStore.create_scoring_input")
         logger.info("Creating Scoring Input")
 
         psm_data = self.get_psm_data()
@@ -642,8 +646,6 @@ class DataStore(object):
         """
 
         if not self.high_low_better:
-            logger = getLogger("py_protein_inference.datastore.DataStore.higher_or_lower")
-
             logger.info("Determining If a higher or lower score is better based on scored proteins")
             worst_score = self.scored_proteins[-1].score
             best_score = self.scored_proteins[0].score
@@ -778,8 +780,6 @@ class DataStore(object):
             >>> data.exclude_non_distinguishing_peptides(protein_subset_type="hard")
         """
 
-        logger = getLogger("py_protein_inference.datastore.DataStore.exclude_non_distinguishing_peptides")
-
         logger.info("Applying Exclusion Model")
 
         our_proteins_sorted = self.get_sorted_identifiers(scored=False)
@@ -908,8 +908,6 @@ class DataStore(object):
 
         self._validate_scored_proteins()
 
-        logger = getLogger("py_protein_inference.datastore.DataStore.protein_picker")
-
         logger.info("Running Protein Picker")
 
         # Use higher or lower class to determine if a higher protein score or lower protein score is better based on the scoring method used
@@ -1006,8 +1004,6 @@ class DataStore(object):
 
         self._validate_protein_group_objects()
 
-        logger = getLogger("py_protein_inference.datastore.DataStore.calculate_q_values")
-
         logger.info("Calculating Q values from the protein group objects")
 
         # pick out the lead scoring protein for each group... lead score is at 0 position
@@ -1091,8 +1087,6 @@ class DataStore(object):
         Entrapment DB would be target proteins known to NOT be in the sample. However, these entrapped proteins should be in the main database that
         the search was searched against via comet/mascot
         """
-
-        logger = getLogger("py_protein_inference.datastore.DataStore.entrapment_fdr")
 
         true_handle = SeqIO.parse(true_database, "fasta")
         true_proteins = []
@@ -1191,8 +1185,6 @@ class DataStore(object):
         """
         Method that logs the overlap between the digested fasta file and the input files on the PSM level
         """
-        logger = getLogger("py_protein_inference.datastore.DataStore._check_data_digest_overlap_psms")
-
         ## TODO write a function here that looks at the peptides we have and checks how many of these peptides we do not find in our Digest...
         peptides = [x.stripped_peptide for x in self.main_data_form]
         peptides_in_digest = set(self.digest.peptide_to_protein_dictionary.keys())
@@ -1214,8 +1206,6 @@ class DataStore(object):
         """
         Method that logs the overlap between the digested fasta file and the input files on the Protein level
         """
-        logger = getLogger("py_protein_inference.datastore.DataStore._check_data_digest_overlap_proteins")
-
         proteins = [x.possible_proteins for x in self.main_data_form]
         flat_proteins = set([item for sublist in proteins for item in sublist])
         proteins_in_digest = set(self.digest.protein_to_peptide_dictionary.keys())
@@ -1237,8 +1227,6 @@ class DataStore(object):
         """
         Method that logs the number of target and decoy proteins from the digest
         """
-        logger = getLogger("py_protein_inference.datastore.DataStore._check_target_decoy_split")
-
         # Check the number of targets vs the number of decoys from the digest
         targets = [
             x
@@ -1261,8 +1249,6 @@ class DataStore(object):
         """
         Method that checks to make sure that target and decoy proteins exist in the data files
         """
-        logger = getLogger("py_protein_inference.datastore.DataStore._validate_decoys_from_data")
-
         # Check to see if we find decoys from our input files
         proteins = [x.possible_proteins for x in self.main_data_form]
         flat_proteins = set([item for sublist in proteins for item in sublist])
@@ -1275,8 +1261,6 @@ class DataStore(object):
         """
         Method that validates whether or not isoforms are able to be identified in the data files
         """
-        logger = getLogger("py_protein_inference.datastore.DataStore._validate_isoform_from_data")
-
         # Check to see if we find any proteins with isoform info in name in our input files
         proteins = [x.possible_proteins for x in self.main_data_form]
         flat_proteins = set([item for sublist in proteins for item in sublist])
@@ -1298,8 +1282,6 @@ class DataStore(object):
         """
         Method that logs whether or not we can distinguish from reviewed and unreviewd protein identifiers in the digest
         """
-        logger = getLogger("py_protein_inference.datastore.DataStore._validate_reviewed_v_unreviewed")
-
         # Check to see if we get reviewed prots in digest...
         reviewed_proteins = len(self.digest.swiss_prot_protein_set)
         proteins_in_digest = len(set(self.digest.protein_to_peptide_dictionary.keys()))
@@ -1349,10 +1331,10 @@ class DataStore(object):
         len_all = len(self.main_data_form)
         if len_q == len_all:
             status = True
-            self.logger.info("Input has Q value; Can restrict by Q value")
+            logger.info("Input has Q value; Can restrict by Q value")
         else:
             status = False
-            self.logger.warning("Input does not have Q value; Cannot restrict by Q value")
+            logger.warning("Input does not have Q value; Cannot restrict by Q value")
 
         return status
 
@@ -1364,10 +1346,10 @@ class DataStore(object):
         len_all = len(self.main_data_form)
         if len_pep == len_all:
             status = True
-            self.logger.info("Input has Pep value; Can restrict by Pep value")
+            logger.info("Input has Pep value; Can restrict by Pep value")
         else:
             status = False
-            self.logger.warning("Input does not have Pep value; Cannot restrict by Pep value")
+            logger.warning("Input does not have Pep value; Cannot restrict by Pep value")
 
         return status
 
@@ -1379,11 +1361,11 @@ class DataStore(object):
         len_all = len(self.main_data_form)
         if len_c == len_all:
             status = True
-            self.logger.info("Input has Custom value; Can restrict by Custom value")
+            logger.info("Input has Custom value; Can restrict by Custom value")
 
         else:
             status = False
-            self.logger.warning("Input does not have Custom value; Cannot restrict by Custom value")
+            logger.warning("Input does not have Custom value; Cannot restrict by Custom value")
 
         return status
 

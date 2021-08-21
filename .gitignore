@@ -82,3 +82,4 @@ glpkinout/
 data/
 !tests/data/
 !tests/output/
+test_result_junit.xml

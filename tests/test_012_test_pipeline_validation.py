@@ -4,7 +4,6 @@ from unittest import TestCase
 from pkg_resources import resource_filename
 
 import py_protein_inference
-import logging
 import shutil
 
 
@@ -29,10 +28,6 @@ if not os.path.exists(DECOY_DIRECTORY):
 shutil.copyfile(str(TARGET_FILE), os.path.join(TARGET_DIRECTORY, "target_file.txt"))
 shutil.copyfile(DECOY_FILE, os.path.join(DECOY_DIRECTORY, "decoy_file.txt"))
 COMBINED_DIRECTORY = resource_filename("py_protein_inference", "../tests/data/combined_files")
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("py_protein_inference.tests.test_012_test_pipeline_validation")
-
 
 class TestPipelineValidation(TestCase):
     def test_validation(self):

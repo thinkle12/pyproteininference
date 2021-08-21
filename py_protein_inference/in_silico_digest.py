@@ -1,7 +1,17 @@
 from Bio import SeqIO
 from pyteomics import fasta, parser
-from logging import getLogger
+import logging
+import sys
 import re
+
+logger = logging.getLogger(__name__)
+
+# set up our logger
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
 
 class Digest(object):
@@ -19,7 +29,6 @@ class Digest(object):
             Keep as False unless you know what you are doing
         reviewed_identifier_symbol (str/None): Identifier that distinguishes reviewed from unreviewed proteins. Typically this is "sp|". Can also be None type
         digest_type (str): can be any value in :attr:`LIST_OF_DIGEST_TYPES`
-        logger (logger.logging): Logger object
         max_peptide_length (int): Max peptide length to keep for analysis.
 
     """
@@ -119,7 +128,6 @@ class InSilicoDigest(Digest):
             raise ValueError(
                 "digest_type must be equal to one of the following {}".format(str(self.LIST_OF_DIGEST_TYPES))
             )
-        self.logger = getLogger("py_protein_inference.in_silico_digest.InSilicoDigest")
         self.max_peptide_length = max_peptide_length
 
     def digest(self, proseq, miss_cleavage):
@@ -299,7 +307,7 @@ class InSilicoDigest(Digest):
         """
         handle = SeqIO.parse(self.database_path, "fasta")
 
-        self.logger.info("Starting Standard Digest...")
+        logger.info("Starting Standard Digest...")
         pep_dict = {}
         prot_dict = {}
         sp_set = set()
@@ -320,13 +328,13 @@ class InSilicoDigest(Digest):
             for peptide in peptide_list:
                 pep_dict.setdefault(peptide, set()).add(identifier_stripped)
 
-        self.logger.info("Digest finished, peptide and protein dictionaries created based on the provided database")
+        logger.info("Digest finished, peptide and protein dictionaries created based on the provided database")
 
         self.swiss_prot_protein_set = sp_set
         self.peptide_to_protein_dictionary = pep_dict
         self.protein_to_peptide_dictionary = prot_dict
 
-        self.logger.info("Standard Digest Finished...")
+        logger.info("Standard Digest Finished...")
 
 
 class PyteomicsDigest(Digest):
@@ -384,7 +392,7 @@ class PyteomicsDigest(Digest):
             raise ValueError(
                 "digest_type must be equal to one of the following {}".format(str(self.LIST_OF_DIGEST_TYPES))
             )
-        self.logger = getLogger("py_protein_inference.in_silico_digest.PyteomicsDigest")
+        logger = getLogger("py_protein_inference.in_silico_digest.PyteomicsDigest")
         self.max_peptide_length = max_peptide_length
 
     def digest_fasta_database(self):
@@ -407,7 +415,7 @@ class PyteomicsDigest(Digest):
             >>> digest.digest_fasta_database()
 
         """
-        self.logger.info("Starting Pyteomics Digest...")
+        logger.info("Starting Pyteomics Digest...")
         pep_dict = {}
         prot_dict = {}
         sp_set = set()
@@ -453,4 +461,4 @@ class PyteomicsDigest(Digest):
         self.peptide_to_protein_dictionary = pep_dict
         self.protein_to_peptide_dictionary = prot_dict
 
-        self.logger.info("Pyteomics Digest Finished...")
+        logger.info("Pyteomics Digest Finished...")

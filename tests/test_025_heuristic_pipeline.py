@@ -12,7 +12,6 @@ from pkg_resources import resource_filename
 
 import py_protein_inference
 import os
-import logging
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
@@ -23,10 +22,6 @@ OUTPUT_DIR = tempfile.gettempdir()
 for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
     if not os.path.exists(os.path.join(OUTPUT_DIR, sub_dir)):
         os.makedirs(os.path.join(OUTPUT_DIR, sub_dir))
-
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("py_protein_inference.tests.test_025_heuristic_pipeline.py")
 
 
 class TestHeuristicWorkflow(TestCase):

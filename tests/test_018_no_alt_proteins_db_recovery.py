@@ -11,7 +11,6 @@ from pkg_resources import resource_filename
 import py_protein_inference
 from py_protein_inference import in_silico_digest
 from py_protein_inference.parameters import ProteinInferenceParameter
-import logging
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target_no_alt_prot.txt")
@@ -23,10 +22,6 @@ SCORE_INDEX = 1
 Q_VALUE_INDEX = 2
 GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("py_protein_inference.tests.test_018_test_alt_protein_recovery")
-
 
 class TestAltProteinDbRecovery(TestCase):
     def test_alt_protein_db_recovery(self):

@@ -1,13 +1,23 @@
 import os
+import sys
 import subprocess
 import collections
+import logging
 
 from py_protein_inference import datastore
 from py_protein_inference.physical import ProteinGroup
 from py_protein_inference.physical import Psm
 from collections import OrderedDict
-from logging import getLogger
 import pulp
+
+logger = logging.getLogger(__name__)
+
+# set up our logger
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
 
 class Inference(object):
@@ -73,7 +83,6 @@ class Inference(object):
             >>> py_protein_inference.inference.Inference.run_inference(data=data,digest=digest)
 
         """
-        logger = getLogger("py_protein_inference.inference.Inference.run_inference")
 
         inference_type = data.parameter_file_object.inference_type
 
@@ -147,7 +156,6 @@ class Inference(object):
 
 
         """
-        logger = getLogger("py_protein_inference.inference.Inference._apply_protein_group_ids")
 
         sp_protein_set = set(self.digest.swiss_prot_protein_set)
 
@@ -222,7 +230,6 @@ class Inclusion(Inference):
         These are both variables of the :py:class:`py_protein_inference.datastore.DataStore` and are
         lists of :py:class:`py_protein_inference.physical.Protein` and :py:class:`py_protein_inference.physical.ProteinGroup`
         """
-        logger = getLogger("py_protein_inference.inference.Inclusion.infer_proteins")
 
         grouped_proteins = self._create_protein_groups(scored_proteins=self.scored_data)
 
@@ -261,7 +268,6 @@ class Inclusion(Inference):
 
         """
 
-        logger = getLogger("py_protein_inference.inference.Inference._apply_protein_group_ids")
 
         sp_protein_set = set(self.digest.swiss_prot_protein_set)
 
@@ -339,7 +345,6 @@ class Exclusion(Inference):
         lists of :py:class:`py_protein_inference.physical.Protein` and :py:class:`py_protein_inference.physical.ProteinGroup`
 
         """
-        logger = getLogger("py_protein_inference.inference.Exclusion.infer_proteins")
 
         grouped_proteins = self._create_protein_groups(scored_proteins=self.scored_data)
 
@@ -412,7 +417,6 @@ class Parsimony(Inference):
 
         """
 
-        logger = getLogger("py_protein_inference.inference.Inference._create_protein_groups")
 
         logger.info("Grouping Peptides with Grouping Type: {}".format(grouping_type))
         logger.info("Grouping Peptides with Inference Type: {}".format(self.PARSIMONY))
@@ -554,7 +558,6 @@ class Parsimony(Inference):
 
 
         """
-        logger = getLogger("py_protein_inference.inference.Inference._swissprot_and_isoform_override")
 
         sp_protein_set = set(self.digest.swiss_prot_protein_set)
         scored_proteins = list(scored_data)
@@ -659,7 +662,6 @@ class Parsimony(Inference):
 
         """
 
-        logger = getLogger("py_protein_inference.inference.Inference._swissprot_override")
 
         if not protein_list[0].reviewed:
             # If the lead is unreviewed attempt to replace it...
@@ -757,7 +759,6 @@ class Parsimony(Inference):
 
         """
 
-        logger = getLogger("py_protein_inference.inference.Inference._isoform_override")
 
         if protein_list[0].reviewed:
             if self.data.parameter_file_object.isoform_symbol in protein_list[0].identifier:
@@ -804,7 +805,6 @@ class Parsimony(Inference):
 
 
         """
-        logger = getLogger("py_protein_inference.inference.Inference._reassign_protein_group_leads")
 
         # Get the higher or lower variable
         if not self.data.high_low_better:
@@ -891,7 +891,6 @@ class Parsimony(Inference):
 
 
         """
-        logger = getLogger("py_protein_inference.inference.Inference._reassign_protein_list_leads")
 
         # Get the higher or lower variable
         if not self.data.high_low_better:
@@ -1111,7 +1110,6 @@ class Parsimony(Inference):
         Returns:
             None
         """
-        logger = getLogger("py_protein_inference.inference.Parsimony._glpk_runner")
 
         # If there is no file_override (mainly for offline testing)
         # Run GLPK with the following command
@@ -1175,7 +1173,6 @@ class Parsimony(Inference):
             glpksolution_filename(str): Path to the output of glpsol
 
         """
-        logger = getLogger("py_protein_inference.inference.Parsimony._glpk_grouper")
 
         scored_data = self.data.get_protein_data()
 
@@ -1297,7 +1294,6 @@ class Parsimony(Inference):
         lists of :py:class:`py_protein_inference.physical.Protein` and :py:class:`py_protein_inference.physical.ProteinGroup`
 
         """
-        logger = getLogger("py_protein_inference.inference.Parsimony._pulp_grouper")
 
         # Here we get the peptide to protein dictionary
         pep_prot_dict = self.data.peptide_to_protein_dictionary()
@@ -1466,7 +1462,6 @@ class Parsimony(Inference):
         Returns:
             None:
         """
-        logger = getLogger("py_protein_inference.inference.Parsimony.infer_proteins")
 
         if self.parameter_file_object.lp_solver == self.PULP:
 
@@ -1519,7 +1514,6 @@ class Parsimony(Inference):
 
     def _assign_shared_peptides(self, shared_pep_type="all"):
 
-        logger = getLogger("py_protein_inference.inference.Parsimony._assign_shared_peptides")
 
         if not self.data.grouped_scored_proteins and self.data.protein_group_objects:
             raise ValueError(
@@ -1615,7 +1609,6 @@ class FirstProtein(Inference):
 
         """
 
-        logger = getLogger("py_protein_inference.inference.FirstProtein.infer_proteins")
 
         grouped_proteins = self._create_protein_groups(scored_proteins=self.scored_data)
 
@@ -1681,7 +1674,6 @@ class PeptideCentric(Inference):
 
         """
 
-        logger = getLogger("py_protein_inference.inference.PeptideCentric.infer_proteins")
 
         # Get the higher or lower variable
         hl = self.data.higher_or_lower()
@@ -1713,7 +1705,6 @@ class PeptideCentric(Inference):
 
         """
 
-        logger = getLogger("py_protein_inference.inference.Inference._apply_protein_group_ids")
 
         grouped_protein_objects = self.data.get_protein_data()
 

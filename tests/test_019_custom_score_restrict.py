@@ -11,8 +11,6 @@ from pkg_resources import resource_filename
 import py_protein_inference
 from py_protein_inference import in_silico_digest
 from py_protein_inference.parameters import ProteinInferenceParameter
-import logging
-
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 
@@ -31,10 +29,6 @@ DECOY_FILE_ADDITIVE = resource_filename("py_protein_inference", "../tests/data/t
 PARAMETER_FILE_ADDITIVE = resource_filename(
     "py_protein_inference", "../tests/data/test_params_additive_custom_score.yaml"
 )
-
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("py_protein_inference.tests.test_019_custom_score_restrict")
 
 
 class TestCustomRestrict(TestCase):

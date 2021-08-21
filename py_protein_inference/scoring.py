@@ -2,8 +2,16 @@ import math
 import numpy
 import sys
 from functools import reduce
-from logging import getLogger
+import logging
 
+logger = logging.getLogger(__name__)
+
+# set up our logger
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
 class Score(object):
     """
@@ -142,7 +150,6 @@ class Score(object):
             >>> score.best_peptide_per_protein()
 
         """
-        logger = getLogger("py_protein_inference.scoring.Score.best_peptide_per_protein")
 
         all_scores = []
 
@@ -170,7 +177,6 @@ class Score(object):
             >>> score.fishers_method()
 
          """
-        logger = getLogger("py_protein_inference.scoring.Score.fishers_method")
 
         all_scores = []
         logger.info("Scoring Proteins with fishers method")
@@ -196,7 +202,6 @@ class Score(object):
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.multiplicative_log()
         """
-        logger = getLogger("py_protein_inference.scoring.Score.multiplicative_log")
 
         # Instead of making all_scores a list... make it a generator??
 
@@ -233,7 +238,6 @@ class Score(object):
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.down_weighted_multiplicative_log()
         """
-        logger = getLogger("py_protein_inference.scoring.Score.down_weighted_multiplicative_log")
 
         score_list = []
         for proteins in self.pre_score_data:
@@ -273,7 +277,6 @@ class Score(object):
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.top_two_combied()
         """
-        logger = getLogger("py_protein_inference.scoring.Score.top_two_combied")
 
         all_scores = []
         logger.info("Scoring Proteins with Top Two Method")
@@ -311,7 +314,6 @@ class Score(object):
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.down_weighted_v2()
         """
-        logger = getLogger("py_protein_inference.scoring.Score.down_weighted_v2")
 
         all_scores = []
         logger.info("Scoring Proteins with down weighted v2 method")
@@ -348,7 +350,6 @@ class Score(object):
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.iterative_down_weighted_log()
         """
-        logger = getLogger("py_protein_inference.scoring.Score.iterative_down_weighted_log")
 
         all_scores = []
         logger.info("Scoring Proteins with IDWL method")
@@ -387,7 +388,6 @@ class Score(object):
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.geometric_mean_log()
         """
-        logger = getLogger("py_protein_inference.scoring.Score.geometric_mean_log")
 
         all_scores = []
         logger.info("Scoring Proteins. with GML method")
@@ -416,7 +416,6 @@ class Score(object):
         """
         The following method is an experimental method essentially used for future development of potential scoring schemes
         """
-        logger = getLogger("py_protein_inference.scoring.Score.iterative_down_weighted_v2")
 
         all_scores = []
         logger.info("Scoring Proteins with iterative down weighted v2 method")
@@ -449,7 +448,6 @@ class Score(object):
             >>> score = py_protein_inference.scoring.Score(data=data)
             >>> score.additive()
         """
-        logger = getLogger("py_protein_inference.scoring.Score.additive")
 
         all_scores = []
         logger.info("Scoring Proteins with additive method")

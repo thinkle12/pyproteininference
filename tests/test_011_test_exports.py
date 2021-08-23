@@ -11,7 +11,6 @@ from unittest import TestCase
 from pkg_resources import resource_filename
 
 import py_protein_inference
-import logging
 
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
@@ -22,9 +21,6 @@ OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('py_protein_inference', '../tests/output/')
 GLPKINOUT_PATH = resource_filename("py_protein_inference", "../tests/glpkinout/")
 SKIP_RUNNING_GLPK = True
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("py_protein_inference.tests.test_011_test_exports.py")
 
 
 class TestExportTypes(TestCase):

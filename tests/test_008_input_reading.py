@@ -14,7 +14,6 @@ import py_protein_inference
 from py_protein_inference import in_silico_digest
 from py_protein_inference.parameters import ProteinInferenceParameter
 import os
-import logging
 
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
@@ -38,9 +37,6 @@ PARAMETER_FILE_ADDITIVE = resource_filename(
 PARAMETER_FILE_MULTIPLICATIVE = resource_filename(
     "py_protein_inference", "../tests/data/test_params_multiplicative_custom_score.yaml"
 )
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("py_protein_inference.tests.test_008_generic_reader.py")
 
 
 class TestReader(TestCase):

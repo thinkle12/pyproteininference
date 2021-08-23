@@ -14,8 +14,6 @@ import py_protein_inference
 from py_protein_inference import in_silico_digest
 from py_protein_inference.parameters import ProteinInferenceParameter
 import os
-import logging
-
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 OUTPUT_DIR = tempfile.gettempdir()
@@ -58,9 +56,6 @@ SCORE_INDEX = 1
 Q_VALUE_INDEX = 2
 GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("py_protein_inference.tests.test_009_additive_custom_pipeline.py")
 
 
 class TestAdditiveWorkflow(TestCase):
@@ -171,8 +166,6 @@ class TestAdditiveWorkflow(TestCase):
         export_type = protein_inference_parameters.export
         export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(directory=os.path.join(OUTPUT_DIR, "leads"), export_type=export_type)
-
-        logger.info("Protein Inference Finished")
 
         lead_output = []
         with open(LEAD_OUTPUT_FILE, "r") as lead_output_file:

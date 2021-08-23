@@ -1,6 +1,16 @@
 import os
 import csv
-from logging import getLogger
+import sys
+import logging
+
+logger = logging.getLogger(__name__)
+
+# set up our logger
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
 
 class Export(object):
@@ -66,7 +76,6 @@ class Export(object):
             >>> export.export_to_csv(directory="/path/to/output/dir/", export_type="psms")
 
         """
-        logger = getLogger("py_protein_inference.export.Export.export_to_csv")
 
         if not directory:
             directory = os.getcwd()

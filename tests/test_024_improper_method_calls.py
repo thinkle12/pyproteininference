@@ -14,8 +14,6 @@ import py_protein_inference
 from py_protein_inference import in_silico_digest
 from py_protein_inference.parameters import ProteinInferenceParameter
 import os
-import logging
-
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
@@ -23,10 +21,6 @@ DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_
 PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_peptide_centric.yaml")
 
 OUTPUT_DIR = tempfile.gettempdir()
-
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("py_protein_inference.tests.test_024_improper_method_calls.py")
 
 
 class TestImproperMethodCalls(TestCase):

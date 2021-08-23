@@ -1,10 +1,20 @@
+import sys
 import yaml
-from logging import getLogger
-
+import logging
 from py_protein_inference.in_silico_digest import InSilicoDigest
 from py_protein_inference.export import Export
 from py_protein_inference.scoring import Score
 from py_protein_inference.inference import Inference
+
+
+logger = logging.getLogger(__name__)
+
+# set up our logger
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
 
 class ProteinInferenceParameter(object):
@@ -34,7 +44,6 @@ class ProteinInferenceParameter(object):
         grouping_type (str/None): String to determine the grouping procedure. Can be any value of GROUPING_TYPES of :py:class:`py_protein_inference.inference.Inference` object
         max_identifiers_peptide_centric (int): Maximum number of identifiers to assign to a group when running peptide_centric inference. Typically this is 10 or 5.
         lp_solver (str/None): The LP solver to use if inference_type="Parsimony". Can be any value in LP_SOLVERS in the :py:class:`py_protein_inference.inference.Inference` object
-        logger (logger.logging): Logger object
 
     """
 
@@ -150,7 +159,6 @@ class ProteinInferenceParameter(object):
         self.grouping_type = None
         self.max_identifiers_peptide_centric = None
         self.lp_solver = None
-        self.logger = getLogger("py_protein_inference.parameters.ProteinInferenceParameter.validate_parameters")
         self.validate = validate
 
         self.convert_to_object()
@@ -245,7 +253,7 @@ class ProteinInferenceParameter(object):
                 self.shared_peptides = Inference.ALL_SHARED_PEPTIDES
 
         else:
-            self.logger.warning("Yaml parameter file not found, parameters set to default")
+            logger.warning("Yaml parameter file not found, parameters set to default")
             self.digest_type = "trypsin"
             self.export = "q_value"
             self.fdr = 0.01
@@ -298,7 +306,7 @@ class ProteinInferenceParameter(object):
         """
         # Make sure we have a valid digest type
         if self.digest_type in InSilicoDigest.LIST_OF_DIGEST_TYPES:
-            self.logger.info("Using digest type '{}'".format(self.digest_type))
+            logger.info("Using digest type '{}'".format(self.digest_type))
         else:
             raise ValueError(
                 "Digest Type '{}' not supported, please use one of the following enyzme digestions: '{}'".format(
@@ -312,7 +320,7 @@ class ProteinInferenceParameter(object):
         """
         # Make sure we have a valid export type
         if self.export in Export.EXPORT_TYPES:
-            self.logger.info("Using Export type '{}'".format(self.export))
+            logger.info("Using Export type '{}'".format(self.export))
         else:
             raise ValueError(
                 "Export Type '{}' not supported, please use one of the following export types: '{}'".format(
@@ -329,19 +337,19 @@ class ProteinInferenceParameter(object):
 
         try:
             if 0 <= float(self.fdr) <= 1:
-                self.logger.info("FDR Input {}".format(self.fdr))
+                logger.info("FDR Input {}".format(self.fdr))
 
         except ValueError:
             raise ValueError("FDR must be a decimal between 0 and 1, FDR provided: {}".format(self.fdr))
 
         try:
             if 0 <= float(self.restrict_pep) <= 1:
-                self.logger.info("PEP restriction {}".format(self.restrict_pep))
+                logger.info("PEP restriction {}".format(self.restrict_pep))
 
         except ValueError:
             if not self.restrict_pep or self.restrict_pep.lower() == "none":
                 self.restrict_pep = None
-                self.logger.info("Not restrict by PEP Value")
+                logger.info("Not restrict by PEP Value")
             else:
                 raise ValueError(
                     "PEP restriction must be a decimal between 0 and 1, PEP restriction provided: {}".format(
@@ -351,12 +359,12 @@ class ProteinInferenceParameter(object):
 
         try:
             if 0 <= float(self.restrict_q) <= 1:
-                self.logger.info("Q Value restriction {}".format(self.restrict_q))
+                logger.info("Q Value restriction {}".format(self.restrict_q))
 
         except ValueError:
             if not self.restrict_q or self.restrict_q.lower() == "none":
                 self.restrict_q = None
-                self.logger.info("Not restrict by Q Value")
+                logger.info("Not restrict by Q Value")
             else:
                 raise ValueError(
                     "Q Value restriction must be a decimal between 0 and 1, Q Value restriction provided: {}".format(
@@ -366,7 +374,7 @@ class ProteinInferenceParameter(object):
 
         try:
             int(self.missed_cleavages)
-            self.logger.info("Missed Cleavages selected: {}".format(self.missed_cleavages))
+            logger.info("Missed Cleavages selected: {}".format(self.missed_cleavages))
         except ValueError:
             raise ValueError(
                 "Missed Cleavages must be an integer, Provided Missed Cleavages value: {}".format(self.missed_cleavages)
@@ -374,11 +382,11 @@ class ProteinInferenceParameter(object):
 
         try:
             int(self.restrict_peptide_length)
-            self.logger.info("Peptide Length Restriction: Len {}".format(self.restrict_peptide_length))
+            logger.info("Peptide Length Restriction: Len {}".format(self.restrict_peptide_length))
         except ValueError:
             if not self.restrict_peptide_length or self.restrict_peptide_length.lower() == "none":
                 self.restrict_peptide_length = None
-                self.logger.info("Not Restricting by Peptide Length")
+                logger.info("Not Restricting by Peptide Length")
             else:
                 raise ValueError(
                     "Peptide Length Restriction must be an integer, Provided Peptide Length Restriction value: {}".format(
@@ -388,11 +396,11 @@ class ProteinInferenceParameter(object):
 
         try:
             float(self.restrict_custom)
-            self.logger.info("Custom restriction {}".format(self.restrict_custom))
+            logger.info("Custom restriction {}".format(self.restrict_custom))
         except ValueError or TypeError:
             if not self.restrict_custom or self.restrict_custom.lower() == "none":
                 self.restrict_custom = None
-                self.logger.info("Not Restricting by Custom Value")
+                logger.info("Not Restricting by Custom Value")
             else:
                 raise ValueError(
                     "Custom restriction must be a number, Custom restriction provided: {}".format(self.restrict_custom)
@@ -405,9 +413,9 @@ class ProteinInferenceParameter(object):
         # Make sure picker is a bool
         if type(self.picker) == bool:
             if self.picker:
-                self.logger.info("Parameters loaded to run Picker")
+                logger.info("Parameters loaded to run Picker")
             else:
-                self.logger.info("Parameters loaded to NOT run Picker")
+                logger.info("Parameters loaded to NOT run Picker")
         else:
             raise ValueError(
                 "Picker Variable must be set to True or False, Picker Variable provided: {}".format(self.picker)
@@ -419,7 +427,7 @@ class ProteinInferenceParameter(object):
         """
         # Make sure we have the score method defined in code to use...
         if self.protein_score in Score.SCORE_METHODS:
-            self.logger.info("Using Score Method '{}'".format(self.protein_score))
+            logger.info("Using Score Method '{}'".format(self.protein_score))
         else:
             raise ValueError(
                 "Score Method '{}' not supported, "
@@ -434,7 +442,7 @@ class ProteinInferenceParameter(object):
         """
         # Make sure score type is multiplicative or additive
         if self.psm_score_type in Score.SCORE_TYPES:
-            self.logger.info("Using Score Type '{}'".format(self.psm_score_type))
+            logger.info("Using Score Type '{}'".format(self.psm_score_type))
         else:
             raise ValueError(
                 "Score Type '{}' not supported, "
@@ -465,7 +473,7 @@ class ProteinInferenceParameter(object):
             )
 
         else:
-            self.logger.info(
+            logger.info(
                 "Combination of Score Type: '{}' and Score Method: '{}' is Ok".format(
                     self.psm_score_type, self.protein_score
                 )
@@ -477,7 +485,7 @@ class ProteinInferenceParameter(object):
         """
         # Check if its parsimony, exclusion, inclusion, none
         if self.inference_type in Inference.INFERENCE_TYPES:
-            self.logger.info("Using inference type '{}'".format(self.inference_type))
+            logger.info("Using inference type '{}'".format(self.inference_type))
         else:
             raise ValueError(
                 "Inferece Type '{}' not supported, please use one of the following Inferece Types: '{}'".format(
@@ -491,11 +499,11 @@ class ProteinInferenceParameter(object):
         """
         # Check if its parsimony, exclusion, inclusion, none
         if self.grouping_type in Inference.GROUPING_TYPES:
-            self.logger.info("Using Grouping type '{}'".format(self.grouping_type))
+            logger.info("Using Grouping type '{}'".format(self.grouping_type))
         else:
             if self.grouping_type.lower() == "none" or not self.grouping_type:
                 self.grouping_type = None
-                self.logger.info("Using Grouping type: None")
+                logger.info("Using Grouping type: None")
             else:
 
                 raise ValueError(
@@ -510,7 +518,7 @@ class ProteinInferenceParameter(object):
         """
         # Check if max_identifiers_peptide_centric param is an INT
         if type(self.max_identifiers_peptide_centric) == int:
-            self.logger.info(
+            logger.info(
                 "Max Number of Indentifiers for Peptide Centric Inference: '{}'".format(
                     self.max_identifiers_peptide_centric
                 )
@@ -528,11 +536,11 @@ class ProteinInferenceParameter(object):
         """
         # Check if its pulp, glpk, or None
         if self.lp_solver in Inference.LP_SOLVERS:
-            self.logger.info("Using LP Solver '{}'".format(self.lp_solver))
+            logger.info("Using LP Solver '{}'".format(self.lp_solver))
         else:
             if self.lp_solver.lower() == "none" or not self.lp_solver:
                 self.lp_solver = None
-                self.logger.info("Setting LP Solver to None")
+                logger.info("Setting LP Solver to None")
             else:
                 raise ValueError(
                     "LP Solver '{}' not supported, please use one of the following LP Solvers: '{}'".format(
@@ -546,11 +554,11 @@ class ProteinInferenceParameter(object):
         """
         # Check if its all, best, or none
         if self.shared_peptides in Inference.SHARED_PEPTIDE_TYPES:
-            self.logger.info("Using Shared Peptide types '{}'".format(self.shared_peptides))
+            logger.info("Using Shared Peptide types '{}'".format(self.shared_peptides))
         else:
             if self.shared_peptides.lower() == "none" or not self.shared_peptides:
                 self.shared_peptides = None
-                self.logger.info("Setting Shared Peptide type to None")
+                logger.info("Setting Shared Peptide type to None")
             else:
                 raise ValueError(
                     "Shared Peptide types '{}' not supported, please use one of the following Shared Peptide types: '{}'".format(
@@ -564,30 +572,30 @@ class ProteinInferenceParameter(object):
 
         """
         if type(self.decoy_symbol) == str:
-            self.logger.info("Decoy Symbol set to: '{}'".format(self.decoy_symbol))
+            logger.info("Decoy Symbol set to: '{}'".format(self.decoy_symbol))
         else:
             raise ValueError("Decoy Symbol must be a string, provided value: {}".format(self.decoy_symbol))
 
         if type(self.isoform_symbol) == str:
-            self.logger.info("Isoform Symbol set to: '{}'".format(self.isoform_symbol))
+            logger.info("Isoform Symbol set to: '{}'".format(self.isoform_symbol))
             if self.isoform_symbol.lower() == "none" or not self.isoform_symbol:
                 self.isoform_symbol = None
-                self.logger.info("Isoform Symbol set to None")
+                logger.info("Isoform Symbol set to None")
         else:
             if self.isoform_symbol:
                 self.isoform_symbol = None
-                self.logger.info("Isoform Symbol set to None")
+                logger.info("Isoform Symbol set to None")
             raise ValueError("Isoform Symbol must be a string, provided value: {}".format(self.isoform_symbol))
 
         if type(self.reviewed_identifier_symbol) == str:
-            self.logger.info("Reviewed Identifier Symbol set to: '{}'".format(self.reviewed_identifier_symbol))
+            logger.info("Reviewed Identifier Symbol set to: '{}'".format(self.reviewed_identifier_symbol))
             if self.reviewed_identifier_symbol.lower() == "none" or not self.reviewed_identifier_symbol:
                 self.reviewed_identifier_symbol = None
-                self.logger.info("Reviewed Identifier Symbol set to None")
+                logger.info("Reviewed Identifier Symbol set to None")
         else:
             if not self.reviewed_identifier_symbol:
                 self.reviewed_identifier_symbol = None
-                self.logger.info("Reviewed Identifier Symbol set to None")
+                logger.info("Reviewed Identifier Symbol set to None")
             raise ValueError(
                 "Reviewed Identifier Symbol must be a string, provided value: {}".format(
                     self.reviewed_identifier_symbol
@@ -596,14 +604,14 @@ class ProteinInferenceParameter(object):
 
     def _validate_parameter_shape(self, yaml_params):
         if self.PARENT_PARAMETER_KEY in yaml_params.keys():
-            self.logger.info("Main Parameter Key is Present")
+            logger.info("Main Parameter Key is Present")
         else:
             raise ValueError(
                 "Key {} needs to be defined as the outermost parameter group".format(self.PARENT_PARAMETER_KEY)
             )
 
         if self.PARAMETER_MAIN_KEYS.issubset(yaml_params[self.PARENT_PARAMETER_KEY]):
-            self.logger.info("All Sub Parameter Keys Present")
+            logger.info("All Sub Parameter Keys Present")
         else:
             raise ValueError(
                 "All of the following values: {}. Need to be Sub Parameters in the Yaml Parameter file".format(
@@ -744,9 +752,7 @@ class ProteinInferenceParameter(object):
             pass
         else:
             if self.restrict_q:
-                self.logger.warning(
-                    "No Q values found in the input data, overriding parameters to not filter on Q value"
-                )
+                logger.warning("No Q values found in the input data, overriding parameters to not filter on Q value")
                 self.restrict_q = None
 
     def override_pep_restrict(self, data):
@@ -762,7 +768,7 @@ class ProteinInferenceParameter(object):
             pass
         else:
             if self.restrict_pep:
-                self.logger.warning(
+                logger.warning(
                     "No Pep values found in the input data, overriding parameters to not filter on Pep value"
                 )
                 self.restrict_pep = None
@@ -780,7 +786,7 @@ class ProteinInferenceParameter(object):
             pass
         else:
             if self.restrict_custom:
-                self.logger.warning(
+                logger.warning(
                     "No Custom values found in the input data, overriding parameters to not filter on Custom value"
                 )
                 self.restrict_custom = None

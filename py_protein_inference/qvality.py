@@ -1,9 +1,19 @@
+import sys
 import csv
 import uuid
 import tempfile
 import os
 import subprocess
-from logging import getLogger
+import logging
+
+logger = logging.getLogger(__name__)
+
+# set up our logger
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
 
 class Qvality(object):
@@ -32,7 +42,6 @@ class CalculateQandPepValues(Qvality):
         self.qvality_output_filename = os.path.join(self.temp_dir, "qvality_output-{}".format(self.uuid_tag))
 
     def execute(self):
-        logger = getLogger("py_protein_inference.qvality.CalculateQandPepValues.execute")
 
         # Need to generate UUIDs for the filenames... because we are going to delete all of them...
         targets = []

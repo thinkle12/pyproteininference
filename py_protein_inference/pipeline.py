@@ -5,6 +5,15 @@ import argparse
 import py_protein_inference
 from py_protein_inference.inference import Inference
 
+logger = logging.getLogger(__name__)
+
+# set up our logger
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
 
 class ProteinInferencePipeline(object):
     """
@@ -23,7 +32,6 @@ class ProteinInferencePipeline(object):
         output_directory (str): Path to Directory where output will be written
         id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
         append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
-        logger (logging.logger): Logger object for logging
         data (py_protein_inference.datastore.DataStore): Data Class
         digest (py_protein_inference.in_silico_digest.Digest): Digest Class
 
@@ -75,14 +83,6 @@ class ProteinInferencePipeline(object):
             >>>     append_alt_from_db=append_alt,
             >>> )
         """
-        self.logger = logging.getLogger("py_protein_inference.pipeline.ProteinInferencePipeline")
-
-        # set up our logger
-        logging.basicConfig(
-            stream=sys.stderr,
-            level=logging.INFO,
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        )
 
         self.parameter_file = parameter_file
         self.database_file = database_file
@@ -159,10 +159,10 @@ class ProteinInferencePipeline(object):
             id_splitting=self.id_splitting,
         )
         if self.database_file:
-            self.logger.info("Running In Silico Database Digest on file {}".format(self.database_file))
+            logger.info("Running In Silico Database Digest on file {}".format(self.database_file))
             digest.digest_fasta_database()
         else:
-            self.logger.warning(
+            logger.warning(
                 "No Database File provided, Skipping database digest and only taking protein-peptide mapping from the input files."
             )
 
@@ -234,7 +234,7 @@ class ProteinInferencePipeline(object):
         self.data = data
         self.digest = digest
 
-        self.logger.info("Protein Inference Finished")
+        logger.info("Protein Inference Finished")
 
     def _validate_input(self):
         """
@@ -258,7 +258,7 @@ class ProteinInferencePipeline(object):
             and not self.decoy_directory
             and not self.combined_directory
         ):
-            self.logger.info("Validating input as target_files and decoy_files")
+            logger.info("Validating input as target_files and decoy_files")
         elif (
             self.combined_files
             and not self.target_files
@@ -267,7 +267,7 @@ class ProteinInferencePipeline(object):
             and not self.target_directory
             and not self.combined_directory
         ):
-            self.logger.info("Validating input as combined_files")
+            logger.info("Validating input as combined_files")
         elif (
             self.target_directory
             and self.decoy_directory
@@ -276,7 +276,7 @@ class ProteinInferencePipeline(object):
             and not self.combined_directory
             and not self.combined_files
         ):
-            self.logger.info("Validating input as target_directory and decoy_directory")
+            logger.info("Validating input as target_directory and decoy_directory")
             self._transform_directory_to_files()
         elif (
             self.combined_directory
@@ -286,7 +286,7 @@ class ProteinInferencePipeline(object):
             and not self.target_files
             and not self.target_directory
         ):
-            self.logger.info("Validating input as combined_directory")
+            logger.info("Validating input as combined_directory")
             self._transform_directory_to_files()
         else:
             raise ValueError(
@@ -303,7 +303,7 @@ class ProteinInferencePipeline(object):
         reassigns these files to the target_files, decoy_files, and combined_files to be used in :py:class:`py_protein_inference.reader.Reader` object
         """
         if self.target_directory and self.decoy_directory:
-            self.logger.info("Transforming target_directory and decoy_directory into files")
+            logger.info("Transforming target_directory and decoy_directory into files")
             target_files = os.listdir(self.target_directory)
             target_files_full = [
                 os.path.join(self.target_directory, x) for x in target_files if x.endswith(".txt") or x.endswith(".tsv")
@@ -318,7 +318,7 @@ class ProteinInferencePipeline(object):
             self.decoy_files = decoy_files_full
 
         elif self.combined_directory:
-            self.logger.info("Transforming combined_directory into files")
+            logger.info("Transforming combined_directory into files")
             combined_files = os.listdir(self.combined_directory)
             combined_files_full = [
                 os.path.join(self.combined_directory, x)
@@ -350,6 +350,6 @@ class ProteinInferencePipeline(object):
 
     def _log_append_alt_from_db(self):
         if self.append_alt_from_db:
-            self.logger.info("Append Alternative Proteins from Database set to True")
+            logger.info("Append Alternative Proteins from Database set to True")
         else:
-            self.logger.info("Append Alternative Proteins from Database set to False")
+            logger.info("Append Alternative Proteins from Database set to False")

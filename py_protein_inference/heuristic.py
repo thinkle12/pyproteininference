@@ -8,6 +8,15 @@ from py_protein_inference.pipeline import ProteinInferencePipeline
 from py_protein_inference.inference import Inference
 import matplotlib.pyplot as plt
 
+logger = logging.getLogger(__name__)
+
+# set up our logger
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
 
 class HeuristicPipeline(ProteinInferencePipeline):
     """
@@ -29,7 +38,6 @@ class HeuristicPipeline(ProteinInferencePipeline):
         append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
         roc_plot_filepath (str): Filepath to be written to by Heuristic Plotting method. This is optional and a default filename will be created in output_directory if this is left as None
         fdr_max (float): The Maximum FDR to display on the ROC Plot generated to compare inference methods
-        logger (logging.logger): Logger object for logging
         inference_method_list: (list) List of inference methods used in heuristic determination
         datastore_dict: (dict) Dictionary of :py:class:`py_protein_inference.datastore.DataStore` objects generated in hueristic determination with the inference method as the key of each entry
         selected_method: (str) String representation of the selected inference method based on the heuristic
@@ -92,15 +100,6 @@ class HeuristicPipeline(ProteinInferencePipeline):
             >>>     fdr_max=0.2,
             >>> )
         """
-
-        self.logger = logging.getLogger("py_protein_inference.heuristic.HeuristicPipeline")
-
-        # set up our logger
-        logging.basicConfig(
-            stream=sys.stderr,
-            level=logging.INFO,
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        )
 
         self.parameter_file = parameter_file
         self.database_file = database_file
@@ -185,10 +184,10 @@ class HeuristicPipeline(ProteinInferencePipeline):
             id_splitting=self.id_splitting,
         )
         if self.database_file:
-            self.logger.info("Running In Silico Database Digest on file {}".format(self.database_file))
+            logger.info("Running In Silico Database Digest on file {}".format(self.database_file))
             digest.digest_fasta_database()
         else:
-            self.logger.warning(
+            logger.warning(
                 "No Database File provided, Skipping database digest and only taking protein-peptide mapping from the input files."
             )
 
@@ -196,13 +195,13 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
             method_specific_parameters = copy.deepcopy(py_protein_inference_parameters)
 
-            self.logger.info("Overriding inference type {}".format(method_specific_parameters.inference_type))
+            logger.info("Overriding inference type {}".format(method_specific_parameters.inference_type))
 
             method_specific_parameters.inference_type = inference_method
             method_specific_parameters.fdr = fdr_threshold
 
-            self.logger.info("New inference type {}".format(method_specific_parameters.inference_type))
-            self.logger.info("FDR Threshold Set to {}".format(method_specific_parameters.fdr))
+            logger.info("New inference type {}".format(method_specific_parameters.inference_type))
+            logger.info("FDR Threshold Set to {}".format(method_specific_parameters.fdr))
 
             reader = py_protein_inference.reader.GenericReader(
                 target_file=self.target_files,
@@ -247,7 +246,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             self.generate_roc_plot(fdr_max=self.fdr_max, pdf_filename=self.roc_plot_filepath)
 
         else:
-            self.logger.info("skip_plot is set to True. Not creating ROC Plot.")
+            logger.info("skip_plot is set to True. Not creating ROC Plot.")
 
     def determine_optimal_inference_method(self, empirical_threshold=0.2):
 
@@ -257,8 +256,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
         }
         number_passing_proteins = {x: len(filtered_protein_objects[x]) for x in filtered_protein_objects.keys()}
 
-        self.logger.info("Number of Passing Proteins per Inference Method")
-        self.logger.info(number_passing_proteins)
+        logger.info("Number of Passing Proteins per Inference Method")
+        logger.info(number_passing_proteins)
 
         # Calculate how similar the number of passing proteins is for each method
         similarity_dict = {}
@@ -270,12 +269,12 @@ class HeuristicPipeline(ProteinInferencePipeline):
         # Simple transformation for getting max below
         diff_dict = {x: abs(1 - similarity_dict[x]) for x in number_passing_proteins.keys()}
 
-        self.logger.info("Initial Heuristic Scores")
-        self.logger.info(diff_dict)
+        logger.info("Initial Heuristic Scores")
+        logger.info(diff_dict)
 
         # Remove the most dissimilar method, which is the max
         key_to_delete = max(diff_dict, key=lambda k: diff_dict[k])
-        self.logger.info("Removing {} with score {}".format(key_to_delete, diff_dict[key_to_delete]))
+        logger.info("Removing {} with score {}".format(key_to_delete, diff_dict[key_to_delete]))
         del diff_dict[key_to_delete]
         del number_passing_proteins[key_to_delete]
 
@@ -288,20 +287,20 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         pared_diff_dict = {x: abs(1 - pared_similarity_dict[x]) for x in number_passing_proteins.keys()}
 
-        self.logger.info("Final Heuristic Scores")
-        self.logger.info(pared_diff_dict)
+        logger.info("Final Heuristic Scores")
+        logger.info(pared_diff_dict)
 
         # Remove Inclusion and Exclusion if they are poor. IE if their heuristic scores are above an empirical threshold value
         # .2 was determined as a proper threshold in testing different databases (Uniprot, Swissprot, Swissprot no isoforms)
         if Inference.EXCLUSION in pared_diff_dict.keys():
             if pared_diff_dict[Inference.EXCLUSION] <= empirical_threshold:
-                self.logger.info(
+                logger.info(
                     "Keeping {} with score {}".format(Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION])
                 )
 
             else:
                 # If not the remove it
-                self.logger.info(
+                logger.info(
                     "Removing {} with score {}".format(Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION])
                 )
                 del pared_diff_dict[Inference.EXCLUSION]
@@ -309,13 +308,13 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         if Inference.INCLUSION in pared_diff_dict.keys():
             if pared_diff_dict[Inference.INCLUSION] <= empirical_threshold:
-                self.logger.info(
+                logger.info(
                     "Keeping {} with score {}".format(Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION])
                 )
 
             else:
                 # If not then remove it
-                self.logger.info(
+                logger.info(
                     "Removing {} with score {}".format(Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION])
                 )
                 del pared_diff_dict[Inference.INCLUSION]
@@ -332,7 +331,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     number_passing_proteins[Inference.INCLUSION] / self.RATIO_CONSTANT
                     > number_passing_proteins[Inference.PARSIMONY]
                 ):
-                    self.logger.info(
+                    logger.info(
                         "Removing {} with score {}".format(Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION])
                     )
                     del pared_diff_dict[Inference.INCLUSION]
@@ -343,7 +342,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     number_passing_proteins[Inference.EXCLUSION] * self.RATIO_CONSTANT
                     < number_passing_proteins[Inference.PARSIMONY]
                 ):
-                    self.logger.info(
+                    logger.info(
                         "Removing {} with score {}".format(Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION])
                     )
                     del pared_diff_dict[Inference.EXCLUSION]
@@ -352,7 +351,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                 if len(pared_diff_dict.keys()) == 3:
                     # if neither are removed select Exclusion. Since all methods are close to parsimony take exclusion because it wouldnt have removed too many hits
                     selected_method = Inference.EXCLUSION
-                    self.logger.info(
+                    logger.info(
                         "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                     )
                     return selected_method
@@ -365,7 +364,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     number_passing_proteins[Inference.INCLUSION] / self.RATIO_CONSTANT
                     > number_passing_proteins[Inference.PARSIMONY]
                 ):
-                    self.logger.info(
+                    logger.info(
                         "Removing {} with score {}".format(Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION])
                     )
                     del pared_diff_dict[Inference.INCLUSION]
@@ -378,7 +377,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                         number_passing_proteins[Inference.INCLUSION] / self.RATIO_CONSTANT
                         > number_passing_proteins[Inference.PEPTIDE_CENTRIC]
                     ):
-                        self.logger.info(
+                        logger.info(
                             "Removing {} with score {}".format(
                                 Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION]
                             )
@@ -389,7 +388,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                 if len(pared_diff_dict.keys()) == 3:
                     # if Inclusion is not removed select Inclusion.
                     selected_method = Inference.INCLUSION
-                    self.logger.info(
+                    logger.info(
                         "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                     )
                     return selected_method
@@ -402,7 +401,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     number_passing_proteins[Inference.EXCLUSION] * self.RATIO_CONSTANT
                     < number_passing_proteins[Inference.PARSIMONY]
                 ):
-                    self.logger.info(
+                    logger.info(
                         "Removing {} with score {}".format(Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION])
                     )
                     del pared_diff_dict[Inference.EXCLUSION]
@@ -415,7 +414,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                         pared_diff_dict[Inference.EXCLUSION] * self.RATIO_CONSTANT
                         < pared_diff_dict[Inference.PEPTIDE_CENTRIC]
                     ):
-                        self.logger.info(
+                        logger.info(
                             "Removing {} with score {}".format(
                                 Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION]
                             )
@@ -426,7 +425,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                 if len(pared_diff_dict.keys()) == 3:
                     # if Exclusion is not removed select Exclusion. Since it is close to parsimony and peptide-centric take exclusion because it wouldnt have removed too many hits
                     selected_method = Inference.EXCLUSION
-                    self.logger.info(
+                    logger.info(
                         "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                     )
                     return selected_method
@@ -439,7 +438,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     number_passing_proteins[Inference.INCLUSION] / self.RATIO_CONSTANT
                     > number_passing_proteins[Inference.PEPTIDE_CENTRIC]
                 ):
-                    self.logger.info(
+                    logger.info(
                         "Removing {} with score {}".format(Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION])
                     )
                     del pared_diff_dict[Inference.INCLUSION]
@@ -450,7 +449,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     pared_diff_dict[Inference.EXCLUSION] * self.RATIO_CONSTANT
                     < pared_diff_dict[Inference.PEPTIDE_CENTRIC]
                 ):
-                    self.logger.info(
+                    logger.info(
                         "Removing {} with score {}".format(Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION])
                     )
                     del pared_diff_dict[Inference.EXCLUSION]
@@ -460,7 +459,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     # if neither are removed select Exclusion. Since both are close to peptide-centric take exclusion because it wouldnt have removed too many hits
                     selected_method = Inference.EXCLUSION
                     # If we have one remaining just return it
-                    self.logger.info(
+                    logger.info(
                         "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                     )
                     return selected_method
@@ -474,7 +473,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             if set([Inference.PEPTIDE_CENTRIC, Inference.EXCLUSION]) == set(remaining_inference_methods):
                 # Take peptide centric
                 selected_method = Inference.PEPTIDE_CENTRIC
-                self.logger.info(
+                logger.info(
                     "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                 )
                 return selected_method
@@ -482,7 +481,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             elif set([Inference.PEPTIDE_CENTRIC, Inference.INCLUSION]) == set(remaining_inference_methods):
                 # Take peptide centric
                 selected_method = Inference.PEPTIDE_CENTRIC
-                self.logger.info(
+                logger.info(
                     "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                 )
                 return selected_method
@@ -492,7 +491,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                 # First If peptide centric is less than parsimony return parsimony
                 if number_passing_proteins[Inference.PEPTIDE_CENTRIC] < number_passing_proteins[Inference.PARSIMONY]:
                     selected_method = Inference.PARSIMONY
-                    self.logger.info(
+                    logger.info(
                         "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                     )
                     return selected_method
@@ -503,14 +502,14 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     > number_passing_proteins[Inference.PARSIMONY]
                 ):
                     selected_method = Inference.PARSIMONY
-                    self.logger.info(
+                    logger.info(
                         "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                     )
                     return selected_method
                 else:
                     # If not (Meaning the values are close... return peptide-centric)
                     selected_method = Inference.PEPTIDE_CENTRIC
-                    self.logger.info(
+                    logger.info(
                         "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                     )
                     return selected_method
@@ -518,7 +517,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             elif set([Inference.EXCLUSION, Inference.INCLUSION]) == set(remaining_inference_methods):
                 # This situation should never occur
                 selected_method = Inference.INCLUSION
-                self.logger.info(
+                logger.info(
                     "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                 )
                 return selected_method
@@ -530,7 +529,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
                 # This is highly unlikely to happen
                 if number_passing_proteins[Inference.EXCLUSION] > number_passing_proteins[Inference.PARSIMONY]:
                     selected_method = Inference.EXCLUSION
-                    self.logger.info(
+                    logger.info(
                         "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                     )
                     return selected_method
@@ -542,14 +541,14 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     > number_passing_proteins[Inference.EXCLUSION]
                 ):
                     selected_method = Inference.PARSIMONY
-                    self.logger.info(
+                    logger.info(
                         "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                     )
                     return selected_method
                 else:
                     # If not (Meaning the values are close... return exclusion)
                     selected_method = Inference.EXCLUSION
-                    self.logger.info(
+                    logger.info(
                         "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                     )
                     return selected_method
@@ -557,7 +556,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             elif set([Inference.PARSIMONY, Inference.INCLUSION]) == set(remaining_inference_methods):
                 # take parsimony
                 selected_method = Inference.PARSIMONY
-                self.logger.info(
+                logger.info(
                     "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
                 )
                 return selected_method
@@ -567,9 +566,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
         if len(remaining_inference_methods) == 1:
             selected_method = list(pared_diff_dict.keys())[0]
             # If we have one remaining just return it
-            self.logger.info(
-                "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
-            )
+            logger.info("Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method]))
             return selected_method
 
         if len(remaining_inference_methods) == 0:
@@ -596,6 +593,6 @@ class HeuristicPipeline(ProteinInferencePipeline):
         plt.legend(loc='lower right')
         plt.title("FDR vs Target Protein Hits per Inference Method")
         if pdf_filename:
-            self.logger.info("Writing ROC plot to: {}".format(pdf_filename))
+            logger.info("Writing ROC plot to: {}".format(pdf_filename))
             f.savefig(pdf_filename)
         plt.close()

@@ -30,6 +30,7 @@ class ProteinInferencePipeline(object):
         decoy_directory (str): Path to Directory containing Decoy Psm Files
         combined_directory (str): Path to Directory containing Combined Psm Files
         output_directory (str): Path to Directory where output will be written
+        output_filename (str): Path to Filename where output will be written. Will override output_directory
         id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
         append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
         data (py_protein_inference.datastore.DataStore): Data Class
@@ -48,6 +49,7 @@ class ProteinInferencePipeline(object):
         decoy_directory=None,
         combined_directory=None,
         output_directory=None,
+        output_filename=None,
         id_splitting=False,
         append_alt_from_db=True,
     ):
@@ -62,6 +64,7 @@ class ProteinInferencePipeline(object):
             target_directory (str): Path to Directory containing Target Psm Files
             decoy_directory (str): Path to Directory containing Decoy Psm Files
             combined_directory (str): Path to Directory containing Combined Psm Files
+            output_filename (str): Path to Filename where output will be written. Will override output_directory
             output_directory (str): Path to Directory where output will be written
             id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
             append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
@@ -80,6 +83,7 @@ class ProteinInferencePipeline(object):
             >>>     decoy_directory=decoy_directory,
             >>>     combined_directory=combined_directory,
             >>>     output_directory=dir_name,
+            >>>     output_filename=output_filename,
             >>>     append_alt_from_db=append_alt,
             >>> )
         """
@@ -93,6 +97,7 @@ class ProteinInferencePipeline(object):
         self.decoy_directory = decoy_directory
         self.combined_directory = combined_directory
         self.output_directory = output_directory
+        self.output_filename = output_filename
         self.id_splitting = id_splitting
         self.append_alt_from_db = append_alt_from_db
         self.data = None
@@ -135,6 +140,7 @@ class ProteinInferencePipeline(object):
             >>>     decoy_directory=decoy_directory,
             >>>     combined_directory=combined_directory,
             >>>     output_directory=dir_name,
+            >>>     output_filename=output_filename,
             >>>     append_alt_from_db=append_alt,
             >>> )
             >>> pipeline.execute()
@@ -229,7 +235,11 @@ class ProteinInferencePipeline(object):
         ### STEP 12: Export to CSV
         ### STEP 12: Export to CSV
         export = py_protein_inference.export.Export(data=data)
-        export.export_to_csv(directory=self.output_directory, export_type=py_protein_inference_parameters.export)
+        export.export_to_csv(
+            output_filename=self.output_filename,
+            directory=self.output_directory,
+            export_type=py_protein_inference_parameters.export,
+        )
 
         self.data = data
         self.digest = digest

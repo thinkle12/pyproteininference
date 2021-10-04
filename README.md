@@ -2,7 +2,7 @@
 # Py Protein Inference
 ## Requirements
 
-Current version: 0.7.0
+Current version: 0.7.4
 
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__
  2. __Python Packages__:
@@ -181,7 +181,7 @@ Command line options are as follows:
 ```
 cli$ python protein_inference_cli.py --help
 usage: protein_inference_cli.py [-h] [-t FILE [FILE ...]] [-d FILE [FILE ...]]
-                                [-f FILE [FILE ...]] [-o DIR] [-a DIR]
+                                [-f FILE [FILE ...]] [-o DIR] [-l FILE] [-a DIR]
                                 [-b DIR] [-c DIR] -db FILE -y FILE
 
 Protein Inference
@@ -201,6 +201,10 @@ optional arguments:
   -o DIR, --output DIR  protein_inference Result Directory to write to - Name
                         of file will be determined by parameters selected and
                         parameter tag
+  -l FILE, --output_filename FILE
+					Filename to write results to. Can be left blank. 
+					If this flag is left blank the filename will be 
+					automatically generated. If set this flag will override -o
   -a DIR, --target_directory DIR
                         Directory that contains either .txt or .tsv input
                         target psm data. Make sure the directory ONLY contains
@@ -244,7 +248,8 @@ The following flags are `"necessary"`:
 
 1) `-db` Path to Fasta Database file (Technically this is optional but recommended if the peptide to protein map is not present in the input files)
 2) `-y` Path to Protein Inference Yaml Parameter file (Required)
-3) `-o` Output  Directory is not necessary but if it is left blank files will be written to the current working directory
+3) `-o` Output Directory is not necessary but if it is left blank files will be written to the current working directory
+4) `-l` Output Filename is not necessary but if it is left blank a filename will be automatically generated and will be written to directory as set in `-o`. Will override `-o` flag it set.
 
 The following combinations of input are allowed and at least one combination is required:
 
@@ -298,19 +303,19 @@ Py Protein Inference can also be ran via a docker container. To access the docke
 2. Ability to pull the docker image from docker hub
 
 Pulling the image from docker hub:
-`docker pull pyproteininference:0.7.0`
+`docker pull pyproteininference:0.7.4`
 
-It is recommended to pull the image with the highest version number. Currently this is 0.7.0.
+It is recommended to pull the image with the highest version number. Currently this is 0.7.4.
 
 Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
 Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
 See the example below:
-`docker run -v /path/to/data/:/data pyproteininference:0.7.0 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+`docker run -v /path/to/data/:/data pyproteininference:0.7.4 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
 
 #### Building the Docker image from source
 Use the following command from the root directory of the source code:
-Here we use version `0.7.0` and tag as that version as well.
-`docker build . -f Dockerfile -t pyproteininference:0.7.0 --build-arg VERSION=0.7.0`
+Here we use version `0.7.4` and tag as that version as well.
+`docker build . -f Dockerfile -t pyproteininference:0.7.4 --build-arg VERSION=0.7.4`
 
 ### Running Heuristic
 Py Protein Inference also has a built in Heuristic that runs through four inference methods (Inclusion, Exclusion, Parsimony, and Peptide Centric) and selects a recommended method for your given dataset. 
@@ -326,7 +331,7 @@ If this does not work download `protein_inference_heuristic_cli.py` from our rep
 Command line options are as follows:
 ```
 cli$ python protein_inference_heuristic_cli.py --help
-usage: protein_inference_heuristic_cli.py [-h] [-t FILE [FILE ...]] [-d FILE [FILE ...]] [-f FILE [FILE ...]] [-o DIR] [-a DIR] [-b DIR] [-c DIR]
+usage: protein_inference_heuristic_cli.py [-h] [-t FILE [FILE ...]] [-d FILE [FILE ...]] [-f FILE [FILE ...]] [-o DIR] [-l FILE] [-a DIR] [-b DIR] [-c DIR]
                                           [-db FILE] -y FILE [-p [BOOL]] [-i [BOOL]] [-r FILE] [-m FLOAT]
 
 Protein Inference Heuristic
@@ -341,6 +346,9 @@ optional arguments:
                         Input combined psm output from percolator. This should contain Target and Decoy PSMS. Can either input one file or a list of
                         files
   -o DIR, --output DIR  Result Directory to write to - Name of file will be determined by parameters selected and parameter tag
+  -l FILE, --output_filename FILE
+                        Filename to write results to. Can be left blank. If this flag is left blank the filename will be automatically generated.
+                        If set this flag will override -o
   -a DIR, --target_directory DIR
                         Directory that contains either .txt or .tsv input target psm data. Make sure the directory ONLY contains result files
   -b DIR, --decoy_directory DIR

@@ -59,7 +59,7 @@ class Export(object):
         self.data = data
         self.filepath = None
 
-    def export_to_csv(self, directory, export_type="q_value"):
+    def export_to_csv(self, output_filename=None, directory=None, export_type="q_value"):
         """
         Method that dispatches to one of the many export methods given an export_type input
 
@@ -68,12 +68,13 @@ class Export(object):
         This method sets the :attr:`filepath` variable.
 
         Args:
-            directory (str): Directory to write the result file to
+            output_filename (str): Filepath to write to. If set as None will auto generate filename and will write to directory variable
+            directory (str): Directory to write the result file to. If None, will write to current working directory
             export_type (str): Must be a value in :attr:`EXPORT_TYPES` and determines the output format
 
         Example:
             >>> export = py_protein_inference.export.Export(data=data)
-            >>> export.export_to_csv(directory="/path/to/output/dir/", export_type="psms")
+            >>> export.export_to_csv(output_filename=None, directory="/path/to/output/dir/", export_type="psms")
 
         """
 
@@ -86,54 +87,72 @@ class Export(object):
         if self.EXPORT_LEADS == export_type:
             filename = "{}_leads_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
+            if output_filename:
+                complete_filepath = output_filename
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_leads_restricted(filename_out=complete_filepath)
 
         if self.EXPORT_ALL == export_type:
             filename = "{}_all_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
+            if output_filename:
+                complete_filepath = output_filename
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_all_restricted(complete_filepath)
 
         if self.EXPORT_COMMA_SEP == export_type:
             filename = "{}_comma_sep_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
+            if output_filename:
+                complete_filepath = output_filename
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_comma_sep_restricted(complete_filepath)
 
         if self.EXPORT_Q_VALUE_COMMA_SEP == export_type:
             filename = "{}_q_value_comma_sep_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
+            if output_filename:
+                complete_filepath = output_filename
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_comma_sep(complete_filepath)
 
         if self.EXPORT_Q_VALUE == export_type:
             filename = "{}_q_value_leads_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
+            if output_filename:
+                complete_filepath = output_filename
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads(complete_filepath)
 
         if self.EXPORT_Q_VALUE_ALL == export_type:
             filename = "{}_q_value_all_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
+            if output_filename:
+                complete_filepath = output_filename
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_all(complete_filepath)
 
         if self.EXPORT_PEPTIDES == export_type:
             filename = "{}_q_value_leads_peptides_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
+            if output_filename:
+                complete_filepath = output_filename
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads_peptides(complete_filepath)
 
         if self.EXPORT_PSMS == export_type:
             filename = "{}_q_value_leads_psms_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
+            if output_filename:
+                complete_filepath = output_filename
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads_psms(complete_filepath)
 
         if self.EXPORT_PSM_IDS == export_type:
             filename = "{}_q_value_leads_psm_ids_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
+            if output_filename:
+                complete_filepath = output_filename
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads_psm_ids(complete_filepath)
 

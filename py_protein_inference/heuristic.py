@@ -34,6 +34,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
         decoy_directory (str): Path to Directory containing Decoy Psm Files
         combined_directory (str): Path to Directory containing Combined Psm Files
         output_directory (str): Path to Directory where output will be written
+        output_filename (str): Path to Filename where output will be written. Will override output_directory
         id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
         append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
         roc_plot_filepath (str): Filepath to be written to by Heuristic Plotting method. This is optional and a default filename will be created in output_directory if this is left as None
@@ -59,6 +60,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
         decoy_directory=None,
         combined_directory=None,
         output_directory=None,
+        output_filename=None,
         id_splitting=False,
         append_alt_from_db=True,
         roc_plot_filepath=None,
@@ -76,6 +78,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             decoy_directory (str): Path to Directory containing Decoy Psm Files
             combined_directory (str): Path to Directory containing Combined Psm Files
             output_directory (str): Path to Directory where output will be written
+            output_filename (str): Path to Filename where output will be written. Will override output_directory
             id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
             append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
             roc_plot_filepath (str): Filepath to be written to by Heuristic Plotting method. This is optional and a default filename will be created in output_directory if this is left as None
@@ -95,6 +98,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             >>>     decoy_directory=decoy_directory,
             >>>     combined_directory=combined_directory,
             >>>     output_directory=dir_name,
+            >>>     output_filename=output_filename,
             >>>     append_alt_from_db=append_alt,
             >>>     roc_plot_filepath=roc_plot_filepath,
             >>>     fdr_max=0.2,
@@ -110,6 +114,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
         self.decoy_directory = decoy_directory
         self.combined_directory = combined_directory
         self.output_directory = output_directory
+        self.output_filename = output_filename
         self.id_splitting = id_splitting
         self.append_alt_from_db = append_alt_from_db
         self.fdr_max = fdr_max
@@ -163,6 +168,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             >>>     decoy_directory=decoy_directory,
             >>>     combined_directory=combined_directory,
             >>>     output_directory=dir_name,
+            >>>     output_filename=output_filename,
             >>>     append_alt_from_db=append_alt,
             >>>     roc_plot_filepath=roc_plot_filepath,
             >>>     fdr_max=0.2,
@@ -240,7 +246,11 @@ class HeuristicPipeline(ProteinInferencePipeline):
         self.selected_datastore = self.datastore_dict[self.selected_method]
 
         export = py_protein_inference.export.Export(data=self.selected_datastore)
-        export.export_to_csv(directory=self.output_directory, export_type=method_specific_parameters.export)
+        export.export_to_csv(
+            output_filename=self.output_filename,
+            directory=self.output_directory,
+            export_type=method_specific_parameters.export,
+        )
 
         if not skip_plot:
             self.generate_roc_plot(fdr_max=self.fdr_max, pdf_filename=self.roc_plot_filepath)

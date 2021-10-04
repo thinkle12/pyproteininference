@@ -6,7 +6,7 @@ setup(
     pbr=True,
     scripts=glob.glob("scripts/*.py"),
     name="py_protein_inference",
-    version="0.7.3",
+    version="0.7.4",
     url="",
     license="",
     author="hinklet",

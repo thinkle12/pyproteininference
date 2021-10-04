@@ -42,6 +42,15 @@ parser.add_argument(
     metavar="DIR",
 )
 parser.add_argument(
+    "-l",
+    "--output_filename",
+    dest="output_filename",
+    required=False,
+    help="Filename to write results to. Can be left blank. If this flag is left blank the filename will be automatically generated. If set this flag will override -o",
+    metavar="FILE",
+    default=None,
+)
+parser.add_argument(
     "-a",
     "--target_directory",
     dest="target_directory",
@@ -134,6 +143,7 @@ def main():
         decoy_directory=args.decoy_directory,
         combined_directory=args.combined_directory,
         output_directory=args.dir_name,
+        output_filenam=args.output_filename,
         append_alt_from_db=args.append_alt,
         id_splitting=args.id_splitting,
     )

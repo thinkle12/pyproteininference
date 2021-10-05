@@ -1,18 +1,12 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec  5 16:16:17 2017
-
-@author: hinklet
-"""
+import os
 import tempfile
 from unittest import TestCase
+
 from pkg_resources import resource_filename
 
 import py_protein_inference
 from py_protein_inference import in_silico_digest
 from py_protein_inference.parameters import ProteinInferenceParameter
-import os
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
@@ -28,14 +22,14 @@ for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
 class TestAltProteinRead(TestCase):
     def test_alt_protein_reader(self):
 
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
         protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE)
 
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
@@ -46,9 +40,9 @@ class TestAltProteinRead(TestCase):
         )
         digest.digest_fasta_database()
 
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
         pep_and_prot_data = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
@@ -86,7 +80,11 @@ class TestAltProteinRead(TestCase):
             ['RPOC_SHIF8|Q0SY12'],
             ['RPOC_SHIF8|Q0SY12'],
             ['##TCAF1_HUMAN|##Q9Y4C2'],
-            ['##TCAF2_HUMAN|##A6NFQ2', '##TCAF2_HUMAN|##A6NFQ2-2', '##TCAF2_HUMAN|##A6NFQ2-3'],
+            [
+                '##TCAF2_HUMAN|##A6NFQ2',
+                '##TCAF2_HUMAN|##A6NFQ2-2',
+                '##TCAF2_HUMAN|##A6NFQ2-3',
+            ],
             ['RAF1_HUMAN|P04049'],
         ]
 
@@ -135,4 +133,7 @@ class TestAltProteinRead(TestCase):
         ]
 
         for i in range(len(possible_proteins_no_append)):
-            self.assertSetEqual(set(possible_proteins_no_append[i]), set(true_possible_proteins_no_append[i]))
+            self.assertSetEqual(
+                set(possible_proteins_no_append[i]),
+                set(true_possible_proteins_no_append[i]),
+            )

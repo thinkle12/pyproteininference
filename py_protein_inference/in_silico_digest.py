@@ -1,8 +1,9 @@
+import logging
+import re
+import sys
+
 from Bio import SeqIO
 from pyteomics import fasta, parser
-import logging
-import sys
-import re
 
 logger = logging.getLogger(__name__)
 
@@ -21,13 +22,17 @@ class Digest(object):
     Attributes:
         peptide_to_protein_dictionary (dict): Dictionary of peptides (keys) to protein sets (values)
         protein_to_peptide_dictionary (dict): Dictionary of proteins (keys) to peptide sets (values)
-        swiss_prot_protein_set (set): Set of reviewed proteins if they are able to be distinguished from unreviewed proteins
+        swiss_prot_protein_set (set): Set of reviewed proteins if they are able to be distinguished from unreviewed
+            proteins
         database_path (str): Path to fasta database file to digest
         missed_cleavages (int): The number of missed cleavages to allow
-        id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
-            from the database protein strings as sometimes the database will contain those strings while the input data will have the strings split already.
+        id_splitting (bool): True/False on whether or not to split a given regex off identifiers.
+            This is used to split of "sp|" and "tr|"
+            from the database protein strings as sometimes the database will contain those strings while
+            the input data will have the strings split already.
             Keep as False unless you know what you are doing
-        reviewed_identifier_symbol (str/None): Identifier that distinguishes reviewed from unreviewed proteins. Typically this is "sp|". Can also be None type
+        reviewed_identifier_symbol (str/None): Identifier that distinguishes reviewed from unreviewed proteins.
+            Typically this is "sp|". Can also be None type
         digest_type (str): can be any value in :attr:`LIST_OF_DIGEST_TYPES`
         max_peptide_length (int): Max peptide length to keep for analysis.
 
@@ -59,7 +64,7 @@ class Digest(object):
         "Y",
         "V",
     ]
-    UNIPROT_STRS = "sp\||tr\|"
+    UNIPROT_STRS = "sp\||tr\|"  # noqa W605
     UNIPROT_STR_REGEX = re.compile(UNIPROT_STRS)
     SP_STRING = "sp|"
     METHIONINE = "M"
@@ -86,20 +91,26 @@ class InSilicoDigest(Digest):
         """
         The following class creates protein to peptide, peptide to protein, and reviewed protein mappings.
 
-        The input is a fasta database, a digest type, the number of missed cleavages, a symbol that references reviewed identifiers and whether or not to split IDs.
+        The input is a fasta database, a digest type, the number of missed cleavages, a symbol that references reviewed
+        identifiers and whether or not to split IDs.
 
         Further digestion types need to be added in the future other than just trypsin/lysc
 
-        This class sets important attributes for the Digest object such as: :attr:`peptide_to_protein_dictionary`, :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
+        This class sets important attributes for the Digest object such as: :attr:`peptide_to_protein_dictionary`,
+        :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
 
         Args:
             database_path (str): Path to fasta database file to digest
             digest_type (str): Must be a value in :attr:`LIST_OF_DIGEST_TYPES`
-            missed_cleavages (int): Integer that indicates the maximum number of allowable missed cleavages from the ms search
-            reviewed_identifier_symbol (str/None): Symbol that indicates a reviewed identifier. If using Uniprot this is typically 'sp|'. Can also be None type
+            missed_cleavages (int): Integer that indicates the maximum number of allowable missed cleavages from the
+                ms search
+            reviewed_identifier_symbol (str/None): Symbol that indicates a reviewed identifier. If using Uniprot this
+                is typically 'sp|'. Can also be None type
             max_peptide_length (int): The maximum length of peptides to keep for the analysis
-            id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
-                from the database protein strings as sometimes the database will contain those strings while the input data will have the strings split already.
+            id_splitting (bool): True/False on whether or not to split a given regex off identifiers.
+                This is used to split of "sp|" and "tr|"
+                from the database protein strings as sometimes the database will contain those strings while the input
+                data will have the strings split already.
                 Keep as False unless you know what you are doing
 
         Raises:
@@ -164,7 +175,7 @@ class InSilicoDigest(Digest):
         if len(cut_sites) > 2:
             if miss_cleavage == 0:
                 for j in range(0, len(cut_sites) - 1):
-                    no_miss_cleave_pep = proseq[cut_sites[j] : cut_sites[j + 1]]
+                    no_miss_cleave_pep = proseq[cut_sites[j] : cut_sites[j + 1]]  # noqa E203
                     peptides.append(no_miss_cleave_pep)
                     # Account for N terminal Methionine Potential Cleavage
                     if j == 0 and proseq[cut_sites[0]] == self.METHIONINE:
@@ -174,96 +185,96 @@ class InSilicoDigest(Digest):
 
             elif miss_cleavage == 1:
                 for j in range(0, len(cut_sites) - 2):
-                    peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]])
-                    peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]])
+                    peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]])  # noqa E203
+                    peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]])  # noqa E203
                     # Account for N terminal Methionine Potential Cleavage
                     if j == 0 and proseq[cut_sites[0]] == self.METHIONINE:
-                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]][1:])
-                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]][1:])
+                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]][1:])  # noqa E203
+                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]][1:])  # noqa E203
 
                 # Account for N terminal Methionine Potential Cleavage
                 if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == self.METHIONINE:
-                    peptides.append(proseq[cut_sites[-2] : cut_sites[-1]][1:])
+                    peptides.append(proseq[cut_sites[-2] : cut_sites[-1]][1:])  # noqa E203
 
-                peptides.append(proseq[cut_sites[-2] : cut_sites[-1]])
+                peptides.append(proseq[cut_sites[-2] : cut_sites[-1]])  # noqa E203
 
             elif miss_cleavage == 2:
                 for j in range(0, len(cut_sites) - 3):
-                    peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]])
-                    peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]])
-                    peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]])
+                    peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]])  # noqa E203
+                    peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]])  # noqa E203
+                    peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]])  # noqa E203
                     # Account for N terminal Methionine Potential Cleavage
                     if j == 0 and proseq[cut_sites[0]] == self.METHIONINE:
-                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]][1:])
-                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]][1:])
-                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]][1:])
+                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]][1:])  # noqa E203
+                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]][1:])  # noqa E203
+                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]][1:])  # noqa E203
 
                 # Account for N terminal Methionine Potential Cleavage
                 if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == self.METHIONINE:
-                    peptides.append(proseq[cut_sites[-3] : cut_sites[-2]][1:])
-                    peptides.append(proseq[cut_sites[-3] : cut_sites[-1]][1:])
+                    peptides.append(proseq[cut_sites[-3] : cut_sites[-2]][1:])  # noqa E203
+                    peptides.append(proseq[cut_sites[-3] : cut_sites[-1]][1:])  # noqa E203
                 if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == self.METHIONINE:
-                    peptides.append(proseq[cut_sites[-2] : cut_sites[-1]][1:])
+                    peptides.append(proseq[cut_sites[-2] : cut_sites[-1]][1:])  # noqa E203
 
-                peptides.append(proseq[cut_sites[-3] : cut_sites[-2]])
-                peptides.append(proseq[cut_sites[-3] : cut_sites[-1]])
-                peptides.append(proseq[cut_sites[-2] : cut_sites[-1]])
+                peptides.append(proseq[cut_sites[-3] : cut_sites[-2]])  # noqa E203
+                peptides.append(proseq[cut_sites[-3] : cut_sites[-1]])  # noqa E203
+                peptides.append(proseq[cut_sites[-2] : cut_sites[-1]])  # noqa E203
 
             elif miss_cleavage == 3:
                 # If len cut sites is greater than 3... then we can do 3 missed cleavages
                 if len(cut_sites) > 3:
                     for j in range(0, len(cut_sites) - 4):
-                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]])
-                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]])
-                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]])
-                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 4]])
+                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]])  # noqa E203
+                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]])  # noqa E203
+                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]])  # noqa E203
+                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 4]])  # noqa E203
                         # Account for N terminal Methionine Potential Cleavage
                         if j == 0 and proseq[cut_sites[0]] == self.METHIONINE:
-                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]][1:])
-                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]][1:])
-                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]][1:])
-                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 4]][1:])
+                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]][1:])  # noqa E203
+                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]][1:])  # noqa E203
+                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]][1:])  # noqa E203
+                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 4]][1:])  # noqa E203
 
                     # Account for N terminal Methionine Potential Cleavage
                     if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == self.METHIONINE:
-                        peptides.append(proseq[cut_sites[-3] : cut_sites[-2]][1:])
-                        peptides.append(proseq[cut_sites[-3] : cut_sites[-1]][1:])
+                        peptides.append(proseq[cut_sites[-3] : cut_sites[-2]][1:])  # noqa E203
+                        peptides.append(proseq[cut_sites[-3] : cut_sites[-1]][1:])  # noqa E203
                     if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == self.METHIONINE:
-                        peptides.append(proseq[cut_sites[-2] : cut_sites[-1]][1:])
+                        peptides.append(proseq[cut_sites[-2] : cut_sites[-1]][1:])  # noqa E203
                     if cut_sites[-4] == 0 and proseq[cut_sites[-4]] == self.METHIONINE:
-                        peptides.append(proseq[cut_sites[-4] : cut_sites[-3]][1:])
-                        peptides.append(proseq[cut_sites[-4] : cut_sites[-2]][1:])
-                        peptides.append(proseq[cut_sites[-4] : cut_sites[-1]][1:])
+                        peptides.append(proseq[cut_sites[-4] : cut_sites[-3]][1:])  # noqa E203
+                        peptides.append(proseq[cut_sites[-4] : cut_sites[-2]][1:])  # noqa E203
+                        peptides.append(proseq[cut_sites[-4] : cut_sites[-1]][1:])  # noqa E203
 
-                    peptides.append(proseq[cut_sites[-3] : cut_sites[-2]])
-                    peptides.append(proseq[cut_sites[-3] : cut_sites[-1]])
-                    peptides.append(proseq[cut_sites[-2] : cut_sites[-1]])
-                    peptides.append(proseq[cut_sites[-4] : cut_sites[-1]])
-                    peptides.append(proseq[cut_sites[-4] : cut_sites[-2]])
-                    peptides.append(proseq[cut_sites[-4] : cut_sites[-3]])
+                    peptides.append(proseq[cut_sites[-3] : cut_sites[-2]])  # noqa E203
+                    peptides.append(proseq[cut_sites[-3] : cut_sites[-1]])  # noqa E203
+                    peptides.append(proseq[cut_sites[-2] : cut_sites[-1]])  # noqa E203
+                    peptides.append(proseq[cut_sites[-4] : cut_sites[-1]])  # noqa E203
+                    peptides.append(proseq[cut_sites[-4] : cut_sites[-2]])  # noqa E203
+                    peptides.append(proseq[cut_sites[-4] : cut_sites[-3]])  # noqa E203
 
                 else:
                     # If len cut sites not greater than 3... then we do 2 MC
                     for j in range(0, len(cut_sites) - 3):
-                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]])
-                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]])
-                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]])
+                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]])  # noqa E203
+                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]])  # noqa E203
+                        peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]])  # noqa E203
                         # Account for N terminal Methionine Potential Cleavage
                         if j == 0 and proseq[cut_sites[0]] == self.METHIONINE:
-                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]][1:])
-                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]][1:])
-                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]][1:])
+                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 1]][1:])  # noqa E203
+                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 2]][1:])  # noqa E203
+                            peptides.append(proseq[cut_sites[j] : cut_sites[j + 3]][1:])  # noqa E203
 
                     # Account for N terminal Methionine Potential Cleavage
                     if cut_sites[-3] == 0 and proseq[cut_sites[-3]] == self.METHIONINE:
-                        peptides.append(proseq[cut_sites[-3] : cut_sites[-2]][1:])
-                        peptides.append(proseq[cut_sites[-3] : cut_sites[-1]][1:])
+                        peptides.append(proseq[cut_sites[-3] : cut_sites[-2]][1:])  # noqa E203
+                        peptides.append(proseq[cut_sites[-3] : cut_sites[-1]][1:])  # noqa E203
                     if cut_sites[-2] == 0 and proseq[cut_sites[-2]] == self.METHIONINE:
-                        peptides.append(proseq[cut_sites[-2] : cut_sites[-1]][1:])
+                        peptides.append(proseq[cut_sites[-2] : cut_sites[-1]][1:])  # noqa E203
 
-                    peptides.append(proseq[cut_sites[-3] : cut_sites[-2]])
-                    peptides.append(proseq[cut_sites[-3] : cut_sites[-1]])
-                    peptides.append(proseq[cut_sites[-2] : cut_sites[-1]])
+                    peptides.append(proseq[cut_sites[-3] : cut_sites[-2]])  # noqa E203
+                    peptides.append(proseq[cut_sites[-3] : cut_sites[-1]])  # noqa E203
+                    peptides.append(proseq[cut_sites[-2] : cut_sites[-1]])  # noqa E203
 
         else:  # there is no tryptic site in the protein sequence
             peptides.append(proseq)
@@ -288,7 +299,8 @@ class InSilicoDigest(Digest):
     def digest_fasta_database(self):
         """
         This method reads in and prepares the fasta database for database digestion and assigns
-        the several attributes for the Digest object: :attr:`peptide_to_protein_dictionary`, :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
+        the several attributes for the Digest object: :attr:`peptide_to_protein_dictionary`,
+        :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
 
         Returns:
             None
@@ -313,9 +325,9 @@ class InSilicoDigest(Digest):
         sp_set = set()
 
         for record in handle:
-            if self.id_splitting == True:
+            if self.id_splitting:
                 identifier_stripped = self.UNIPROT_STR_REGEX.sub("", record.id)
-            if self.id_splitting == False:
+            if not self.id_splitting:
                 identifier_stripped = record.id
 
             if self.reviewed_identifier_symbol:
@@ -358,15 +370,21 @@ class PyteomicsDigest(Digest):
 
         Further digestion types need to be added in the future other than just trypsin/lysc
 
-        This class sets important attributes for the Digest object such as: :attr:`peptide_to_protein_dictionary`, :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
+        This class sets important attributes for the Digest object such as: :attr:`peptide_to_protein_dictionary`,
+        :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
 
         Args:
             database_path (str): Path to fasta database file to digest
             digest_type (str): Must be a value in :attr:`LIST_OF_DIGEST_TYPES`
-            missed_cleavages (int): Integer that indicates the maximum number of allowable missed cleavages from the ms search
-            reviewed_identifier_symbol (str/None): Symbol that indicates a reviewed identifier. If using Uniprot this is typically 'sp|'
-            max_peptide_length (int): The maximum length of peptides to keep for the analysis            id_splitting (bool): True/False on whether or not to split a given regex off identifiers. This is used to split of "sp|" and "tr|"
-                from the database protein strings as sometimes the database will contain those strings while the input data will have the strings split already.
+            missed_cleavages (int): Integer that indicates the maximum number of allowable missed cleavages from
+                the ms search
+            reviewed_identifier_symbol (str/None): Symbol that indicates a reviewed identifier.
+                If using Uniprot this is typically 'sp|'
+            max_peptide_length (int): The maximum length of peptides to keep for the analysis
+            id_splitting (bool): True/False on whether or not to split a given regex off identifiers.
+                This is used to split of "sp|" and "tr|"
+                from the database protein strings as sometimes the database will contain those
+                strings while the input data will have the strings split already.
                 Keep as False unless you know what you are doing
 
         Example:
@@ -392,13 +410,13 @@ class PyteomicsDigest(Digest):
             raise ValueError(
                 "digest_type must be equal to one of the following {}".format(str(self.LIST_OF_DIGEST_TYPES))
             )
-        logger = getLogger("py_protein_inference.in_silico_digest.PyteomicsDigest")
         self.max_peptide_length = max_peptide_length
 
     def digest_fasta_database(self):
         """
         This method reads in and prepares the fasta database for database digestion and assigns
-        the several attributes for the Digest object: :attr:`peptide_to_protein_dictionary`, :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
+        the several attributes for the Digest object: :attr:`peptide_to_protein_dictionary`,
+        :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
 
         Returns:
             None
@@ -433,9 +451,9 @@ class PyteomicsDigest(Digest):
             identifier = description.split(" ")[0]
 
             # Handle ID Splitting...
-            if self.id_splitting == True:
+            if self.id_splitting:
                 identifier_stripped = self.UNIPROT_STR_REGEX.sub("", identifier)
-            if self.id_splitting == False:
+            if not self.id_splitting:
                 identifier_stripped = identifier
 
             # If reviewed add to sp_set
@@ -449,7 +467,7 @@ class PyteomicsDigest(Digest):
                 pep_dict.setdefault(peptide, []).append(identifier_stripped)
                 # Need to account for potential N-term Methionine Cleavage
                 if sequence.startswith(peptide) and peptide.startswith(self.METHIONINE):
-                    # If our sequence starts with the current peptide... and our current peptide starts with methionine...
+                    # If our sequence starts with the current peptide... and our current peptide starts with methionine
                     # Then we remove the methionine from the peptide and add it to our dicts...
                     methionine_cleaved_peptide = peptide[1:]
                     met_cleaved_peps.add(methionine_cleaved_peptide)

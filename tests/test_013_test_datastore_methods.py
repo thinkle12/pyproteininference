@@ -1,5 +1,6 @@
 import tempfile
 from unittest import TestCase
+
 from pkg_resources import resource_filename
 
 import py_protein_inference
@@ -18,16 +19,16 @@ temp_dir = tempfile.gettempdir()
 class TestDataStoreMethods(TestCase):
     def test_datastore(self):
 
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
         protein_inference_parameters = py_protein_inference.parameters.ProteinInferenceParameter(
             yaml_param_filepath=PARAMETER_FILE
         )
 
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
         digest = py_protein_inference.in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
@@ -38,9 +39,9 @@ class TestDataStoreMethods(TestCase):
         )
         digest.digest_fasta_database()
 
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
         pep_and_prot_data = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
@@ -51,45 +52,45 @@ class TestDataStoreMethods(TestCase):
         )
         pep_and_prot_data.read_psms()
 
-        ### STEP 4: Initiate the datastore class ###
-        ### STEP 4: Initiate the datastore class ###
-        ### STEP 4: Initiate the datastore class ###
+        # STEP 4: Initiate the datastore class #
+        # STEP 4: Initiate the datastore class #
+        # STEP 4: Initiate the datastore class #
         data = py_protein_inference.datastore.DataStore(pep_and_prot_data, digest=digest)
 
-        ### Step 5: Restrict the PSM data
-        ### Step 5: Restrict the PSM data
-        ### Step 5: Restrict the PSM data
+        # Step 5: Restrict the PSM data
+        # Step 5: Restrict the PSM data
+        # Step 5: Restrict the PSM data
         data.restrict_psm_data()
 
-        ### Step 6: Generate protein scoring input
-        ### Step 6: Generate protein scoring input
-        ### Step 6: Generate protein scoring input
+        # Step 6: Generate protein scoring input
+        # Step 6: Generate protein scoring input
+        # Step 6: Generate protein scoring input
         data.create_scoring_input()
 
-        ### Step 7: Remove non unique peptides if running exclusion
-        ### Step 7: Remove non unique peptides if running exclusion
-        ### Step 7: Remove non unique peptides if running exclusion
+        # Step 7: Remove non unique peptides if running exclusion
+        # Step 7: Remove non unique peptides if running exclusion
+        # Step 7: Remove non unique peptides if running exclusion
         if protein_inference_parameters.inference_type == py_protein_inference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 
-        ### STEP 8: Score our PSMs given a score method
-        ### STEP 8: Score our PSMs given a score method
-        ### STEP 8: Score our PSMs given a score method
+        # STEP 8: Score our PSMs given a score method
+        # STEP 8: Score our PSMs given a score method
+        # STEP 8: Score our PSMs given a score method
         score = py_protein_inference.scoring.Score(data=data)
         score.score_psms(score_method=protein_inference_parameters.protein_score)
 
-        ### STEP 9: Run protein picker on the data
-        ### STEP 9: Run protein picker on the data
-        ### STEP 9: Run protein picker on the data
+        # STEP 9: Run protein picker on the data
+        # STEP 9: Run protein picker on the data
+        # STEP 9: Run protein picker on the data
         if protein_inference_parameters.picker:
             data.protein_picker()
         else:
             pass
 
-        ### STEP 10: Apply Inference
-        ### STEP 10: Apply Inference
-        ### STEP 10: Apply Inference
+        # STEP 10: Apply Inference
+        # STEP 10: Apply Inference
+        # STEP 10: Apply Inference
         inference_type = protein_inference_parameters.inference_type
 
         # For parsimony... Run GLPK setup, runner, grouper...
@@ -113,9 +114,9 @@ class TestDataStoreMethods(TestCase):
             group = py_protein_inference.inference.PeptideCentric(data=data, digest=digest)
             group.infer_proteins()
 
-        ### STEP 11: Run FDR and Q value Calculations
-        ### STEP 11: Run FDR and Q value Calculations
-        ### STEP 11: Run FDR and Q value Calculations
+        # STEP 11: Run FDR and Q value Calculations
+        # STEP 11: Run FDR and Q value Calculations
+        # STEP 11: Run FDR and Q value Calculations
         data.calculate_q_values()
 
         # Start datastore tests

@@ -1,11 +1,12 @@
-import sys
-import yaml
 import logging
-from py_protein_inference.in_silico_digest import InSilicoDigest
-from py_protein_inference.export import Export
-from py_protein_inference.scoring import Score
-from py_protein_inference.inference import Inference
+import sys
 
+import yaml
+
+from py_protein_inference.export import Export
+from py_protein_inference.in_silico_digest import InSilicoDigest
+from py_protein_inference.inference import Inference
+from py_protein_inference.scoring import Score
 
 logger = logging.getLogger(__name__)
 
@@ -23,27 +24,46 @@ class ProteinInferenceParameter(object):
 
     Attributes:
         yaml_param_filepath (str): path to properly formatted parameter file specific to Protein Inference
-        digest_type (str): String that determines that type of in silico digestion for :py:class:`py_protein_inference.in_silico_digest.Digest`. Typically "trypsin"
-        export (str): String to indicate the export type for :py:class:`py_protein_inference.export.Export`. Typically this is "psms", "peptides", or "psm_ids"
+        digest_type (str): String that determines that type of in silico digestion for
+            :py:class:`py_protein_inference.in_silico_digest.Digest`. Typically "trypsin"
+        export (str): String to indicate the export type for :py:class:`py_protein_inference.export.Export`.
+            Typically this is "psms", "peptides", or "psm_ids"
         fdr (float): Float to indicate FDR filtering
         glpk_path (str): Path to local installation of glpsol if inference_type="parsimony" and lp_solver="glpk"
-        missed_cleavages (int): Integer to determine the number of missed cleavages in the database digestion :py:class:`py_protein_inference.in_silico_digest.Digest`
-        picker (bool): True/False on whether or not to run the protein picker algorithm :py:meth:py_protein_inference.datastore.DataStore.protein_picker`
-        restrict_pep (float/None): Float to restrict the posterior error probability values by in the PSM input. Used in :py:meth:py_protein_inference.datastore.DataStore.restrict_psm_data`
-        restrict_peptide_length (int/None): Float to restrict the peptide length values by in the PSM input. Used in :py:meth:py_protein_inference.datastore.DataStore.restrict_psm_data`
-        restrict_q (float/None): Float to restrict the q values by in the PSM input. Used in :py:meth:py_protein_inference.datastore.DataStore.restrict_psm_data`
-        restrict_custom (float/None): Float to restrict the custom values by in the PSM input. Used in :py:meth:py_protein_inference.datastore.DataStore.restrict_psm_data`. Filtering depends on score_type variable. If score_type is multiplicative then values that are less than restrict_custom are kept. If score_type is additive then values that are more than restrict_custom are kept.
-        protein_score (str): String to determine the way in which Proteins are scored can be any of the SCORE_METHODS in :py:class:`py_protein_inference.scoring.Score`
-        psm_score_type (str): String to determine the type of score that the PSM scores are (Additive or Multiplicative) can be any of the SCORE_TYPES in :py:class:`py_protein_inference.scoring.Score`
+        missed_cleavages (int): Integer to determine the number of missed cleavages in the database digestion
+            :py:class:`py_protein_inference.in_silico_digest.Digest`
+        picker (bool): True/False on whether or not to run the protein picker algorithm
+            :py:meth:py_protein_inference.datastore.DataStore.protein_picker`
+        restrict_pep (float/None): Float to restrict the posterior error probability values by in the PSM input.
+            Used in :py:meth:py_protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_peptide_length (int/None): Float to restrict the peptide length values by in the PSM input.
+            Used in :py:meth:py_protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_q (float/None): Float to restrict the q values by in the PSM input.
+            Used in :py:meth:py_protein_inference.datastore.DataStore.restrict_psm_data`
+        restrict_custom (float/None): Float to restrict the custom values by in the PSM input.
+            Used in :py:meth:py_protein_inference.datastore.DataStore.restrict_psm_data`.
+            Filtering depends on score_type variable. If score_type is multiplicative then values that are less than
+            restrict_custom are kept. If score_type is additive then values that are more than restrict_custom are kept.
+        protein_score (str): String to determine the way in which Proteins are scored can be any of the SCORE_METHODS
+            in :py:class:`py_protein_inference.scoring.Score`
+        psm_score_type (str): String to determine the type of score that the PSM scores are
+            (Additive or Multiplicative) can be any of the SCORE_TYPES in :py:class:`py_protein_inference.scoring.Score`
         decoy_symbol (str): String to denote decoy proteins from target proteins. IE "##"
         isoform_symbol (str): String to denote isoforms from regular proteins. IE "-". Can also be None
-        reviewed_identifier_symbol (str): String to denote a "Reviewed" Protein. Typically this is: "sp|" if using Uniprot Fasta database
-        inference_type (str): String to determine the inference procedure. Can be any value of INFERENCE_TYPES of :py:class:`py_protein_inference.inference.Inference` object
+        reviewed_identifier_symbol (str): String to denote a "Reviewed" Protein. Typically this is: "sp|"
+            if using Uniprot Fasta database
+        inference_type (str): String to determine the inference procedure. Can be any value of INFERENCE_TYPES
+            of :py:class:`py_protein_inference.inference.Inference` object
         tag (str): String to be added to output files
-        psm_score (str): String that indicates the PSM input score. The value should match the string in the input data of the score you want to use for PSM score. This score will be used in scoring methods here: :py:class:`py_protein_inference.scoring.Score`
-        grouping_type (str/None): String to determine the grouping procedure. Can be any value of GROUPING_TYPES of :py:class:`py_protein_inference.inference.Inference` object
-        max_identifiers_peptide_centric (int): Maximum number of identifiers to assign to a group when running peptide_centric inference. Typically this is 10 or 5.
-        lp_solver (str/None): The LP solver to use if inference_type="Parsimony". Can be any value in LP_SOLVERS in the :py:class:`py_protein_inference.inference.Inference` object
+        psm_score (str): String that indicates the PSM input score. The value should match the string in the
+            input data of the score you want to use for PSM score. This score will be used in scoring methods
+                here: :py:class:`py_protein_inference.scoring.Score`
+        grouping_type (str/None): String to determine the grouping procedure. Can be any value of
+            GROUPING_TYPES of :py:class:`py_protein_inference.inference.Inference` object
+        max_identifiers_peptide_centric (int): Maximum number of identifiers to assign to a group when
+            running peptide_centric inference. Typically this is 10 or 5.
+        lp_solver (str/None): The LP solver to use if inference_type="Parsimony".
+            Can be any value in LP_SOLVERS in the :py:class:`py_protein_inference.inference.Inference` object
 
     """
 
@@ -74,7 +94,12 @@ class ProteinInferenceParameter(object):
     PICKER_PARAMETER = "picker"
     TAG_PARAMETER = "tag"
 
-    GENERAL_PARAMETER_SUB_KEYS = {EXPORT_PARAMETER, FDR_PARAMETER, PICKER_PARAMETER, TAG_PARAMETER}
+    GENERAL_PARAMETER_SUB_KEYS = {
+        EXPORT_PARAMETER,
+        FDR_PARAMETER,
+        PICKER_PARAMETER,
+        TAG_PARAMETER,
+    }
 
     PEP_RESTRICT_PARAMETER = "pep_restriction"
     PEPTIDE_LENGTH_RESTRICT_PARAMETER = "peptide_length_restriction"
@@ -92,13 +117,21 @@ class ProteinInferenceParameter(object):
     PSM_SCORE_PARAMETER = "psm_score"
     PSM_SCORE_TYPE_PARAMETER = "psm_score_type"
 
-    SCORE_PARAMETER_SUB_KEYS = {PROTEIN_SCORE_PARAMETER, PSM_SCORE_PARAMETER, PSM_SCORE_TYPE_PARAMETER}
+    SCORE_PARAMETER_SUB_KEYS = {
+        PROTEIN_SCORE_PARAMETER,
+        PSM_SCORE_PARAMETER,
+        PSM_SCORE_TYPE_PARAMETER,
+    }
 
     DECOY_SYMBOL_PARAMETER = "decoy_symbol"
     ISOFORM_SYMBOL_PARAMETER = "isoform_symbol"
     REVIEWED_IDENTIFIER_PARAMETER = "reviewed_identifier_symbol"
 
-    IDENTIFIER_SUB_KEYS = {DECOY_SYMBOL_PARAMETER, ISOFORM_SYMBOL_PARAMETER, REVIEWED_IDENTIFIER_PARAMETER}
+    IDENTIFIER_SUB_KEYS = {
+        DECOY_SYMBOL_PARAMETER,
+        ISOFORM_SYMBOL_PARAMETER,
+        REVIEWED_IDENTIFIER_PARAMETER,
+    }
 
     INFERENCE_TYPE_PARAMETER = "inference_type"
     GROUPING_TYPE_PARAMETER = "grouping_type"
@@ -114,7 +147,11 @@ class ProteinInferenceParameter(object):
     GLPK_PATH_PARAMETER = "glpk_path"
     SHARED_PEPTIDES_PARAMETER = "shared_peptides"
 
-    PARSIMONY_SUB_KEYS = {LP_SOLVER_PARAMETER, GLPK_PATH_PARAMETER, SHARED_PEPTIDES_PARAMETER}
+    PARSIMONY_SUB_KEYS = {
+        LP_SOLVER_PARAMETER,
+        GLPK_PATH_PARAMETER,
+        SHARED_PEPTIDES_PARAMETER,
+    }
 
     MAX_IDENTIFIERS_PARAMETER = "max_identifiers"
 
@@ -389,9 +426,8 @@ class ProteinInferenceParameter(object):
                 logger.info("Not Restricting by Peptide Length")
             else:
                 raise ValueError(
-                    "Peptide Length Restriction must be an integer, Provided Peptide Length Restriction value: {}".format(
-                        self.restrict_peptide_length
-                    )
+                    "Peptide Length Restriction must be an integer, "
+                    "Provided Peptide Length Restriction value: {}".format(self.restrict_peptide_length)
                 )
 
         try:
@@ -455,7 +491,8 @@ class ProteinInferenceParameter(object):
         """
         Internal ProteinInferenceParameter method to validate combination of score method and score type
         """
-        # Check to see if combination of score (column), method(multiplicative log, additive), and score type (multiplicative/additive) is possible...
+        # Check to see if combination of score (column), method(multiplicative log, additive),
+        # and score type (multiplicative/additive) is possible...
         # This will be super custom
 
         if self.psm_score_type == Score.ADDITIVE_SCORE_TYPE and self.protein_score != Score.ADDITIVE:
@@ -525,9 +562,8 @@ class ProteinInferenceParameter(object):
             )
         else:
             raise ValueError(
-                "Max Number of Indentifiers for Peptide Centric Inference must be an integer, provided value: {}".format(
-                    self.max_identifiers_peptide_centric
-                )
+                "Max Number of Indentifiers for Peptide Centric Inference must be an integer, "
+                "provided value: {}".format(self.max_identifiers_peptide_centric)
             )
 
     def _validate_lp_solver(self):
@@ -561,14 +597,14 @@ class ProteinInferenceParameter(object):
                 logger.info("Setting Shared Peptide type to None")
             else:
                 raise ValueError(
-                    "Shared Peptide types '{}' not supported, please use one of the following Shared Peptide types: '{}'".format(
-                        self.shared_peptides, Inference.SHARED_PEPTIDE_TYPES
-                    )
+                    "Shared Peptide types '{}' not supported, please use one of the following "
+                    "Shared Peptide types: '{}'".format(self.shared_peptides, Inference.SHARED_PEPTIDE_TYPES)
                 )
 
     def _validate_identifiers(self):
         """
-        Internal ProteinInferenceParameter method to validate the decoy symbol, isoform symbol, and reviewed identifier symbol
+        Internal ProteinInferenceParameter method to validate the decoy symbol, isoform symbol,
+        and reviewed identifier symbol
 
         """
         if type(self.decoy_symbol) == str:
@@ -626,9 +662,8 @@ class ProteinInferenceParameter(object):
                     pass
                 else:
                     raise ValueError(
-                        "General Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the general parameter field".format(
-                            gkey
-                        )
+                        "General Sub Parameter '{}' is not found in the parameter file. "
+                        "Please add it as a sub parameter of the general parameter field".format(gkey)
                     )
 
         except KeyError:
@@ -641,9 +676,8 @@ class ProteinInferenceParameter(object):
                     pass
                 else:
                     raise ValueError(
-                        "Data Restriction Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the data_restriction parameter field".format(
-                            drkey
-                        )
+                        "Data Restriction Sub Parameter '{}' is not found in the parameter file. "
+                        "Please add it as a sub parameter of the data_restriction parameter field".format(drkey)
                     )
 
         except KeyError:
@@ -656,9 +690,8 @@ class ProteinInferenceParameter(object):
                     pass
                 else:
                     raise ValueError(
-                        "Score Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the score parameter field".format(
-                            skey
-                        )
+                        "Score Sub Parameter '{}' is not found in the parameter file. "
+                        "Please add it as a sub parameter of the score parameter field".format(skey)
                     )
 
         except KeyError:
@@ -671,9 +704,8 @@ class ProteinInferenceParameter(object):
                     pass
                 else:
                     raise ValueError(
-                        "Identifiers Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the identifiers parameter field".format(
-                            ikey
-                        )
+                        "Identifiers Sub Parameter '{}' is not found in the parameter file. "
+                        "Please add it as a sub parameter of the identifiers parameter field".format(ikey)
                     )
 
         except KeyError:
@@ -686,9 +718,8 @@ class ProteinInferenceParameter(object):
                     pass
                 else:
                     raise ValueError(
-                        "Inference Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the inference parameter field".format(
-                            infkey
-                        )
+                        "Inference Sub Parameter '{}' is not found in the parameter file. "
+                        "Please add it as a sub parameter of the inference parameter field".format(infkey)
                     )
 
         except KeyError:
@@ -701,9 +732,8 @@ class ProteinInferenceParameter(object):
                     pass
                 else:
                     raise ValueError(
-                        "Digest Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the digest parameter field".format(
-                            dkey
-                        )
+                        "Digest Sub Parameter '{}' is not found in the parameter file. "
+                        "Please add it as a sub parameter of the digest parameter field".format(dkey)
                     )
 
         except KeyError:
@@ -716,9 +746,8 @@ class ProteinInferenceParameter(object):
                     pass
                 else:
                     raise ValueError(
-                        "Parsimony Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the parsimony parameter field".format(
-                            pkey
-                        )
+                        "Parsimony Sub Parameter '{}' is not found in the parameter file. "
+                        "Please add it as a sub parameter of the parsimony parameter field".format(pkey)
                     )
 
         except KeyError:
@@ -731,9 +760,8 @@ class ProteinInferenceParameter(object):
                     pass
                 else:
                     raise ValueError(
-                        "Peptide Centric Sub Parameter '{}' is not found in the parameter file. Please add it as a sub parameter of the peptide_centric parameter field".format(
-                            pckey
-                        )
+                        "Peptide Centric Sub Parameter '{}' is not found in the parameter file. "
+                        "Please add it as a sub parameter of the peptide_centric parameter field".format(pckey)
                     )
 
         except KeyError:
@@ -775,7 +803,8 @@ class ProteinInferenceParameter(object):
 
     def override_custom_restrict(self, data):
         """
-        ProteinInferenceParameter method to override restrict_custom if the input data does not contain custom score values.
+        ProteinInferenceParameter method to override restrict_custom if
+        the input data does not contain custom score values.
 
         Args:
             data (py_protein_inference.datastore.DataStore): Data Object
@@ -793,7 +822,8 @@ class ProteinInferenceParameter(object):
 
     def fix_parameters_from_datastore(self, data):
         """
-        ProteinInferenceParameter method to override restriction values in the parameter file if those scores do not exist in the input files
+        ProteinInferenceParameter method to override restriction values in the
+        parameter file if those scores do not exist in the input files
 
         Args:
             data (py_protein_inference.datastore.DataStore): Data Object

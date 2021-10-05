@@ -3,13 +3,15 @@ import re
 
 class Protein(object):
     """
-    The following class is a representation of a Protein that stores characteristics/attributes of a protein for the entire analysis.
+    The following class is a representation of a Protein that stores characteristics/attributes of a protein for the
+        entire analysis.
     We use __slots__ to predefine the attributes the Protein Object can have
     This is done to speed up runtime of the PI algorithm
 
     Attributes:
         identifier (str): String identifier for the Protein object
-        score (float): Float that represents the protein score as output from :py:class:`py_protein_inference.scoring.Score` methods
+        score (float): Float that represents the protein score as output from
+            :py:class:`py_protein_inference.scoring.Score` methods
         psms (list): List of :py:class:`py_protein_inference.physical.Psm` objects
         group_identification (set): Set of group Identifiers that the protein belongs to (int)
         reviewed (bool): True/False on if the identifier is reviewed
@@ -58,11 +60,11 @@ class Protein(object):
         self.reviewed = False
         self.unreviewed = False
         self.peptides = None  # Sequence info without flanking
-        self.peptide_scores = None  # TODO remove
+        self.peptide_scores = None  # remove
         self.picked = True
-        self.num_peptides = None  # TODO remove
-        self.unique_peptides = None  # TODO remove
-        self.num_unique_peptides = None  # TODO remove
+        self.num_peptides = None  # remove
+        self.unique_peptides = None  # remove
+        self.num_unique_peptides = None  # remove
         self.raw_peptides = set()  # Includes Flanking Seq Info
 
     def get_psm_scores(self):
@@ -168,9 +170,12 @@ class Psm(object):
         possible_proteins (list): List of protein strings that the Psm maps to based on the digest
         psm_id (str): String that represents a global identifier for the Psm. Should come from input files.
         custom_score (float): Score that comes from a custom column in the input files
-        main_score (float): The Psm score to be used as the scoring variable for protein scoring. can be percscore,qvalue,pepvalue, or custom_score
-        stripped_peptide (str): This is the identifier attribute that has had mods removed and flanking AAs removed IE: DLIDEGHAATQLVNQLHDVVVENNLSDK
-        non_flanking_peptide (str): This is the identifier attribute that has had flanking AAs removed IE: DLIDEGH#AATQLVNQLHDVVVENNLSDK. #NOTE Mods are still present here
+        main_score (float): The Psm score to be used as the scoring variable for protein scoring. can be
+            percscore,qvalue,pepvalue, or custom_score
+        stripped_peptide (str): This is the identifier attribute that has had mods removed and flanking AAs
+            removed IE: DLIDEGHAATQLVNQLHDVVVENNLSDK
+        non_flanking_peptide (str): This is the identifier attribute that has had flanking AAs
+            removed IE: DLIDEGH#AATQLVNQLHDVVVENNLSDK. #NOTE Mods are still present here
 
     """
 
@@ -190,7 +195,7 @@ class Psm(object):
     # The regex removes anything between parantheses including parenthases - \([^()]*\)
     # The regex removes anything between brackets including parenthases - \[.*?\]
     # And the regex removes anything that is not an A-Z character [^A-Z]
-    MOD_REGEX = re.compile("\([^()]*\)|\[.*?\]|[^A-Z]")
+    MOD_REGEX = re.compile("\([^()]*\)|\[.*?\]|[^A-Z]")  # noqa W605
 
     FRONT_FLANKING_REGEX = re.compile("^[A-Z|-][.]")
     BACK_FLANKING_REGEX = re.compile("[.][A-Z|-]$")
@@ -253,11 +258,13 @@ class Psm(object):
     def split_peptide(cls, peptide_string, delimiter="."):
         """
         This class method takes a peptide string with flanking AAs and removes them from the peptide string.
-        This method uses string splitting and if the method produces a faulty peptide the method :meth:`split_peptide_pro` will be called
+        This method uses string splitting and if the method produces a faulty peptide the method
+            :meth:`split_peptide_pro` will be called
 
         Args:
             peptide_string (str): Peptide string to have mods removed from
-            delimiter (str): a string to indicate what separates a leading/trailing (flanking) AA from the peptide sequence
+            delimiter (str): a string to indicate what separates a leading/trailing (flanking) AA from the
+                peptide sequence
 
         Returns:
             str: a peptide string with flanking AAs removed
@@ -282,12 +289,14 @@ class Psm(object):
     def split_peptide_pro(cls, peptide_string, delimiter="."):
         """
         This class method takes a peptide string with flanking AAs and removes them from the peptide string
-        This is a specialized method of :meth:`split_peptide` that uses regex identifiers to replace flanking AAs as opposed to string splitting
+        This is a specialized method of :meth:`split_peptide` that uses regex identifiers to replace flanking AAs as
+            opposed to string splitting
 
 
         Args:
             peptide_string (str): Peptide string to have mods removed from
-            delimiter (str): a string to indicate what separates a leading/trailing (flanking) AA from the peptide sequence
+            delimiter (str): a string to indicate what separates a leading/trailing (flanking) AA from the peptide
+                sequence
 
         Returns:
             str: a peptide string with flanking AAs removed
@@ -313,7 +322,8 @@ class Psm(object):
         This method takes in a score type and assigns the variable main_score for a given Psm based on the score type.
 
         Args:
-            score (str): This is a string representation of the Psm attribute that will get assigned to the main_score variable
+            score (str): This is a string representation of the Psm attribute that will get assigned to the main_score
+                variable
 
         """
         # Assign a main score based on user input
@@ -325,14 +335,16 @@ class Psm(object):
 
 class ProteinGroup(object):
     """
-    The following class is a physical Protein Group class that stores characteristics of a Protein Group for the entire analysis.
+    The following class is a physical Protein Group class that stores characteristics of a Protein Group for the entire
+        analysis.
     We use __slots__ to predefine the attributes the Psm Object can have
     This is done to speed up runtime of the PI algorithm
 
     Attributes:
         number_id (int): unique Integer to represent a group
         proteins (list): List of :py:class:`py_protein_inference.physical.Protein` objects
-        q_value (float): Q value for the protein group that is calculated with method :py:meth:`py_protein_inference.datastore.DataStore.calculate_q_values`
+        q_value (float): Q value for the protein group that is calculated with method
+            :py:meth:`py_protein_inference.datastore.DataStore.calculate_q_values`
 
     """
 

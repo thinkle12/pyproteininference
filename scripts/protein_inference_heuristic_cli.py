@@ -1,6 +1,6 @@
-import py_protein_inference
 import argparse
 
+import py_protein_inference
 
 parser = argparse.ArgumentParser(description="Protein Inference Heuristic")
 parser.add_argument(
@@ -28,7 +28,8 @@ parser.add_argument(
     "--combined_files",
     dest="combined_files",
     required=False,
-    help="Input combined psm output from percolator. This should contain Target and Decoy PSMS. Can either input one file or a list of files",
+    help="Input combined psm output from percolator. This should contain Target and Decoy PSMS. "
+    "Can either input one file or a list of files",
     metavar="FILE",
     nargs="+",
     type=str,
@@ -46,7 +47,8 @@ parser.add_argument(
     "--output_filename",
     dest="output_filename",
     required=False,
-    help="Filename to write results to. Can be left blank. If this flag is left blank the filename will be automatically generated. If set this flag will override -o",
+    help="Filename to write results to. Can be left blank. If this flag is left blank the filename will be"
+    " automatically generated. If set this flag will override -o",
     metavar="FILE",
     default=None,
 )
@@ -55,7 +57,8 @@ parser.add_argument(
     "--target_directory",
     dest="target_directory",
     required=False,
-    help="Directory that contains either .txt or .tsv input target psm data. Make sure the directory ONLY contains result files",
+    help="Directory that contains either .txt or .tsv input target psm data. Make sure the directory ONLY contains"
+    " result files",
     metavar="DIR",
 )
 parser.add_argument(
@@ -63,7 +66,8 @@ parser.add_argument(
     "--decoy_directory",
     dest="decoy_directory",
     required=False,
-    help="Directory that contains either .txt or .tsv input decoy psm data. Make sure the directory ONLY contains result files",
+    help="Directory that contains either .txt or .tsv input decoy psm data. Make sure the directory ONLY contains"
+    " result files",
     metavar="DIR",
 )
 parser.add_argument(
@@ -71,7 +75,8 @@ parser.add_argument(
     "--combined_directory",
     dest="combined_directory",
     required=False,
-    help="Directory that contains either .txt or .tsv input data with targets/decoys combined. Make sure the directory ONLY contains result files",
+    help="Directory that contains either .txt or .tsv input data with targets/decoys combined. "
+    "Make sure the directory ONLY contains result files",
     metavar="DIR",
 )
 parser.add_argument(

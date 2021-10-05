@@ -1,18 +1,12 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec  5 16:16:17 2017
-
-@author: hinklet
-"""
+import os
 import tempfile
 from unittest import TestCase
+
 from pkg_resources import resource_filename
 
 import py_protein_inference
 from py_protein_inference import in_silico_digest
 from py_protein_inference.parameters import ProteinInferenceParameter
-import os
 
 TEST_DATABASE_ORIGINAL = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 TEST_DATABASE_MISSING_PEP = resource_filename(

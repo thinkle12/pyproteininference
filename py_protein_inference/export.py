@@ -1,7 +1,7 @@
-import os
 import csv
-import sys
 import logging
+import os
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -63,12 +63,14 @@ class Export(object):
         """
         Method that dispatches to one of the many export methods given an export_type input
 
-        filepath is determined based on directory arg and information from data :py:class:`py_protein_inference.datastore.DataStore`
+        filepath is determined based on directory arg and information from data
+        :py:class:`py_protein_inference.datastore.DataStore`
 
         This method sets the :attr:`filepath` variable.
 
         Args:
-            output_filename (str): Filepath to write to. If set as None will auto generate filename and will write to directory variable
+            output_filename (str): Filepath to write to. If set as None will auto generate filename and
+                will write to directory variable
             directory (str): Directory to write the result file to. If None, will write to current working directory
             export_type (str): Must be a value in :attr:`EXPORT_TYPES` and determines the output format
 
@@ -186,7 +188,7 @@ class Export(object):
                 protein_export_list.append([prots.identifier])
                 protein_export_list[-1].append(prots.score)
                 protein_export_list[-1].append(prots.num_peptides)
-                if prots.reviewed == True:
+                if prots.reviewed:
                     protein_export_list[-1].append("Reviewed")
                 else:
                     protein_export_list[-1].append("Unreviewed")
@@ -224,7 +226,7 @@ class Export(object):
             protein_export_list.append([groups[0].identifier])
             protein_export_list[-1].append(groups[0].score)
             protein_export_list[-1].append(groups[0].num_peptides)
-            if groups[0].reviewed == True:
+            if groups[0].reviewed:
                 protein_export_list[-1].append("Reviewed")
             else:
                 protein_export_list[-1].append("Unreviewed")
@@ -265,7 +267,7 @@ class Export(object):
                     protein_export_list.append([prots.identifier])
                     protein_export_list[-1].append(prots.score)
                     protein_export_list[-1].append(prots.num_peptides)
-                    if prots.reviewed == True:
+                    if prots.reviewed:
                         protein_export_list[-1].append("Reviewed")
                     else:
                         protein_export_list[-1].append("Unreviewed")
@@ -303,7 +305,7 @@ class Export(object):
             protein_export_list[-1].append(lead_protein.score)
             protein_export_list[-1].append(groups.q_value)
             protein_export_list[-1].append(lead_protein.num_peptides)
-            if lead_protein.reviewed == True:
+            if lead_protein.reviewed:
                 protein_export_list[-1].append("Reviewed")
             else:
                 protein_export_list[-1].append("Unreviewed")
@@ -344,7 +346,7 @@ class Export(object):
             protein_export_list[-1].append(lead_protein.score)
             protein_export_list[-1].append(groups.q_value)
             protein_export_list[-1].append(lead_protein.num_peptides)
-            if lead_protein.reviewed == True:
+            if lead_protein.reviewed:
                 protein_export_list[-1].append("Reviewed")
             else:
                 protein_export_list[-1].append("Unreviewed")
@@ -385,7 +387,7 @@ class Export(object):
                 protein_export_list[-1].append(proteins.score)
                 protein_export_list[-1].append(groups.q_value)
                 protein_export_list[-1].append(proteins.num_peptides)
-                if proteins.reviewed == True:
+                if proteins.reviewed:
                     protein_export_list[-1].append("Reviewed")
                 else:
                     protein_export_list[-1].append("Unreviewed")
@@ -415,7 +417,7 @@ class Export(object):
                 protein_export_list[-1].append(proteins.score)
                 protein_export_list[-1].append(groups.q_value)
                 protein_export_list[-1].append(proteins.num_peptides)
-                if proteins.reviewed == True:
+                if proteins.reviewed:
                     protein_export_list[-1].append("Reviewed")
                 else:
                     protein_export_list[-1].append("Unreviewed")
@@ -455,7 +457,7 @@ class Export(object):
                 protein_export_list[-1].append(lead_protein.score)
                 protein_export_list[-1].append(groups.q_value)
                 protein_export_list[-1].append(lead_protein.num_peptides)
-                if lead_protein.reviewed == True:
+                if lead_protein.reviewed:
                     protein_export_list[-1].append("Reviewed")
                 else:
                     protein_export_list[-1].append("Unreviewed")
@@ -494,7 +496,7 @@ class Export(object):
             protein_export_list[-1].append(lead_protein.score)
             protein_export_list[-1].append(groups.q_value)
             protein_export_list[-1].append(lead_protein.num_peptides)
-            if lead_protein.reviewed == True:
+            if lead_protein.reviewed:
                 protein_export_list[-1].append("Reviewed")
             else:
                 protein_export_list[-1].append("Unreviewed")
@@ -534,7 +536,7 @@ class Export(object):
             protein_export_list[-1].append(lead_protein.score)
             protein_export_list[-1].append(groups.q_value)
             protein_export_list[-1].append(lead_protein.num_peptides)
-            if lead_protein.reviewed == True:
+            if lead_protein.reviewed:
                 protein_export_list[-1].append("Reviewed")
             else:
                 protein_export_list[-1].append("Unreviewed")
@@ -574,7 +576,7 @@ class Export(object):
             protein_export_list[-1].append(lead_protein.score)
             protein_export_list[-1].append(groups.q_value)
             protein_export_list[-1].append(lead_protein.num_peptides)
-            if lead_protein.reviewed == True:
+            if lead_protein.reviewed:
                 protein_export_list[-1].append("Reviewed")
             else:
                 protein_export_list[-1].append("Unreviewed")

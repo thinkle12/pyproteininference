@@ -1,8 +1,9 @@
+import logging
 import math
-import numpy
 import sys
 from functools import reduce
-import logging
+
+import numpy
 
 logger = logging.getLogger(__name__)
 
@@ -16,22 +17,27 @@ logging.basicConfig(
 
 class Score(object):
     """
-    Score class that contains methods to do a variety of scoring methods on the :py:class:`py_protein_inference.physical.Psm` objects
+    Score class that contains methods to do a variety of scoring methods on the
+    :py:class:`py_protein_inference.physical.Psm` objects
     contained inside of :py:class:`py_protein_inference.physical.Protein` objects
 
-    Methods in the class loop over each Protein object and creates a protein "score" variable using the Psm object scores.
+    Methods in the class loop over each Protein object and creates a protein "score" variable using the Psm object
+    scores.
 
     Methods score all proteins from :attr:`scoring_input` from :py:class:`py_protein_inference.datastore.DataStore`.
-    The PSM score that is used is determined from :py:meth:`py_protein_inference.datastore.DataStore.create_scoring_input`
+    The PSM score that is used is determined from
+    :py:meth:`py_protein_inference.datastore.DataStore.create_scoring_input`
 
     Each scoring method will set the following attributes for :py:class:`py_protein_inference.datastore.DataStore`
 
     1. attr:`score_method`; This is the full name of the score method
     2. attr:`short_score_method`; This is the short name of the score method
-    3. attr:`scored_proteins`; This is a list of :py:class:`py_protein_inference.physical.Protein` objects that have been scored
+    3. attr:`scored_proteins`; This is a list of :py:class:`py_protein_inference.physical.Protein` objects
+    that have been scored
 
     Attributes:
-        pre_score_data (list): This is a list of :py:class:`py_protein_inference.physical.Protein` objects that contain :py:class:`py_protein_inference.physical.Psm` objects
+        pre_score_data (list): This is a list of :py:class:`py_protein_inference.physical.Protein` objects that
+        contain :py:class:`py_protein_inference.physical.Psm` objects
         data (py_protein_inference.datastore.DataStore): Data Object
 
     """
@@ -89,7 +95,8 @@ class Score(object):
             data (py_protein_inference.datastore.DataStore): Data class object
 
         Raises:
-            ValueError: If the variable :attr:`scoring_input` for :py:class:`py_protein_inference.datastore.DataStore` is Empty "[]" or does not exist "None"
+            ValueError: If the variable :attr:`scoring_input` for :py:class:`py_protein_inference.datastore.DataStore`
+            is Empty "[]" or does not exist "None"
 
         Examples:
             >>> score = py_protein_inference.scoring.Score(data=data)
@@ -98,13 +105,15 @@ class Score(object):
             self.pre_score_data = data.scoring_input
         else:
             raise ValueError(
-                "scoring input not found in data object - Please run 'create_scoring_input' method from DataStore to run any scoring type"
+                "scoring input not found in data object - Please run 'create_scoring_input' method from "
+                "DataStore to run any scoring type"
             )
         self.data = data
 
     def score_psms(self, score_method="multiplicative_log"):
         """
-        This method dispatches to the actual scoring method given a string input that is defined in :py:class:`py_protein_inference.parameters.ProteinInferenceParameter`
+        This method dispatches to the actual scoring method given a string input that is defined in
+        :py:class:`py_protein_inference.parameters.ProteinInferenceParameter`
 
         Args:
             score_method (str): This is a string that represents which scoring method to call.
@@ -197,7 +206,8 @@ class Score(object):
     def multiplicative_log(self):
         """
         This method uses a Multiplicative Log scoring scheme.
-        The selected Psm score from all the peptides per protein are multiplied together and we take -Log(X) of the multiplied Peptide scores
+        The selected Psm score from all the peptides per protein are multiplied together and we take -Log(X)
+        of the multiplied Peptide scores
 
         Examples:
             >>> score = py_protein_inference.scoring.Score(data=data)
@@ -305,7 +315,8 @@ class Score(object):
     def down_weighted_v2(self):
         """
         This method uses a Downweighted Multiplicative Log scoring scheme.
-        Each peptide is iteratively downweighted by raising the peptide QValue or PepValue to the following power (1/(1+index_number)).
+        Each peptide is iteratively downweighted by raising the peptide QValue or PepValue to the
+        following power (1/(1+index_number)).
         Where index_number is the peptide number per protein...
         Each score for a protein provides less and less weight iteratively
 
@@ -341,7 +352,8 @@ class Score(object):
     def iterative_down_weighted_log(self):
         """
         This method uses a Downweighted Multiplicative Log scoring scheme.
-        Each peptide is iteratively downweighted by multiplying the peptide QValue or PepValue to the following  (1+index_number).
+        Each peptide is iteratively downweighted by multiplying the peptide QValue or PepValue to
+        the following  (1+index_number).
         Where index_number is the peptide number per protein...
         Each score for a protein provides less and less weight iteratively
 
@@ -357,7 +369,6 @@ class Score(object):
         for protein in self.pre_score_data:
             val_list = protein.get_psm_scores()
 
-            mean = numpy.mean(val_list)
             # Here take each score and multiply it by its index number).
             # This downweights each successive score by reducing its weight in a decreasing fashion
             # Basically, each score for a protein will provide less and less weight iteratively
@@ -415,7 +426,8 @@ class Score(object):
 
     def iterative_down_weighted_v2(self):
         """
-        The following method is an experimental method essentially used for future development of potential scoring schemes
+        The following method is an experimental method essentially used for future development of potential scoring
+        schemes
         """
 
         all_scores = []

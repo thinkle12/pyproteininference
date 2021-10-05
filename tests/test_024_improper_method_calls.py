@@ -1,19 +1,12 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec  5 16:16:17 2017
-
-@author: hinklet
-"""
-import csv
+import os
 import tempfile
 from unittest import TestCase
+
 from pkg_resources import resource_filename
 
 import py_protein_inference
 from py_protein_inference import in_silico_digest
 from py_protein_inference.parameters import ProteinInferenceParameter
-import os
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
@@ -26,14 +19,14 @@ OUTPUT_DIR = tempfile.gettempdir()
 class TestImproperMethodCalls(TestCase):
     def test_incorrect_method_calls(self):
 
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
         protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE)
 
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
@@ -44,9 +37,9 @@ class TestImproperMethodCalls(TestCase):
         )
         digest.digest_fasta_database()
 
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
         pep_and_prot_data = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
@@ -55,7 +48,8 @@ class TestImproperMethodCalls(TestCase):
             append_alt_from_db=False,
         )
 
-        # Validate that we will get a ValueError if we try to load the DataStore object WITHOUT running read_psms from Reader class
+        # Validate that we will get a ValueError if we try to load the DataStore object
+        # WITHOUT running read_psms from Reader class
         with self.assertRaises(ValueError):
             data = py_protein_inference.datastore.DataStore(pep_and_prot_data, digest=digest)
 

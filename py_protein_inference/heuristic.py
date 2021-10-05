@@ -1,12 +1,14 @@
+import copy
+import logging
 import os
 import sys
-import copy
-import numpy
-import logging
-import py_protein_inference
-from py_protein_inference.pipeline import ProteinInferencePipeline
-from py_protein_inference.inference import Inference
+
 import matplotlib.pyplot as plt
+import numpy
+
+import py_protein_inference
+from py_protein_inference.inference import Inference
+from py_protein_inference.pipeline import ProteinInferencePipeline
 
 logger = logging.getLogger(__name__)
 
@@ -35,15 +37,21 @@ class HeuristicPipeline(ProteinInferencePipeline):
         combined_directory (str): Path to Directory containing Combined Psm Files
         output_directory (str): Path to Directory where output will be written
         output_filename (str): Path to Filename where output will be written. Will override output_directory
-        id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
-        append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
-        roc_plot_filepath (str): Filepath to be written to by Heuristic Plotting method. This is optional and a default filename will be created in output_directory if this is left as None
-        fdr_max (float): The Maximum FDR to display on the ROC Plot generated to compare inference methods
+        id_splitting (bool): True/False on whether to split protein IDs in the digest.
+            Leave as False unless you know what you are doing
+        append_alt_from_db (bool): True/False on whether to append
+            alternative proteins from the DB digestion in Reader class
+        roc_plot_filepath (str): Filepath to be written to by Heuristic Plotting method.
+            This is optional and a default filename will be created in output_directory if this is left as None
+        fdr_max (float): The Maximum FDR to display on the ROC Plot generated
+            to compare inference methods
         inference_method_list: (list) List of inference methods used in heuristic determination
-        datastore_dict: (dict) Dictionary of :py:class:`py_protein_inference.datastore.DataStore` objects generated in hueristic determination with the inference method as the key of each entry
+        datastore_dict: (dict) Dictionary of :py:class:`py_protein_inference.datastore.DataStore`
+            objects generated in hueristic determination with the inference method as the key of each entry
         selected_method: (str) String representation of the selected inference method based on the heuristic
         heuristic: (float) Heuristic Value as determined from the data
-        selected_datastore: (:py:class:`py_protein_inference.datastore.DataStore`) The DataStore object as selected by the heuristic
+        selected_datastore: (:py:class:`py_protein_inference.datastore.DataStore`)
+            The DataStore object as selected by the heuristic
 
     """
 
@@ -78,11 +86,16 @@ class HeuristicPipeline(ProteinInferencePipeline):
             decoy_directory (str): Path to Directory containing Decoy Psm Files
             combined_directory (str): Path to Directory containing Combined Psm Files
             output_directory (str): Path to Directory where output will be written
-            output_filename (str): Path to Filename where output will be written. Will override output_directory
-            id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
-            append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
-            roc_plot_filepath (str): Filepath to be written to by Heuristic Plotting method. This is optional and a default filename will be created in output_directory if this is left as None
-            fdr_max (float): The Maximum FDR to display on the ROC Plot generated to compare inference methods
+            output_filename (str): Path to Filename where output will be written.
+                Will override output_directory
+            id_splitting (bool): True/False on whether to split protein IDs in the digest.
+                Leave as False unless you know what you are doing
+            append_alt_from_db (bool): True/False on whether to append alternative proteins
+                from the DB digestion in Reader class
+            roc_plot_filepath (str): Filepath to be written to by Heuristic Plotting method.
+                This is optional and a default filename will be created in output_directory if this is left as None
+            fdr_max (float): The Maximum FDR to display on the ROC Plot generated to compare
+                inference methods
 
         Returns:
             object:
@@ -194,7 +207,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
             digest.digest_fasta_database()
         else:
             logger.warning(
-                "No Database File provided, Skipping database digest and only taking protein-peptide mapping from the input files."
+                "No Database File provided, Skipping database digest and only taking protein-peptide mapping from the "
+                "input files."
             )
 
         for inference_method in self.inference_method_list:
@@ -300,8 +314,10 @@ class HeuristicPipeline(ProteinInferencePipeline):
         logger.info("Final Heuristic Scores")
         logger.info(pared_diff_dict)
 
-        # Remove Inclusion and Exclusion if they are poor. IE if their heuristic scores are above an empirical threshold value
-        # .2 was determined as a proper threshold in testing different databases (Uniprot, Swissprot, Swissprot no isoforms)
+        # Remove Inclusion and Exclusion if they are poor. IE if their heuristic scores are above an
+        # empirical threshold value
+        # .2 was determined as a proper threshold in testing different databases
+        # (Uniprot, Swissprot, Swissprot no isoforms)
         if Inference.EXCLUSION in pared_diff_dict.keys():
             if pared_diff_dict[Inference.EXCLUSION] <= empirical_threshold:
                 logger.info(
@@ -332,8 +348,9 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         remaining_inference_methods = list(pared_diff_dict.keys())
 
-        ## At this point we have 3, 2 or 1 inference types remaining... So lets do branching if statement for all possible combinations
-        ## Each combination will have different rules based on empirical knowledgee
+        # At this point we have 3, 2 or 1 inference types remaining... So lets do branching if statement for
+        # all possible combinations
+        # Each combination will have different rules based on empirical knowledgee
         if len(remaining_inference_methods) == 3:
             if set([Inference.PARSIMONY, Inference.EXCLUSION, Inference.INCLUSION]) == set(remaining_inference_methods):
                 # If inclusion is over double parsimony remove it
@@ -359,7 +376,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     del number_passing_proteins[Inference.EXCLUSION]
 
                 if len(pared_diff_dict.keys()) == 3:
-                    # if neither are removed select Exclusion. Since all methods are close to parsimony take exclusion because it wouldnt have removed too many hits
+                    # if neither are removed select Exclusion. Since all methods are close to parsimony take exclusion
+                    # because it wouldnt have removed too many hits
                     selected_method = Inference.EXCLUSION
                     logger.info(
                         "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
@@ -389,7 +407,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     ):
                         logger.info(
                             "Removing {} with score {}".format(
-                                Inference.INCLUSION, pared_diff_dict[Inference.INCLUSION]
+                                Inference.INCLUSION,
+                                pared_diff_dict[Inference.INCLUSION],
                             )
                         )
                         del pared_diff_dict[Inference.INCLUSION]
@@ -426,14 +445,16 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     ):
                         logger.info(
                             "Removing {} with score {}".format(
-                                Inference.EXCLUSION, pared_diff_dict[Inference.EXCLUSION]
+                                Inference.EXCLUSION,
+                                pared_diff_dict[Inference.EXCLUSION],
                             )
                         )
                         del pared_diff_dict[Inference.EXCLUSION]
                         del number_passing_proteins[Inference.EXCLUSION]
 
                 if len(pared_diff_dict.keys()) == 3:
-                    # if Exclusion is not removed select Exclusion. Since it is close to parsimony and peptide-centric take exclusion because it wouldnt have removed too many hits
+                    # if Exclusion is not removed select Exclusion. Since it is close to parsimony and peptide-centric
+                    # take exclusion because it wouldnt have removed too many hits
                     selected_method = Inference.EXCLUSION
                     logger.info(
                         "Inference {} Selected with score {}".format(selected_method, pared_diff_dict[selected_method])
@@ -466,7 +487,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     del number_passing_proteins[Inference.EXCLUSION]
 
                 if len(pared_diff_dict.keys()) == 3:
-                    # if neither are removed select Exclusion. Since both are close to peptide-centric take exclusion because it wouldnt have removed too many hits
+                    # if neither are removed select Exclusion. Since both are close to peptide-centric take exclusion
+                    # because it wouldnt have removed too many hits
                     selected_method = Inference.EXCLUSION
                     # If we have one remaining just return it
                     logger.info(
@@ -506,7 +528,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     )
                     return selected_method
 
-                # check to see if parsimony and peptide centric are close... If half of peptide centric is greater than parsimony pick parsimony
+                # check to see if parsimony and peptide centric are close... If half of peptide centric is greater
+                # than parsimony pick parsimony
                 if (
                     number_passing_proteins[Inference.PEPTIDE_CENTRIC] / self.RATIO_CONSTANT
                     > number_passing_proteins[Inference.PARSIMONY]
@@ -544,7 +567,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
                     )
                     return selected_method
 
-                # check to see if parsimony and exclusion are close... If half of parsimony is greater than exclusion pick parsimony
+                # check to see if parsimony and exclusion are close... If half of parsimony is greater than exclusion
+                # pick parsimony
                 # This means that exclusion is removing a lot of peptides
                 if (
                     number_passing_proteins[Inference.PARSIMONY] / self.RATIO_CONSTANT
@@ -593,7 +617,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             if inference_method == self.selected_method:
                 best_value = min(fdrs, key=lambda x: abs(x - target_fdr))
                 best_index = fdrs.index(best_value)
-                best_target_hit_value = target_hits[best_index]
+                best_target_hit_value = target_hits[best_index]  # noqa F841
 
         plt.axvline(target_fdr, color="black", linestyle='--', alpha=0.75, label="Target FDR")
         plt.legend()

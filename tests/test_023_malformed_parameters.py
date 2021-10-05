@@ -1,17 +1,11 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec  5 16:16:17 2017
-
-@author: hinklet
-"""
+import os
 import tempfile
 from unittest import TestCase
+
+import yaml
 from pkg_resources import resource_filename
 
 from py_protein_inference.parameters import ProteinInferenceParameter
-import yaml
-import os
 
 PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
@@ -22,11 +16,10 @@ NEW_PARAMETER_FILE = os.path.join(OUTPUT_DIR, "malformed_protein_inference_param
 class TestMalformedParameters(TestCase):
     def test_malformed_parameters(self):
 
-        # TODO maybe add a shape catcher... need certain headers and subheaders in params....
-
         # Read params...
         # Make sure everything is as it should be...
         protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE)
+        self.assertIsInstance(protein_inference_parameters, ProteinInferenceParameter)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -38,11 +31,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -54,11 +47,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -70,11 +63,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -86,11 +79,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -102,11 +95,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -118,11 +111,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -134,11 +127,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -150,11 +143,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -166,11 +159,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -182,11 +175,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -198,11 +191,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -214,11 +207,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -230,11 +223,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -246,11 +239,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -262,11 +255,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -278,11 +271,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -294,11 +287,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
     def test_empty_parameters(self):
         protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=None)
@@ -338,11 +331,12 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -354,11 +348,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -370,11 +364,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -386,11 +380,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -402,11 +396,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -418,11 +412,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -434,11 +428,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -450,11 +444,11 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
 
         # Read params with pyyaml
         with open(PARAMETER_FILE, "r") as stream:
@@ -466,8 +460,8 @@ class TestMalformedParameters(TestCase):
 
         # Rewrite the params...
         with open(NEW_PARAMETER_FILE, 'w') as file:
-            new_params = yaml.dump(edited_yaml_params, file)
+            yaml.dump(edited_yaml_params, file)
 
         # Re-read the params with ProteinInferenceParameter...
         with self.assertRaises(ValueError):
-            protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)
+            ProteinInferenceParameter(yaml_param_filepath=NEW_PARAMETER_FILE)

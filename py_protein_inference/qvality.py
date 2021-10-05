@@ -1,10 +1,9 @@
-import sys
-import csv
-import uuid
-import tempfile
+import logging
 import os
 import subprocess
-import logging
+import sys
+import tempfile
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +59,11 @@ class CalculateQandPepValues(Qvality):
             for d in decoys:
                 f.write(d + "\n")
         p = subprocess.Popen(
-            "qvality {} {} -o {}".forat(self.target_score_file, self.decoy_score_file, self.qvality_output_filename),
+            "qvality {} {} -o {}".forat(
+                self.target_score_file,
+                self.decoy_score_file,
+                self.qvality_output_filename,
+            ),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=True,

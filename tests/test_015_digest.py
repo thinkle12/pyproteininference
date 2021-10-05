@@ -1,8 +1,8 @@
 from unittest import TestCase
+
 from pkg_resources import resource_filename
 
 import py_protein_inference
-
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
@@ -11,16 +11,16 @@ PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_p
 class TestDigest(TestCase):
     def test_standard_digest(self):
 
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
         protein_inference_parameters = py_protein_inference.parameters.ProteinInferenceParameter(
             yaml_param_filepath=PARAMETER_FILE
         )
 
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
         digest = py_protein_inference.in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,

@@ -1,14 +1,4 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec  5 16:16:17 2017
-
-@author: hinklet
-"""
-import csv
-import tempfile
 from unittest import TestCase
-from pkg_resources import resource_filename
 
 from py_protein_inference.physical import Psm
 

@@ -1,17 +1,10 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec  5 16:16:17 2017
-
-@author: hinklet
-"""
-import csv
+import os
 import tempfile
 from unittest import TestCase
+
 from pkg_resources import resource_filename
 
 import py_protein_inference
-import os
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")

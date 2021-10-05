@@ -1,11 +1,11 @@
 import os
+import shutil
 import tempfile
 from unittest import TestCase
+
 from pkg_resources import resource_filename
 
 import py_protein_inference
-import shutil
-
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
@@ -112,7 +112,7 @@ class TestPipelineValidation(TestCase):
 
         # Test Proper error reporting
         with self.assertRaises(ValueError):
-            pipeline5 = py_protein_inference.pipeline.ProteinInferencePipeline(
+            py_protein_inference.pipeline.ProteinInferencePipeline(
                 parameter_file=PARAMETER_FILE,
                 database_file=TEST_DATABASE,
                 target_files=TARGET_FILE,
@@ -126,7 +126,7 @@ class TestPipelineValidation(TestCase):
             )
 
         with self.assertRaises(ValueError):
-            pipeline6 = py_protein_inference.pipeline.ProteinInferencePipeline(
+            py_protein_inference.pipeline.ProteinInferencePipeline(
                 parameter_file=PARAMETER_FILE,
                 database_file=TEST_DATABASE,
                 target_files=None,
@@ -140,7 +140,7 @@ class TestPipelineValidation(TestCase):
             )
 
         with self.assertRaises(ValueError):
-            pipeline7 = py_protein_inference.pipeline.ProteinInferencePipeline(
+            py_protein_inference.pipeline.ProteinInferencePipeline(
                 parameter_file=PARAMETER_FILE,
                 database_file=TEST_DATABASE,
                 target_files=TARGET_FILE,

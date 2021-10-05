@@ -1,20 +1,10 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec  5 16:16:17 2017
-
-@author: hinklet
-"""
-import csv
-import tempfile
 from unittest import TestCase
+
 from pkg_resources import resource_filename
 
 import py_protein_inference
 from py_protein_inference import in_silico_digest
 from py_protein_inference.parameters import ProteinInferenceParameter
-import os
-
 
 TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
 TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
@@ -42,14 +32,14 @@ PARAMETER_FILE_MULTIPLICATIVE = resource_filename(
 class TestReader(TestCase):
     def test_generic_and_percolator_readers(self):
 
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
         protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE)
 
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
@@ -60,11 +50,9 @@ class TestReader(TestCase):
         )
         digest.digest_fasta_database()
 
-        # TODO dont test digest... test this in a separate test
-
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
         pep_and_prot_data = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
@@ -130,14 +118,14 @@ class TestReader(TestCase):
 
     def test_generic_functionality(self):
 
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
         protein_inference_parameters_add = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE_ADDITIVE)
 
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters_add.digest_type,
@@ -148,11 +136,9 @@ class TestReader(TestCase):
         )
         digest.digest_fasta_database()
 
-        # TODO dont test digest... test this in a separate test
-
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
         pep_and_prot_data_add = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE_ADDITIVE,
             decoy_file=DECOY_FILE_ADDITIVE,
@@ -163,14 +149,14 @@ class TestReader(TestCase):
 
         self.assertEqual(len(pep_and_prot_data_add.psms), 27)
 
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
         protein_inference_parameters_mult = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE_MULTIPLICATIVE)
 
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters_mult.digest_type,
@@ -181,11 +167,9 @@ class TestReader(TestCase):
         )
         digest.digest_fasta_database()
 
-        # TODO dont test digest... test this in a separate test
-
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
         pep_and_prot_data_mult = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE_MULTIPLICATIVE,
             decoy_file=DECOY_FILE_MULTIPLICATIVE,

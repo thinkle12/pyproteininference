@@ -1,11 +1,5 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec  5 16:16:17 2017
-
-@author: hinklet
-"""
 from unittest import TestCase
+
 from pkg_resources import resource_filename
 
 import py_protein_inference
@@ -27,14 +21,14 @@ PEPTIDES_INDEX = 6
 class TestAltProteinDbRecovery(TestCase):
     def test_alt_protein_db_recovery(self):
 
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
         protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE)
 
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
         digest = in_silico_digest.InSilicoDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
@@ -45,9 +39,9 @@ class TestAltProteinDbRecovery(TestCase):
         )
         digest.digest_fasta_database()
 
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
         pep_and_prot_data_no_append = py_protein_inference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,

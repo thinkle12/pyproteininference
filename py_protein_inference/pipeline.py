@@ -1,7 +1,8 @@
+import argparse
+import logging
 import os
 import sys
-import logging
-import argparse
+
 import py_protein_inference
 from py_protein_inference.inference import Inference
 
@@ -31,8 +32,10 @@ class ProteinInferencePipeline(object):
         combined_directory (str): Path to Directory containing Combined Psm Files
         output_directory (str): Path to Directory where output will be written
         output_filename (str): Path to Filename where output will be written. Will override output_directory
-        id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
-        append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
+        id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you
+            know what you are doing
+        append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in
+            Reader class
         data (py_protein_inference.datastore.DataStore): Data Class
         digest (py_protein_inference.in_silico_digest.Digest): Digest Class
 
@@ -66,8 +69,10 @@ class ProteinInferencePipeline(object):
             combined_directory (str): Path to Directory containing Combined Psm Files
             output_filename (str): Path to Filename where output will be written. Will override output_directory
             output_directory (str): Path to Directory where output will be written
-            id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you know what you are doing
-            append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in Reader class
+            id_splitting (bool): True/False on whether to split protein IDs in the digest. Leave as False unless you
+                know what you are doing
+            append_alt_from_db (bool): True/False on whether to append alternative proteins from the DB digestion in
+                Reader class
 
         Returns:
             object:
@@ -115,7 +120,8 @@ class ProteinInferencePipeline(object):
         This method calls other classes and methods that make up the protein inference pipeline
         This includes but is not limited to:
 
-        This method sets the data :py:class:`py_protein_inference.datastore.DataStore` and digest :py:class:`py_protein_inference.in_silico_digest.Digest` objects.
+        This method sets the data :py:class:`py_protein_inference.datastore.DataStore` and digest
+            :py:class:`py_protein_inference.in_silico_digest.Digest` objects.
 
         1. Parameter file management
         2. Digesting Fasta Database (Optional)
@@ -146,16 +152,16 @@ class ProteinInferencePipeline(object):
             >>> pipeline.execute()
 
         """
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
-        ### STEP 1: Load parameter file ###
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
+        # STEP 1: Load parameter file #
         py_protein_inference_parameters = py_protein_inference.parameters.ProteinInferenceParameter(
             yaml_param_filepath=self.parameter_file
         )
 
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
-        ### STEP 2: Start with running an In Silico Digestion ###
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
+        # STEP 2: Start with running an In Silico Digestion #
         digest = py_protein_inference.in_silico_digest.InSilicoDigest(
             database_path=self.database_file,
             digest_type=py_protein_inference_parameters.digest_type,
@@ -169,12 +175,13 @@ class ProteinInferencePipeline(object):
             digest.digest_fasta_database()
         else:
             logger.warning(
-                "No Database File provided, Skipping database digest and only taking protein-peptide mapping from the input files."
+                "No Database File provided, Skipping database digest and only taking protein-peptide mapping from the "
+                "input files."
             )
 
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
-        ### STEP 3: Read PSM Data ###
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
+        # STEP 3: Read PSM Data #
         reader = py_protein_inference.reader.GenericReader(
             target_file=self.target_files,
             decoy_file=self.decoy_files,
@@ -185,55 +192,55 @@ class ProteinInferencePipeline(object):
         )
         reader.read_psms()
 
-        ### STEP 4: Initiate the datastore object ###
-        ### STEP 4: Initiate the datastore object ###
-        ### STEP 4: Initiate the datastore object ###
+        # STEP 4: Initiate the datastore object #
+        # STEP 4: Initiate the datastore object #
+        # STEP 4: Initiate the datastore object #
         data = py_protein_inference.datastore.DataStore(reader=reader, digest=digest)
 
-        ### Step 5: Restrict the PSM data
-        ### Step 5: Restrict the PSM data
-        ### Step 5: Restrict the PSM data
+        # Step 5: Restrict the PSM data
+        # Step 5: Restrict the PSM data
+        # Step 5: Restrict the PSM data
         data.restrict_psm_data()
 
-        ### Step 6: Generate protein scoring input
-        ### Step 6: Generate protein scoring input
-        ### Step 6: Generate protein scoring input
+        # Step 6: Generate protein scoring input
+        # Step 6: Generate protein scoring input
+        # Step 6: Generate protein scoring input
         data.create_scoring_input()
 
-        ### Step 7: Remove non unique peptides if running exclusion
-        ### Step 7: Remove non unique peptides if running exclusion
-        ### Step 7: Remove non unique peptides if running exclusion
+        # Step 7: Remove non unique peptides if running exclusion
+        # Step 7: Remove non unique peptides if running exclusion
+        # Step 7: Remove non unique peptides if running exclusion
         if py_protein_inference_parameters.inference_type == Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 
-        ### STEP 8: Score our PSMs given a score method
-        ### STEP 8: Score our PSMs given a score method
-        ### STEP 8: Score our PSMs given a score method
+        # STEP 8: Score our PSMs given a score method
+        # STEP 8: Score our PSMs given a score method
+        # STEP 8: Score our PSMs given a score method
         score = py_protein_inference.scoring.Score(data=data)
         score.score_psms(score_method=py_protein_inference_parameters.protein_score)
 
-        ### STEP 9: Run protein picker on the data
-        ### STEP 9: Run protein picker on the data
-        ### STEP 9: Run protein picker on the data
+        # STEP 9: Run protein picker on the data
+        # STEP 9: Run protein picker on the data
+        # STEP 9: Run protein picker on the data
         if py_protein_inference_parameters.picker:
             data.protein_picker()
         else:
             pass
 
-        ### STEP 10: Apply Inference
-        ### STEP 10: Apply Inference
-        ### STEP 10: Apply Inference
+        # STEP 10: Apply Inference
+        # STEP 10: Apply Inference
+        # STEP 10: Apply Inference
         py_protein_inference.inference.Inference.run_inference(data=data, digest=digest)
 
-        ### STEP 11: Q value Calculations
-        ### STEP 11: Q value Calculations
-        ### STEP 11: Q value Calculations
+        # STEP 11: Q value Calculations
+        # STEP 11: Q value Calculations
+        # STEP 11: Q value Calculations
         data.calculate_q_values()
 
-        ### STEP 12: Export to CSV
-        ### STEP 12: Export to CSV
-        ### STEP 12: Export to CSV
+        # STEP 12: Export to CSV
+        # STEP 12: Export to CSV
+        # STEP 12: Export to CSV
         export = py_protein_inference.export.Export(data=data)
         export.export_to_csv(
             output_filename=self.output_filename,
@@ -254,7 +261,8 @@ class ProteinInferencePipeline(object):
 
         1. either one or multiple target_files and decoy_files,
         2. either one or multiple combined_files that include target and decoy data
-        3. a directory that contains target files (target_directory) as well as a directory that contains decoy files (decoy_directory)
+        3. a directory that contains target files (target_directory) as well as a directory that contains decoy files
+            (decoy_directory)
         4. a directory that contains combined target/decoy files (combined_directory)
 
         Raises:
@@ -303,14 +311,16 @@ class ProteinInferencePipeline(object):
                 "To run Protein inference please supply either: "
                 "(1) either one or multiple target_files and decoy_files, "
                 "(2) either one or multiple combined_files that include target and decoy data"
-                "(3) a directory that contains target files (target_directory) as well as a directory that contains decoy files (decoy_directory)"
+                "(3) a directory that contains target files (target_directory) as well as a directory that "
+                "contains decoy files (decoy_directory)"
                 "(4) a directory that contains combined target/decoy files (combined_directory)"
             )
 
     def _transform_directory_to_files(self):
         """
         This internal method takes files that are in the target_directory, decoy_directory, or combined_directory and
-        reassigns these files to the target_files, decoy_files, and combined_files to be used in :py:class:`py_protein_inference.reader.Reader` object
+        reassigns these files to the target_files, decoy_files, and combined_files to be used in
+         :py:class:`py_protein_inference.reader.Reader` object
         """
         if self.target_directory and self.decoy_directory:
             logger.info("Transforming target_directory and decoy_directory into files")

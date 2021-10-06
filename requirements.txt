@@ -1,6 +1,5 @@
 numpy
 pyteomics
-biopython
 pulp
 PyYAML
 matplotlib

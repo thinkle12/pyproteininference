@@ -9,7 +9,7 @@ PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_p
 
 
 class TestDigest(TestCase):
-    def test_standard_digest(self):
+    def test_pyteomics_digest(self):
 
         # STEP 1: Load parameter file #
         # STEP 1: Load parameter file #
@@ -21,12 +21,12 @@ class TestDigest(TestCase):
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
-        digest = py_protein_inference.in_silico_digest.InSilicoDigest(
+        digest = py_protein_inference.in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,
             reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
-            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
+            max_peptide_length=None,
             id_splitting=True,
         )
         digest.digest_fasta_database()
@@ -332,15 +332,15 @@ class TestDigest(TestCase):
             },
         )
 
-        self.assertEqual(len(digest.peptide_to_protein_dictionary), 5075)
+        self.assertEqual(len(digest.peptide_to_protein_dictionary), 5079)
 
         protein_inference_parameters.missed_cleavages = 2
-        digest2 = py_protein_inference.in_silico_digest.InSilicoDigest(
+        digest2 = py_protein_inference.in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,
             reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
-            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
+            max_peptide_length=None,
             id_splitting=True,
         )
         digest2.digest_fasta_database()
@@ -577,15 +577,15 @@ class TestDigest(TestCase):
                 "GLNQDCCVVYRLIK",
             },
         )
-        self.assertEqual(len(digest2.peptide_to_protein_dictionary), 3707)
+        self.assertEqual(len(digest2.peptide_to_protein_dictionary), 3710)
 
         protein_inference_parameters.missed_cleavages = 1
-        digest3 = py_protein_inference.in_silico_digest.InSilicoDigest(
+        digest3 = py_protein_inference.in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,
             reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
-            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
+            max_peptide_length=None,
             id_splitting=True,
         )
         digest3.digest_fasta_database()
@@ -753,15 +753,15 @@ class TestDigest(TestCase):
                 "GLNQDCCVVYRLIK",
             },
         )
-        self.assertEqual(len(digest3.peptide_to_protein_dictionary), 2334)
+        self.assertEqual(len(digest3.peptide_to_protein_dictionary), 2336)
 
         protein_inference_parameters.missed_cleavages = 0
-        digest4 = py_protein_inference.in_silico_digest.InSilicoDigest(
+        digest4 = py_protein_inference.in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,
             reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
-            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
+            max_peptide_length=None,
             id_splitting=True,
         )
         digest4.digest_fasta_database()
@@ -859,4 +859,4 @@ class TestDigest(TestCase):
                 "R",
             },
         )
-        self.assertEqual(len(digest4.peptide_to_protein_dictionary), 1018)
+        self.assertEqual(len(digest4.peptide_to_protein_dictionary), 1019)

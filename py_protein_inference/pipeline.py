@@ -162,7 +162,7 @@ class ProteinInferencePipeline(object):
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
-        digest = py_protein_inference.in_silico_digest.InSilicoDigest(
+        digest = py_protein_inference.in_silico_digest.PyteomicsDigest(
             database_path=self.database_file,
             digest_type=py_protein_inference_parameters.digest_type,
             missed_cleavages=py_protein_inference_parameters.missed_cleavages,

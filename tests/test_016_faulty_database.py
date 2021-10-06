@@ -58,7 +58,7 @@ class TestFaultyDatabasePipeline(TestCase):
         protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE)
 
         # Perform digest on each database
-        digest_normal = in_silico_digest.InSilicoDigest(
+        digest_normal = in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE_ORIGINAL,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,
@@ -68,7 +68,7 @@ class TestFaultyDatabasePipeline(TestCase):
         )
         digest_normal.digest_fasta_database()
 
-        digest_missing_pep = in_silico_digest.InSilicoDigest(
+        digest_missing_pep = in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE_MISSING_PEP,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,
@@ -78,7 +78,7 @@ class TestFaultyDatabasePipeline(TestCase):
         )
         digest_missing_pep.digest_fasta_database()
 
-        digest_missing_prot = in_silico_digest.InSilicoDigest(
+        digest_missing_prot = in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE_MISSING_PROT,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,

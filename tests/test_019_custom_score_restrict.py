@@ -35,7 +35,7 @@ class TestCustomRestrict(TestCase):
         protein_inference_parameters.restrict_q = 0.1
         protein_inference_parameters.restrict_custom = 0.0009
 
-        digest = in_silico_digest.InSilicoDigest(
+        digest = in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,
@@ -75,7 +75,7 @@ class TestCustomRestrict(TestCase):
         protein_inference_parameters.restrict_q = 0.1
         protein_inference_parameters.restrict_custom = 6
 
-        digest = in_silico_digest.InSilicoDigest(
+        digest = in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,

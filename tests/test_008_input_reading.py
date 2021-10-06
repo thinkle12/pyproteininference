@@ -40,7 +40,7 @@ class TestReader(TestCase):
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
-        digest = in_silico_digest.InSilicoDigest(
+        digest = in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,
@@ -126,7 +126,7 @@ class TestReader(TestCase):
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
-        digest = in_silico_digest.InSilicoDigest(
+        digest = in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters_add.digest_type,
             missed_cleavages=protein_inference_parameters_add.missed_cleavages,
@@ -157,7 +157,7 @@ class TestReader(TestCase):
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
-        digest = in_silico_digest.InSilicoDigest(
+        digest = in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters_mult.digest_type,
             missed_cleavages=protein_inference_parameters_mult.missed_cleavages,

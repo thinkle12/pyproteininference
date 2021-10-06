@@ -67,7 +67,7 @@ class TestMultiplicativeWorkflow(TestCase):
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
-        digest = in_silico_digest.InSilicoDigest(
+        digest = in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,

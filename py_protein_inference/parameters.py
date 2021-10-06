@@ -4,7 +4,7 @@ import sys
 import yaml
 
 from py_protein_inference.export import Export
-from py_protein_inference.in_silico_digest import InSilicoDigest
+from py_protein_inference.in_silico_digest import PyteomicsDigest
 from py_protein_inference.inference import Inference
 from py_protein_inference.scoring import Score
 
@@ -342,12 +342,12 @@ class ProteinInferenceParameter(object):
         Internal ProteinInferenceParameter method to validate the digest type
         """
         # Make sure we have a valid digest type
-        if self.digest_type in InSilicoDigest.LIST_OF_DIGEST_TYPES:
+        if self.digest_type in PyteomicsDigest.LIST_OF_DIGEST_TYPES:
             logger.info("Using digest type '{}'".format(self.digest_type))
         else:
             raise ValueError(
                 "Digest Type '{}' not supported, please use one of the following enyzme digestions: '{}'".format(
-                    self.digest_type, ", ".join(InSilicoDigest.LIST_OF_DIGEST_TYPES)
+                    self.digest_type, ", ".join(PyteomicsDigest.LIST_OF_DIGEST_TYPES)
                 )
             )
 

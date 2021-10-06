@@ -2,7 +2,6 @@ import logging
 import re
 import sys
 
-from Bio import SeqIO
 from pyteomics import fasta, parser
 
 logger = logging.getLogger(__name__)

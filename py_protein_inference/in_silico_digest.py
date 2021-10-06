@@ -73,6 +73,7 @@ class Digest(object):
     def __init__(self):
         pass
 
+
 class PyteomicsDigest(Digest):
     """
     This class represents a pyteomics implementation of an in silico digest

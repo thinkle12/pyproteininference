@@ -2,7 +2,7 @@
 # Py Protein Inference
 ## Requirements
 
-Current version: 0.7.5
+Current version: 0.7.6
 
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__
  2. __Python Packages__:
@@ -103,7 +103,7 @@ For a sample parameter file please see the `parameters/` or `tests/data/` folder
 ## Digest:
 | Parameter | Description |Type|
 |---|---|---|
-| digest_type | The enzyme used for digestion for the MS searches. Can be either __trypsin__ or __lysc__. Other digest types can be implemented upon request | String |
+| digest_type | The enzyme used for digestion for the MS searches. IE 'trypsin'. Can be any expasy rule as defined here: https://pyteomics.readthedocs.io/en/latest/_modules/pyteomics/parser.html | String |
 | missed_cleavages | The number of missed cleavages allowed for the MS searches. IE __2__ | Int |
 
 ## Parsimony:
@@ -303,19 +303,19 @@ Py Protein Inference can also be ran via a docker container. To access the docke
 2. Ability to pull the docker image from docker hub
 
 Pulling the image from docker hub:
-`docker pull pyproteininference:0.7.5`
+`docker pull pyproteininference:0.7.6`
 
-It is recommended to pull the image with the highest version number. Currently this is 0.7.5.
+It is recommended to pull the image with the highest version number. Currently this is 0.7.6.
 
 Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
 Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
 See the example below:
-`docker run -v /path/to/data/:/data pyproteininference:0.7.5 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+`docker run -v /path/to/data/:/data pyproteininference:0.7.6 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
 
 #### Building the Docker image from source
 Use the following command from the root directory of the source code:
-Here we use version `0.7.5` and tag as that version as well.
-`docker build . -f Dockerfile -t pyproteininference:0.7.5 --build-arg VERSION=0.7.5`
+Here we use version `0.7.6` and tag as that version as well.
+`docker build . -f Dockerfile -t pyproteininference:0.7.6 --build-arg VERSION=0.7.6`
 
 ### Running Heuristic
 Py Protein Inference also has a built in Heuristic that runs through four inference methods (Inclusion, Exclusion, Parsimony, and Peptide Centric) and selects a recommended method for your given dataset. 

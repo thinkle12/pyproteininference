@@ -2,8 +2,6 @@ import collections
 import logging
 import sys
 
-from Bio import SeqIO
-
 from py_protein_inference.inference import Inference
 from py_protein_inference.physical import Protein, Psm
 from py_protein_inference.scoring import Score
@@ -1115,97 +1113,6 @@ class DataStore(object):
         )
 
         logger.info("Finished Q value Calculation")
-
-    def entrapment_fdr(self, true_database, false_discovery_rate=0.05):
-        """
-        Calculates Entrapment FDR on the lead protein in the groups.
-        Input is a DataStore object, an entrapment database, and a false discovery rate
-
-        Example:
-             >>> data = py_protein_inference.datastore.DataStore(reader = reader, digest=digest)
-            >>> # Data must be scored first
-            >>> data.entrapment_fdr(true_database = "example_entrap.fasta",false_discovery_rate=0.1)
-
-        FDR values are calculated As (entrapped proteins)/total
-
-        This method is useful for calculating an entrapment FDR IF using a benchmark dataset with KNOWN protein content.
-        Entrapment DB would be target proteins known to NOT be in the sample. However, these entrapped proteins
-        should be in the main database that
-        the search was searched against via comet/mascot
-        """
-
-        true_handle = SeqIO.parse(true_database, "fasta")
-        true_proteins = []
-        for records in true_handle:
-            if not records.id.startsiwith(
-                self.decoy_symbol
-            ):  # TODO this should not be an in... should be a startswith and use params
-                true_proteins.append(records.id)
-
-        protein_data = [x[0].identifier for x in self.grouped_scored_proteins]
-        false_true_positives = []
-        decoys = []
-        for i in range(len(protein_data)):
-            # Get a list of false true positives from the protein data... basically if its not a decoy and if its not
-            # in true_proteins
-            if not protein_data[i].startswith(self.decoy_symbol) and protein_data[i] not in true_proteins:
-                false_true_positives.append(protein_data[i])
-            if protein_data[i].startswith(self.decoy_symbol):
-                decoys.append(protein_data[i])
-
-        entrapment_proteins_set = list(false_true_positives)
-        entrapment_proteins_set = set(entrapment_proteins_set)
-
-        # pick out the lead scoring protein for each group... lead score is at 0 position
-        lead_score = [x[0] for x in self.grouped_scored_proteins]
-        # Now pick out only the lead protein identifiers
-        lead_proteins = [x.identifier for x in lead_score]
-
-        # Reverse the list (best to worst) -> (worst to best)
-        lead_proteins.reverse()
-
-        fdr_list = []
-        for i in range(len(lead_proteins)):
-            binary_entrap_target_list = [1 if elem in entrapment_proteins_set else 0 for elem in lead_proteins]
-            total = len(lead_proteins)
-            entraped = sum(binary_entrap_target_list)
-            # Calculate FDR at every step starting with the entire list...
-            # Delete first entry (worst score) every time we go through a cycle
-            fdr = (entraped) / (float(total))
-            fdr_list.append(fdr)
-            if fdr < false_discovery_rate:
-                break
-            else:
-                # Here we delete the worst score every time... thus making our list smaller and smaller
-                del lead_proteins[0]
-
-        lead_proteins.reverse()
-
-        fdr_restricted_set = [self.grouped_scored_proteins[x] for x in range(len(lead_proteins))]
-
-        onehitwonders = []
-        for groups in fdr_restricted_set:
-            if int(groups[0].num_peptides) == 1:
-                onehitwonders.append(groups[0])
-
-        logger.info(
-            "Protein Group leads that pass with more than 1 PSM with a {}  Entrapment FDR =  {}".format(
-                false_discovery_rate, str(len(fdr_restricted_set) - len(onehitwonders))
-            )
-        )
-        logger.info(
-            "Protein Group lead One hit Wonders that pass {} Entrapment FDR = {}".format(
-                false_discovery_rate, len(onehitwonders)
-            )
-        )
-
-        logger.info(
-            "Number of Protein groups that pass a {} Entrapment FDR: {}".format(
-                str(false_discovery_rate * 100), len(fdr_restricted_set)
-            )
-        )
-
-        return fdr_restricted_set
 
     def validate_psm_data(self):
         """

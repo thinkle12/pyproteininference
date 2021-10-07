@@ -1,7 +1,0 @@
-# Include the data files
-include data/*.txt
-include data/*.fasta
-include glpkinout/*.mod
-include glpkinout/*.sol
-include output/*.csv
-include plots/*.pdf

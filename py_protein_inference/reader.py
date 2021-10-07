@@ -382,7 +382,7 @@ class PercolatorReader(Reader):
                     )  # This peptide needs to be scrubbed of Mods...
                 except KeyError:
                     current_alt_proteins = []
-                    logger.warning(
+                    logger.debug(
                         "Peptide {} was not found in the supplied DB with the following proteins {}".format(
                             current_peptide,
                             ";".join(combined_psm_result_rows.possible_proteins),
@@ -391,7 +391,7 @@ class PercolatorReader(Reader):
                     for poss_prot in combined_psm_result_rows.possible_proteins:
                         self.digest.peptide_to_protein_dictionary.setdefault(current_peptide, set()).add(poss_prot)
                         self.digest.protein_to_peptide_dictionary.setdefault(poss_prot, set()).add(current_peptide)
-                        logger.info(
+                        logger.debug(
                             "Adding Peptide {} and Protein {} to Digest dictionaries".format(current_peptide, poss_prot)
                         )
 
@@ -540,7 +540,7 @@ class ProteologicPostSearchReader(Reader):
                     )  # This peptide needs to be scrubbed of Mods...
                 except KeyError:
                     current_alt_proteins = []
-                    logger.warning(
+                    logger.debug(
                         "Peptide {} was not found in the supplied DB with the following proteins {}".format(
                             current_peptide, ";".join(p.possible_proteins)
                         )
@@ -548,7 +548,7 @@ class ProteologicPostSearchReader(Reader):
                     for poss_prot in p.possible_proteins:
                         self.digest.peptide_to_protein_dictionary.setdefault(current_peptide, set()).add(poss_prot)
                         self.digest.protein_to_peptide_dictionary.setdefault(poss_prot, set()).add(current_peptide)
-                        logger.info(
+                        logger.debug(
                             "Adding Peptide {} and Protein {} to Digest dictionaries".format(current_peptide, poss_prot)
                         )
 
@@ -899,7 +899,7 @@ class GenericReader(Reader):
                     )  # This peptide needs to be scrubbed of Mods...
                 except KeyError:
                     current_alt_proteins = []
-                    logger.warning(
+                    logger.debug(
                         "Peptide {} was not found in the supplied DB for Proteins {}".format(
                             current_peptide, ";".join(psm.possible_proteins)
                         )
@@ -907,7 +907,7 @@ class GenericReader(Reader):
                     for poss_prot in psm.possible_proteins:
                         self.digest.peptide_to_protein_dictionary.setdefault(current_peptide, set()).add(poss_prot)
                         self.digest.protein_to_peptide_dictionary.setdefault(poss_prot, set()).add(current_peptide)
-                        logger.info(
+                        logger.debug(
                             "Adding Peptide {} and Protein {} to Digest dictionaries".format(current_peptide, poss_prot)
                         )
 

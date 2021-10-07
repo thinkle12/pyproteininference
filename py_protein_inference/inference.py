@@ -175,7 +175,7 @@ class Inference(object):
             protein_list = []
             group_id = group_id + 1
             pg = ProteinGroup(group_id)
-            logger.info("Created Protein Group with ID: {}".format(str(group_id)))
+            logger.debug("Created Protein Group with ID: {}".format(str(group_id)))
             for protein in protein_group:
                 cur_protein = protein
                 # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
@@ -291,7 +291,7 @@ class Inclusion(Inference):
             protein_list = []
             group_id = group_id + 1
             pg = ProteinGroup(group_id)
-            logger.info("Created Protein Group with ID: {}".format(str(group_id)))
+            logger.debug("Created Protein Group with ID: {}".format(str(group_id)))
             for prot in protein_group:
                 cur_protein = prot
                 # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
@@ -601,7 +601,7 @@ class Parsimony(Inference):
             group_id = group_id + 1
             # Make a protein group
             pg = ProteinGroup(group_id)
-            logger.info("Created Protein Group with ID: {}".format(str(group_id)))
+            logger.debug("Created Protein Group with ID: {}".format(str(group_id)))
             for prots in protein_group:
                 # Loop over all proteins in the original group
                 try:
@@ -741,7 +741,6 @@ class Parsimony(Inference):
                             # with the best reviewed identifier in grouped_protein_objects
                             swiss_prot_override_index = grouped_protein_objects[-1].index(best_swiss_prot_prot)
                             cur_tr_lead = grouped_protein_objects[-1][0]
-                            logger.info(cur_tr_lead.identifier)
                             # Re-assigning the value within the index will also reassign the value in protein_list...
                             # This is because grouped_protein_objects[-1] equals protein_list
                             # So we do not have to reassign values in protein_list
@@ -753,7 +752,11 @@ class Parsimony(Inference):
                                 grouped_protein_objects[-1][0],
                             )
                             new_sp_lead = grouped_protein_objects[-1][0]
-                            logger.info(new_sp_lead.identifier)
+                            logger.info(
+                                "Overriding Unreviewed {} with Reviewed {}".format(
+                                    cur_tr_lead.identifier, new_sp_lead.identifier
+                                )
+                            )
 
                             # Append new_sp_lead protein to leads, to make sure we dont repeat leads
                             leads.add(new_sp_lead.identifier)
@@ -1178,12 +1181,12 @@ class Parsimony(Inference):
             )
             output = p.communicate()
 
-            logger.info("Start Command line Stdout")
-            logger.info(output[0])
-            logger.info("End Command line Stdout")
-            logger.info("Start Command line Stderr")
-            logger.info(output[1])
-            logger.info("End Command line Stderr")
+            logger.debug("Start Command line Stdout")
+            logger.debug(output[0])
+            logger.debug("End Command line Stdout")
+            logger.debug("Start Command line Stderr")
+            logger.debug(output[1])
+            logger.debug("End Command line Stderr")
 
             if output[0] == "":
                 raise ValueError("Glpk did not produce any output... See potential error output above")
@@ -1791,7 +1794,7 @@ class PeptideCentric(Inference):
             protein_list = []
             group_id = group_id + 1
             pg = ProteinGroup(group_id)
-            logger.info("Created Protein Group with ID: {}".format(str(group_id)))
+            logger.debug("Created Protein Group with ID: {}".format(str(group_id)))
             # The following loop assigns group_id's, reviewed/unreviewed status, and number of unique peptides...
             if group_id not in protein_group.group_identification:
                 protein_group.group_identification.add(group_id)

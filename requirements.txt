@@ -1,5 +1,5 @@
-numpy
-pyteomics
-pulp
-PyYAML
-matplotlib
+numpy>=1.19.2
+pyteomics>=3.5.1
+pulp>=2.4
+PyYAML>=5.4.1
+matplotlib>=3.3.4

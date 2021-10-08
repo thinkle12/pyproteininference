@@ -328,19 +328,11 @@ class PercolatorReader(Reader):
             reverse=False,
         )
 
-        # TODO
-        # TRY TO GET PERC_ALL AS A GENERATOR
-        # Can do this... just give the option to feed a combined file... and loop over all the files...
-        # Hmm... problem is it still needs to be sorted by perc score....
-
         list_of_psm_objects = []
         peptide_tracker = set()
         all_sp_proteins = set(self.digest.swiss_prot_protein_set)
         # We only want to get unique peptides... using all messes up scoring...
         # Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
-
-        # TODO
-        # make this for loop a generator...
 
         logger.info("Length of PSM Data: {}".format(len(perc_all)))
         for psm_info in perc_all:
@@ -506,7 +498,6 @@ class ProteologicPostSearchReader(Reader):
         # The data is sorted by percolator score... or at least it should be...
         # Or sorted by posterior error probability
 
-        # TODO, We may need to try the quant thing on ALL PSMs, not just unique Peptides...
         for peps in list_of_psms:
             current_peptide = peps.peptide.sequence
             # Define the Psm...
@@ -570,9 +561,6 @@ class ProteologicPostSearchReader(Reader):
 
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)
-
-            # TODO, Here we will Keep track of a large set of all PSMs..
-            # We will keep track of this new PSMid -> search_id.peptide_id
 
         self.psms = list_of_psm_objects
         logger.info("Finished reading in data from Proteologic...")
@@ -829,11 +817,6 @@ class GenericReader(Reader):
                     reverse=False,
                 )
 
-        # TODO
-        # TRY TO GET PERC_ALL AS A GENERATOR
-        # Can do this... just give the option to feed a combined file... and loop over all the files...
-        # Hmm... problem is it still needs to be sorted by perc score....
-
         list_of_psm_objects = []
         peptide_tracker = set()
         all_sp_proteins = set(self.digest.swiss_prot_protein_set)
@@ -842,8 +825,6 @@ class GenericReader(Reader):
 
         peptide_to_protein_dictionary = self.digest.peptide_to_protein_dictionary
 
-        # TODO
-        # make this for loop a generator...
         logger.info("Length of PSM Data: {}".format(len(all_psms)))
         for psm_info in all_psms:
             current_peptide = psm_info[self.PEPTIDE]

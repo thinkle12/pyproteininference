@@ -135,7 +135,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             if self.output_directory:
                 self.roc_plot_filepath = os.path.join(self.output_directory, "roc_plot.pdf")
             else:
-                os.path.join(os.getcwd(), "roc_plot.pdf")
+                self.roc_plot_filepath = os.path.join(os.getcwd(), "roc_plot.pdf")
         else:
             self.roc_plot_filepath = roc_plot_filepath
 

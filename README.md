@@ -2,7 +2,7 @@
 # Py Protein Inference
 ## Requirements
 
-Current version: 0.7.6
+Current version: 0.7.7
 
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__
  2. __Python Packages__:
@@ -180,68 +180,39 @@ If this does not work download `protein_inference_cli.py` from our repository an
 Command line options are as follows:
 ```
 cli$ python protein_inference_cli.py --help
-usage: protein_inference_cli.py [-h] [-t FILE [FILE ...]] [-d FILE [FILE ...]]
-                                [-f FILE [FILE ...]] [-o DIR] [-l FILE] [-a DIR]
-                                [-b DIR] [-c DIR] -db FILE -y FILE
+usage: protein_inference_cli.py [-h] [-t FILE [FILE ...]] [-d FILE [FILE ...]] [-f FILE [FILE ...]] [-o DIR] [-l FILE] [-a DIR] [-b DIR] [-c DIR] [-db FILE] [-y FILE] [-p] [-i]
 
 Protein Inference
 
 optional arguments:
   -h, --help            show this help message and exit
   -t FILE [FILE ...], --target FILE [FILE ...]
-                        Input target psm output from percolator. Can either
-                        input one file or a list of files
+                        Input target psm output from percolator. Can either input one file or a list of files.
   -d FILE [FILE ...], --decoy FILE [FILE ...]
-                        Input decoy psm output from percolator. Can either
-                        input one file or a list of files
+                        Input decoy psm output from percolator. Can either input one file or a list of files.
   -f FILE [FILE ...], --combined_files FILE [FILE ...]
-                        Input combined psm output from percolator. This should
-                        contain Target and Decoy PSMS. Can either input one
-                        file or a list of files
-  -o DIR, --output DIR  protein_inference Result Directory to write to - Name
-                        of file will be determined by parameters selected and
-                        parameter tag
+                        Input combined psm output from percolator. This should contain Target and Decoy PSMS. Can either input one file or a list of files.
+  -o DIR, --output DIR  Result Directory to write to - Name of file will be determined by parameters selected and parameter tag. If this option is not set, will write results to current working
+                        directory.
   -l FILE, --output_filename FILE
-					Filename to write results to. Can be left blank. 
-					If this flag is left blank the filename will be 
-					automatically generated. If set this flag will override -o
+                        Filename to write results to. Can be left blank. If this flag is left blank the filename will be automatically generated. If set this flag will override -o.
   -a DIR, --target_directory DIR
-                        Directory that contains either .txt or .tsv input
-                        target psm data. Make sure the directory ONLY contains
-                        result files
+                        Directory that contains either .txt or .tsv input target psm data. Make sure the directory ONLY contains result files.
   -b DIR, --decoy_directory DIR
-                        Directory that contains either .txt or .tsv input
-                        decoy psm data. Make sure the directory ONLY contains
-                        result files
+                        Directory that contains either .txt or .tsv input decoy psm data. Make sure the directory ONLY contains result files.
   -c DIR, --combined_directory DIR
-                        Directory that contains either .txt or .tsv input data
-                        with targets/decoys combined. Make sure the directory
-                        ONLY contains result files
+                        Directory that contains either .txt or .tsv input data with targets/decoys combined. Make sure the directory ONLY contains result files.
   -db FILE, --database FILE
-                        Provide the fasta formatted database used in the MS
-                        search
+                        Path to the fasta formatted database used in the MS search. This is optional. If not set, will use the proteins only in the input files.
   -y FILE, --yaml_params FILE
-                        Provide a Protein Inference Yaml Parameter File
-  -p [BOOL], --append_alt [BOOL]
-                        Set '--append_alt True' or '--append_alt False'.
-                        Whether or not to add alternative proteins to each PSM
-                        from the database digest. If False the peptide/protein
-                        mapping will be taken from the input files only. If
-                        this is left blank it will default to True.
-  -i [BOOL], --id_splitting [BOOL]
-                        Set '--id_splitting True' or '--id_splitting False'.
-                        This flag is by default False. So if it is left blank
-                        then the variable is set to False. This flag indicates
-                        whether or not to split the identifiers that are
-                        present in the fasta database. Only set this flag to
-                        True if you know what you are doing. Sometimes the
-                        fasta database protein IDs will be like:
-                        'sp|ARAF_HUMAN|P10398'. While protein IDs in the input
-                        files will be 'ARAF_HUMAN|P10398'. Setting This flag
-                        to True will split off the front 'sp|' from the
-                        database protein identifiers. This is typically not
-                        necessary. So leave this blank unless you know what
-                        you are doing.                     
+                        Path to a Protein Inference Yaml Parameter File. If this is not set, default parameters will be used.
+  -p, --skip_append_alt
+                        If set, will add alternative proteins to each PSM from the database digest. If not set the peptide/protein mapping will be taken from the input files only. If this is left
+                        blank it will default to True which means alternative proteins will be added from the database digest.
+  -i, --id_splitting    If set this flag will split protein identifiers. See below for more information.If not set, this flag will not split protein identifiers.This flag indicates whether or not to
+                        split the identifiers that are present in the fasta database. Only use this option if you know what you are doing. Sometimes the fasta database protein IDs will be like:
+                        'sp|ARAF_HUMAN|P10398'. While protein IDs in the input files will be 'ARAF_HUMAN|P10398'. Setting This flag will split off the front 'sp|' or 'tr|' from the database protein
+                        identifiers. This is typically not necessary. So leave this blank unless you know what you are doing.
 ```
 
 The following flags are `"necessary"`:
@@ -258,10 +229,10 @@ The following combinations of input are allowed and at least one combination is 
 3) `-f` Path to input combined target/decoy (`-f`) files. This can be one file file or multiple files separated by spaces (" ")
 4) `-c` Path to input combined target/decoy (`-a`) directory that contain combined target/decoy files. This is one directory each and all .txt and .tsv files will be read in as input
 
-Other flags
+Advanced usage flags
 
-1) `-p` This flag is a True/False on whether or not to append alternative proteins from the fasta database digestion. If this flag is left blank it defaults to True. If a database is not supplied this flag does nothing.
-2) `-i` True/False on whether or not to split the IDs in the fasta database file. Only use this flag if you know what you are doing. It typically should be left blank. See the help display above for more info.
+1) `-p` This flag is a True/False on whether or not to skip appending alternative proteins from the fasta database digestion. If this flag is left blank it will not skip appending alternative proteins. If a database is not supplied this flag does nothing. It is suggested to leave this flag blank unless you know what you are doing. Leaving this flag blank will append alternative proteins into the analysis from the fasta database.
+2) `-i` True/False on whether or not to split the IDs in the fasta database file. Only use this flag if you know what you are doing. It typically should be left blank. See the help display above for more info. If it is left blank it will not split IDs in the fasta database file.
 
 Any other combinations will result in an Error raised.
 Please do not attempt to load separate target and decoy files with combined files. Also, do not load from directory as well as file as this is not supported.
@@ -303,19 +274,19 @@ Py Protein Inference can also be ran via a docker container. To access the docke
 2. Ability to pull the docker image from docker hub
 
 Pulling the image from docker hub:
-`docker pull pyproteininference:0.7.6`
+`docker pull pyproteininference:0.7.7`
 
-It is recommended to pull the image with the highest version number. Currently this is 0.7.6.
+It is recommended to pull the image with the highest version number. Currently this is 0.7.7.
 
 Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
 Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
 See the example below:
-`docker run -v /path/to/data/:/data pyproteininference:0.7.6 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+`docker run -v /path/to/data/:/data pyproteininference:0.7.7 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
 
 #### Building the Docker image from source
 Use the following command from the root directory of the source code:
-Here we use version `0.7.6` and tag as that version as well.
-`docker build . -f Dockerfile -t pyproteininference:0.7.6 --build-arg VERSION=0.7.6`
+Here we use version `0.7.7` and tag as that version as well.
+`docker build . -f Dockerfile -t pyproteininference:0.7.7 --build-arg VERSION=0.7.7`
 
 ### Running Heuristic
 Py Protein Inference also has a built in Heuristic that runs through four inference methods (Inclusion, Exclusion, Parsimony, and Peptide Centric) and selects a recommended method for your given dataset. 
@@ -331,50 +302,45 @@ If this does not work download `protein_inference_heuristic_cli.py` from our rep
 Command line options are as follows:
 ```
 cli$ python protein_inference_heuristic_cli.py --help
-usage: protein_inference_heuristic_cli.py [-h] [-t FILE [FILE ...]] [-d FILE [FILE ...]] [-f FILE [FILE ...]] [-o DIR] [-l FILE] [-a DIR] [-b DIR] [-c DIR]
-                                          [-db FILE] -y FILE [-p [BOOL]] [-i [BOOL]] [-r FILE] [-m FLOAT]
+usage: protein_inference_heuristic_cli.py [-h] [-t FILE [FILE ...]] [-d FILE [FILE ...]] [-f FILE [FILE ...]] [-o DIR] [-l FILE] [-a DIR] [-b DIR] [-c DIR] [-db FILE] [-y FILE] [-p] [-i] [-r FILE]
+                                          [-m FLOAT]
 
 Protein Inference Heuristic
 
 optional arguments:
   -h, --help            show this help message and exit
   -t FILE [FILE ...], --target FILE [FILE ...]
-                        Input target psm output from percolator. Can either input one file or a list of files
+                        Input target psm output from percolator. Can either input one file or a list of files.
   -d FILE [FILE ...], --decoy FILE [FILE ...]
-                        Input decoy psm output from percolator. Can either input one file or a list of files
+                        Input decoy psm output from percolator. Can either input one file or a list of files.
   -f FILE [FILE ...], --combined_files FILE [FILE ...]
-                        Input combined psm output from percolator. This should contain Target and Decoy PSMS. Can either input one file or a list of
-                        files
-  -o DIR, --output DIR  Result Directory to write to - Name of file will be determined by parameters selected and parameter tag
+                        Input combined psm output from percolator. This should contain Target and Decoy PSMS. Can either input one file or a list of files.
+  -o DIR, --output DIR  Result Directory to write to - Name of file will be determined by parameters selected and parameter tag. If this option is not set, will write results to current working
+                        directory.
   -l FILE, --output_filename FILE
-                        Filename to write results to. Can be left blank. If this flag is left blank the filename will be automatically generated.
-                        If set this flag will override -o
+                        Filename to write results to. Can be left blank. If this flag is left blank the filename will be automatically generated. If set this flag will override -o.
   -a DIR, --target_directory DIR
-                        Directory that contains either .txt or .tsv input target psm data. Make sure the directory ONLY contains result files
+                        Directory that contains either .txt or .tsv input target psm data. Make sure the directory ONLY contains result files.
   -b DIR, --decoy_directory DIR
-                        Directory that contains either .txt or .tsv input decoy psm data. Make sure the directory ONLY contains result files
+                        Directory that contains either .txt or .tsv input decoy psm data. Make sure the directory ONLY contains. result files.
   -c DIR, --combined_directory DIR
-                        Directory that contains either .txt or .tsv input data with targets/decoys combined. Make sure the directory ONLY contains
-                        result files
+                        Directory that contains either .txt or .tsv input data with targets/decoys combined. Make sure the directory ONLY contains result files.
   -db FILE, --database FILE
-                        Provide the fasta formatted database used in the MS search
+                        Path to the fasta formatted database used in the MS search. This is optional. If not set, will use the proteins only in the input files.
   -y FILE, --yaml_params FILE
-                        Provide a Protein Inference Yaml Parameter File
-  -p [BOOL], --append_alt [BOOL]
-                        Set '--append_alt True' or '--append_alt False'. Whether or not to add alternative proteins to each PSM from the database
-                        digest. If False the peptide/protein mapping will be taken from the input files only. If this is left blank it will default
-                        to True.
-  -i [BOOL], --id_splitting [BOOL]
-                        Set '--id_splitting True' or '--id_splitting False'. This flag is by default False. So if it is left blank then the variable
-                        is set to False. This flag indicates whether or not to split the identifiers that are present in the fasta database. Only
-                        set this flag to True if you know what you are doing. Sometimes the fasta database protein IDs will be like:
-                        'sp|ARAF_HUMAN|P10398'. While protein IDs in the input files will be 'ARAF_HUMAN|P10398'. Setting This flag to True will
-                        split off the front 'sp|' from the database protein identifiers. This is typically not necessary. So leave this blank unless
-                        you know what you are doing.
+                        Path to a Protein Inference Yaml Parameter File. If this is not set, default parameters will be used.
+  -p, --skip_append_alt
+                        If set, will add alternative proteins to each PSM from the database digest. If not set the peptide/protein mapping will be taken from the input files only. If this is left
+                        blank it will default to True which means alternative proteins will be added from the database digest.
+  -i, --id_splitting    If set this flag will split protein identifiers. See below for more information.If not set, this flag will not split protein identifiers.This flag indicates whether or not to
+                        split the identifiers that are present in the fasta database. Only use this option if you know what you are doing. Sometimes the fasta database protein IDs will be like:
+                        'sp|ARAF_HUMAN|P10398'. While protein IDs in the input files will be 'ARAF_HUMAN|P10398'. Setting This flag will split off the front 'sp|' or 'tr|' from the database protein
+                        identifiers. This is typically not necessary. So leave this blank unless you know what you are doing.
   -r FILE, --roc_plot_filepath FILE
-                        PDF Filepath to write the ROC plot to after Heuristic Scoring
+                        PDF Filepath to write the ROC plot to after Heuristic Scoring. If not set, writes the file with filename roc_plot.pdf to directory set in -o. If -o is not set, will write the
+                        file to current working directory.
   -m FLOAT, --fdr_max FLOAT
-                        The maximum FDR to display in the ROC plot
+                        The maximum FDR to display in the ROC plot. Defaults to 0.1 if not set.
 ```
 
 Input options are the same as the standard protein_inference_cli.py with the addition of two optional inputs:

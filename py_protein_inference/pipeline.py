@@ -114,6 +114,8 @@ class ProteinInferencePipeline(object):
 
         self._log_append_alt_from_db()
 
+        self._log_id_splitting()
+
     def execute(self):
         """
         This method is the main driver of the data analysis for the protein inference package.
@@ -373,3 +375,9 @@ class ProteinInferencePipeline(object):
             logger.info("Append Alternative Proteins from Database set to True")
         else:
             logger.info("Append Alternative Proteins from Database set to False")
+
+    def _log_id_splitting(self):
+        if self.id_splitting:
+            logger.info("ID Splitting for Database Digestion set to True")
+        else:
+            logger.info("ID Splitting for Database Digestion set to False")

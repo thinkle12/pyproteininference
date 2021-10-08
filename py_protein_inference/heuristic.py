@@ -47,7 +47,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             to compare inference methods
         inference_method_list: (list) List of inference methods used in heuristic determination
         datastore_dict: (dict) Dictionary of :py:class:`py_protein_inference.datastore.DataStore`
-            objects generated in hueristic determination with the inference method as the key of each entry
+            objects generated in heuristic determination with the inference method as the key of each entry
         selected_method: (str) String representation of the selected inference method based on the heuristic
         heuristic: (float) Heuristic Value as determined from the data
         selected_datastore: (:py:class:`py_protein_inference.datastore.DataStore`)
@@ -132,7 +132,10 @@ class HeuristicPipeline(ProteinInferencePipeline):
         self.append_alt_from_db = append_alt_from_db
         self.fdr_max = fdr_max
         if not roc_plot_filepath:
-            self.roc_plot_filepath = os.path.join(self.output_directory, "roc_plot.pdf")
+            if self.output_directory:
+                self.roc_plot_filepath = os.path.join(self.output_directory, "roc_plot.pdf")
+            else:
+                os.path.join(os.getcwd(), "roc_plot.pdf")
         else:
             self.roc_plot_filepath = roc_plot_filepath
 

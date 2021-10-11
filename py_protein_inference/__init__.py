@@ -5,6 +5,5 @@ from py_protein_inference import inference  # noqa F401
 from py_protein_inference import parameters  # noqa F401
 from py_protein_inference import physical  # noqa F401
 from py_protein_inference import pipeline  # noqa F401
-from py_protein_inference import qvality  # noqa F401
 from py_protein_inference import reader  # noqa F401
 from py_protein_inference import scoring  # noqa F401

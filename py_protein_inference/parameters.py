@@ -639,6 +639,10 @@ class ProteinInferenceParameter(object):
             )
 
     def _validate_parameter_shape(self, yaml_params):
+        """
+        Internal ProteinInferenceParameter method to validate shape of the parameter file by checking to make sure
+         that all necessary main parameter fields are defined
+        """
         if self.PARENT_PARAMETER_KEY in yaml_params.keys():
             logger.info("Main Parameter Key is Present")
         else:

@@ -1193,10 +1193,6 @@ class DataStore(object):
         logger.info("Number of Decoy Proteins in Digest: {}".format(len(decoys)))
         logger.info("Ratio of Targets Proteins to Decoy Proteins: {}".format(ratio))
 
-    def _validate_score(self):
-        # Make sure the score is actually in our data file header... Not sure if we can do this...?
-        pass
-
     def _validate_decoys_from_data(self):
         """
         Method that checks to make sure that target and decoy proteins exist in the data files

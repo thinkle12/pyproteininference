@@ -1193,10 +1193,6 @@ class DataStore(object):
         logger.info("Number of Decoy Proteins in Digest: {}".format(len(decoys)))
         logger.info("Ratio of Targets Proteins to Decoy Proteins: {}".format(ratio))
 
-    def _validate_score(self):
-        # Make sure the score is actually in our data file header... Not sure if we can do this...?
-        pass
-
     def _validate_decoys_from_data(self):
         """
         Method that checks to make sure that target and decoy proteins exist in the data files
@@ -1323,6 +1319,18 @@ class DataStore(object):
         return status
 
     def get_protein_objects(self, fdr_restricted=False):
+        """
+        Method retrieves protein objects. Either retrieves FDR restricted list of protien objects,
+        or retrieves all objects
+
+        Args:
+            fdr_restricted (bool): True/False on whether to restrict the list of objects based on FDR
+
+        Returns:
+            list: List of scored :py:class:`py_protein_inference.physical.ProteinGroup`
+                objects that have been grouped and sorted.
+
+        """
         if fdr_restricted:
             protein_objects = [
                 x.proteins for x in self.protein_group_objects if x.q_value <= self.parameter_file_object.fdr
@@ -1333,6 +1341,9 @@ class DataStore(object):
         return protein_objects
 
     def _init_validate(self, reader):
+        """
+        Internal Method that checks to make sure the reader object is properly loaded and validated
+        """
         if reader.psms:
             self.main_data_form = reader.psms  # Unrestricted PSM data
             self.restricted_peptides = [x.non_flanking_peptide for x in self.main_data_form]
@@ -1344,6 +1355,9 @@ class DataStore(object):
             )
 
     def _validate_main_data_form(self):
+        """
+        Internal Method that checks to make sure the Main data has been defined to run DataStore methods
+        """
         if self.main_data_form:
             pass
         else:
@@ -1353,6 +1367,9 @@ class DataStore(object):
             )
 
     def _validate_main_data_restricted(self):
+        """
+        Internal Method that checks to make sure the Main data Restricted has been defined to run DataStore methods
+        """
         if self.main_data_restricted:
             pass
         else:
@@ -1362,6 +1379,9 @@ class DataStore(object):
             )
 
     def _validate_scored_proteins(self):
+        """
+        Internal Method that checks to make sure that proteins have been scored to run certain subsequent methods
+        """
         if self.picked_proteins_scored or self.scored_proteins:
             pass
         else:
@@ -1371,6 +1391,9 @@ class DataStore(object):
             )
 
     def _validate_scoring_input(self):
+        """
+        Internal Method that checks to make sure that Scoring Input has been created to be able to run scoring methods
+        """
         if self.scoring_input:
             pass
         else:
@@ -1380,6 +1403,9 @@ class DataStore(object):
             )
 
     def _validate_protein_group_objects(self):
+        """
+        Internal Method that checks to make sure inference has been run before proceeding
+        """
         if self.protein_group_objects and self.grouped_scored_proteins:
             pass
         else:
@@ -1389,7 +1415,17 @@ class DataStore(object):
             )
 
     def generate_fdr_vs_target_hits(self, fdr_max=0.2):
+        """
+        Method for calculating FDR vs number of Target Proteins
 
+        Args:
+            fdr_max (float): The maximum false discovery rate to calculate target hits for.
+                Will stop once fdr_max is reached
+
+        Returns:
+            list: List of lists of: (FDR, Number of Target Hits). Ordered by increasing number of Target Hits
+
+        """
         fdr_vs_count = []
         count_list = []
         for pg in self.protein_group_objects:

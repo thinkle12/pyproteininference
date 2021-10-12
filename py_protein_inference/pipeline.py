@@ -1,4 +1,3 @@
-import argparse
 import logging
 import os
 import sys
@@ -359,24 +358,19 @@ class ProteinInferencePipeline(object):
         else:
             pass
 
-    @classmethod
-    def str2bool(self, v):
-        if isinstance(v, bool):
-            return v
-        if v.lower() in ('yes', 'true', 't', 'y', '1'):
-            return True
-        elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-            return False
-        else:
-            raise argparse.ArgumentTypeError('Boolean value expected.')
-
     def _log_append_alt_from_db(self):
+        """
+        Internal method for logging whether the user sets alternative protein append to True or False
+        """
         if self.append_alt_from_db:
             logger.info("Append Alternative Proteins from Database set to True")
         else:
             logger.info("Append Alternative Proteins from Database set to False")
 
     def _log_id_splitting(self):
+        """
+        Internal method for logging whether the user sets ID splitting to True or False
+        """
         if self.id_splitting:
             logger.info("ID Splitting for Database Digestion set to True")
         else:

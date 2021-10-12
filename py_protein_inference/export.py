@@ -429,7 +429,7 @@ class Export(object):
             writer = csv.writer(f)
             writer.writerows(protein_export_list)
 
-    def csv_export_q_value_all_long(self, filename_out):
+    def csv_export_q_value_leads_long(self, filename_out):
         """
         Method that outputs all lead proteins with Q values.
 

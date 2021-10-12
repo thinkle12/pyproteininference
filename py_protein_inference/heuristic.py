@@ -276,6 +276,16 @@ class HeuristicPipeline(ProteinInferencePipeline):
             logger.info("skip_plot is set to True. Not creating ROC Plot.")
 
     def determine_optimal_inference_method(self, empirical_threshold=0.2):
+        """
+        This method determines the optimal inference method from Inclusion, Exclusion, Parsimony, Peptide-Centric
+
+        Args:
+            empirical_threshold (float): Threshold used for cutoffs for the heuristic algorithm
+
+        Returns:
+            str: String representation of the selected inference method
+
+        """
 
         # Get the number of passing proteins
         filtered_protein_objects = {
@@ -609,7 +619,18 @@ class HeuristicPipeline(ProteinInferencePipeline):
         if len(remaining_inference_methods) == 0:
             raise ValueError("Not able to determine optimal Inference Method for your dataset")
 
-    def generate_roc_plot(self, fdr_max=0.2, pdf_filename=None, target_fdr=None):
+    def generate_roc_plot(self, fdr_max=0.2, pdf_filename=None):
+        """
+        This method produces a PDF ROC plot overlaying the 4 inference methods apart of the heuristic algorithm
+
+        Args:
+            fdr_max (float): Max FDR to display on the plot
+            pdf_filename (str): Filename to write roc plot to
+
+        Returns:
+            None
+
+        """
         f = plt.figure()
         for inference_method in self.datastore_dict.keys():
             fdr_vs_target_hits = self.datastore_dict[inference_method].generate_fdr_vs_target_hits(fdr_max=fdr_max)

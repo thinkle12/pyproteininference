@@ -1058,7 +1058,7 @@ class DataStore(object):
         logger.info("Calculating FDRs")
         fdr_list = []
         for i in range(len(lead_proteins)):
-            binary_decoy_target_list = [1 if elem.startswith(self.decoy_symbol) else 0 for elem in lead_proteins]
+            binary_decoy_target_list = [1 if self.decoy_symbol in elem else 0 for elem in lead_proteins]
             total = len(lead_proteins)
             decoys = sum(binary_decoy_target_list)
             # Calculate FDR at every step starting with the entire list...
@@ -1429,7 +1429,7 @@ class DataStore(object):
         fdr_vs_count = []
         count_list = []
         for pg in self.protein_group_objects:
-            if not pg.proteins[0].identifier.startswith(self.decoy_symbol):
+            if self.decoy_symbol not in pg.proteins[0].identifier:
                 count_list.append(pg)
             fdr_vs_count.append([pg.q_value, len(count_list)])
 

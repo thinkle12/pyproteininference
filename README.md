@@ -2,7 +2,7 @@
 # Py Protein Inference
 ## Requirements
 
-Current version: 0.7.8
+Current version: 0.7.9
 
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__
  2. __Python Packages__:
@@ -11,10 +11,10 @@ Current version: 0.7.8
 
 ## Installation
 1. Use Pip:
-```pip install protein_inference```
+```pip install py_protein_inference```
 2. Cloning the Repository:
 ```git clone repo_url``` - Replace repo_url with the proper URL for the package.
-```cd repo``` - Replace repo with the name of the directory that protein inference was put into. Should be ```protein_inference```
+```cd repo``` - Replace repo with the name of the directory that protein inference was put into. Should be ```py_protein_inference```
 within the above directory type: ```python setup.py install```
 
 After either of these two steps above the package should be installed
@@ -58,7 +58,7 @@ For a sample parameter file please see the `parameters/` or `tests/data/` folder
 ## General:
 | Parameter | Description |Type|
 |---|---|---|
-| export | Export Type can be one of: __peptides__, __psms__, __psm_ids__, __q_value__, __q_value_all__, __q_value_comma_sep__, __leads__, __all__, __comma_sep__. Suggested types are __peptides__, __psms__, and __psm_ids__ as these produce square output. If there are mutliple proteins per group the three mentioned types will report the leads only. Other types report on the peptide level with slightly different formats and whether or not to include leads only or all proteins. See [here](#export-explanations) for an in-depth explanation of Export Types | String |
+| export | Export Type can be one of: __peptides__, __psms__, __psm_ids__, __long__, __q_value__, __q_value_all__, __q_value_comma_sep__, __leads__, __all__, __comma_sep__. Suggested types are __peptides__, __psms__, and __psm_ids__ as these produce square output. If there are mutliple proteins per group the three mentioned types will report the leads only. Other types report on the peptide level with slightly different formats and whether or not to include leads only or all proteins. See [here](#export-explanations) for an in-depth explanation of Export Types | String |
 | fdr | False Discovery Rate to be marked as significant. Ex. __0.01__ for 1% FDR | Numeric |
 | picker | __True__/__False__ on whether to run the Protein Picker algorithm. For more info click [here](#protein-picker) | Bool |
 | tag | A String tag that will be written into the result files. Ex. __example_tag__ | String |
@@ -274,19 +274,19 @@ Py Protein Inference can also be ran via a docker container. To access the docke
 2. Ability to pull the docker image from docker hub
 
 Pulling the image from docker hub:
-`docker pull pyproteininference:0.7.8`
+`docker pull pyproteininference:0.7.9`
 
-It is recommended to pull the image with the highest version number. Currently this is 0.7.8.
+It is recommended to pull the image with the highest version number. Currently this is 0.7.9.
 
 Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
 Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
 See the example below:
-`docker run -v /path/to/data/:/data pyproteininference:0.7.8 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+`docker run -v /path/to/data/:/data pyproteininference:0.7.9 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
 
 #### Building the Docker image from source
 Use the following command from the root directory of the source code:
-Here we use version `0.7.8` and tag as that version as well.
-`docker build . -f Dockerfile -t pyproteininference:0.7.8 --build-arg VERSION=0.7.8`
+Here we use version `0.7.9` and tag as that version as well.
+`docker build . -f Dockerfile -t pyproteininference:0.7.9 --build-arg VERSION=0.7.9`
 
 ### Running Heuristic
 Py Protein Inference also has a built in Heuristic that runs through four inference methods (Inclusion, Exclusion, Parsimony, and Peptide Centric) and selects a recommended method for your given dataset. 
@@ -521,6 +521,38 @@ The tables below represent what the output of each export type will look like. E
 | TCAF1_HUMAN\|Q9Y4C2     | 19.048939464610452 | 0.0                | 2                  | Reviewed        | 4       | 10 9                                | 
 | HNRPU_HUMAN\|Q00839     | 15.316094065486292 | 0.0                | 2                  | Reviewed        | 5       | 11 12                               | 
 | ##TCAF2_HUMAN\|##A6NFQ2 | 2.4079456086518722 | 0.3333333333333333 | 1                  | Reviewed        | 6       | 27                                  | 
+
+4 __long__: This is a standard export type that reports back Protein, Score, Qvalue, and PSM Identifiers in a long format. Each Peptide for each Protein is listed down the file This format is good for merging to exterior data to swap with the inference reference.
+
+| Protein                | Score              | Q_Value            | Number_of_Peptides | Identifier_Type | GroupID | Peptides                         |
+|------------------------|--------------------|--------------------|--------------------|-----------------|---------|----------------------------------|
+| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | CGVEVTQTK                        |
+| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | MGAEAIQALLK                      |
+| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | NTLLHEQWCDLLEENSVDAVK            |
+| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | RVDYSGR                          |
+| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | FATSDLNDLYR                      |
+| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | EGLNVLQY#FISTHGAR                |
+| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | LIPAGTGYAYHQDR                   |
+| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | VADLFEAR                         |
+| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | IPQESGGTK                        |
+| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | IALASPDMIR                       |
+| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | VTAEDVLKPGTADILVPR               |
+| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | VIDIWAAANDR                      |
+| RAF1_HUMAN|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | QTAQGMDYLHAK                     |
+| RAF1_HUMAN|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | VFLPNKQR                         |
+| RAF1_HUMAN|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | FQMFQLIDIAR                      |
+| RAF1_HUMAN|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | SASEPSLHR                        |
+| RAF1_HUMAN|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | CQTCGYKFHEHCSTK                  |
+| RAF1_HUMAN|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | WHGDVAVKILK                      |
+| ARAF_HUMAN|P10398      | 46.288402190472596 | 0.0                | 4                  | Reviewed        | 3       | QTAQGMDYLHAK                     |
+| ARAF_HUMAN|P10398      | 46.288402190472596 | 0.0                | 4                  | Reviewed        | 3       | GYLSPDLSK                        |
+| ARAF_HUMAN|P10398      | 46.288402190472596 | 0.0                | 4                  | Reviewed        | 3       | TFFSLAFCDFCLK                    |
+| ARAF_HUMAN|P10398      | 46.288402190472596 | 0.0                | 4                  | Reviewed        | 3       | SASEPSLHR                        |
+| TCAF1_HUMAN|Q9Y4C2     | 19.048939464610452 | 0.0                | 2                  | Reviewed        | 4       | YCWMSTGLYIPGR                    |
+| TCAF1_HUMAN|Q9Y4C2     | 19.048939464610452 | 0.0                | 2                  | Reviewed        | 4       | LYLLTQMPH                        |
+| HNRPU_HUMAN|Q00839     | 15.316094065486292 | 0.0                | 2                  | Reviewed        | 5       | LQAALDDEEAGGRPAMEPGNGSLDLGGDSAGR |
+| HNRPU_HUMAN|Q00839     | 15.316094065486292 | 0.0                | 2                  | Reviewed        | 5       | AEGGGGGGRPGAPAAGDGK              |
+| ##TCAF2_HUMAN|##A6NFQ2 | 2.4079456086518722 | 0.3333333333333333 | 1                  | Reviewed        | 6       | MEPTPVPFCGAK                     |
 
 
 #### Legacy Export Types:

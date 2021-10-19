@@ -378,3 +378,37 @@ class TestExportTypes(TestCase):
                 "Q96BA7_HUMAN|Q96BA7",
             ],
         )
+
+        export_type = "long"
+        export = py_protein_inference.export.Export(data=data)
+        export.export_to_csv(directory=OUTPUT_DIR, export_type=export_type)
+
+        output = []
+        with open(export.filepath, "r") as lead_output_file:
+            reader = csv.reader(lead_output_file, delimiter=",")
+            for row in reader:
+                output.append(row)
+
+        # Output should be one line for every peptide
+        self.assertListEqual(
+            output[1],
+            ['RPOC_SHIF8|Q0SY12', '82.89306334778564', '0.0', '12', 'Reviewed', '1', 'CGVEVTQTK'],
+        )
+
+        self.assertListEqual(
+            output[2],
+            ['RPOC_SHIF8|Q0SY12', '82.89306334778564', '0.0', '12', 'Reviewed', '1', 'EGLNVLQY#FISTHGAR'],
+        )
+
+        self.assertListEqual(
+            output[-1],
+            [
+                '##TCAF2_HUMAN|##A6NFQ2',
+                '2.4079456086518722',
+                '0.3333333333333333',
+                '1',
+                'Reviewed',
+                '6',
+                'MEPTPVPFCGAK',
+            ],
+        )

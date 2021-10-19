@@ -32,6 +32,7 @@ class Export(object):
     EXPORT_PEPTIDES = "peptides"
     EXPORT_PSMS = "psms"
     EXPORT_PSM_IDS = "psm_ids"
+    EXPORT_LONG = "long"
 
     EXPORT_TYPES = [
         EXPORT_LEADS,
@@ -43,6 +44,7 @@ class Export(object):
         EXPORT_PEPTIDES,
         EXPORT_PSMS,
         EXPORT_PSM_IDS,
+        EXPORT_LONG,
     ]
 
     def __init__(self, data):
@@ -157,6 +159,14 @@ class Export(object):
                 complete_filepath = output_filename
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads_psm_ids(complete_filepath)
+
+        if self.EXPORT_LONG == export_type:
+            filename = "{}_q_value_long_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
+            complete_filepath = os.path.join(directory, filename)
+            if output_filename:
+                complete_filepath = output_filename
+            logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
+            self.csv_export_q_value_leads_long(complete_filepath)
 
         self.filepath = complete_filepath
 
@@ -452,7 +462,7 @@ class Export(object):
         ]
         for groups in self.data.protein_group_objects:
             lead_protein = groups.proteins[0]
-            for peps in lead_protein.peptides:
+            for peps in sorted(lead_protein.peptides):
                 protein_export_list.append([lead_protein.identifier])
                 protein_export_list[-1].append(lead_protein.score)
                 protein_export_list[-1].append(groups.q_value)

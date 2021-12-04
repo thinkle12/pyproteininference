@@ -5,38 +5,38 @@ from unittest import TestCase
 
 from pkg_resources import resource_filename
 
-import py_protein_inference
-from py_protein_inference import in_silico_digest
-from py_protein_inference.parameters import ProteinInferenceParameter
+import pyproteininference
+from pyproteininference import in_silico_digest
+from pyproteininference.parameters import ProteinInferenceParameter
 
-TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
-TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
-DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy.txt")
-PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
+TEST_DATABASE = resource_filename("pyproteininference", "../tests/data/test_database.fasta")
+TARGET_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_target.txt")
+DECOY_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_decoy.txt")
+PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_inclusion.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
-# OUTPUT_DIR = resource_filename('py_protein_inference', '../tests/output/')
+# OUTPUT_DIR = resource_filename('pyproteininference', '../tests/output/')
 for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
     if not os.path.exists(os.path.join(OUTPUT_DIR, sub_dir)):
         os.makedirs(os.path.join(OUTPUT_DIR, sub_dir))
 
 LEAD_OUTPUT_FILE = resource_filename(
-    "py_protein_inference",
+    "pyproteininference",
     "../tests/output/leads/test_inclusion_q_value_leads_ml_posterior_error_prob.csv",
 )
 ALL_OUTPUT_FILE = resource_filename(
-    "py_protein_inference",
+    "pyproteininference",
     "../tests/output/all/test_inclusion_q_value_all_ml_posterior_error_prob.csv",
 )
 PEPTIDE_OUTPUT_FILE = resource_filename(
-    "py_protein_inference",
+    "pyproteininference",
     "../tests/output/peptides/test_inclusion_q_value_leads_peptides_ml_posterior_error_prob.csv",
 )
 PSM_OUTPUT_FILE = resource_filename(
-    "py_protein_inference",
+    "pyproteininference",
     "../tests/output/psms/test_inclusion_q_value_leads_psms_ml_posterior_error_prob.csv",
 )
 PSM_ID_OUTPUT_FILE = resource_filename(
-    "py_protein_inference",
+    "pyproteininference",
     "../tests/output/psm_ids/test_inclusion_q_value_leads_psm_ids_ml_posterior_error_prob.csv",
 )
 
@@ -92,7 +92,7 @@ class TestLoadInclusionWorkflow(TestCase):
         # STEP 3: Read PSM Data #
         # STEP 3: Read PSM Data #
         # STEP 3: Read PSM Data #
-        pep_and_prot_data = py_protein_inference.reader.GenericReader(
+        pep_and_prot_data = pyproteininference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
@@ -106,7 +106,7 @@ class TestLoadInclusionWorkflow(TestCase):
         # STEP 4: Initiate the datastore class #
         # STEP 4: Initiate the datastore class #
         # STEP 4: Initiate the datastore class #
-        data = py_protein_inference.datastore.DataStore(pep_and_prot_data, digest=digest)
+        data = pyproteininference.datastore.DataStore(pep_and_prot_data, digest=digest)
 
         # Step 5: Restrict the PSM data
         # Step 5: Restrict the PSM data
@@ -123,14 +123,14 @@ class TestLoadInclusionWorkflow(TestCase):
         # Step 7: Remove non unique peptides if running exclusion
         # Step 7: Remove non unique peptides if running exclusion
         # Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters.inference_type == py_protein_inference.inference.Inference.EXCLUSION:
+        if protein_inference_parameters.inference_type == pyproteininference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 
         # STEP 8: Score our PSMs given a score method
         # STEP 8: Score our PSMs given a score method
         # STEP 8: Score our PSMs given a score method
-        score = py_protein_inference.scoring.Score(data=data)
+        score = pyproteininference.scoring.Score(data=data)
         score.score_psms(score_method=protein_inference_parameters.protein_score)
 
         # STEP 9: Run protein picker on the data
@@ -147,16 +147,16 @@ class TestLoadInclusionWorkflow(TestCase):
         inference_type = protein_inference_parameters.inference_type
 
         # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == py_protein_inference.inference.Inference.PARSIMONY:
-            group = py_protein_inference.inference.Parsimony(data=data, digest=digest)
+        if inference_type == pyproteininference.inference.Inference.PARSIMONY:
+            group = pyproteininference.inference.Parsimony(data=data, digest=digest)
             group.infer_proteins()
 
-        if inference_type == py_protein_inference.inference.Inference.INCLUSION:
-            group = py_protein_inference.inference.Inclusion(data=data, digest=digest)
+        if inference_type == pyproteininference.inference.Inference.INCLUSION:
+            group = pyproteininference.inference.Inclusion(data=data, digest=digest)
             group.infer_proteins()
 
-        if inference_type == py_protein_inference.inference.Inference.EXCLUSION:
-            group = py_protein_inference.inference.Exclusion(data=data, digest=digest)
+        if inference_type == pyproteininference.inference.Inference.EXCLUSION:
+            group = pyproteininference.inference.Exclusion(data=data, digest=digest)
             group.infer_proteins()
 
         # STEP 11: Run FDR and Q value Calculations
@@ -168,7 +168,7 @@ class TestLoadInclusionWorkflow(TestCase):
         # STEP 12: Export to CSV
         # STEP 12: Export to CSV
         export_type = protein_inference_parameters.export
-        export = py_protein_inference.export.Export(data=data)
+        export = pyproteininference.export.Export(data=data)
         export.export_to_csv(directory=os.path.join(OUTPUT_DIR, "leads"), export_type=export_type)
 
         lead_output = []
@@ -337,7 +337,7 @@ class TestLoadInclusionWorkflow(TestCase):
                 set(psm_id_output[i][PEPTIDES_INDEX:]),
             )
 
-        pipeline = py_protein_inference.pipeline.ProteinInferencePipeline(
+        pipeline = pyproteininference.pipeline.ProteinInferencePipeline(
             parameter_file=PARAMETER_FILE,
             database_file=TEST_DATABASE,
             target_files=TARGET_FILE,

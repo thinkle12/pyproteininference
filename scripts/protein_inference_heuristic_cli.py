@@ -1,6 +1,6 @@
 import argparse
 
-import py_protein_inference
+import pyproteininference
 
 
 def main():
@@ -150,7 +150,7 @@ def main():
 
     args = parser.parse_args()
 
-    pipeline = py_protein_inference.heuristic.HeuristicPipeline(
+    pipeline = pyproteininference.heuristic.HeuristicPipeline(
         parameter_file=args.yaml_params,
         database_file=args.database,
         target_files=args.target,

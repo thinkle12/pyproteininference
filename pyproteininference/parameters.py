@@ -3,10 +3,10 @@ import sys
 
 import yaml
 
-from py_protein_inference.export import Export
-from py_protein_inference.in_silico_digest import PyteomicsDigest
-from py_protein_inference.inference import Inference
-from py_protein_inference.scoring import Score
+from pyproteininference.export import Export
+from pyproteininference.in_silico_digest import PyteomicsDigest
+from pyproteininference.inference import Inference
+from pyproteininference.scoring import Score
 
 logger = logging.getLogger(__name__)
 
@@ -25,45 +25,45 @@ class ProteinInferenceParameter(object):
     Attributes:
         yaml_param_filepath (str): path to properly formatted parameter file specific to Protein Inference
         digest_type (str): String that determines that type of in silico digestion for
-            :py:class:`py_protein_inference.in_silico_digest.Digest`. Typically "trypsin"
-        export (str): String to indicate the export type for :py:class:`py_protein_inference.export.Export`.
+            :py:class:`pyproteininference.in_silico_digest.Digest`. Typically "trypsin"
+        export (str): String to indicate the export type for :py:class:`pyproteininference.export.Export`.
             Typically this is "psms", "peptides", or "psm_ids"
         fdr (float): Float to indicate FDR filtering
         glpk_path (str): Path to local installation of glpsol if inference_type="parsimony" and lp_solver="glpk"
         missed_cleavages (int): Integer to determine the number of missed cleavages in the database digestion
-            :py:class:`py_protein_inference.in_silico_digest.Digest`
+            :py:class:`pyproteininference.in_silico_digest.Digest`
         picker (bool): True/False on whether or not to run the protein picker algorithm
-            :py:meth:py_protein_inference.datastore.DataStore.protein_picker`
+            :py:meth:pyproteininference.datastore.DataStore.protein_picker`
         restrict_pep (float/None): Float to restrict the posterior error probability values by in the PSM input.
-            Used in :py:meth:py_protein_inference.datastore.DataStore.restrict_psm_data`
+            Used in :py:meth:pyproteininference.datastore.DataStore.restrict_psm_data`
         restrict_peptide_length (int/None): Float to restrict the peptide length values by in the PSM input.
-            Used in :py:meth:py_protein_inference.datastore.DataStore.restrict_psm_data`
+            Used in :py:meth:pyproteininference.datastore.DataStore.restrict_psm_data`
         restrict_q (float/None): Float to restrict the q values by in the PSM input.
-            Used in :py:meth:py_protein_inference.datastore.DataStore.restrict_psm_data`
+            Used in :py:meth:pyproteininference.datastore.DataStore.restrict_psm_data`
         restrict_custom (float/None): Float to restrict the custom values by in the PSM input.
-            Used in :py:meth:py_protein_inference.datastore.DataStore.restrict_psm_data`.
+            Used in :py:meth:pyproteininference.datastore.DataStore.restrict_psm_data`.
             Filtering depends on score_type variable. If score_type is multiplicative then values that are less than
             restrict_custom are kept. If score_type is additive then values that are more than restrict_custom are kept.
         protein_score (str): String to determine the way in which Proteins are scored can be any of the SCORE_METHODS
-            in :py:class:`py_protein_inference.scoring.Score`
+            in :py:class:`pyproteininference.scoring.Score`
         psm_score_type (str): String to determine the type of score that the PSM scores are
-            (Additive or Multiplicative) can be any of the SCORE_TYPES in :py:class:`py_protein_inference.scoring.Score`
+            (Additive or Multiplicative) can be any of the SCORE_TYPES in :py:class:`pyproteininference.scoring.Score`
         decoy_symbol (str): String to denote decoy proteins from target proteins. IE "##"
         isoform_symbol (str): String to denote isoforms from regular proteins. IE "-". Can also be None
         reviewed_identifier_symbol (str): String to denote a "Reviewed" Protein. Typically this is: "sp|"
             if using Uniprot Fasta database
         inference_type (str): String to determine the inference procedure. Can be any value of INFERENCE_TYPES
-            of :py:class:`py_protein_inference.inference.Inference` object
+            of :py:class:`pyproteininference.inference.Inference` object
         tag (str): String to be added to output files
         psm_score (str): String that indicates the PSM input score. The value should match the string in the
             input data of the score you want to use for PSM score. This score will be used in scoring methods
-                here: :py:class:`py_protein_inference.scoring.Score`
+                here: :py:class:`pyproteininference.scoring.Score`
         grouping_type (str/None): String to determine the grouping procedure. Can be any value of
-            GROUPING_TYPES of :py:class:`py_protein_inference.inference.Inference` object
+            GROUPING_TYPES of :py:class:`pyproteininference.inference.Inference` object
         max_identifiers_peptide_centric (int): Maximum number of identifiers to assign to a group when
             running peptide_centric inference. Typically this is 10 or 5.
         lp_solver (str/None): The LP solver to use if inference_type="Parsimony".
-            Can be any value in LP_SOLVERS in the :py:class:`py_protein_inference.inference.Inference` object
+            Can be any value in LP_SOLVERS in the :py:class:`pyproteininference.inference.Inference` object
 
     """
 
@@ -168,8 +168,8 @@ class ProteinInferenceParameter(object):
             None
 
         Example:
-            >>> py_protein_inference.parameters.ProteinInferenceParameter(
-            >>>     yaml_param_filepath = "/path/to/py_protein_inference_params.yaml", validate=True
+            >>> pyproteininference.parameters.ProteinInferenceParameter(
+            >>>     yaml_param_filepath = "/path/to/pyproteininference_params.yaml", validate=True
             >>> )
 
 
@@ -776,7 +776,7 @@ class ProteinInferenceParameter(object):
         ProteinInferenceParameter method to override restrict_q if the input data does not contain q values.
 
         Args:
-            data (py_protein_inference.datastore.DataStore): Data Object
+            data (pyproteininference.datastore.DataStore): Data Object
 
         """
         data_has_q = data.input_has_q()
@@ -792,7 +792,7 @@ class ProteinInferenceParameter(object):
         ProteinInferenceParameter method to override restrict_pep if the input data does not contain pep values.
 
         Args:
-            data (py_protein_inference.datastore.DataStore): Data Object
+            data (pyproteininference.datastore.DataStore): Data Object
 
         """
         data_has_pep = data.input_has_pep()
@@ -811,7 +811,7 @@ class ProteinInferenceParameter(object):
         the input data does not contain custom score values.
 
         Args:
-            data (py_protein_inference.datastore.DataStore): Data Object
+            data (pyproteininference.datastore.DataStore): Data Object
 
         """
         data_has_custom = data.input_has_custom()
@@ -830,7 +830,7 @@ class ProteinInferenceParameter(object):
         parameter file if those scores do not exist in the input files
 
         Args:
-            data (py_protein_inference.datastore.DataStore): Data Object
+            data (pyproteininference.datastore.DataStore): Data Object
 
         """
 

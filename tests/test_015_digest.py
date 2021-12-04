@@ -2,10 +2,10 @@ from unittest import TestCase
 
 from pkg_resources import resource_filename
 
-import py_protein_inference
+import pyproteininference
 
-TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
-PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
+TEST_DATABASE = resource_filename("pyproteininference", "../tests/data/test_database.fasta")
+PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_inclusion.yaml")
 
 
 class TestDigest(TestCase):
@@ -14,14 +14,14 @@ class TestDigest(TestCase):
         # STEP 1: Load parameter file #
         # STEP 1: Load parameter file #
         # STEP 1: Load parameter file #
-        protein_inference_parameters = py_protein_inference.parameters.ProteinInferenceParameter(
+        protein_inference_parameters = pyproteininference.parameters.ProteinInferenceParameter(
             yaml_param_filepath=PARAMETER_FILE
         )
 
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
-        digest = py_protein_inference.in_silico_digest.PyteomicsDigest(
+        digest = pyproteininference.in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,
@@ -335,7 +335,7 @@ class TestDigest(TestCase):
         self.assertEqual(len(digest.peptide_to_protein_dictionary), 5079)
 
         protein_inference_parameters.missed_cleavages = 2
-        digest2 = py_protein_inference.in_silico_digest.PyteomicsDigest(
+        digest2 = pyproteininference.in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,
@@ -580,7 +580,7 @@ class TestDigest(TestCase):
         self.assertEqual(len(digest2.peptide_to_protein_dictionary), 3710)
 
         protein_inference_parameters.missed_cleavages = 1
-        digest3 = py_protein_inference.in_silico_digest.PyteomicsDigest(
+        digest3 = pyproteininference.in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,
@@ -756,7 +756,7 @@ class TestDigest(TestCase):
         self.assertEqual(len(digest3.peptide_to_protein_dictionary), 2336)
 
         protein_inference_parameters.missed_cleavages = 0
-        digest4 = py_protein_inference.in_silico_digest.PyteomicsDigest(
+        digest4 = pyproteininference.in_silico_digest.PyteomicsDigest(
             database_path=TEST_DATABASE,
             digest_type=protein_inference_parameters.digest_type,
             missed_cleavages=protein_inference_parameters.missed_cleavages,

@@ -7,8 +7,8 @@ from collections import OrderedDict
 
 import pulp
 
-from py_protein_inference import datastore
-from py_protein_inference.physical import ProteinGroup, Psm
+from pyproteininference import datastore
+from pyproteininference.physical import ProteinGroup, Psm
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +26,8 @@ class Inference(object):
     The base Inference class contains several methods that are shared across the Inference sub-classes.
 
     Attributes:
-        data (py_protein_inference.datastore.DataStore): Data Class
-        digest (py_protein_inference.in_silico_digest.Digest): Digest Class
+        data (pyproteininference.datastore.DataStore): Data Class
+        digest (pyproteininference.in_silico_digest.Digest): Digest Class
     """
 
     PARSIMONY = "parsimony"
@@ -68,8 +68,8 @@ class Inference(object):
         Initialization method of Inference object
 
         Args:
-            data (py_protein_inference.datastore.DataStore): Data Class
-            digest (py_protein_inference.in_silico_digest.Digest): Digest Class
+            data (pyproteininference.datastore.DataStore): Data Class
+            digest (pyproteininference.in_silico_digest.Digest): Digest Class
 
         """
         self.data = data
@@ -81,11 +81,11 @@ class Inference(object):
         """
         This class method dispatches to one of the five different inference classes/models
         based on input from the protein inference parameter object
-            :py:class:`py_protein_inference.parameters.ProteinInferenceParameter`.
+            :py:class:`pyproteininference.parameters.ProteinInferenceParameter`.
         The methods are "parsimony", "inclusion", "exclusion", "peptide_centric", and "first_protein"
 
         Example:
-            >>> py_protein_inference.inference.Inference.run_inference(data=data,digest=digest)
+            >>> pyproteininference.inference.Inference.run_inference(data=data,digest=digest)
 
         """
 
@@ -119,10 +119,10 @@ class Inference(object):
         This method sets up protein groups for inference methods that do not need grouping
 
         Args:
-            scored_proteins (list): List of scored :py:class:`py_protein_inference.physical.Protein` objects
+            scored_proteins (list): List of scored :py:class:`pyproteininference.physical.Protein` objects
 
         Returns:
-            list: List of lists of scored :py:class:`py_protein_inference.physical.Protein` objects
+            list: List of lists of scored :py:class:`pyproteininference.physical.Protein` objects
 
         """
         scored_proteins = sorted(
@@ -151,14 +151,14 @@ class Inference(object):
     def _apply_protein_group_ids(self, grouped_protein_objects):
         """
         This method creates the ProteinGroup objects from the output of
-            :py:meth:`py_protein_inference.inference.Inference_create_protein_groups`
+            :py:meth:`pyproteininference.inference.Inference_create_protein_groups`
 
         Args:
-            grouped_protein_objects (list): list of grouped :py:class:`py_protein_inference.physical.Protein` objects
+            grouped_protein_objects (list): list of grouped :py:class:`pyproteininference.physical.Protein` objects
 
         Returns:
-            dict: a Dictionary that contains a list of :py:class:`py_protein_inference.physical.ProteinGroup`
-                objects (key:"group_objects") and a list of grouped :py:class:`py_protein_inference.physical.Protein`
+            dict: a Dictionary that contains a list of :py:class:`pyproteininference.physical.ProteinGroup`
+                objects (key:"group_objects") and a list of grouped :py:class:`pyproteininference.physical.Protein`
                 objects (key:"grouped_protein_objects")
 
 
@@ -208,9 +208,9 @@ class Inclusion(Inference):
     Inclusion inference method
 
     Attributes:
-        data (py_protein_inference.datastore.DataStore): Data Object
-        digest (py_protein_inference.in_silico_digest.Digest): Digest Object
-        scored_data (list): a List of scored Protein objects :py:class:`py_protein_inference.physical.Protein`
+        data (pyproteininference.datastore.DataStore): Data Object
+        digest (pyproteininference.in_silico_digest.Digest): Digest Object
+        scored_data (list): a List of scored Protein objects :py:class:`pyproteininference.physical.Protein`
 
     """
 
@@ -219,8 +219,8 @@ class Inclusion(Inference):
         Initialization method of the Inclusion Inference method
 
         Args:
-            data (py_protein_inference.datastore.DataStore): Data Object
-            digest (py_protein_inference.in_silico_digest.Digest): Digest Object
+            data (pyproteininference.datastore.DataStore): Data Object
+            digest (pyproteininference.in_silico_digest.Digest): Digest Object
         """
 
         self.data = data
@@ -236,9 +236,9 @@ class Inclusion(Inference):
         and groups are not created
 
         This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`py_protein_inference.datastore.DataStore` and are
-        lists of :py:class:`py_protein_inference.physical.Protein` and
-        :py:class:`py_protein_inference.physical.ProteinGroup`
+        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
+        lists of :py:class:`pyproteininference.physical.Protein` and
+        :py:class:`pyproteininference.physical.ProteinGroup`
         """
 
         grouped_proteins = self._create_protein_groups(scored_proteins=self.scored_data)
@@ -268,14 +268,14 @@ class Inclusion(Inference):
     def _apply_protein_group_ids(self, grouped_protein_objects):
         """
         This method creates the ProteinGroup objects for the inclusion inference type using protein groups from
-        :py:meth:`py_protein_inference.inference.Inference_create_protein_groups`
+        :py:meth:`pyproteininference.inference.Inference_create_protein_groups`
 
         Args:
-            grouped_protein_objects (list): list of grouped :py:class:`py_protein_inference.physical.Protein` objects
+            grouped_protein_objects (list): list of grouped :py:class:`pyproteininference.physical.Protein` objects
 
         Returns:
-            dict: a Dictionary that contains a list of :py:class:`py_protein_inference.physical.ProteinGroup`
-                objects (key:"group_objects") and a list of grouped :py:class:`py_protein_inference.physical.Protein`
+            dict: a Dictionary that contains a list of :py:class:`pyproteininference.physical.ProteinGroup`
+                objects (key:"group_objects") and a list of grouped :py:class:`pyproteininference.physical.Protein`
                 objects (key:"grouped_protein_objects")
 
         """
@@ -324,9 +324,9 @@ class Exclusion(Inference):
     Exclusion inference method
 
     Attributes:
-        data (py_protein_inference.datastore.DataStore): Data Object
-        digest (py_protein_inference.in_silico_digest.Digest): Digest Object
-        scored_data (list): a List of scored Protein objects :py:class:`py_protein_inference.physical.Protein`
+        data (pyproteininference.datastore.DataStore): Data Object
+        digest (pyproteininference.in_silico_digest.Digest): Digest Object
+        scored_data (list): a List of scored Protein objects :py:class:`pyproteininference.physical.Protein`
 
     """
 
@@ -335,8 +335,8 @@ class Exclusion(Inference):
         Initialization method of the Exclusion Class
 
         Args:
-            data (py_protein_inference.datastore.DataStore): Data Object
-            digest (py_protein_inference.in_silico_digest.Digest): Digest Object
+            data (pyproteininference.datastore.DataStore): Data Object
+            digest (pyproteininference.in_silico_digest.Digest): Digest Object
 
         """
         self.data = data
@@ -353,9 +353,9 @@ class Exclusion(Inference):
         For the exclusion inference method groups cannot be created because all shared peptides are removed
 
         This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`py_protein_inference.datastore.DataStore` and are
-        lists of :py:class:`py_protein_inference.physical.Protein` and
-        :py:class:`py_protein_inference.physical.ProteinGroup`
+        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
+        lists of :py:class:`pyproteininference.physical.Protein` and
+        :py:class:`pyproteininference.physical.ProteinGroup`
 
         """
 
@@ -389,9 +389,9 @@ class Parsimony(Inference):
     Parsimony inference method
 
     Attributes:
-        data (py_protein_inference.datastore.DataStore): Data Object
-        digest (py_protein_inference.in_silico_digest.Digest): Digest Object
-        scored_data (list): a List of scored Protein objects :py:class:`py_protein_inference.physical.Protein`
+        data (pyproteininference.datastore.DataStore): Data Object
+        digest (pyproteininference.in_silico_digest.Digest): Digest Object
+        scored_data (list): a List of scored Protein objects :py:class:`pyproteininference.physical.Protein`
         lead_protein_set (set): Set of protein strings that are classified as leads from the LP solver
 
     """
@@ -401,8 +401,8 @@ class Parsimony(Inference):
         Initialization method of the Parsimony object
 
         Args:
-            data (py_protein_inference.datastore.DataStore): Data Object
-            digest (py_protein_inference.in_silico_digest.Digest): Digest Object
+            data (pyproteininference.datastore.DataStore): Data Object
+            digest (pyproteininference.in_silico_digest.Digest): Digest Object
         """
         self.data = data
         self.digest = digest
@@ -418,18 +418,18 @@ class Parsimony(Inference):
         grouping_type="shared_peptides",
     ):
         """
-        Internal method that creates a list of lists of :py:class:`py_protein_inference.physical.Protein`
+        Internal method that creates a list of lists of :py:class:`pyproteininference.physical.Protein`
         objects for the Parsimony inference object
         These list of lists are "groups" and the proteins get grouped them according to grouping_type variable
 
         Args:
-            all_scored_proteins (list): list of :py:class:`py_protein_inference.physical.Protein` objects
-            lead_protein_objects (list): list of :py:class:`py_protein_inference.physical.Protein` objects.
+            all_scored_proteins (list): list of :py:class:`pyproteininference.physical.Protein` objects
+            lead_protein_objects (list): list of :py:class:`pyproteininference.physical.Protein` objects.
                 Only needed if inference_type=parsimony
             grouping_type: (str): One of :attr:`GROUPING_TYPES`
 
         Returns:
-            list: list of lists of :py:class:`py_protein_inference.physical.Protein` objects
+            list: list of lists of :py:class:`pyproteininference.physical.Protein` objects
 
         """
 
@@ -567,15 +567,15 @@ class Parsimony(Inference):
         This method is only used with parsimony inference type
 
         Args:
-            scored_data (list): list of scored :py:class:`py_protein_inference.physical.Protein` objects
-            grouped_proteins:  list of grouped :py:class:`py_protein_inference.physical.Protein` objects
+            scored_data (list): list of scored :py:class:`pyproteininference.physical.Protein` objects
+            grouped_proteins:  list of grouped :py:class:`pyproteininference.physical.Protein` objects
             override_type (str): "soft" or "hard" to indicate Reviewed/Unreviewed override. "soft" is preferred and
                 default.
             isoform_override (bool): True/False on whether to favor canonical forms vs isoforms as group leads
 
         Returns:
-            dict: a Dictionary that contains a list of :py:class:`py_protein_inference.physical.ProteinGroup` objects
-            (key:"group_objects") and a list of grouped :py:class:`py_protein_inference.physical.Protein`
+            dict: a Dictionary that contains a list of :py:class:`pyproteininference.physical.ProteinGroup` objects
+            (key:"group_objects") and a list of grouped :py:class:`pyproteininference.physical.Protein`
             objects (key:"grouped_protein_objects")
 
 
@@ -675,7 +675,7 @@ class Parsimony(Inference):
         This method is here to provide consistency to the output
 
         Args:
-            protein_list (list): List of grouped :py:class:`py_protein_inference.physical.Protein` objects
+            protein_list (list): List of grouped :py:class:`pyproteininference.physical.Protein` objects
             leads (set): Set of string protien identifiers that have been identified as a lead
             grouped_protein_objects (list): List of protein_list lists
             override_type (str): "soft" or "hard" on how to override non reviewed identifiers. "soft" is preferred
@@ -684,7 +684,7 @@ class Parsimony(Inference):
             dict: leads (set): Set of string protien identifiers that have been identified as a lead.
              Updated to reflect lead changes
             grouped_protein_objects (list): List of protein_list lists. Updated to reflect lead changes
-            protein_list (list): List of grouped :py:class:`py_protein_inference.physical.Protein` objects.
+            protein_list (list): List of grouped :py:class:`pyproteininference.physical.Protein` objects.
                 Updated to reflect lead changes
 
         """
@@ -786,7 +786,7 @@ class Parsimony(Inference):
         This method is here to provide consistency to the output
 
         Args:
-            protein_list (list): List of grouped :py:class:`py_protein_inference.physical.Protein` objects
+            protein_list (list): List of grouped :py:class:`pyproteininference.physical.Protein` objects
             leads (set): Set of string protien identifiers that have been identified as a lead
             grouped_protein_objects (list): List of protein_list lists
 
@@ -794,7 +794,7 @@ class Parsimony(Inference):
             dict: leads (set): Set of string protien identifiers that have been identified as a lead. Updated to
                 reflect lead changes
             grouped_protein_objects (list): List of protein_list lists. Updated to reflect lead changes
-            protein_list (list): List of grouped :py:class:`py_protein_inference.physical.Protein` objects.
+            protein_list (list): List of grouped :py:class:`pyproteininference.physical.Protein` objects.
                 Updated to reflect lead changes
 
 
@@ -842,10 +842,10 @@ class Parsimony(Inference):
         This method acts on the protein group objects
 
         Args:
-            protein_group_objects (list): List of :py:class:`py_protein_inference.physical.ProteinGroup` objects
+            protein_group_objects (list): List of :py:class:`pyproteininference.physical.ProteinGroup` objects
 
         Returns:
-            list: List of :py:class:`py_protein_inference.physical.ProteinGroup` objects where leads have been
+            list: List of :py:class:`pyproteininference.physical.ProteinGroup` objects where leads have been
                 reassigned properly
 
 
@@ -934,10 +934,10 @@ class Parsimony(Inference):
         This method acts on the grouped protein objects
 
         Args:
-            grouped_protein_objects (list): List of :py:class:`py_protein_inference.physical.Protein` objects
+            grouped_protein_objects (list): List of :py:class:`pyproteininference.physical.Protein` objects
 
         Returns:
-            list: List of :py:class:`py_protein_inference.physical.Protein` objects where leads have been
+            list: List of :py:class:`pyproteininference.physical.Protein` objects where leads have been
                 reassigned properly
 
 
@@ -1206,9 +1206,9 @@ class Parsimony(Inference):
         finally lead protein objects.
 
         This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`py_protein_inference.datastore.DataStore` and are
-        lists of :py:class:`py_protein_inference.physical.Protein` and
-        :py:class:`py_protein_inference.physical.ProteinGroup`
+        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
+        lists of :py:class:`pyproteininference.physical.Protein` and
+        :py:class:`pyproteininference.physical.ProteinGroup`
 
         The subsequent lead proteins then have proteins assigned to them through grouping
 
@@ -1360,9 +1360,9 @@ class Parsimony(Inference):
          various internal grouping functions
 
         This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`py_protein_inference.datastore.DataStore` and are
-        lists of :py:class:`py_protein_inference.physical.Protein`
-        and :py:class:`py_protein_inference.physical.ProteinGroup`
+        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
+        lists of :py:class:`pyproteininference.physical.Protein`
+        and :py:class:`pyproteininference.physical.ProteinGroup`
 
         """
 
@@ -1521,12 +1521,12 @@ class Parsimony(Inference):
     def infer_proteins(self, glpkinout_directory="glpkinout", skip_running_glpk=False):
         """
         This method performs the Parsimony inference method and either uses pulp or glpk based on the
-        :py:class:`py_protein_inference.parameters.ProteinInferenceParameter` object
+        :py:class:`pyproteininference.parameters.ProteinInferenceParameter` object
 
         This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`py_protein_inference.datastore.DataStore` and are
-        lists of :py:class:`py_protein_inference.physical.Protein` and
-        :py:class:`py_protein_inference.physical.ProteinGroup`
+        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
+        lists of :py:class:`pyproteininference.physical.Protein` and
+        :py:class:`pyproteininference.physical.ProteinGroup`
 
         Args:
             glpkinout_directory (str): Directory to use for writing glpsol files. Only used if lp_solver is glpk
@@ -1650,8 +1650,8 @@ class FirstProtein(Inference):
     FirstProtein inference method
 
     Attributes:
-        data (py_protein_inference.datastore.DataStore): Data Object
-        digest (py_protein_inference.in_silico_digest.Digest): Digest Object
+        data (pyproteininference.datastore.DataStore): Data Object
+        digest (pyproteininference.in_silico_digest.Digest): Digest Object
 
     """
 
@@ -1660,8 +1660,8 @@ class FirstProtein(Inference):
         FirstProtein Inference initialization method
 
         Args:
-            data (py_protein_inference.datastore.DataStore): Data Object
-            digest (py_protein_inference.in_silico_digest.Digest): Digest Object
+            data (pyproteininference.datastore.DataStore): Data Object
+            digest (pyproteininference.in_silico_digest.Digest): Digest Object
 
         Returns:
             object:
@@ -1677,9 +1677,9 @@ class FirstProtein(Inference):
         This method performs the First Protein inference method
 
         This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`py_protein_inference.datastore.DataStore` and are
-        lists of :py:class:`py_protein_inference.physical.Protein` and
-        :py:class:`py_protein_inference.physical.ProteinGroup`
+        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
+        lists of :py:class:`pyproteininference.physical.Protein` and
+        :py:class:`pyproteininference.physical.ProteinGroup`
 
         """
 
@@ -1714,8 +1714,8 @@ class PeptideCentric(Inference):
     PeptideCentric inference method
 
     Attributes:
-        data (py_protein_inference.datastore.DataStore): Data Object
-        digest (py_protein_inference.in_silico_digest.Digest): Digest Object
+        data (pyproteininference.datastore.DataStore): Data Object
+        digest (pyproteininference.in_silico_digest.Digest): Digest Object
 
     """
 
@@ -1724,8 +1724,8 @@ class PeptideCentric(Inference):
         PeptideCentric Inference initialization method
 
         Args:
-            data (py_protein_inference.datastore.DataStore): Data Object
-            digest (py_protein_inference.in_silico_digest.Digest): Digest Object
+            data (pyproteininference.datastore.DataStore): Data Object
+            digest (pyproteininference.in_silico_digest.Digest): Digest Object
 
         Returns:
             object:
@@ -1740,9 +1740,9 @@ class PeptideCentric(Inference):
         This method performs the Peptide Centric inference method
 
         This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`py_protein_inference.datastore.DataStore` and are
-        lists of :py:class:`py_protein_inference.physical.Protein` and
-         :py:class:`py_protein_inference.physical.ProteinGroup`
+        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
+        lists of :py:class:`pyproteininference.physical.Protein` and
+         :py:class:`pyproteininference.physical.ProteinGroup`
 
         Returns:
             None
@@ -1772,11 +1772,11 @@ class PeptideCentric(Inference):
     def _apply_protein_group_ids(self):
         """
         This method creates the ProteinGroup objects for the peptide_centric inference based on protein groups
-        from :py:meth:`py_protein_inference.inference.Inference_create_protein_groups`
+        from :py:meth:`pyproteininference.inference.Inference_create_protein_groups`
 
         Returns:
-            dict: a Dictionary that contains a list of :py:class:`py_protein_inference.physical.ProteinGroup`
-            objects (key:"group_objects") and a list of grouped :py:class:`py_protein_inference.physical.Protein`
+            dict: a Dictionary that contains a list of :py:class:`pyproteininference.physical.ProteinGroup`
+            objects (key:"group_objects") and a list of grouped :py:class:`pyproteininference.physical.Protein`
             objects (key:"grouped_protein_objects")
 
         """

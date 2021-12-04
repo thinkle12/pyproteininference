@@ -5,16 +5,16 @@ from unittest import TestCase
 
 from pkg_resources import resource_filename
 
-import py_protein_inference
+import pyproteininference
 
-TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
-PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
+TEST_DATABASE = resource_filename("pyproteininference", "../tests/data/test_database.fasta")
+PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_inclusion.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
-# OUTPUT_DIR = resource_filename('py_protein_inference', '../tests/output/')
+# OUTPUT_DIR = resource_filename('pyproteininference', '../tests/output/')
 
-TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
-DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy.txt")
-COMBINED_FILE = resource_filename("py_protein_inference", "../tests/data/combined_files/test_combined_data.txt")
+TARGET_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_target.txt")
+DECOY_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_decoy.txt")
+COMBINED_FILE = resource_filename("pyproteininference", "../tests/data/combined_files/test_combined_data.txt")
 
 temp_dir = tempfile.gettempdir()
 
@@ -27,14 +27,14 @@ if not os.path.exists(DECOY_DIRECTORY):
 
 shutil.copyfile(str(TARGET_FILE), os.path.join(TARGET_DIRECTORY, "target_file.txt"))
 shutil.copyfile(DECOY_FILE, os.path.join(DECOY_DIRECTORY, "decoy_file.txt"))
-COMBINED_DIRECTORY = resource_filename("py_protein_inference", "../tests/data/combined_files")
+COMBINED_DIRECTORY = resource_filename("pyproteininference", "../tests/data/combined_files")
 
 
 class TestPipelineValidation(TestCase):
     def test_validation(self):
 
         # Test target and decoy file
-        pipeline1 = py_protein_inference.pipeline.ProteinInferencePipeline(
+        pipeline1 = pyproteininference.pipeline.ProteinInferencePipeline(
             parameter_file=PARAMETER_FILE,
             database_file=TEST_DATABASE,
             target_files=TARGET_FILE,
@@ -52,7 +52,7 @@ class TestPipelineValidation(TestCase):
         self.assertEqual(len(pipeline1.data.main_data_form), 27)
 
         # Test combined file
-        pipeline2 = py_protein_inference.pipeline.ProteinInferencePipeline(
+        pipeline2 = pyproteininference.pipeline.ProteinInferencePipeline(
             parameter_file=PARAMETER_FILE,
             database_file=TEST_DATABASE,
             target_files=None,
@@ -70,7 +70,7 @@ class TestPipelineValidation(TestCase):
         self.assertEqual(len(pipeline2.data.main_data_form), 27)
 
         # Test target and decoy directories
-        pipeline3 = py_protein_inference.pipeline.ProteinInferencePipeline(
+        pipeline3 = pyproteininference.pipeline.ProteinInferencePipeline(
             parameter_file=PARAMETER_FILE,
             database_file=TEST_DATABASE,
             target_files=None,
@@ -91,7 +91,7 @@ class TestPipelineValidation(TestCase):
         self.assertEqual(len(pipeline3.data.main_data_form), 27)
 
         # Test combined directory
-        pipeline4 = py_protein_inference.pipeline.ProteinInferencePipeline(
+        pipeline4 = pyproteininference.pipeline.ProteinInferencePipeline(
             parameter_file=PARAMETER_FILE,
             database_file=TEST_DATABASE,
             target_files=None,
@@ -112,7 +112,7 @@ class TestPipelineValidation(TestCase):
 
         # Test Proper error reporting
         with self.assertRaises(ValueError):
-            py_protein_inference.pipeline.ProteinInferencePipeline(
+            pyproteininference.pipeline.ProteinInferencePipeline(
                 parameter_file=PARAMETER_FILE,
                 database_file=TEST_DATABASE,
                 target_files=TARGET_FILE,
@@ -126,7 +126,7 @@ class TestPipelineValidation(TestCase):
             )
 
         with self.assertRaises(ValueError):
-            py_protein_inference.pipeline.ProteinInferencePipeline(
+            pyproteininference.pipeline.ProteinInferencePipeline(
                 parameter_file=PARAMETER_FILE,
                 database_file=TEST_DATABASE,
                 target_files=None,
@@ -140,7 +140,7 @@ class TestPipelineValidation(TestCase):
             )
 
         with self.assertRaises(ValueError):
-            py_protein_inference.pipeline.ProteinInferencePipeline(
+            pyproteininference.pipeline.ProteinInferencePipeline(
                 parameter_file=PARAMETER_FILE,
                 database_file=TEST_DATABASE,
                 target_files=TARGET_FILE,

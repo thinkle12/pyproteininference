@@ -112,7 +112,7 @@ class PyteomicsDigest(Digest):
                 Keep as False unless you know what you are doing
 
         Example:
-            >>> digest = py_protein_inference.in_silico_digest.PyteomicsDigest(
+            >>> digest = pyproteininference.in_silico_digest.PyteomicsDigest(
             >>>     database_path=database_file,
             >>>     digest_type='trypsin',
             >>>     missed_cleavages=2,
@@ -146,7 +146,7 @@ class PyteomicsDigest(Digest):
             None
 
         Example:
-            >>> digest = py_protein_inference.in_silico_digest.PyteomicsDigest(
+            >>> digest = pyproteininference.in_silico_digest.PyteomicsDigest(
             >>>     database_path=database_file,
             >>>     digest_type='trypsin',
             >>>     missed_cleavages=2,

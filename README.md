@@ -2,7 +2,7 @@
 # Py Protein Inference
 ## Requirements
 
-Current version: 0.7.9
+Current version: 0.8.0
 
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__
  2. __Python Packages__:
@@ -11,10 +11,10 @@ Current version: 0.7.9
 
 ## Installation
 1. Use Pip:
-```pip install py_protein_inference```
+```pip install pyproteininference```
 2. Cloning the Repository:
 ```git clone repo_url``` - Replace repo_url with the proper URL for the package.
-```cd repo``` - Replace repo with the name of the directory that protein inference was put into. Should be ```py_protein_inference```
+```cd repo``` - Replace repo with the name of the directory that protein inference was put into. Should be ```pyproteininference```
 within the above directory type: ```python setup.py install```
 
 After either of these two steps above the package should be installed
@@ -175,7 +175,7 @@ The command line tool can be called as follows:
 `protein_inference_cli.py --help`
 This will return the help prompt for the tool.
 If this does not work download `protein_inference_cli.py` from our repository and write the full path to the script while also calling `python`
-`python /path/to/directory/py_protein_inference/scripts/protein_inference_cli.py --help`
+`python /path/to/directory/pyproteininference/scripts/protein_inference_cli.py --help`
 
 Command line options are as follows:
 ```
@@ -248,7 +248,7 @@ Running with multiple input target/decoy files:
 ### Running Within Python
 To run within a python console please see the following example:
 ```python
-from py_protein_inference.pipeline import ProteinInferencePipeline
+from pyproteininference.pipeline import ProteinInferencePipeline
 
 yaml_params = "/path/to/yaml/params.yaml"
 database = "/path/to/database/file.fasta"
@@ -274,19 +274,19 @@ Py Protein Inference can also be ran via a docker container. To access the docke
 2. Ability to pull the docker image from docker hub
 
 Pulling the image from docker hub:
-`docker pull pyproteininference:0.7.9`
+`docker pull pyproteininference:0.8.0`
 
-It is recommended to pull the image with the highest version number. Currently this is 0.7.9.
+It is recommended to pull the image with the highest version number. Currently this is 0.8.0.
 
 Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
 Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
 See the example below:
-`docker run -v /path/to/data/:/data pyproteininference:0.7.9 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+`docker run -v /path/to/data/:/data pyproteininference:0.8.0 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
 
 #### Building the Docker image from source
 Use the following command from the root directory of the source code:
-Here we use version `0.7.9` and tag as that version as well.
-`docker build . -f Dockerfile -t pyproteininference:0.7.9 --build-arg VERSION=0.7.9`
+Here we use version `0.8.0` and tag as that version as well.
+`docker build . -f Dockerfile -t pyproteininference:0.8.0 --build-arg VERSION=0.8.0`
 
 ### Running Heuristic
 Py Protein Inference also has a built in Heuristic that runs through four inference methods (Inclusion, Exclusion, Parsimony, and Peptide Centric) and selects a recommended method for your given dataset. 
@@ -297,7 +297,7 @@ The Heuristic method also outputs a ROC plot that showcases all of the inference
 `python protein_inference_heuristic_cli.py --help`
 This will return the help prompt for the tool.
 If this does not work download `protein_inference_heuristic_cli.py` from our repository and write the full path to the script while also calling `python`
-`python /path/to/directory/py_protein_inference/scripts/protein_inference_heuristic_cli.py --help`
+`python /path/to/directory/pyproteininference/scripts/protein_inference_heuristic_cli.py --help`
 
 Command line options are as follows:
 ```
@@ -351,7 +351,7 @@ Input options are the same as the standard protein_inference_cli.py with the add
 #### Running the Heuristic Method via Python
 To run within a python console please see the following example:
 ```python
-from py_protein_inference.heuristic import HeuristicPipeline
+from pyproteininference.heuristic import HeuristicPipeline
 
 yaml_params = "/path/to/yaml/params.yaml"
 database = "/path/to/database/file.fasta"
@@ -384,15 +384,15 @@ hp.generate_roc_plot(fdr_max=0.1, pdf_filename=pdf_filename)
 ##### Console Output
 Console Output is as follows and indicates the recommended method at the end:
 ```
-2021-07-22 17:43:05,677 - py_protein_inference.heuristic.HeuristicPipeline - INFO - Number of Passing Proteins per Inference Method
-2021-07-22 17:43:05,678 - py_protein_inference.heuristic.HeuristicPipeline - INFO - {'inclusion': 4956, 'exclusion': 1769, 'parsimony': 2808, 'peptide_centric': 4757}
-2021-07-22 17:43:05,679 - py_protein_inference.heuristic.HeuristicPipeline - INFO - Initial Heuristic Scores
-2021-07-22 17:43:05,679 - py_protein_inference.heuristic.HeuristicPipeline - INFO - {'inclusion': 0.5928862224126847, 'exclusion': 0.576152064531587, 'parsimony': 0.2663299076815886, 'peptide_centric': 0.4970103849784959}
-2021-07-22 17:43:05,679 - py_protein_inference.heuristic.HeuristicPipeline - INFO - Removing inclusion with score 0.5928862224126847
-2021-07-22 17:43:05,680 - py_protein_inference.heuristic.HeuristicPipeline - INFO - Final Heuristic Scores
-2021-07-22 17:43:05,680 - py_protein_inference.heuristic.HeuristicPipeline - INFO - {'exclusion': 0.5323198942498348, 'parsimony': 0.1394422310756972, 'peptide_centric': 1.0786541402665502}
-2021-07-22 17:43:05,680 - py_protein_inference.heuristic.HeuristicPipeline - INFO - Removing exclusion with score 0.5323198942498348
-2021-07-22 17:43:05,680 - py_protein_inference.heuristic.HeuristicPipeline - INFO - Inference peptide_centric Selected with score 1.0786541402665502
+2021-07-22 17:43:05,677 - pyproteininference.heuristic.HeuristicPipeline - INFO - Number of Passing Proteins per Inference Method
+2021-07-22 17:43:05,678 - pyproteininference.heuristic.HeuristicPipeline - INFO - {'inclusion': 4956, 'exclusion': 1769, 'parsimony': 2808, 'peptide_centric': 4757}
+2021-07-22 17:43:05,679 - pyproteininference.heuristic.HeuristicPipeline - INFO - Initial Heuristic Scores
+2021-07-22 17:43:05,679 - pyproteininference.heuristic.HeuristicPipeline - INFO - {'inclusion': 0.5928862224126847, 'exclusion': 0.576152064531587, 'parsimony': 0.2663299076815886, 'peptide_centric': 0.4970103849784959}
+2021-07-22 17:43:05,679 - pyproteininference.heuristic.HeuristicPipeline - INFO - Removing inclusion with score 0.5928862224126847
+2021-07-22 17:43:05,680 - pyproteininference.heuristic.HeuristicPipeline - INFO - Final Heuristic Scores
+2021-07-22 17:43:05,680 - pyproteininference.heuristic.HeuristicPipeline - INFO - {'exclusion': 0.5323198942498348, 'parsimony': 0.1394422310756972, 'peptide_centric': 1.0786541402665502}
+2021-07-22 17:43:05,680 - pyproteininference.heuristic.HeuristicPipeline - INFO - Removing exclusion with score 0.5323198942498348
+2021-07-22 17:43:05,680 - pyproteininference.heuristic.HeuristicPipeline - INFO - Inference peptide_centric Selected with score 1.0786541402665502
 ```
 
 ##### ROC Plot Output

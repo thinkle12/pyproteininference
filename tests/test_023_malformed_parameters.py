@@ -5,9 +5,9 @@ from unittest import TestCase
 import yaml
 from pkg_resources import resource_filename
 
-from py_protein_inference.parameters import ProteinInferenceParameter
+from pyproteininference.parameters import ProteinInferenceParameter
 
-PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
+PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_inclusion.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
 
 NEW_PARAMETER_FILE = os.path.join(OUTPUT_DIR, "malformed_protein_inference_params.yaml")

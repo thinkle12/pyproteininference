@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from py_protein_inference.physical import Psm
+from pyproteininference.physical import Psm
 
 
 class TestLoadPeptideParsing(TestCase):

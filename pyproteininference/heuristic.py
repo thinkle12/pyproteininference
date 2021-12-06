@@ -6,9 +6,9 @@ import sys
 import matplotlib.pyplot as plt
 import numpy
 
-import py_protein_inference
-from py_protein_inference.inference import Inference
-from py_protein_inference.pipeline import ProteinInferencePipeline
+import pyproteininference
+from pyproteininference.inference import Inference
+from pyproteininference.pipeline import ProteinInferencePipeline
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
     """
     This is the Protein Inference Heuristic classs which houses the logic to run the Protein Inference Heuristic method
      to determine the best inference method for the given data
-    Logic is executed in the :py:meth:`py_protein_inference.heuristic.HeuristicPipeline.execute` method
+    Logic is executed in the :py:meth:`pyproteininference.heuristic.HeuristicPipeline.execute` method
 
     Attributes:
         parameter_file (str): Path to Protein Inference Yaml Parameter File
@@ -46,11 +46,11 @@ class HeuristicPipeline(ProteinInferencePipeline):
         fdr_max (float): The Maximum FDR to display on the ROC Plot generated
             to compare inference methods
         inference_method_list: (list) List of inference methods used in heuristic determination
-        datastore_dict: (dict) Dictionary of :py:class:`py_protein_inference.datastore.DataStore`
+        datastore_dict: (dict) Dictionary of :py:class:`pyproteininference.datastore.DataStore`
             objects generated in heuristic determination with the inference method as the key of each entry
         selected_method: (str) String representation of the selected inference method based on the heuristic
         heuristic: (float) Heuristic Value as determined from the data
-        selected_datastore: (:py:class:`py_protein_inference.datastore.DataStore`)
+        selected_datastore: (:py:class:`pyproteininference.datastore.DataStore`)
             The DataStore object as selected by the heuristic
 
     """
@@ -101,7 +101,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             object:
 
         Example:
-            >>> heuristic = py_protein_inference.heuristic.HeuristicPipeline(
+            >>> heuristic = pyproteininference.heuristic.HeuristicPipeline(
             >>>     parameter_file=yaml_params,
             >>>     database_file=database,
             >>>     target_files=target,
@@ -174,7 +174,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             None
 
         Example:
-            >>> heuristic = py_protein_inference.heuristic.HeuristicPipeline(
+            >>> heuristic = pyproteininference.heuristic.HeuristicPipeline(
             >>>     parameter_file=yaml_params,
             >>>     database_file=database,
             >>>     target_files=target,
@@ -193,16 +193,16 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         """
 
-        py_protein_inference_parameters = py_protein_inference.parameters.ProteinInferenceParameter(
+        pyproteininference_parameters = pyproteininference.parameters.ProteinInferenceParameter(
             yaml_param_filepath=self.parameter_file
         )
 
-        digest = py_protein_inference.in_silico_digest.PyteomicsDigest(
+        digest = pyproteininference.in_silico_digest.PyteomicsDigest(
             database_path=self.database_file,
-            digest_type=py_protein_inference_parameters.digest_type,
-            missed_cleavages=py_protein_inference_parameters.missed_cleavages,
-            reviewed_identifier_symbol=py_protein_inference_parameters.reviewed_identifier_symbol,
-            max_peptide_length=py_protein_inference_parameters.restrict_peptide_length,
+            digest_type=pyproteininference_parameters.digest_type,
+            missed_cleavages=pyproteininference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=pyproteininference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=pyproteininference_parameters.restrict_peptide_length,
             id_splitting=self.id_splitting,
         )
         if self.database_file:
@@ -216,7 +216,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         for inference_method in self.inference_method_list:
 
-            method_specific_parameters = copy.deepcopy(py_protein_inference_parameters)
+            method_specific_parameters = copy.deepcopy(pyproteininference_parameters)
 
             logger.info("Overriding inference type {}".format(method_specific_parameters.inference_type))
 
@@ -226,7 +226,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             logger.info("New inference type {}".format(method_specific_parameters.inference_type))
             logger.info("FDR Threshold Set to {}".format(method_specific_parameters.fdr))
 
-            reader = py_protein_inference.reader.GenericReader(
+            reader = pyproteininference.reader.GenericReader(
                 target_file=self.target_files,
                 decoy_file=self.decoy_files,
                 combined_files=self.combined_files,
@@ -236,7 +236,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             )
             reader.read_psms()
 
-            data = py_protein_inference.datastore.DataStore(reader=reader, digest=digest)
+            data = pyproteininference.datastore.DataStore(reader=reader, digest=digest)
 
             data.restrict_psm_data()
 
@@ -245,7 +245,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             if method_specific_parameters.inference_type == Inference.EXCLUSION:
                 data.exclude_non_distinguishing_peptides()
 
-            score = py_protein_inference.scoring.Score(data=data)
+            score = pyproteininference.scoring.Score(data=data)
             score.score_psms(score_method=method_specific_parameters.protein_score)
 
             if method_specific_parameters.picker:
@@ -253,7 +253,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             else:
                 pass
 
-            py_protein_inference.inference.Inference.run_inference(data=data, digest=digest)
+            pyproteininference.inference.Inference.run_inference(data=data, digest=digest)
 
             data.calculate_q_values()
 
@@ -262,7 +262,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
         self.selected_method = self.determine_optimal_inference_method()
         self.selected_datastore = self.datastore_dict[self.selected_method]
 
-        export = py_protein_inference.export.Export(data=self.selected_datastore)
+        export = pyproteininference.export.Export(data=self.selected_datastore)
         export.export_to_csv(
             output_filename=self.output_filename,
             directory=self.output_directory,

@@ -4,21 +4,21 @@ from unittest import TestCase
 
 from pkg_resources import resource_filename
 
-import py_protein_inference
-from py_protein_inference import in_silico_digest
-from py_protein_inference.parameters import ProteinInferenceParameter
+import pyproteininference
+from pyproteininference import in_silico_digest
+from pyproteininference.parameters import ProteinInferenceParameter
 
-TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
-TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
-DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy.txt")
-PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_parsimony_glpk.yaml")
+TEST_DATABASE = resource_filename("pyproteininference", "../tests/data/test_database.fasta")
+TARGET_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_target.txt")
+DECOY_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_decoy.txt")
+PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_parsimony_glpk.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
-# OUTPUT_DIR = resource_filename('py_protein_inference', '../tests/output/')
+# OUTPUT_DIR = resource_filename('pyproteininference', '../tests/output/')
 for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
     if not os.path.exists(os.path.join(OUTPUT_DIR, sub_dir)):
         os.makedirs(os.path.join(OUTPUT_DIR, sub_dir))
 
-GLPKINOUT_PATH = resource_filename("py_protein_inference", "../tests/glpkinout/")
+GLPKINOUT_PATH = resource_filename("pyproteininference", "../tests/glpkinout/")
 SKIP_RUNNING_GLPK = True
 
 IDENTIFIER_INDEX = 0
@@ -55,7 +55,7 @@ class TestLoadParsimonyGlpkWorkflowSharedPeptideReassignment(TestCase):
         # STEP 3: Read PSM Data #
         # STEP 3: Read PSM Data #
         # STEP 3: Read PSM Data #
-        pep_and_prot_data = py_protein_inference.reader.GenericReader(
+        pep_and_prot_data = pyproteininference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
@@ -69,7 +69,7 @@ class TestLoadParsimonyGlpkWorkflowSharedPeptideReassignment(TestCase):
         # STEP 4: Initiate the datastore class #
         # STEP 4: Initiate the datastore class #
         # STEP 4: Initiate the datastore class #
-        data = py_protein_inference.datastore.DataStore(pep_and_prot_data, digest=digest)
+        data = pyproteininference.datastore.DataStore(pep_and_prot_data, digest=digest)
 
         # Step 5: Restrict the PSM data
         # Step 5: Restrict the PSM data
@@ -86,14 +86,14 @@ class TestLoadParsimonyGlpkWorkflowSharedPeptideReassignment(TestCase):
         # Step 7: Remove non unique peptides if running exclusion
         # Step 7: Remove non unique peptides if running exclusion
         # Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters.inference_type == py_protein_inference.inference.Inference.EXCLUSION:
+        if protein_inference_parameters.inference_type == pyproteininference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data.exclude_non_distinguishing_peptides()
 
         # STEP 8: Score our PSMs given a score method
         # STEP 8: Score our PSMs given a score method
         # STEP 8: Score our PSMs given a score method
-        score = py_protein_inference.scoring.Score(data=data)
+        score = pyproteininference.scoring.Score(data=data)
         score.score_psms(score_method=protein_inference_parameters.protein_score)
 
         # STEP 9: Run protein picker on the data
@@ -110,16 +110,16 @@ class TestLoadParsimonyGlpkWorkflowSharedPeptideReassignment(TestCase):
         inference_type = protein_inference_parameters.inference_type
 
         # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == py_protein_inference.inference.Inference.PARSIMONY:
-            group = py_protein_inference.inference.Parsimony(data=data, digest=digest)
+        if inference_type == pyproteininference.inference.Inference.PARSIMONY:
+            group = pyproteininference.inference.Parsimony(data=data, digest=digest)
             group.infer_proteins(glpkinout_directory=GLPKINOUT_PATH, skip_running_glpk=SKIP_RUNNING_GLPK)
 
-        if inference_type == py_protein_inference.inference.Inference.INCLUSION:
-            group = py_protein_inference.inference.Inclusion(data=data, digest=digest)
+        if inference_type == pyproteininference.inference.Inference.INCLUSION:
+            group = pyproteininference.inference.Inclusion(data=data, digest=digest)
             group.infer_proteins()
 
-        if inference_type == py_protein_inference.inference.Inference.EXCLUSION:
-            group = py_protein_inference.inference.Exclusion(data=data, digest=digest)
+        if inference_type == pyproteininference.inference.Inference.EXCLUSION:
+            group = pyproteininference.inference.Exclusion(data=data, digest=digest)
             group.infer_proteins()
 
         lead_protein_psms = [x[0].psms for x in data.grouped_scored_proteins]
@@ -161,7 +161,7 @@ class TestLoadParsimonyGlpkWorkflowSharedPeptideReassignment(TestCase):
         # STEP 3: Read PSM Data #
         # STEP 3: Read PSM Data #
         # STEP 3: Read PSM Data #
-        pep_and_prot_data_all = py_protein_inference.reader.GenericReader(
+        pep_and_prot_data_all = pyproteininference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters_all,
@@ -175,7 +175,7 @@ class TestLoadParsimonyGlpkWorkflowSharedPeptideReassignment(TestCase):
         # STEP 4: Initiate the datastore class #
         # STEP 4: Initiate the datastore class #
         # STEP 4: Initiate the datastore class #
-        data_all = py_protein_inference.datastore.DataStore(pep_and_prot_data_all, digest=digest_all)
+        data_all = pyproteininference.datastore.DataStore(pep_and_prot_data_all, digest=digest_all)
 
         # Step 5: Restrict the PSM data
         # Step 5: Restrict the PSM data
@@ -192,14 +192,14 @@ class TestLoadParsimonyGlpkWorkflowSharedPeptideReassignment(TestCase):
         # Step 7: Remove non unique peptides if running exclusion
         # Step 7: Remove non unique peptides if running exclusion
         # Step 7: Remove non unique peptides if running exclusion
-        if protein_inference_parameters_all.inference_type == py_protein_inference.inference.Inference.EXCLUSION:
+        if protein_inference_parameters_all.inference_type == pyproteininference.inference.Inference.EXCLUSION:
             # This gets ran if we run exclusion...
             data_all.exclude_non_distinguishing_peptides()
 
         # STEP 8: Score our PSMs given a score method
         # STEP 8: Score our PSMs given a score method
         # STEP 8: Score our PSMs given a score method
-        score_all = py_protein_inference.scoring.Score(data=data_all)
+        score_all = pyproteininference.scoring.Score(data=data_all)
         score_all.score_psms(score_method=protein_inference_parameters_all.protein_score)
 
         # STEP 9: Run protein picker on the data
@@ -216,16 +216,16 @@ class TestLoadParsimonyGlpkWorkflowSharedPeptideReassignment(TestCase):
         inference_type = protein_inference_parameters_all.inference_type
 
         # For parsimony... Run GLPK setup, runner, grouper...
-        if inference_type == py_protein_inference.inference.Inference.PARSIMONY:
-            group = py_protein_inference.inference.Parsimony(data=data_all, digest=digest_all)
+        if inference_type == pyproteininference.inference.Inference.PARSIMONY:
+            group = pyproteininference.inference.Parsimony(data=data_all, digest=digest_all)
             group.infer_proteins(glpkinout_directory=GLPKINOUT_PATH, skip_running_glpk=SKIP_RUNNING_GLPK)
 
-        if inference_type == py_protein_inference.inference.Inference.INCLUSION:
-            group = py_protein_inference.inference.Inclusion(data=data_all, digest=digest_all)
+        if inference_type == pyproteininference.inference.Inference.INCLUSION:
+            group = pyproteininference.inference.Inclusion(data=data_all, digest=digest_all)
             group.infer_proteins()
 
-        if inference_type == py_protein_inference.inference.Inference.EXCLUSION:
-            group = py_protein_inference.inference.Exclusion(data=data_all, digest=digest_all)
+        if inference_type == pyproteininference.inference.Inference.EXCLUSION:
+            group = pyproteininference.inference.Exclusion(data=data_all, digest=digest_all)
             group.infer_proteins()
 
         lead_protein_psms = [x[0].psms for x in data_all.grouped_scored_proteins]

@@ -2,14 +2,14 @@ from unittest import TestCase
 
 from pkg_resources import resource_filename
 
-import py_protein_inference
-from py_protein_inference import in_silico_digest
-from py_protein_inference.parameters import ProteinInferenceParameter
+import pyproteininference
+from pyproteininference import in_silico_digest
+from pyproteininference.parameters import ProteinInferenceParameter
 
-TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
-TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target_no_alt_prot.txt")
-DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy_no_alt_prot.txt")
-PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
+TEST_DATABASE = resource_filename("pyproteininference", "../tests/data/test_database.fasta")
+TARGET_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_target_no_alt_prot.txt")
+DECOY_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_decoy_no_alt_prot.txt")
+PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_inclusion.yaml")
 
 IDENTIFIER_INDEX = 0
 SCORE_INDEX = 1
@@ -42,7 +42,7 @@ class TestAltProteinDbRecovery(TestCase):
         # STEP 3: Read PSM Data #
         # STEP 3: Read PSM Data #
         # STEP 3: Read PSM Data #
-        pep_and_prot_data_no_append = py_protein_inference.reader.GenericReader(
+        pep_and_prot_data_no_append = pyproteininference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
@@ -84,7 +84,7 @@ class TestAltProteinDbRecovery(TestCase):
             ],
         )
 
-        pep_and_prot_data_append = py_protein_inference.reader.GenericReader(
+        pep_and_prot_data_append = pyproteininference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,

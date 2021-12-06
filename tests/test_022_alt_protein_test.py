@@ -4,16 +4,16 @@ from unittest import TestCase
 
 from pkg_resources import resource_filename
 
-import py_protein_inference
-from py_protein_inference import in_silico_digest
-from py_protein_inference.parameters import ProteinInferenceParameter
+import pyproteininference
+from pyproteininference import in_silico_digest
+from pyproteininference.parameters import ProteinInferenceParameter
 
-TEST_DATABASE = resource_filename("py_protein_inference", "../tests/data/test_database.fasta")
-TARGET_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_target.txt")
-DECOY_FILE = resource_filename("py_protein_inference", "../tests/data/test_perc_data_decoy.txt")
-PARAMETER_FILE = resource_filename("py_protein_inference", "../tests/data/test_params_inclusion.yaml")
+TEST_DATABASE = resource_filename("pyproteininference", "../tests/data/test_database.fasta")
+TARGET_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_target.txt")
+DECOY_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_decoy.txt")
+PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_inclusion.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
-# OUTPUT_DIR = resource_filename('py_protein_inference', '../tests/output/')
+# OUTPUT_DIR = resource_filename('pyproteininference', '../tests/output/')
 for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
     if not os.path.exists(os.path.join(OUTPUT_DIR, sub_dir)):
         os.makedirs(os.path.join(OUTPUT_DIR, sub_dir))
@@ -43,7 +43,7 @@ class TestAltProteinRead(TestCase):
         # STEP 3: Read PSM Data #
         # STEP 3: Read PSM Data #
         # STEP 3: Read PSM Data #
-        pep_and_prot_data = py_protein_inference.reader.GenericReader(
+        pep_and_prot_data = pyproteininference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,
@@ -91,7 +91,7 @@ class TestAltProteinRead(TestCase):
         for i in range(len(possible_proteins)):
             self.assertSetEqual(set(possible_proteins[i]), set(true_possible_proteins[i]))
 
-        pep_and_prot_data_no_append = py_protein_inference.reader.GenericReader(
+        pep_and_prot_data_no_append = pyproteininference.reader.GenericReader(
             target_file=TARGET_FILE,
             decoy_file=DECOY_FILE,
             parameter_file_object=protein_inference_parameters,

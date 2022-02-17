@@ -345,7 +345,13 @@ optional arguments:
 
 Input options are the same as the standard protein_inference_cli.py with the addition of two optional inputs:
 1) `-r` This is a filepath that will have a pdf plot written to it after the heuristic method has been run. If this is left blank it will write the plot into the standard output directory with the name roc_plot.pdf
-2) `-m` The maximum FDR to display in the ROC plot. If this value is left blank it will be set to 0.2
+2) `-m` The maximum FDR to display in the ROC plot. If this value is left blank it will be set to 0.1
+
+You can run the tool as follows:
+`protein_inference_heuristic_cli.py -t /path/to/target/file.txt -d /path/to/decoy/file.txt -db /path/to/database/file.fasta -y /path/to/parameter/file.yaml -o /path/to/output/directory/ -r /path/to/pdf/file.pdf -m 0.2`
+
+Running with multiple input target/decoy files:
+`protein_inference_heuristic_cli.py -t /path/to/target/file1.txt /path/to/target/file2.txt -d /path/to/decoy/file1.txt /path/to/decoy/file2.txt -db /path/to/database/file.fasta -y /path/to/parameter/file.yaml -o /path/to/output/directory/ -r /path/to/pdf/file.pdf -m 0.2`
 
 
 #### Running the Heuristic Method via Python

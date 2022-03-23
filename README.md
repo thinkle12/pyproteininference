@@ -207,8 +207,8 @@ optional arguments:
   -y FILE, --yaml_params FILE
                         Path to a Protein Inference Yaml Parameter File. If this is not set, default parameters will be used.
   -p, --skip_append_alt
-                        If set, will add alternative proteins to each PSM from the database digest. If not set the peptide/protein mapping will be taken from the input files only. If this is left
-                        blank it will default to True which means alternative proteins will be added from the database digest.
+                        If this flag is set, will skip adding alternative proteins to each PSM from the database digest. If this flag is not set, the peptide/protein mapping will be taken from 
+                        database digest and appended to the mapping present in the input files.
   -i, --id_splitting    If set this flag will split protein identifiers. See below for more information.If not set, this flag will not split protein identifiers.This flag indicates whether or not to
                         split the identifiers that are present in the fasta database. Only use this option if you know what you are doing. Sometimes the fasta database protein IDs will be like:
                         'sp|ARAF_HUMAN|P10398'. While protein IDs in the input files will be 'ARAF_HUMAN|P10398'. Setting This flag will split off the front 'sp|' or 'tr|' from the database protein
@@ -330,8 +330,8 @@ optional arguments:
   -y FILE, --yaml_params FILE
                         Path to a Protein Inference Yaml Parameter File. If this is not set, default parameters will be used.
   -p, --skip_append_alt
-                        If set, will add alternative proteins to each PSM from the database digest. If not set the peptide/protein mapping will be taken from the input files only. If this is left
-                        blank it will default to True which means alternative proteins will be added from the database digest.
+                        If this flag is set, will skip adding alternative proteins to each PSM from the database digest. If this flag is not set, the peptide/protein mapping will be taken from 
+                        database digest and appended to the mapping present in the input files.
   -i, --id_splitting    If set this flag will split protein identifiers. See below for more information.If not set, this flag will not split protein identifiers.This flag indicates whether or not to
                         split the identifiers that are present in the fasta database. Only use this option if you know what you are doing. Sometimes the fasta database protein IDs will be like:
                         'sp|ARAF_HUMAN|P10398'. While protein IDs in the input files will be 'ARAF_HUMAN|P10398'. Setting This flag will split off the front 'sp|' or 'tr|' from the database protein

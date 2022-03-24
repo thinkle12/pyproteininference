@@ -207,8 +207,8 @@ optional arguments:
   -y FILE, --yaml_params FILE
                         Path to a Protein Inference Yaml Parameter File. If this is not set, default parameters will be used.
   -p, --skip_append_alt
-                        If set, will add alternative proteins to each PSM from the database digest. If not set the peptide/protein mapping will be taken from the input files only. If this is left
-                        blank it will default to True which means alternative proteins will be added from the database digest.
+                        If this flag is set, will skip adding alternative proteins to each PSM from the database digest. If this flag is not set, the peptide/protein mapping will be taken from 
+                        database digest and appended to the mapping present in the input files.
   -i, --id_splitting    If set this flag will split protein identifiers. See below for more information.If not set, this flag will not split protein identifiers.This flag indicates whether or not to
                         split the identifiers that are present in the fasta database. Only use this option if you know what you are doing. Sometimes the fasta database protein IDs will be like:
                         'sp|ARAF_HUMAN|P10398'. While protein IDs in the input files will be 'ARAF_HUMAN|P10398'. Setting This flag will split off the front 'sp|' or 'tr|' from the database protein
@@ -330,8 +330,8 @@ optional arguments:
   -y FILE, --yaml_params FILE
                         Path to a Protein Inference Yaml Parameter File. If this is not set, default parameters will be used.
   -p, --skip_append_alt
-                        If set, will add alternative proteins to each PSM from the database digest. If not set the peptide/protein mapping will be taken from the input files only. If this is left
-                        blank it will default to True which means alternative proteins will be added from the database digest.
+                        If this flag is set, will skip adding alternative proteins to each PSM from the database digest. If this flag is not set, the peptide/protein mapping will be taken from 
+                        database digest and appended to the mapping present in the input files.
   -i, --id_splitting    If set this flag will split protein identifiers. See below for more information.If not set, this flag will not split protein identifiers.This flag indicates whether or not to
                         split the identifiers that are present in the fasta database. Only use this option if you know what you are doing. Sometimes the fasta database protein IDs will be like:
                         'sp|ARAF_HUMAN|P10398'. While protein IDs in the input files will be 'ARAF_HUMAN|P10398'. Setting This flag will split off the front 'sp|' or 'tr|' from the database protein
@@ -345,7 +345,13 @@ optional arguments:
 
 Input options are the same as the standard protein_inference_cli.py with the addition of two optional inputs:
 1) `-r` This is a filepath that will have a pdf plot written to it after the heuristic method has been run. If this is left blank it will write the plot into the standard output directory with the name roc_plot.pdf
-2) `-m` The maximum FDR to display in the ROC plot. If this value is left blank it will be set to 0.2
+2) `-m` The maximum FDR to display in the ROC plot. If this value is left blank it will be set to 0.1
+
+You can run the tool as follows:
+`protein_inference_heuristic_cli.py -t /path/to/target/file.txt -d /path/to/decoy/file.txt -db /path/to/database/file.fasta -y /path/to/parameter/file.yaml -o /path/to/output/directory/ -r /path/to/pdf/file.pdf -m 0.2`
+
+Running with multiple input target/decoy files:
+`protein_inference_heuristic_cli.py -t /path/to/target/file1.txt /path/to/target/file2.txt -d /path/to/decoy/file1.txt /path/to/decoy/file2.txt -db /path/to/database/file.fasta -y /path/to/parameter/file.yaml -o /path/to/output/directory/ -r /path/to/pdf/file.pdf -m 0.2`
 
 
 #### Running the Heuristic Method via Python
@@ -526,33 +532,33 @@ The tables below represent what the output of each export type will look like. E
 
 | Protein                | Score              | Q_Value            | Number_of_Peptides | Identifier_Type | GroupID | Peptides                         |
 |------------------------|--------------------|--------------------|--------------------|-----------------|---------|----------------------------------|
-| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | CGVEVTQTK                        |
-| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | MGAEAIQALLK                      |
-| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | NTLLHEQWCDLLEENSVDAVK            |
-| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | RVDYSGR                          |
-| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | FATSDLNDLYR                      |
-| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | EGLNVLQY#FISTHGAR                |
-| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | LIPAGTGYAYHQDR                   |
-| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | VADLFEAR                         |
-| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | IPQESGGTK                        |
-| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | IALASPDMIR                       |
-| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | VTAEDVLKPGTADILVPR               |
-| RPOC_SHIF8|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | VIDIWAAANDR                      |
-| RAF1_HUMAN|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | QTAQGMDYLHAK                     |
-| RAF1_HUMAN|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | VFLPNKQR                         |
-| RAF1_HUMAN|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | FQMFQLIDIAR                      |
-| RAF1_HUMAN|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | SASEPSLHR                        |
-| RAF1_HUMAN|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | CQTCGYKFHEHCSTK                  |
-| RAF1_HUMAN|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | WHGDVAVKILK                      |
-| ARAF_HUMAN|P10398      | 46.288402190472596 | 0.0                | 4                  | Reviewed        | 3       | QTAQGMDYLHAK                     |
-| ARAF_HUMAN|P10398      | 46.288402190472596 | 0.0                | 4                  | Reviewed        | 3       | GYLSPDLSK                        |
-| ARAF_HUMAN|P10398      | 46.288402190472596 | 0.0                | 4                  | Reviewed        | 3       | TFFSLAFCDFCLK                    |
-| ARAF_HUMAN|P10398      | 46.288402190472596 | 0.0                | 4                  | Reviewed        | 3       | SASEPSLHR                        |
-| TCAF1_HUMAN|Q9Y4C2     | 19.048939464610452 | 0.0                | 2                  | Reviewed        | 4       | YCWMSTGLYIPGR                    |
-| TCAF1_HUMAN|Q9Y4C2     | 19.048939464610452 | 0.0                | 2                  | Reviewed        | 4       | LYLLTQMPH                        |
-| HNRPU_HUMAN|Q00839     | 15.316094065486292 | 0.0                | 2                  | Reviewed        | 5       | LQAALDDEEAGGRPAMEPGNGSLDLGGDSAGR |
-| HNRPU_HUMAN|Q00839     | 15.316094065486292 | 0.0                | 2                  | Reviewed        | 5       | AEGGGGGGRPGAPAAGDGK              |
-| ##TCAF2_HUMAN|##A6NFQ2 | 2.4079456086518722 | 0.3333333333333333 | 1                  | Reviewed        | 6       | MEPTPVPFCGAK                     |
+| RPOC_SHIF8\|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | CGVEVTQTK                        |
+| RPOC_SHIF8\|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | MGAEAIQALLK                      |
+| RPOC_SHIF8\|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | NTLLHEQWCDLLEENSVDAVK            |
+| RPOC_SHIF8\|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | RVDYSGR                          |
+| RPOC_SHIF8\|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | FATSDLNDLYR                      |
+| RPOC_SHIF8\|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | EGLNVLQY#FISTHGAR                |
+| RPOC_SHIF8\|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | LIPAGTGYAYHQDR                   |
+| RPOC_SHIF8\|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | VADLFEAR                         |
+| RPOC_SHIF8\|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | IPQESGGTK                        |
+| RPOC_SHIF8\|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | IALASPDMIR                       |
+| RPOC_SHIF8\|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | VTAEDVLKPGTADILVPR               |
+| RPOC_SHIF8\|Q0SY12      | 82.89306334778564  | 0.0                | 12                 | Reviewed        | 1       | VIDIWAAANDR                      |
+| RAF1_HUMAN\|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | QTAQGMDYLHAK                     |
+| RAF1_HUMAN\|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | VFLPNKQR                         |
+| RAF1_HUMAN\|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | FQMFQLIDIAR                      |
+| RAF1_HUMAN\|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | SASEPSLHR                        |
+| RAF1_HUMAN\|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | CQTCGYKFHEHCSTK                  |
+| RAF1_HUMAN\|P04049      | 70.7434325345954   | 0.0                | 6                  | Reviewed        | 2       | WHGDVAVKILK                      |
+| ARAF_HUMAN\|P10398      | 46.288402190472596 | 0.0                | 4                  | Reviewed        | 3       | QTAQGMDYLHAK                     |
+| ARAF_HUMAN\|P10398      | 46.288402190472596 | 0.0                | 4                  | Reviewed        | 3       | GYLSPDLSK                        |
+| ARAF_HUMAN\|P10398      | 46.288402190472596 | 0.0                | 4                  | Reviewed        | 3       | TFFSLAFCDFCLK                    |
+| ARAF_HUMAN\|P10398      | 46.288402190472596 | 0.0                | 4                  | Reviewed        | 3       | SASEPSLHR                        |
+| TCAF1_HUMAN\|Q9Y4C2     | 19.048939464610452 | 0.0                | 2                  | Reviewed        | 4       | YCWMSTGLYIPGR                    |
+| TCAF1_HUMAN\|Q9Y4C2     | 19.048939464610452 | 0.0                | 2                  | Reviewed        | 4       | LYLLTQMPH                        |
+| HNRPU_HUMAN\|Q00839     | 15.316094065486292 | 0.0                | 2                  | Reviewed        | 5       | LQAALDDEEAGGRPAMEPGNGSLDLGGDSAGR |
+| HNRPU_HUMAN\|Q00839     | 15.316094065486292 | 0.0                | 2                  | Reviewed        | 5       | AEGGGGGGRPGAPAAGDGK              |
+| ##TCAF2_HUMAN\|##A6NFQ2 | 2.4079456086518722 | 0.3333333333333333 | 1                  | Reviewed        | 6       | MEPTPVPFCGAK                     |
 
 
 #### Legacy Export Types:

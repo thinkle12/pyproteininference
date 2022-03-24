@@ -108,10 +108,9 @@ def main():
         '--skip_append_alt',
         action="store_true",
         default=False,
-        help="If set, will add alternative proteins to each PSM from the database digest. "
-        "If not set the peptide/protein mapping will be taken from the input files only. "
-        "If this is left blank it will default to True which means alternative proteins will "
-        "be added from the database digest.",
+        help="If this flag is set, will skip adding alternative proteins to each PSM from the database digest. "
+        "If this flag is not set, the peptide/protein mapping will be taken from database digest and appended to "
+        "the mapping present in the input files.",
     )
     parser.add_argument(
         "-i",

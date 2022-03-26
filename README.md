@@ -2,7 +2,7 @@
 # Py Protein Inference
 ## Requirements
 
-Current version: 0.8.0
+Current version: 0.9.0
 
  1. __Python 3.6__ or greater. This package was created using __Python 3.6__
  2. __Python Packages__:
@@ -274,19 +274,19 @@ Py Protein Inference can also be ran via a docker container. To access the docke
 2. Ability to pull the docker image from docker hub
 
 Pulling the image from docker hub:
-`docker pull pyproteininference:0.8.0`
+`docker pull pyproteininference:0.9.0`
 
-It is recommended to pull the image with the highest version number. Currently this is 0.8.0.
+It is recommended to pull the image with the highest version number. Currently this is 0.9.0.
 
 Running via docker is similar to running normally on the commandline. One thing to consider is that you have to volume mount the data into the container.
 Here we have data that exists in `/path/to/data/` locally and we are mounting it into a directory called `/data` within the container. Therefore, when running the tool in the container we sepcify all the paths of our data by using `/data` 
 See the example below:
-`docker run -v /path/to/data/:/data pyproteininference:0.8.0 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
+`docker run -v /path/to/data/:/data pyproteininference:0.9.0 python scripts/protein_inference_cli.py -t /data/target_file.txt -d /data/decoy_file.txt -db /data/database_file.fasta -y /data/parameter_file.yaml -o /data/`
 
 #### Building the Docker image from source
 Use the following command from the root directory of the source code:
-Here we use version `0.8.0` and tag as that version as well.
-`docker build . -f Dockerfile -t pyproteininference:0.8.0 --build-arg VERSION=0.8.0`
+Here we use version `0.9.0` and tag as that version as well.
+`docker build . -f Dockerfile -t pyproteininference:0.9.0 --build-arg VERSION=0.9.0`
 
 ### Running Heuristic
 Py Protein Inference also has a built in Heuristic that runs through four inference methods (Inclusion, Exclusion, Parsimony, and Peptide Centric) and selects a recommended method for your given dataset. 
@@ -303,7 +303,7 @@ Command line options are as follows:
 ```
 cli$ python protein_inference_heuristic_cli.py --help
 usage: protein_inference_heuristic_cli.py [-h] [-t FILE [FILE ...]] [-d FILE [FILE ...]] [-f FILE [FILE ...]] [-o DIR] [-l FILE] [-a DIR] [-b DIR] [-c DIR] [-db FILE] [-y FILE] [-p] [-i] [-r FILE]
-                                          [-m FLOAT]
+                                          [-m FLOAT] [-u STR]
 
 Protein Inference Heuristic
 
@@ -341,11 +341,15 @@ optional arguments:
                         file to current working directory.
   -m FLOAT, --fdr_max FLOAT
                         The maximum FDR to display in the ROC plot. Defaults to 0.1 if not set.
+  -u STR, --output_type STR
+						The type of output to be written. Can either be 'all' or 'optimal'. If set to 'all' will output all inference results. If set to 'optimal' will output only the result selected 
+						by the heuristic method. If left blank this will default to 'all'.
 ```
 
-Input options are the same as the standard protein_inference_cli.py with the addition of two optional inputs:
+Input options are the same as the standard protein_inference_cli.py with the addition of three optional inputs:
 1) `-r` This is a filepath that will have a pdf plot written to it after the heuristic method has been run. If this is left blank it will write the plot into the standard output directory with the name roc_plot.pdf
 2) `-m` The maximum FDR to display in the ROC plot. If this value is left blank it will be set to 0.1
+3) `-u` This is the type of output to be written after the heuristic method is complete. Will either output all results or the optimal results. If all is selected the optimal results will have the string "optimal_method" spliced into the filename.
 
 You can run the tool as follows:
 `protein_inference_heuristic_cli.py -t /path/to/target/file.txt -d /path/to/decoy/file.txt -db /path/to/database/file.fasta -y /path/to/parameter/file.yaml -o /path/to/output/directory/ -r /path/to/pdf/file.pdf -m 0.2`
@@ -375,7 +379,8 @@ hp = HeuristicPipeline(parameter_file=yaml_params,
 							 combined_files=None,  
 							 output_directory=output_directory_name,
 							 roc_plot_filepath=pdf_filename,
-							 fdr_max=0.2)  
+							 fdr_max=0.2,
+					   		 output_type="all")  
 # Calling .execute() will initiate the heuristic pipeline with the given data 
 # The suggested method will be output in the console and the suggested method results will be written into the output_directory
 hp.execute()

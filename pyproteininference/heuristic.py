@@ -650,7 +650,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             fdr_vs_target_hits = self.datastore_dict[inference_method].generate_fdr_vs_target_hits(fdr_max=fdr_max)
             fdrs = [x[0] for x in fdr_vs_target_hits]
             target_hits = [x[1] for x in fdr_vs_target_hits]
-            plt.plot(fdrs, target_hits, '-', label=inference_method)
+            plt.plot(fdrs, target_hits, '-', label=inference_method.replace("_", " "))
             target_fdr = self.datastore_dict[inference_method].parameter_file_object.fdr
             if inference_method == self.selected_method:
                 best_value = min(fdrs, key=lambda x: abs(x - target_fdr))

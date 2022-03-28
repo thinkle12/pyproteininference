@@ -1,3 +1,4 @@
+import copy
 import csv
 import itertools
 import logging
@@ -130,6 +131,37 @@ class Reader(object):
 
         return psm
 
+    def _check_initial_database_overlap(self, initial_possible_proteins, initial_protein_peptide_map):
+        """
+        Internal method that checks to make sure there is at least some overlap between proteins in the input files
+        And the proteins in the database digestion
+        """
+
+        if len(initial_protein_peptide_map.keys()) > 0:
+            input_protein_ids_flat = set([protein for group in initial_possible_proteins for protein in group])
+
+            digest_proteins = set(initial_protein_peptide_map.keys())
+
+            intersection = input_protein_ids_flat.intersection(digest_proteins)
+
+            if len(intersection) < 1:
+                raise ValueError(
+                    "The Intersection of Protein Identifiers between the database digest "
+                    "and the input files is zero. Please consider setting id_splitting to True. "
+                    "Or make sure that the identifiers in the input files and database file match. "
+                    "Example Protein Identifier from input file '{}'."
+                    "Example Protein Identifier from database file '{}'".format(
+                        list(input_protein_ids_flat)[0], list(digest_proteins)[0]
+                    )
+                )
+            else:
+                logger.info("Number of matching proteins from database and input files: {}".format(len(intersection)))
+                logger.info("Number of proteins from database file: {}".format(len(digest_proteins)))
+                logger.info("Number of proteins from input files: {}".format(len(input_protein_ids_flat)))
+
+        else:
+            pass
+
 
 class PercolatorReader(Reader):
     """
@@ -203,6 +235,7 @@ class PercolatorReader(Reader):
         self.psms = None
         self.search_id = None
         self.digest = digest
+        self.initial_protein_peptide_map = copy.copy(self.digest.protein_to_peptide_dictionary)
         self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
@@ -334,6 +367,7 @@ class PercolatorReader(Reader):
         # We only want to get unique peptides... using all messes up scoring...
         # Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
 
+        initial_poss_prots = []
         logger.info("Length of PSM Data: {}".format(len(perc_all)))
         for psm_info in perc_all:
             current_peptide = psm_info[self.PEPTIDE_INDEX]
@@ -357,6 +391,7 @@ class PercolatorReader(Reader):
                     )
                 combined_psm_result_rows.possible_proteins = poss_proteins  # Restrict to 50 total possible proteins...
                 combined_psm_result_rows.psm_id = psm_info[self.PSMID_INDEX]
+                input_poss_prots = copy.copy(poss_proteins)
 
                 # Split peptide if flanking
                 current_peptide = Psm.split_peptide(peptide_string=current_peptide)
@@ -411,7 +446,13 @@ class PercolatorReader(Reader):
                 list_of_psm_objects.append(combined_psm_result_rows)
                 peptide_tracker.add(current_peptide)
 
+                initial_poss_prots.append(input_poss_prots)
+
         self.psms = list_of_psm_objects
+
+        self._check_initial_database_overlap(
+            initial_possible_proteins=initial_poss_prots, initial_protein_peptide_map=self.initial_protein_peptide_map
+        )
 
         logger.info("Length of PSM Data: {}".format(len(self.psms)))
 
@@ -463,6 +504,7 @@ class ProteologicPostSearchReader(Reader):
 
         self.psms = None
         self.digest = digest
+        self.initial_protein_peptide_map = copy.copy(self.digest.protein_to_peptide_dictionary)
         self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
@@ -498,6 +540,7 @@ class ProteologicPostSearchReader(Reader):
         # The data is sorted by percolator score... or at least it should be...
         # Or sorted by posterior error probability
 
+        initial_poss_prots = []
         for peps in list_of_psms:
             current_peptide = peps.peptide.sequence
             # Define the Psm...
@@ -513,6 +556,7 @@ class ProteologicPostSearchReader(Reader):
                     p.possible_proteins = peps.alternative_proteins
 
                 p.possible_proteins = list(filter(None, p.possible_proteins))
+                input_poss_prots = copy.copy(p.possible_proteins)
                 p.psm_id = peps.spectrum.spectrum_identifier
 
                 # Split peptide if flanking
@@ -562,7 +606,14 @@ class ProteologicPostSearchReader(Reader):
                 list_of_psm_objects.append(p)
                 peptide_tracker.add(current_peptide)
 
+                initial_poss_prots.append(input_poss_prots)
+
         self.psms = list_of_psm_objects
+
+        self._check_initial_database_overlap(
+            initial_possible_proteins=initial_poss_prots, initial_protein_peptide_map=self.initial_protein_peptide_map
+        )
+
         logger.info("Finished reading in data from Proteologic...")
 
 
@@ -642,6 +693,7 @@ class GenericReader(Reader):
         self.psms = None
         self.search_id = None
         self.digest = digest
+        self.initial_protein_peptide_map = copy.copy(self.digest.protein_to_peptide_dictionary)
         self.load_custom_score = False
 
         self.append_alt_from_db = append_alt_from_db
@@ -825,6 +877,7 @@ class GenericReader(Reader):
 
         peptide_to_protein_dictionary = self.digest.peptide_to_protein_dictionary
 
+        initial_poss_prots = []
         logger.info("Length of PSM Data: {}".format(len(all_psms)))
         for psm_info in all_psms:
             current_peptide = psm_info[self.PEPTIDE]
@@ -860,6 +913,8 @@ class GenericReader(Reader):
                 # Remove potential Repeats
                 if self.parameter_file_object.inference_type != Inference.FIRST_PROTEIN:
                     psm.possible_proteins = list(set(psm.possible_proteins))
+
+                input_poss_prots = copy.copy(psm.possible_proteins)
 
                 # Get PSM ID
                 psm.psm_id = psm_info[self.PSMID]
@@ -911,7 +966,13 @@ class GenericReader(Reader):
                 list_of_psm_objects.append(psm)
                 peptide_tracker.add(current_peptide)
 
+                initial_poss_prots.append(input_poss_prots)
+
         self.psms = list_of_psm_objects
+
+        self._check_initial_database_overlap(
+            initial_possible_proteins=initial_poss_prots, initial_protein_peptide_map=self.initial_protein_peptide_map
+        )
 
         logger.info("Length of PSM Data: {}".format(len(self.psms)))
 

@@ -146,6 +146,19 @@ def main():
         type=float,
         default=0.1,
     )
+    parser.add_argument(
+        "-u",
+        "--output_type",
+        dest="output_type",
+        required=False,
+        help="The type of output to be written. Can either be 'all' or 'optimal'. "
+        "If set to 'all' will output all inference results. IF set to 'optimal' "
+        "will output only the result selected by the heuristic method. If left blank "
+        "this will default to 'all'.",
+        metavar="STR",
+        type=str,
+        default="all",
+    )
 
     args = parser.parse_args()
 
@@ -164,6 +177,7 @@ def main():
         id_splitting=args.id_splitting,
         roc_plot_filepath=args.roc_plot_filepath,
         fdr_max=args.fdr_max,
+        output_type=args.output_type,
     )
     pipeline.execute()
 

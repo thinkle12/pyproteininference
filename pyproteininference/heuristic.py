@@ -52,10 +52,13 @@ class HeuristicPipeline(ProteinInferencePipeline):
         heuristic: (float) Heuristic Value as determined from the data
         selected_datastore: (:py:class:`pyproteininference.datastore.DataStore`)
             The DataStore object as selected by the heuristic
+        output_type: (str) How to output results. Can either be "all" or "optimal". Will either output all results
+            or will only output the optimal results.
 
     """
 
     RATIO_CONSTANT = 2
+    OUTPUT_TYPES = ["all", "optimal"]
 
     def __init__(
         self,
@@ -73,6 +76,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
         append_alt_from_db=True,
         roc_plot_filepath=None,
         fdr_max=0.2,
+        output_type="all",
     ):
         """
 
@@ -96,6 +100,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
                 This is optional and a default filename will be created in output_directory if this is left as None
             fdr_max (float): The Maximum FDR to display on the ROC Plot generated to compare
                 inference methods
+            output_type: (str) How to output results. Can either be "all" or "optimal". Will either output all results
+                        or will only output the optimal results.
 
         Returns:
             object:
@@ -115,6 +121,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             >>>     append_alt_from_db=append_alt,
             >>>     roc_plot_filepath=roc_plot_filepath,
             >>>     fdr_max=0.2,
+            >>>     output_type="all"
             >>> )
         """
 
@@ -131,11 +138,17 @@ class HeuristicPipeline(ProteinInferencePipeline):
         self.id_splitting = id_splitting
         self.append_alt_from_db = append_alt_from_db
         self.fdr_max = fdr_max
+        self.output_type = output_type
+        if self.output_type not in self.OUTPUT_TYPES:
+            raise ValueError("The variable output_type must be set to either 'all' or 'optimal'")
         if not roc_plot_filepath:
-            if self.output_directory:
+            if self.output_directory and not self.output_filename:
                 self.roc_plot_filepath = os.path.join(self.output_directory, "roc_plot.pdf")
+            elif self.output_filename:
+                self.roc_plot_filepath = os.path.join(os.path.split(self.output_filename)[0], "roc_plot.pdf")
             else:
                 self.roc_plot_filepath = os.path.join(os.getcwd(), "roc_plot.pdf")
+
         else:
             self.roc_plot_filepath = roc_plot_filepath
 
@@ -164,7 +177,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
         1. Loops over the main inference methods: Inclusion, Exclusion, Parsimony, and Peptide Centric
         2. Determines the optimal inference method based on the input data as well as the database file
-        3. Outputs the optimal results
+        3. Outputs the results and indicates the optimal results
 
         Args:
             fdr_threshold (float): The Qvalue/FDR threshold the heuristic method uses to base calculations from
@@ -188,6 +201,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             >>>     append_alt_from_db=append_alt,
             >>>     roc_plot_filepath=roc_plot_filepath,
             >>>     fdr_max=0.2,
+            >>>     output_type="all"
             >>> )
             >>> heuristic.execute(fdr_threshold=0.01)
 
@@ -262,12 +276,12 @@ class HeuristicPipeline(ProteinInferencePipeline):
         self.selected_method = self.determine_optimal_inference_method()
         self.selected_datastore = self.datastore_dict[self.selected_method]
 
-        export = pyproteininference.export.Export(data=self.selected_datastore)
-        export.export_to_csv(
-            output_filename=self.output_filename,
-            directory=self.output_directory,
-            export_type=method_specific_parameters.export,
-        )
+        if self.output_type == "all":
+            self._write_all_results(parameters=method_specific_parameters)
+        elif self.output_type == "optimal":
+            self._write_optimal_results(parameters=method_specific_parameters)
+        else:
+            self._write_optimal_results(parameters=method_specific_parameters)
 
         if not skip_plot:
             self.generate_roc_plot(fdr_max=self.fdr_max, pdf_filename=self.roc_plot_filepath)
@@ -654,3 +668,58 @@ class HeuristicPipeline(ProteinInferencePipeline):
             logger.info("Writing ROC plot to: {}".format(pdf_filename))
             f.savefig(pdf_filename)
         plt.close()
+
+    def _write_all_results(self, parameters):
+        """
+        Internal method that loops over all results and writes them out
+        """
+        for method in list(self.datastore_dict.keys()):
+            if method == self.selected_method:
+                inference_method_string = "{}_{}".format(method, "optimal_method")
+            else:
+                inference_method_string = method
+            if not self.output_filename and self.output_directory:
+                # If a filename is not provided then construct one using output_directory
+                # Note: output_directory will always get set even if its set as None - gets set to cwd
+                inference_filename = os.path.join(
+                    self.output_directory, "{}_{}".format(inference_method_string, "protein_inference_results.csv")
+                )
+            if self.output_filename:
+                # If the user specified an output filename then split it apart and insert the inference method
+                # Then reconstruct the file
+                split = os.path.split(self.output_filename)
+                path = split[0]
+                filename = split[1]
+                inference_filename = os.path.join(path, "{}_{}".format(inference_method_string, filename))
+            export = pyproteininference.export.Export(data=self.datastore_dict[method])
+            export.export_to_csv(
+                output_filename=inference_filename,
+                directory=self.output_directory,
+                export_type=parameters.export,
+            )
+
+    def _write_optimal_results(self, parameters):
+        """
+        Internal method that writes out the optimized results
+        """
+
+        inference_method_string = "{}_{}".format(self.selected_method, "optimal_method")
+        if not self.output_filename and self.output_directory:
+            # If a filename is not provided then construct one using output_directory
+            # Note: output_directory will always get set even if its set as None - gets set to cwd
+            inference_filename = os.path.join(
+                self.output_directory, "{}_{}".format(inference_method_string, "protein_inference_results.csv")
+            )
+        if self.output_filename:
+            # If the user specified an output filename then split it apart and insert the inference method
+            # Then reconstruct the file
+            split = os.path.split(self.output_filename)
+            path = split[0]
+            filename = split[1]
+            inference_filename = os.path.join(path, "{}_{}".format(inference_method_string, filename))
+        export = pyproteininference.export.Export(data=self.selected_datastore)
+        export.export_to_csv(
+            output_filename=inference_filename,
+            directory=self.output_directory,
+            export_type=parameters.export,
+        )

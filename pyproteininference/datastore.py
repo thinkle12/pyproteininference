@@ -1436,3 +1436,30 @@ class DataStore(object):
         fdr_vs_count = [x for x in fdr_vs_count if x[0] < fdr_max]
 
         return fdr_vs_count
+
+    def recover_mapping(self):
+        all_psms = self.get_psm_data()
+        proteins = [x.possible_proteins for x in all_psms]
+        flat_proteins = [item for sublist in proteins for item in sublist]
+
+        missing_prots = []
+        for prot in flat_proteins:
+            try:
+                self.digest.protein_to_peptide_dictionary[prot]
+            except KeyError:
+                missing_prots.append(prot)
+                logger.warning(
+                    "Protein {} not found in protein to peptide mapping - trying to find the mapping.".format(prot)
+                )
+                psm_data = self.get_psm_data()
+                peptides = [x.stripped_peptide for x in psm_data if prot in x.possible_proteins]
+                for pep in peptides:
+                    self.digest.peptide_to_protein_dictionary.setdefault(pep, set()).add(prot)
+                    self.digest.protein_to_peptide_dictionary.setdefault(prot, set()).add(pep)
+                logger.info("Updated mappings for protein {} with {} peptides".format(prot, len(peptides)))
+
+        if missing_prots:
+            logger.info(
+                "{} proteins not found in mapping objects, please double check that your database"
+                " provided is accurate for the given input data.".format(len(missing_prots))
+            )

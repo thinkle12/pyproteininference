@@ -203,6 +203,7 @@ class ProteinInferencePipeline(object):
         # Step 5: Restrict the PSM data
         data.restrict_psm_data()
 
+        data.recover_mapping()
         # Step 6: Generate protein scoring input
         # Step 6: Generate protein scoring input
         # Step 6: Generate protein scoring input

@@ -254,6 +254,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
             data.restrict_psm_data()
 
+            data.recover_mapping()
+
             data.create_scoring_input()
 
             if method_specific_parameters.inference_type == Inference.EXCLUSION:

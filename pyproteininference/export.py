@@ -206,7 +206,7 @@ class Export(object):
                 for peps in prots.peptides:
                     protein_export_list[-1].append(peps)
 
-        with open(filename_out, "w") as f:
+        with open(filename_out, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(protein_export_list)
 
@@ -244,7 +244,7 @@ class Export(object):
             for peps in sorted(groups[0].peptides):
                 protein_export_list[-1].append(peps)
 
-        with open(filename_out, "w") as f:
+        with open(filename_out, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(protein_export_list)
 
@@ -284,7 +284,7 @@ class Export(object):
                     protein_export_list[-1].append(prots.group_identification)
                 else:
                     protein_export_list[-1].append(prots.identifier)
-        with open(filename_out, "w") as f:
+        with open(filename_out, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(protein_export_list)
 
@@ -324,7 +324,7 @@ class Export(object):
             for peps in sorted(peptides):
                 protein_export_list[-1].append(peps)
 
-        with open(filename_out, "w") as f:
+        with open(filename_out, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(protein_export_list)
 
@@ -364,7 +364,7 @@ class Export(object):
             for other_prots in groups.proteins[1:]:
                 protein_export_list[-1].append(other_prots.identifier)
 
-        with open(filename_out, "w") as f:
+        with open(filename_out, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(protein_export_list)
 
@@ -405,7 +405,7 @@ class Export(object):
                 for peps in sorted(proteins.peptides):
                     protein_export_list[-1].append(peps)
 
-        with open(filename_out, "w") as f:
+        with open(filename_out, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(protein_export_list)
 
@@ -435,7 +435,7 @@ class Export(object):
                 for peps in sorted(proteins.peptides):
                     protein_export_list[-1].append(peps)
 
-        with open(filename_out, "w") as f:
+        with open(filename_out, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(protein_export_list)
 
@@ -474,7 +474,7 @@ class Export(object):
                 protein_export_list[-1].append(groups.number_id)
                 protein_export_list[-1].append(peps)
 
-        with open(filename_out, "w") as f:
+        with open(filename_out, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(protein_export_list)
 
@@ -514,7 +514,7 @@ class Export(object):
             peptides = peptide_delimiter.join(list(sorted(lead_protein.peptides)))
             protein_export_list[-1].append(peptides)
 
-        with open(filename_out, "w") as f:
+        with open(filename_out, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(protein_export_list)
 
@@ -554,7 +554,7 @@ class Export(object):
             psms = peptide_delimiter.join(sorted([x.non_flanking_peptide for x in lead_protein.psms]))
             protein_export_list[-1].append(psms)
 
-        with open(filename_out, "w") as f:
+        with open(filename_out, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(protein_export_list)
 
@@ -594,6 +594,6 @@ class Export(object):
             psms = peptide_delimiter.join(sorted(lead_protein.get_psm_ids()))
             protein_export_list[-1].append(psms)
 
-        with open(filename_out, "w") as f:
+        with open(filename_out, "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(protein_export_list)

@@ -1,6 +1,5 @@
 import copy
 import csv
-import itertools
 import logging
 import os
 import sys
@@ -49,20 +48,20 @@ class Reader(object):
         self.combined_files = combined_files
         self.directory = directory
 
-    def remap(self, fieldnames):
+    def get_alternative_proteins_from_input(self, row):
         """
-        Method to map empty column names to "alternative_protein_x" for each column.
-        This method is necessary as the standard input format is irregular.
-
-        Args:
-            fieldnames:
-
-        Returns:
-            list: List of column names for alternative proteins for the input data
+        Method to get the alternative proteins from the input files
 
         """
-        price_count = itertools.count(1)
-        return ["alternative_protein_{}".format(next(price_count)) if f == "" else f for f in fieldnames]
+        if None in row.keys():
+            try:
+                row["alternative_proteins"] = row.pop(None)
+            except KeyError:
+                row["alternative_proteins"] = []
+        else:
+            logger.warning("Alternative Proteins not found in the input files. Make sure format is proper.")
+            row["alternative_proteins"] = []
+        return row
 
     def _validate_input(self):
         """
@@ -653,7 +652,7 @@ class GenericReader(Reader):
     POSTERIOR_ERROR_PROB = "posterior_error_prob"
     PEPTIDE = "peptide"
     PROTEIN_IDS = "proteinIds"
-    EXTRA_PROTEIN_IDS = "alternative_protein_{}"
+    ALTERNATIVE_PROTEINS = "alternative_proteins"
 
     def __init__(
         self,
@@ -717,10 +716,6 @@ class GenericReader(Reader):
                 )
             )
 
-        self.MAX_ALTERNATIVE_PROTEIN_COLUMN_NAMES = [
-            self.EXTRA_PROTEIN_IDS.format(x) for x in range(1, self.MAX_ALLOWED_ALTERNATIVE_PROTEINS + 1)
-        ]
-
         # If we select to not run inference at all
         if self.parameter_file_object.inference_type == Inference.FIRST_PROTEIN:
             # Only allow 1 Protein per PSM
@@ -752,20 +747,20 @@ class GenericReader(Reader):
                     ptarg = []
                     with open(t_files, "r") as psm_target_file:
                         logger.info(t_files)
-                        spamreader = csv.reader(psm_target_file, delimiter="\t")
-                        fieldnames = self.remap(next(spamreader))
+                        spamreader = csv.DictReader(psm_target_file, delimiter="\t")
                         for row in spamreader:
-                            ptarg.append(dict(zip(fieldnames, row)))
+                            row = self.get_alternative_proteins_from_input(row)
+                            ptarg.append(row)
                     all_target = all_target + ptarg
             else:
                 # If not just read the file...
                 ptarg = []
                 with open(self.target_file, "r") as psm_target_file:
                     logger.info(self.target_file)
-                    spamreader = csv.reader(psm_target_file, delimiter="\t")
-                    fieldnames = self.remap(next(spamreader))
+                    spamreader = csv.DictReader(psm_target_file, delimiter="\t")
                     for row in spamreader:
-                        ptarg.append(dict(zip(fieldnames, row)))
+                        row = self.get_alternative_proteins_from_input(row)
+                        ptarg.append(row)
                 all_target = ptarg
 
             # Repeat for decoy file
@@ -775,19 +770,19 @@ class GenericReader(Reader):
                     pdec = []
                     with open(d_files, "r") as psm_decoy_file:
                         logger.info(d_files)
-                        spamreader = csv.reader(psm_decoy_file, delimiter="\t")
-                        fieldnames = self.remap(next(spamreader))
+                        spamreader = csv.DictReader(psm_decoy_file, delimiter="\t")
                         for row in spamreader:
-                            pdec.append(dict(zip(fieldnames, row)))
+                            row = self.get_alternative_proteins_from_input(row)
+                            pdec.append(row)
                     all_decoy = all_decoy + pdec
             else:
                 pdec = []
                 with open(self.decoy_file, "r") as psm_decoy_file:
                     logger.info(self.decoy_file)
-                    spamreader = csv.reader(psm_decoy_file, delimiter="\t")
-                    fieldnames = self.remap(next(spamreader))
+                    spamreader = csv.DictReader(psm_decoy_file, delimiter="\t")
                     for row in spamreader:
-                        pdec.append(dict(zip(fieldnames, row)))
+                        row = self.get_alternative_proteins_from_input(row)
+                        pdec.append(row)
                 all_decoy = pdec
 
             # Combine the lists
@@ -800,19 +795,19 @@ class GenericReader(Reader):
                     c_all = []
                     with open(c_files, "r") as psm_file:
                         logger.info(c_files)
-                        spamreader = csv.reader(psm_file, delimiter="\t")
-                        fieldnames = self.remap(next(spamreader))
+                        spamreader = csv.DictReader(psm_file, delimiter="\t")
                         for row in spamreader:
-                            c_all.append(dict(zip(fieldnames, row)))
+                            row = self.get_alternative_proteins_from_input(row)
+                            c_all.append(row)
                     all = all + c_all
             else:
                 c_all = []
                 with open(self.combined_files, "r") as psm_file:
                     logger.info(self.combined_files)
-                    spamreader = csv.reader(psm_file, delimiter="\t")
-                    fieldnames = self.remap(next(spamreader))
+                    spamreader = csv.DictReader(psm_file, delimiter="\t")
                     for row in spamreader:
-                        c_all.append(dict(zip(fieldnames, row)))
+                        row = self.get_alternative_proteins_from_input(row)
+                        c_all.append(row)
                 all = c_all
             all_psms = all
 
@@ -823,10 +818,10 @@ class GenericReader(Reader):
                 psm_per_file = []
                 with open(files, "r") as psm_file:
                     logger.info(files)
-                    spamreader = csv.reader(psm_file, delimiter="\t")
-                    fieldnames = self.remap(next(spamreader))
+                    spamreader = csv.DictReader(psm_file, delimiter="\t")
                     for row in spamreader:
-                        psm_per_file.append(dict(zip(fieldnames, row)))
+                        row = self.get_alternative_proteins_from_input(row)
+                        psm_per_file.append(row)
                 all = all + psm_per_file
             all_psms = all
 
@@ -904,12 +899,7 @@ class GenericReader(Reader):
                     psm.custom_score = float(psm_info[self.scoring_variable])
                 psm.possible_proteins = []
                 psm.possible_proteins.append(psm_info[self.PROTEIN_IDS])
-                for alternative_protein_keys in self.MAX_ALTERNATIVE_PROTEIN_COLUMN_NAMES:
-                    try:
-                        if psm_info[alternative_protein_keys]:
-                            psm.possible_proteins.append(psm_info[alternative_protein_keys])
-                    except KeyError:
-                        break
+                psm.possible_proteins = psm.possible_proteins + [x for x in psm_info[self.ALTERNATIVE_PROTEINS] if x]
                 # Remove potential Repeats
                 if self.parameter_file_object.inference_type != Inference.FIRST_PROTEIN:
                     psm.possible_proteins = list(set(psm.possible_proteins))
@@ -928,11 +918,8 @@ class GenericReader(Reader):
                     stripped_peptide = Psm.remove_peptide_mods(peptide_string)
                     current_peptide = stripped_peptide
                 # Add the other possible_proteins from insilicodigest here...
-
                 try:
-                    current_alt_proteins = list(
-                        peptide_to_protein_dictionary[current_peptide]
-                    )  # This peptide needs to be scrubbed of Mods...
+                    current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
                 except KeyError:
                     current_alt_proteins = []
                     logger.debug(

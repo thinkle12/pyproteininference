@@ -1,4 +1,4 @@
-PSMId	score	q-value	posterior_error_prob	peptide	proteinIds			
+PSMId	score	q-value	posterior_error_prob	peptide	proteinIds
 1	7	0.00032	3.50E-06	R.CQTCGYKFHEHCSTK.V	RAF1_HUMAN|P04049
 2	6.9	0.00035	4.70E-06	K.WHGDVAVKILK.V	RAF1_HUMAN|P04049
 3	6.8	0.000363	6.10E-06	R.QTAQGMDYLHAK.L	ARAF_HUMAN|P10398

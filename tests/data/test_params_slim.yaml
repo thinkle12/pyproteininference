@@ -1,0 +1,5 @@
+parameters:
+  inference:
+    inference_type: inclusion
+  identifiers:
+    decoy_symbol: "decoy_"

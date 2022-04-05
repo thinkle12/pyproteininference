@@ -45,8 +45,8 @@ def main():
         "--output",
         dest="dir_name",
         required=False,
-        help="Result Directory to write to - Name of file will be determined by parameters selected and parameter tag. "
-        "If this option is not set, will write results to current working directory.",
+        help="Result Directory to write to - the name of file will be determined by parameters selected "
+        "and tag parameter. If this option is not set, will write results to current working directory.",
         metavar="DIR",
     )
     parser.add_argument(
@@ -108,23 +108,20 @@ def main():
         '--skip_append_alt',
         action="store_true",
         default=False,
-        help="If this flag is set, will skip adding alternative proteins to each PSM from the database digest. "
-        "If this flag is not set, the peptide/protein mapping will be taken from database digest and appended to "
-        "the mapping present in the input files.",
+        help="Advanced usage only. If this flag is set, will skip adding alternative proteins to each PSM "
+        "from the database digest. If this flag is not set, the peptide/protein mapping will be taken "
+        "from database digest and appended to the mapping present in the input files.",
     )
     parser.add_argument(
         "-i",
         '--id_splitting',
         action="store_true",
         default=False,
-        help="If set this flag will split protein identifiers. See below for more information."
+        help="Advanced usage only. If set this flag will split protein identifiers."
         "If not set, this flag will not split protein identifiers."
-        "This flag indicates whether or not to split the identifiers that are present in the fasta database. "
-        "Only use this option if you know what you are doing. "
-        "Sometimes the fasta database protein IDs will be like: 'sp|ARAF_HUMAN|P10398'. "
-        "While protein IDs in the input files will be 'ARAF_HUMAN|P10398'. "
-        "Setting This flag will split off the front 'sp|' or 'tr|' from the database protein identifiers. "
-        "This is typically not necessary. So leave this blank unless you know what you are doing.",
+        "Sometimes the fasta database protein IDs are formatted as: 'sp|ARAF_HUMAN|P10398'. "
+        "While protein IDs in the input files are formatted as 'ARAF_HUMAN|P10398'. "
+        "Setting This flag will split off the front 'sp|' or 'tr|' from the database protein identifiers. ",
     )
 
     args = parser.parse_args()

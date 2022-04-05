@@ -157,6 +157,29 @@ class ProteinInferenceParameter(object):
 
     PEPTIDE_CENTRIC_SUB_KEYS = {MAX_IDENTIFIERS_PARAMETER}
 
+    DEFAULT_DIGEST_TYPE = "trypsin"
+    DEFAULT_EXPORT = "peptides"
+    DEFAULT_FDR = 0.01
+    DEFAULT_GLPK_PATH = "glpsol"
+    DEFAULT_MISSED_CLEAVAGES = 3
+    DEFAULT_PICKER = True
+    DEFAULT_RESTRICT_PEP = 0.9
+    DEFAULT_RESTRICT_PEPTIDE_LENGTH = 7
+    DEFAULT_RESTRICT_Q = 0.005
+    DEFAULT_RESTRICT_CUSTOM = "None"
+    DEFAULT_PROTEIN_SCORE = "multiplicative_log"
+    DEFAULT_PSM_SCORE = "posterior_error_prob"
+    DEFAULT_DECOY_SYMBOL = "##"
+    DEFAULT_ISOFORM_SYMBOL = "-"
+    DEFAULT_REVIEWED_IDENTIFIER_SYMBOL = "sp|"
+    DEFAULT_INFERENCE_TYPE = "peptide_centric"
+    DEFAULT_TAG = "py_protein_inference"
+    DEFAULT_PSM_SCORE_TYPE = "multiplicative"
+    DEFAULT_GROUPING_TYPE = "shared_peptides"
+    DEFAULT_MAX_IDENTIFIERS_PEPTIDE_CENTRIC = 5
+    DEFAULT_LP_SOLVER = "pulp"
+    DEFAULT_SHARED_PEPTIDES = "all"
+
     def __init__(self, yaml_param_filepath, validate=True):
         """Class to store Protein Inference parameter information as an object
 
@@ -175,27 +198,28 @@ class ProteinInferenceParameter(object):
 
         """
         self.yaml_param_filepath = yaml_param_filepath
-        self.digest_type = None
-        self.export = None
-        self.fdr = None
-        self.glpk_path = None
-        self.missed_cleavages = None
-        self.picker = None
-        self.restrict_pep = None
-        self.restrict_peptide_length = None
-        self.restrict_q = None
-        self.restrict_custom = None
-        self.protein_score = None
-        self.psm_score_type = None
-        self.decoy_symbol = None
-        self.isoform_symbol = None
-        self.reviewed_identifier_symbol = None
-        self.inference_type = None
-        self.tag = None
-        self.psm_score = None
-        self.grouping_type = None
-        self.max_identifiers_peptide_centric = None
-        self.lp_solver = None
+        self.digest_type = self.DEFAULT_DIGEST_TYPE
+        self.export = self.DEFAULT_EXPORT
+        self.fdr = self.DEFAULT_FDR
+        self.glpk_path = self.DEFAULT_GLPK_PATH
+        self.missed_cleavages = self.DEFAULT_MISSED_CLEAVAGES
+        self.picker = self.DEFAULT_PICKER
+        self.restrict_pep = self.DEFAULT_RESTRICT_PEP
+        self.restrict_peptide_length = self.DEFAULT_RESTRICT_PEPTIDE_LENGTH
+        self.restrict_q = self.DEFAULT_RESTRICT_Q
+        self.restrict_custom = self.DEFAULT_RESTRICT_CUSTOM
+        self.protein_score = self.DEFAULT_PROTEIN_SCORE
+        self.psm_score_type = self.DEFAULT_PSM_SCORE_TYPE
+        self.decoy_symbol = self.DEFAULT_DECOY_SYMBOL
+        self.isoform_symbol = self.DEFAULT_ISOFORM_SYMBOL
+        self.reviewed_identifier_symbol = self.DEFAULT_REVIEWED_IDENTIFIER_SYMBOL
+        self.inference_type = self.DEFAULT_INFERENCE_TYPE
+        self.tag = self.DEFAULT_TAG
+        self.psm_score = self.DEFAULT_PSM_SCORE
+        self.grouping_type = self.DEFAULT_GROUPING_TYPE
+        self.max_identifiers_peptide_centric = self.DEFAULT_MAX_IDENTIFIERS_PEPTIDE_CENTRIC
+        self.lp_solver = self.DEFAULT_LP_SOLVER
+        self.shared_peptides = self.DEFAULT_SHARED_PEPTIDES
         self.validate = validate
 
         self.convert_to_object()
@@ -225,94 +249,160 @@ class ProteinInferenceParameter(object):
             with open(self.yaml_param_filepath, "r") as stream:
                 yaml_params = yaml.load(stream, Loader=yaml.Loader)
 
-            if self.validate:
-                self._validate_parameter_shape(yaml_params=yaml_params)
+            try:
+                self.digest_type = yaml_params[self.PARENT_PARAMETER_KEY][self.DIGEST_PARAMETER_KEY][
+                    self.DIGEST_TYPE_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("digest_type set to default of {}".format(self.DEFAULT_DIGEST_TYPE))
 
-            self.digest_type = yaml_params[self.PARENT_PARAMETER_KEY][self.DIGEST_PARAMETER_KEY][
-                self.DIGEST_TYPE_PARAMETER
-            ]
-            self.export = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.EXPORT_PARAMETER]
-            self.fdr = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.FDR_PARAMETER]
-            self.glpk_path = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][
-                self.GLPK_PATH_PARAMETER
-            ]
-            self.missed_cleavages = yaml_params[self.PARENT_PARAMETER_KEY][self.DIGEST_PARAMETER_KEY][
-                self.MISSED_CLEAV_PARAMETER
-            ]
-            self.picker = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.PICKER_PARAMETER]
-            self.restrict_pep = yaml_params[self.PARENT_PARAMETER_KEY][self.DATA_RESTRICTION_PARAMETER_KEY][
-                self.PEP_RESTRICT_PARAMETER
-            ]
-            self.restrict_peptide_length = yaml_params[self.PARENT_PARAMETER_KEY][self.DATA_RESTRICTION_PARAMETER_KEY][
-                self.PEPTIDE_LENGTH_RESTRICT_PARAMETER
-            ]
-            self.restrict_q = yaml_params[self.PARENT_PARAMETER_KEY][self.DATA_RESTRICTION_PARAMETER_KEY][
-                self.Q_VALUE_RESTRICT_PARAMETER
-            ]
-            self.restrict_custom = yaml_params[self.PARENT_PARAMETER_KEY][self.DATA_RESTRICTION_PARAMETER_KEY][
-                self.CUSTOM_RESTRICT_PARAMETER
-            ]
-            self.protein_score = yaml_params[self.PARENT_PARAMETER_KEY][self.SCORE_PARAMETER_KEY][
-                self.PROTEIN_SCORE_PARAMETER
-            ]
-            self.psm_score_type = yaml_params[self.PARENT_PARAMETER_KEY][self.SCORE_PARAMETER_KEY][
-                self.PSM_SCORE_TYPE_PARAMETER
-            ]
-            self.decoy_symbol = yaml_params[self.PARENT_PARAMETER_KEY][self.IDENTIFIERS_PARAMETER_KEY][
-                self.DECOY_SYMBOL_PARAMETER
-            ]
-            self.isoform_symbol = yaml_params[self.PARENT_PARAMETER_KEY][self.IDENTIFIERS_PARAMETER_KEY][
-                self.ISOFORM_SYMBOL_PARAMETER
-            ]
-            self.reviewed_identifier_symbol = yaml_params[self.PARENT_PARAMETER_KEY][self.IDENTIFIERS_PARAMETER_KEY][
-                self.REVIEWED_IDENTIFIER_PARAMETER
-            ]
-            self.inference_type = yaml_params[self.PARENT_PARAMETER_KEY][self.INFERENCE_PARAMETER_KEY][
-                self.INFERENCE_TYPE_PARAMETER
-            ]
-            self.tag = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.TAG_PARAMETER]
-            self.psm_score = yaml_params[self.PARENT_PARAMETER_KEY][self.SCORE_PARAMETER_KEY][self.PSM_SCORE_PARAMETER]
-            self.grouping_type = yaml_params[self.PARENT_PARAMETER_KEY][self.INFERENCE_PARAMETER_KEY][
-                self.GROUPING_TYPE_PARAMETER
-            ]
-            self.max_identifiers_peptide_centric = yaml_params[self.PARENT_PARAMETER_KEY][
-                self.PEPTIDE_CENTRIC_PARAMETER_KEY
-            ][self.MAX_IDENTIFIERS_PARAMETER]
-            self.lp_solver = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][
-                self.LP_SOLVER_PARAMETER
-            ]
+            try:
+                self.export = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.EXPORT_PARAMETER]
+            except KeyError:
+                logger.warning("export set to default of {}".format(self.DEFAULT_EXPORT))
+
+            try:
+                self.fdr = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.FDR_PARAMETER]
+            except KeyError:
+                logger.warning("fdr set to default of {}".format(self.DEFAULT_FDR))
+            try:
+                self.glpk_path = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][
+                    self.GLPK_PATH_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("glpk_path set to default of {}".format(self.DEFAULT_GLPK_PATH))
+            try:
+                self.missed_cleavages = yaml_params[self.PARENT_PARAMETER_KEY][self.DIGEST_PARAMETER_KEY][
+                    self.MISSED_CLEAV_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("missed_cleavages set to default of {}".format(self.DEFAULT_MISSED_CLEAVAGES))
+
+            try:
+                self.picker = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.PICKER_PARAMETER]
+            except KeyError:
+                logger.warning("picker set to default of {}".format(self.DEFAULT_PICKER))
+
+            try:
+                self.restrict_pep = yaml_params[self.PARENT_PARAMETER_KEY][self.DATA_RESTRICTION_PARAMETER_KEY][
+                    self.PEP_RESTRICT_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("restrict_pep set to default of {}".format(self.DEFAULT_RESTRICT_PEP))
+
+            try:
+                self.restrict_peptide_length = yaml_params[self.PARENT_PARAMETER_KEY][
+                    self.DATA_RESTRICTION_PARAMETER_KEY
+                ][self.PEPTIDE_LENGTH_RESTRICT_PARAMETER]
+            except KeyError:
+                logger.warning(
+                    "restrict_peptide_length set to default of {}".format(self.DEFAULT_RESTRICT_PEPTIDE_LENGTH)
+                )
+
+            try:
+                self.restrict_q = yaml_params[self.PARENT_PARAMETER_KEY][self.DATA_RESTRICTION_PARAMETER_KEY][
+                    self.Q_VALUE_RESTRICT_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("restrict_q set to default of {}".format(self.DEFAULT_RESTRICT_Q))
+
+            try:
+                self.restrict_custom = yaml_params[self.PARENT_PARAMETER_KEY][self.DATA_RESTRICTION_PARAMETER_KEY][
+                    self.CUSTOM_RESTRICT_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("restrict_custom set to default of {}".format(self.DEFAULT_RESTRICT_CUSTOM))
+
+            try:
+                self.protein_score = yaml_params[self.PARENT_PARAMETER_KEY][self.SCORE_PARAMETER_KEY][
+                    self.PROTEIN_SCORE_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("protein_score set to default of {}".format(self.DEFAULT_PROTEIN_SCORE))
+
+            try:
+                self.psm_score_type = yaml_params[self.PARENT_PARAMETER_KEY][self.SCORE_PARAMETER_KEY][
+                    self.PSM_SCORE_TYPE_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("psm_score_type set to default of {}".format(self.DEFAULT_PSM_SCORE_TYPE))
+
+            try:
+                self.decoy_symbol = yaml_params[self.PARENT_PARAMETER_KEY][self.IDENTIFIERS_PARAMETER_KEY][
+                    self.DECOY_SYMBOL_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("decoy_symbol set to default of {}".format(self.DEFAULT_DECOY_SYMBOL))
+
+            try:
+                self.isoform_symbol = yaml_params[self.PARENT_PARAMETER_KEY][self.IDENTIFIERS_PARAMETER_KEY][
+                    self.ISOFORM_SYMBOL_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("isoform_symbol set to default of {}".format(self.DEFAULT_ISOFORM_SYMBOL))
+
+            try:
+                self.reviewed_identifier_symbol = yaml_params[self.PARENT_PARAMETER_KEY][
+                    self.IDENTIFIERS_PARAMETER_KEY
+                ][self.REVIEWED_IDENTIFIER_PARAMETER]
+            except KeyError:
+                logger.warning(
+                    "reviewed_identifier_symbol set to default of {}".format(self.DEFAULT_REVIEWED_IDENTIFIER_SYMBOL)
+                )
+
+            try:
+                self.inference_type = yaml_params[self.PARENT_PARAMETER_KEY][self.INFERENCE_PARAMETER_KEY][
+                    self.INFERENCE_TYPE_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("inference_Type set to default of {}".format(self.DEFAULT_INFERENCE_TYPE))
+
+            try:
+                self.tag = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.TAG_PARAMETER]
+            except KeyError:
+                logger.warning("tag set to default of {}".format(self.DEFAULT_TAG))
+
+            try:
+                self.psm_score = yaml_params[self.PARENT_PARAMETER_KEY][self.SCORE_PARAMETER_KEY][
+                    self.PSM_SCORE_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("psm_score set to default of {}".format(self.DEFAULT_PSM_SCORE))
+
+            try:
+                self.grouping_type = yaml_params[self.PARENT_PARAMETER_KEY][self.INFERENCE_PARAMETER_KEY][
+                    self.GROUPING_TYPE_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("grouping_type set to default of {}".format(self.DEFAULT_GROUPING_TYPE))
+
+            try:
+                self.max_identifiers_peptide_centric = yaml_params[self.PARENT_PARAMETER_KEY][
+                    self.PEPTIDE_CENTRIC_PARAMETER_KEY
+                ][self.MAX_IDENTIFIERS_PARAMETER]
+            except KeyError:
+                logger.warning(
+                    "max_identifiers_peptide_centric set to default of {}".format(
+                        self.DEFAULT_MAX_IDENTIFIERS_PEPTIDE_CENTRIC
+                    )
+                )
+
+            try:
+                self.lp_solver = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][
+                    self.LP_SOLVER_PARAMETER
+                ]
+            except KeyError:
+                logger.warning("lp_solver set to default of {}".format(self.DEFAULT_LP_SOLVER))
             try:
                 # Do try except here to make old param files backwards compatible
                 self.shared_peptides = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][
                     self.SHARED_PEPTIDES_PARAMETER
                 ]
             except KeyError:
-                self.shared_peptides = Inference.ALL_SHARED_PEPTIDES
+                logger.warning("shared_peptides set to default of {}".format(self.DEFAULT_SHARED_PEPTIDES))
 
         else:
-            logger.warning("Yaml parameter file not found, parameters set to default")
-            self.digest_type = "trypsin"
-            self.export = "q_value"
-            self.fdr = 0.01
-            self.glpk_path = "glpsol"
-            self.missed_cleavages = 3
-            self.picker = True
-            self.restrict_pep = 0.9
-            self.restrict_peptide_length = 7
-            self.restrict_q = 0.005
-            self.restrict_custom = "None"
-            self.protein_score = "multiplicative_log"
-            self.psm_score = "posterior_error_prob"
-            self.decoy_symbol = "##"
-            self.isoform_symbol = "-"
-            self.reviewed_identifier_symbol = "sp|"
-            self.inference_type = "peptide_centric"
-            self.tag = "example_tag"
-            self.psm_score_type = "multiplicative"
-            self.grouping_type = "shared_peptides"
-            self.max_identifiers_peptide_centric = 5
-            self.lp_solver = "pulp"
-            self.shared_peptides = "all"
+            logger.warning("Yaml parameter file not found, all parameters set to default")
 
     def validate_parameters(self):
         """

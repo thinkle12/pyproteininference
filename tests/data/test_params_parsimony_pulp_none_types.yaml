@@ -1,25 +1,25 @@
 parameters:
   general:
-    export: peptides
+    export: q_value
     fdr: 0.01
     picker: True
-    tag: example_tag
+    tag: test_parsimony_no_grouping
   data_restriction:
-    pep_restriction: 0.9
+    pep_restriction: .9
     peptide_length_restriction: 7
     q_value_restriction: .9
     custom_restriction: None
   score:
-    protein_score: best_peptide_per_protein
+    protein_score: multiplicative_log
     psm_score: posterior_error_prob
     psm_score_type: multiplicative
   identifiers:
     decoy_symbol: "##"
-    isoform_symbol: "-"
-    reviewed_identifier_symbol: "sp|"
+    isoform_symbol: None
+    reviewed_identifier_symbol: None
   inference:
-    inference_type: inclusion
-    grouping_type: subset_peptides
+    inference_type: parsimony
+    grouping_type: None
   digest:
     digest_type: trypsin
     missed_cleavages: 3

@@ -1,16 +1,16 @@
 parameters:
   general:
-    export: peptides
+    export: q_value
     fdr: 0.01
     picker: True
-    tag: example_tag
+    tag: test_inclusion
   data_restriction:
-    pep_restriction: 0.9
+    pep_restriction: .9
     peptide_length_restriction: 7
     q_value_restriction: .9
     custom_restriction: None
   score:
-    protein_score: best_peptide_per_protein
+    protein_score: multiplicative_log
     psm_score: posterior_error_prob
     psm_score_type: multiplicative
   identifiers:
@@ -19,13 +19,13 @@ parameters:
     reviewed_identifier_symbol: "sp|"
   inference:
     inference_type: inclusion
-    grouping_type: subset_peptides
+    grouping_type: None
   digest:
     digest_type: trypsin
     missed_cleavages: 3
   parsimony:
-    lp_solver: pulp
-    glpk_path: None
-    shared_peptides: all
+    lp_solver: None
+    glpk_path: glpsol
+    shared_peptides: None
   peptide_centric:
     max_identifiers: 5

@@ -129,7 +129,7 @@ def main():
         dest="pdf_filename",
         required=False,
         help="PDF Filepath to write the Heuristic plot to after Heuristic Scoring. "
-        "If not set, writes the file with filename roc_plot.pdf to directory set in -o. "
+        "If not set, writes the file with filename heuristic_plot.pdf to directory set in -o. "
         "If -o is not set, will write the file to current working directory.",
         metavar="FILE",
     )

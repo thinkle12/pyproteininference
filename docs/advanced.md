@@ -234,7 +234,7 @@ optional arguments:
   -r FILE, --pdf_filename FILE
                         PDF Filepath to write the Heuristic plot to after
                         Heuristic Scoring. If not set, writes the file with
-                        filename roc_plot.pdf to directory set in -o. If -o is
+                        filename heuristic_plot.pdf to directory set in -o. If -o is
                         not set, will write the file to current working
                         directory.
   -m FLOAT, --fdr_threshold FLOAT
@@ -249,7 +249,7 @@ optional arguments:
 ```
 
 Input options are the same as the standard protein_inference_cli.py with the addition of three optional inputs:
-1. `-r` This is a filepath that will have a pdf plot written to it after the heuristic method has been run. If this is left blank, it will write the plot into the standard output directory with the name roc_plot.pdf
+1. `-r` This is a filepath that will have a density plot written to it after the heuristic method has been run. If this is left blank, it will write the plot into the standard output directory with the name heuristic_plot.pdf
 2. `-m` The FDR threshold to use in the Heuristic Method. The method will use values from 0 to the FDR threshold. If this value is left blank, it will be set to 0.05
 3. `-u` This is the type of output to be written after the heuristic method is complete. Will either output all results or the optimal results. If all is selected, the optimal results will have the string "optimal_method" spliced into the filename.
 
@@ -290,7 +290,7 @@ target_files = ["/path/to/target1.txt","/path/to/target2.txt"]
 ### decoy_files can either be a list of files or one file
 decoy_files = ["/path/to/decoy1.txt","/path/to/decoy2.txt"]
 output_directory_name = "/path/to/output/directory/"
-pdf_filename = "/path/to/output/directory/roc_plot.pdf"
+pdf_filename = "/path/to/output/directory/heuristic_plot.pdf"
 
 hp = HeuristicPipeline(parameter_file=yaml_params,
 							 database_file=database,  

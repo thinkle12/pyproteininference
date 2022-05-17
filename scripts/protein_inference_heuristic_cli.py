@@ -5,7 +5,7 @@ import pyproteininference
 
 def main():
     """
-    Script function for running the execute method of the ProteinInference HeuristicPipeline class
+    Script function for running the execute method of the ProteinInference HeuristicPipeline class.
 
     """
     parser = argparse.ArgumentParser(description="Protein Inference Heuristic")
@@ -125,23 +125,23 @@ def main():
     )
     parser.add_argument(
         "-r",
-        "--roc_plot_filepath",
-        dest="roc_plot_filepath",
+        "--pdf_filename",
+        dest="pdf_filename",
         required=False,
-        help="PDF Filepath to write the ROC plot to after Heuristic Scoring. "
+        help="PDF Filepath to write the Heuristic plot to after Heuristic Scoring. "
         "If not set, writes the file with filename roc_plot.pdf to directory set in -o. "
         "If -o is not set, will write the file to current working directory.",
         metavar="FILE",
     )
     parser.add_argument(
         "-m",
-        "--fdr_max",
-        dest="fdr_max",
+        "--fdr_threshold",
+        dest="fdr_threshold",
         required=False,
-        help="The maximum FDR to display in the ROC plot. Defaults to 0.1 if not set.",
+        help="The FDR threshold to use in the Heuristic Method. Defaults to 0.05 if not set.",
         metavar="FLOAT",
         type=float,
-        default=0.1,
+        default=0.05,
     )
     parser.add_argument(
         "-u",
@@ -172,11 +172,10 @@ def main():
         output_filename=args.output_filename,
         append_alt_from_db=not args.skip_append_alt,  # Need to reverse the Boolean here
         id_splitting=args.id_splitting,
-        roc_plot_filepath=args.roc_plot_filepath,
-        fdr_max=args.fdr_max,
+        pdf_filename=args.pdf_filename,
         output_type=args.output_type,
     )
-    pipeline.execute()
+    pipeline.execute(fdr_threshold=args.fdr_threshold)
 
 
 if __name__ == "__main__":

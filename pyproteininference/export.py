@@ -15,11 +15,11 @@ logging.basicConfig(
 
 class Export(object):
     """
-    Class that handles exporting protein inference results to filesystem as csv files
+    Class that handles exporting protein inference results to filesystem as csv files.
 
     Attributes:
-        data (pyproteininference.datastore.DataStore): Data Class
-        filepath (str): Path to file to be written
+        data (DataStore): [DataStore object][pyproteininference.datastore.DataStore].
+        filepath (str): Path to file to be written.
 
     """
 
@@ -49,10 +49,10 @@ class Export(object):
 
     def __init__(self, data):
         """
-        Initialization method for the Export class
+        Initialization method for the Export class.
 
         Args:
-            data (pyproteininference.datastore.DataStore): Data Object
+            data (DataStore): [DataStore object][pyproteininference.datastore.DataStore].
 
         Example:
             >>> export = pyproteininference.export.Export(data=data)
@@ -63,18 +63,18 @@ class Export(object):
 
     def export_to_csv(self, output_filename=None, directory=None, export_type="q_value"):
         """
-        Method that dispatches to one of the many export methods given an export_type input
+        Method that dispatches to one of the many export methods given an export_type input.
 
-        filepath is determined based on directory arg and information from data
-        :py:class:`pyproteininference.datastore.DataStore`
+        filepath is determined based on directory arg and information from
+        [DataStore object][pyproteininference.datastore.DataStore].
 
-        This method sets the :attr:`filepath` variable.
+        This method sets the `filepath` variable.
 
         Args:
             output_filename (str): Filepath to write to. If set as None will auto generate filename and
-                will write to directory variable
-            directory (str): Directory to write the result file to. If None, will write to current working directory
-            export_type (str): Must be a value in :attr:`EXPORT_TYPES` and determines the output format
+                will write to directory variable.
+            directory (str): Directory to write the result file to. If None, will write to current working directory.
+            export_type (str): Must be a value in `EXPORT_TYPES` and determines the output format.
 
         Example:
             >>> export = pyproteininference.export.Export(data=data)
@@ -96,7 +96,7 @@ class Export(object):
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_leads_restricted(filename_out=complete_filepath)
 
-        if self.EXPORT_ALL == export_type:
+        elif self.EXPORT_ALL == export_type:
             filename = "{}_all_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
             if output_filename:
@@ -104,7 +104,7 @@ class Export(object):
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_all_restricted(complete_filepath)
 
-        if self.EXPORT_COMMA_SEP == export_type:
+        elif self.EXPORT_COMMA_SEP == export_type:
             filename = "{}_comma_sep_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
             if output_filename:
@@ -112,7 +112,7 @@ class Export(object):
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_comma_sep_restricted(complete_filepath)
 
-        if self.EXPORT_Q_VALUE_COMMA_SEP == export_type:
+        elif self.EXPORT_Q_VALUE_COMMA_SEP == export_type:
             filename = "{}_q_value_comma_sep_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
             if output_filename:
@@ -120,7 +120,7 @@ class Export(object):
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_comma_sep(complete_filepath)
 
-        if self.EXPORT_Q_VALUE == export_type:
+        elif self.EXPORT_Q_VALUE == export_type:
             filename = "{}_q_value_leads_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
             if output_filename:
@@ -128,7 +128,7 @@ class Export(object):
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads(complete_filepath)
 
-        if self.EXPORT_Q_VALUE_ALL == export_type:
+        elif self.EXPORT_Q_VALUE_ALL == export_type:
             filename = "{}_q_value_all_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
             if output_filename:
@@ -136,7 +136,7 @@ class Export(object):
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_all(complete_filepath)
 
-        if self.EXPORT_PEPTIDES == export_type:
+        elif self.EXPORT_PEPTIDES == export_type:
             filename = "{}_q_value_leads_peptides_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
             if output_filename:
@@ -144,7 +144,7 @@ class Export(object):
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads_peptides(complete_filepath)
 
-        if self.EXPORT_PSMS == export_type:
+        elif self.EXPORT_PSMS == export_type:
             filename = "{}_q_value_leads_psms_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
             if output_filename:
@@ -152,7 +152,7 @@ class Export(object):
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads_psms(complete_filepath)
 
-        if self.EXPORT_PSM_IDS == export_type:
+        elif self.EXPORT_PSM_IDS == export_type:
             filename = "{}_q_value_leads_psm_ids_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
             if output_filename:
@@ -160,7 +160,7 @@ class Export(object):
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads_psm_ids(complete_filepath)
 
-        if self.EXPORT_LONG == export_type:
+        elif self.EXPORT_LONG == export_type:
             filename = "{}_q_value_long_{}_{}.csv".format(tag, data.short_protein_score, data.psm_score)
             complete_filepath = os.path.join(directory, filename)
             if output_filename:
@@ -168,15 +168,16 @@ class Export(object):
             logger.info("Exporting Protein Inference Data to File: {}".format(complete_filepath))
             self.csv_export_q_value_leads_long(complete_filepath)
 
+        else:
+            complete_filepath = "protein_inference_results.csv"
+
         self.filepath = complete_filepath
 
     def csv_export_all_restricted(self, filename_out):
         """
         Method that outputs a subset of the passing proteins based on FDR.
-        Only Proteins that pass FDR will be output and ALL proteins
-        will be all output not just leads.
 
-        This method returns a non-square CSV file
+        This method returns a non-square CSV file.
 
         Args:
             filename_out (str): Filename for the data to be written to
@@ -215,10 +216,10 @@ class Export(object):
         Method that outputs a subset of the passing proteins based on FDR.
         Only Proteins that pass FDR will be output and only Lead proteins will be output
 
-        This method returns a non-square CSV file
+        This method returns a non-square CSV file.
 
         Args:
-            filename_out (str): Filename for the data to be written to
+            filename_out (str): Filename for the data to be written to.
 
         """
         protein_objects = self.data.get_protein_objects(fdr_restricted=True)
@@ -252,12 +253,12 @@ class Export(object):
         """
         Method that outputs a subset of the passing proteins based on FDR.
         Only Proteins that pass FDR will be output and only Lead proteins will be output.
-        Proteins in the groups of lead proteins will also be output in the same row as the lead
+        Proteins in the groups of lead proteins will also be output in the same row as the lead.
 
-        This method returns a non-square CSV file
+        This method returns a non-square CSV file.
 
         Args:
-            filename_out (str): Filename for the data to be written to
+            filename_out (str): Filename for the data to be written to.
 
         """
         protein_objects = self.data.get_protein_objects(fdr_restricted=True)
@@ -292,10 +293,10 @@ class Export(object):
         """
         Method that outputs all lead proteins with Q values.
 
-        This method returns a non-square CSV file
+        This method returns a non-square CSV file.
 
         Args:
-            filename_out (str): Filename for the data to be written to
+            filename_out (str): Filename for the data to be written to.
 
         """
         protein_export_list = [
@@ -331,12 +332,12 @@ class Export(object):
     def csv_export_q_value_comma_sep(self, filename_out):
         """
         Method that outputs all lead proteins with Q values.
-        Proteins in the groups of lead proteins will also be output in the same row as the lead
+        Proteins in the groups of lead proteins will also be output in the same row as the lead.
 
-        This method returns a non-square CSV file
+        This method returns a non-square CSV file.
 
         Args:
-            filename_out (str): Filename for the data to be written to
+            filename_out (str): Filename for the data to be written to.
 
         """
         protein_export_list = [
@@ -371,13 +372,13 @@ class Export(object):
     def csv_export_q_value_all(self, filename_out):
         """
         Method that outputs all proteins with Q values.
-        Non Lead proteins are also output - entire group gets output
-        Proteins in the groups of lead proteins will also be output in the same row as the lead
+        Non Lead proteins are also output - entire group gets output.
+        Proteins in the groups of lead proteins will also be output in the same row as the lead.
 
-        This method returns a non-square CSV file
+        This method returns a non-square CSV file.
 
         Args:
-            filename_out (str): Filename for the data to be written to
+            filename_out (str): Filename for the data to be written to.
 
         """
         protein_export_list = [
@@ -443,10 +444,10 @@ class Export(object):
         """
         Method that outputs all lead proteins with Q values.
 
-        This method returns a long formatted result file with one peptide on each row
+        This method returns a long formatted result file with one peptide on each row.
 
         Args:
-            filename_out (str): Filename for the data to be written to
+            filename_out (str): Filename for the data to be written to.
 
         """
         protein_export_list = [
@@ -481,12 +482,12 @@ class Export(object):
     def csv_export_q_value_leads_peptides(self, filename_out, peptide_delimiter=" "):
         """
         Method that outputs all lead proteins with Q values in rectangular format.
-        This method outputs unique peptides per protein
+        This method outputs unique peptides per protein.
 
-        This method returns a rectangular CSV file
+        This method returns a rectangular CSV file.
 
         Args:
-            filename_out (str): Filename for the data to be written to
+            filename_out (str): Filename for the data to be written to.
             peptide_delimiter (str): String to separate peptides by in the "Peptides" column of the csv file
         """
         protein_export_list = [
@@ -521,13 +522,13 @@ class Export(object):
     def csv_export_q_value_leads_psms(self, filename_out, peptide_delimiter=" "):
         """
         Method that outputs all lead proteins with Q values in rectangular format.
-        This method outputs all PSMs for the protein not just unique peptide identifiers
+        This method outputs all PSMs for the protein not just unique peptide identifiers.
 
-        This method returns a rectangular CSV file
+        This method returns a rectangular CSV file.
 
         Args:
-            filename_out (str): Filename for the data to be written to
-            peptide_delimiter (str): String to separate peptides by in the "Peptides" column of the csv file
+            filename_out (str): Filename for the data to be written to.
+            peptide_delimiter (str): String to separate peptides by in the "Peptides" column of the csv file.
         """
         protein_export_list = [
             [
@@ -563,11 +564,11 @@ class Export(object):
         Method that outputs all lead proteins with Q values in rectangular format.
         Psms are output as the psm_id value. So sequence information is not output.
 
-        This method returns a rectangular CSV file
+        This method returns a rectangular CSV file.
 
         Args:
-            filename_out (str): Filename for the data to be written to
-            peptide_delimiter (str): String to separate psm_ids by in the "Peptides" column of the csv file
+            filename_out (str): Filename for the data to be written to.
+            peptide_delimiter (str): String to separate psm_ids by in the "Peptides" column of the csv file.
         """
         protein_export_list = [
             [

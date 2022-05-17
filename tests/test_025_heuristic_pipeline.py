@@ -11,6 +11,7 @@ TARGET_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_d
 DECOY_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_decoy.txt")
 PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_parsimony_pulp.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
+PDF_FILENAME = os.path.join(OUTPUT_DIR, "test_pyproteininference.pdf")
 # OUTPUT_DIR = resource_filename('pyproteininference', '../tests/output/')
 for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
     if not os.path.exists(os.path.join(OUTPUT_DIR, sub_dir)):
@@ -31,21 +32,31 @@ class TestHeuristicWorkflow(TestCase):
             combined_directory=None,
             output_directory=OUTPUT_DIR,
             id_splitting=True,
+            pdf_filename=PDF_FILENAME,
         )
 
-        hp.execute(skip_plot=True)
+        hp.execute()
 
-        self.assertEqual(hp.selected_method, "parsimony")
+        self.assertEqual(hp.selected_method, "inclusion")
 
         self.assertIsInstance(hp.selected_datastore, pyproteininference.datastore.DataStore)
 
-        result1 = hp.determine_optimal_inference_method(empirical_threshold=0.5)
+        result1 = hp.determine_optimal_inference_method(
+            false_discovery_rate_threshold=0.05,
+            upper_empirical_threshold=2,
+            lower_empirical_threshold=1,
+            pdf_filename=PDF_FILENAME,
+        )
 
-        self.assertEqual(result1, "exclusion")
+        self.assertEqual(result1, "parsimony")
 
-        result2 = hp.determine_optimal_inference_method(empirical_threshold=1.2)
-
-        self.assertEqual(result2, "exclusion")
+        result2 = hp.determine_optimal_inference_method(
+            false_discovery_rate_threshold=0.1,
+            upper_empirical_threshold=0.5,
+            lower_empirical_threshold=0.25,
+            pdf_filename=PDF_FILENAME,
+        )
+        self.assertEqual(result2, "inclusion")
 
     def test_workflow_heuristic_without_params(self):
 
@@ -59,18 +70,29 @@ class TestHeuristicWorkflow(TestCase):
             combined_directory=None,
             output_directory=OUTPUT_DIR,
             id_splitting=True,
+            pdf_filename=PDF_FILENAME,
         )
 
-        hp.execute(skip_plot=True)
+        hp.execute()
 
-        self.assertEqual(hp.selected_method, "parsimony")
+        self.assertEqual(hp.selected_method, "inclusion")
 
         self.assertIsInstance(hp.selected_datastore, pyproteininference.datastore.DataStore)
 
-        result1 = hp.determine_optimal_inference_method(empirical_threshold=0.5)
+        result1 = hp.determine_optimal_inference_method(
+            false_discovery_rate_threshold=0.05,
+            upper_empirical_threshold=2,
+            lower_empirical_threshold=1,
+            pdf_filename=PDF_FILENAME,
+        )
 
-        self.assertEqual(result1, "exclusion")
+        self.assertEqual(result1, "parsimony")
 
-        result2 = hp.determine_optimal_inference_method(empirical_threshold=1.2)
+        result2 = hp.determine_optimal_inference_method(
+            false_discovery_rate_threshold=0.1,
+            upper_empirical_threshold=0.5,
+            lower_empirical_threshold=0.25,
+            pdf_filename=PDF_FILENAME,
+        )
 
-        self.assertEqual(result2, "exclusion")
+        self.assertEqual(result2, "inclusion")

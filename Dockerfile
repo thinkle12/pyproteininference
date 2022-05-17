@@ -7,13 +7,13 @@ LABEL maintainer="Trent Hinkle <hinklet@gene.com>"
 LABEL version="$VERSION"
 
 # Install glpk
-RUN mkdir /build/
+RUN mkdir /opt/glpk
 
-WORKDIR /build/
+WORKDIR /opt/glpk
 
 RUN wget ftp://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz \
     && tar -xzvf glpk-4.65.tar.gz
-WORKDIR /build/glpk-4.65
+WORKDIR /opt/glpk/glpk-4.65
 RUN chmod +x ./configure \
    && ./configure \
    && make uninstall \
@@ -30,19 +30,13 @@ WORKDIR /
 RUN mkdir /pyproteininference
 
 # copy the entire protein_inference directory into the docker image
-COPY /pyproteininference /pyproteininference/pyproteininference/
-COPY /tests /pyproteininference/tests/
-COPY setup.cfg /pyproteininference/
-COPY setup.py /pyproteininference/
-COPY /parameters /pyproteininference/parameters/
-COPY /scripts /pyproteininference/scripts/
-COPY .git /pyproteininference/.git/
-COPY README.md /pyproteininference/
-COPY requirements.txt /pyproteininference/
+COPY . /pyproteininference
 
 WORKDIR /pyproteininference/
 RUN mkdir /glpkinout
 
 RUN pip install -r requirements.txt
 
-RUN python setup.py develop
+RUN python setup.py install
+
+WORKDIR /

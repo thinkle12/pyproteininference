@@ -1,0 +1,21 @@
+site_name: Py Protein Inference
+nav:
+    - Home: index.md
+    - Quick Start: quickstart.md
+    - Parameters: parameters.md
+    - Input Formats: input_format.md
+    - Advanced Usage: advanced.md
+    - Supplementary Information: supplementary.md
+    - Code Reference:
+      - PyProteinInference: pyproteininference_reference.md
+theme: readthedocs
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_source: true
+      watch:
+        - pyproteininference

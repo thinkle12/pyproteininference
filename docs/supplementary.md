@@ -4,6 +4,9 @@
 
 The Heuristic Algorithm contains multiple steps listed below:
 
+The heuristic is a conservative algorithm that attempts to select a method that is not over or under reporting protein IDs based on all four inference methods executed.
+Empirical thresholds are set for Parsimony and Peptide Centric (lower threshold) as well as for Inclusion and Exclusion (upper threshold) which helps guide the decision making process for selecting a recommended method. These thresholds are separate for Inclusion and Exclusion because thess two algorithms typically over report Protein IDs (Inclusion) or under report Protein IDs (Exclusion). 
+
 1. First each of the four main inference methods is executed.
 2. A finite number (100) of false discovery rates are genereted within the range `[0, fdr_threshold]` by increments of `fdr_threshold * 0.01`. `fdr_threshold` is typically set to `0.05`.
 3. We loop over each FDR and the following is done at each specified FDR:
@@ -12,12 +15,10 @@ The Heuristic Algorithm contains multiple steps listed below:
 6. The distribution of the number of standard deviations from the mean is plotted for each method on the same graph. See [Heuristic Plot](advanced.md#heuristic-density-plot-output) for an example.
 7. The peak of each distribution (each inference method) is identified and the absolute value of the x-axis coordinate is taken of each value. These are the heuristic scores.
 8. A recommended method is selected using the following conditions 
-	- If the heuristic score for parsimony or peptide-centric is within 0.5 stdev then the best method of the two (Closest to zero) is selected as the recommended method.
-	- If the heuristic score for inclusion or exclusion is within 1 stdev then the best method of the two is selected as the recommended method (Unless criteria above is satisfied).
-	- If neither of these conditions are met then the method with the heuristic score closest to zero (The least amount of stdev from the mean) is selected as the recommended method.
-
-The heuristic is a conservative algorithm that attempts to select a method that is not over or under reporting protein IDs based on all four inference methods executed.
-
+	- If the heuristic score for parsimony and peptide-centric is within 0.5 stdev of zero then both methods are recommended. If only one of the two methods is within 0.5 stdev of zero then that method is selected. If criteria is not met, continue to the next step.
+	- If the heuristic score for inclusion and exclusion is within 1 stdev of zero then both methods are recommended. If only one of the two methods is within 1 stdev of zero then that method is selected. (This step is only applicable if step 1 criteria is not met).
+	- If neither of these conditions above are met then the method with the heuristic score closest to zero (The least amount of stdev from the mean) is selected as the recommended method.
+	
 ### Inference Types
 
 #### Inclusion

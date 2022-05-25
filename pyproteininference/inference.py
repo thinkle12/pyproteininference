@@ -812,33 +812,32 @@ class Parsimony(Inference):
 
         """
 
-        if protein_list[0].reviewed:
-            if self.data.parameter_file_object.isoform_symbol in protein_list[0].identifier:
-                pure_id = protein_list[0].identifier.split(self.data.parameter_file_object.isoform_symbol)[0]
-                # Start to loop through protein_list which is the current group...
-                for potential_replacement in protein_list[1:]:
-                    isoform_override = potential_replacement
-                    if (
-                        isoform_override.identifier == pure_id
-                        and isoform_override.identifier not in leads
-                        and set(protein_list[0].peptides).issubset(set(isoform_override.peptides))
-                    ):
-                        isoform_override_index = grouped_protein_objects[-1].index(isoform_override)
-                        cur_iso_lead = grouped_protein_objects[-1][0]
-                        # Re-assigning the value within the index will also reassign the value in protein_list...
-                        # This is because grouped_protein_objects[-1] equals protein_list
-                        # So we do not have to reassign values in protein_list
-                        (grouped_protein_objects[-1][0], grouped_protein_objects[-1][isoform_override_index],) = (
-                            grouped_protein_objects[-1][isoform_override_index],
-                            grouped_protein_objects[-1][0],
-                        )
-                        grouped_protein_objects[-1][isoform_override_index], grouped_protein_objects[-1][0]
+        if self.data.parameter_file_object.isoform_symbol in protein_list[0].identifier:
+            pure_id = protein_list[0].identifier.split(self.data.parameter_file_object.isoform_symbol)[0]
+            # Start to loop through protein_list which is the current group...
+            for potential_replacement in protein_list[1:]:
+                isoform_override = potential_replacement
+                if (
+                    isoform_override.identifier == pure_id
+                    and isoform_override.identifier not in leads
+                    and set(protein_list[0].peptides).issubset(set(isoform_override.peptides))
+                ):
+                    isoform_override_index = grouped_protein_objects[-1].index(isoform_override)
+                    cur_iso_lead = grouped_protein_objects[-1][0]
+                    # Re-assigning the value within the index will also reassign the value in protein_list...
+                    # This is because grouped_protein_objects[-1] equals protein_list
+                    # So we do not have to reassign values in protein_list
+                    (grouped_protein_objects[-1][0], grouped_protein_objects[-1][isoform_override_index],) = (
+                        grouped_protein_objects[-1][isoform_override_index],
+                        grouped_protein_objects[-1][0],
+                    )
+                    grouped_protein_objects[-1][isoform_override_index], grouped_protein_objects[-1][0]
 
-                        new_iso_lead = grouped_protein_objects[-1][0]
-                        logger.info(
-                            "Overriding Isoform {} with {}".format(cur_iso_lead.identifier, new_iso_lead.identifier)
-                        )
-                        leads.add(protein_list[0].identifier)
+                    new_iso_lead = grouped_protein_objects[-1][0]
+                    logger.info(
+                        "Overriding Isoform {} with {}".format(cur_iso_lead.identifier, new_iso_lead.identifier)
+                    )
+                    leads.add(protein_list[0].identifier)
 
         return_dict = {
             "leads": leads,

@@ -70,7 +70,7 @@ This method is useful when there are a lot of shared peptides between multiple p
 #### First Protein
 
 For the First Protein inference method each peptide gets assigned to one protein only. The protein that gets assigned to each peptide is the first listed protein. This is typically the first protein listed in the Fasta database file.
-This method is useful if you just want a quick way to get a sense of the protein FDR and are not worried as much about the peptide to protein mapping.
+This method is very simplistic but useful if you just want a quick way to get a sense of the protein FDR and are not worried as much about the peptide to protein mapping.
 
 
 ### Protein Picker

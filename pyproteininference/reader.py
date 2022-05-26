@@ -59,7 +59,6 @@ class Reader(object):
             except KeyError:
                 row["alternative_proteins"] = []
         else:
-            logger.warning("Alternative Proteins not found in the input files. Make sure format is proper.")
             row["alternative_proteins"] = []
         return row
 
@@ -880,7 +879,19 @@ class GenericReader(Reader):
         peptide_to_protein_dictionary = self.digest.peptide_to_protein_dictionary
 
         initial_poss_prots = []
-        logger.info("Length of PSM Data: {}".format(len(all_psms)))
+        logger.info("Number of PSMs in the input data: {}".format(len(all_psms)))
+        psms_with_alternative_proteins = self._find_psms_with_alternative_proteins(raw_psms=all_psms)
+        logger.info(
+            "Number of PSMs that have alternative proteins in the input data {}".format(
+                len(psms_with_alternative_proteins)
+            )
+        )
+        if len(psms_with_alternative_proteins) == 0:
+            logger.warning(
+                "No PSMs in the input have alternative proteins. "
+                "Make sure your input is properly formatted. "
+                "Alternative Proteins will be retrieved from the fasta database"
+            )
         for psm_info in all_psms:
             current_peptide = psm_info[self.PEPTIDE]
             # Define the Psm...
@@ -971,3 +982,9 @@ class GenericReader(Reader):
         logger.info("Length of PSM Data: {}".format(len(self.psms)))
 
         logger.info("Finished GenericReader.read_psms...")
+
+    def _find_psms_with_alternative_proteins(self, raw_psms):
+
+        psms_with_alternative_proteins = [x for x in raw_psms if x["alternative_proteins"]]
+
+        return psms_with_alternative_proteins

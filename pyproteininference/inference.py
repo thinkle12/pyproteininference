@@ -908,7 +908,6 @@ class Parsimony(Inference):
                             protein_group_objects[i].proteins[0],
                             protein_group_objects[i].proteins[j],
                         ) = (new_lead, old_lead)
-                        logger.info(j)
                         break
 
                 if higher_or_lower == datastore.DataStore.LOWER_PSM_SCORE:
@@ -1000,7 +999,6 @@ class Parsimony(Inference):
                             grouped_protein_objects[i][0],
                             grouped_protein_objects[i][j],
                         ) = (new_lead, old_lead)
-                        logger.info(j)
                         break
 
                 if higher_or_lower == datastore.DataStore.LOWER_PSM_SCORE:

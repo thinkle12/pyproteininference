@@ -5,7 +5,7 @@ import pyproteininference
 
 def main():
     """
-    Script function for running the execute method of the ProteinInferencePipeline class
+    Script function for running the execute method of the ProteinInferencePipeline class.
 
     """
     parser = argparse.ArgumentParser(description="Protein Inference")

@@ -86,7 +86,7 @@ optional arguments:
 
 The following combinations of input are allowed and at least one combination is required:
 
-1. `-t -d` Path to input target (`-t`) and decoy (`-d`) files. This can be one target and one decoy file or multiple files separated by spaces (" ").
+1. `-t -d` Path to input target (`-t`) and decoy (`-d`) files. This can be one target and one decoy file or multiple files separated by spaces (" "). See [here](input_format.md#standard-percolator-output) for information on target/decoy input files.
 2. `-a -b` Path to input target (`-a`) and decoy (`-b`) directories that contain target and decoy files. This is one directory each and all .txt and .tsv files will be read in as input.
 3. `-f` Path to input combined target/decoy (`-f`) files. This can be one file or multiple files separated by spaces (" ").
 4. `-c` Path to input combined target/decoy (`-c`) directory that contain combined target/decoy files. This is one directory each and all .txt and .tsv files will be read in as input.

@@ -12,16 +12,16 @@
 2. Run the Heuristic method with tab delimited results directly from percolator to generate results for peptide centric, parsimony, inclusion, and exclusion:
 
 		protein_inference_heuristic_cli.py \
-		-t /path/to/target/file1.txt \
-		-d /path/to/decoy/file1.txt \
-		-db /path/to/database/file.fasta 
+			-t /path/to/target/file1.txt \
+			-d /path/to/decoy/file1.txt \
+			-db /path/to/database/file.fasta 
 
 3. Run the standard commandline tool with tab delimited results directly from percolator to run a particular inference method. By default, peptide centric inference is selected if a parameter file is not specified:
 
 		protein_inference_cli.py \
-		-t /path/to/target/file.txt \
-		-d /path/to/decoy/file.txt \
-		-db /path/to/database/file.fasta 
+			-t /path/to/target/file.txt \
+			-d /path/to/decoy/file.txt \
+			-db /path/to/database/file.fasta 
 
 4. Specifying Parameters. 
 The two most common parameters to change are the inference type, and the decoy symbol (for identifying decoy proteins vs target proteins).
@@ -40,10 +40,10 @@ The parameters can be quickly altered by creating a file called params.yaml as f
 5. Run the standard commandline tool again, this time specifying the parameters as above:
 		
 		protein_inference_cli.py \
-		-t /path/to/target/file.txt \
-		-d /path/to/decoy/file.txt \
-		-db /path/to/database/file.fasta \
-		-y /path/to/params.yaml
+			-t /path/to/target/file.txt \
+			-d /path/to/decoy/file.txt \
+			-db /path/to/database/file.fasta \
+			-y /path/to/params.yaml
 
 6. Running with docker
 	
@@ -56,10 +56,10 @@ The parameters can be quickly altered by creating a file called params.yaml as f
 	- Run the tool, making sure to volume mount in the directory with your input data and parameters. In the case below, that local directory would be `/path/to/local/directory` and the path in the container is `/data`
 
 			docker run -v /path/to/local/directory/:/data \
-			-it pyproteininference:latest \
-			python /usr/local/bin/protein_inference_cli.py \
-			-f /data/input_file.txt \
-			-db /data/database.fasta \
-			-y /data/parameters.yaml \
-			-o /data/
+				-it pyproteininference:latest \
+				python /usr/local/bin/protein_inference_cli.py \
+				-f /data/input_file.txt \
+				-db /data/database.fasta \
+				-y /data/parameters.yaml \
+				-o /data/
 	

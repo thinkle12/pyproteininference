@@ -108,21 +108,21 @@ Advanced usage flags
 You can run the tool as follows:
 ```shell
 protein_inference_cli.py \
--t /path/to/target/file.txt \
--d /path/to/decoy/file.txt \
--db /path/to/database/file.fasta \
--y /path/to/parameter/file.yaml \
--o /path/to/output/directory/
+    -t /path/to/target/file.txt \
+    -d /path/to/decoy/file.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/parameter/file.yaml \
+    -o /path/to/output/directory/
 ```
 
 Running with multiple input target/decoy files:
 ```shell
 protein_inference_cli.py \
--t /path/to/target/file1.txt /path/to/target/file2.txt \
--d /path/to/decoy/file1.txt /path/to/decoy/file2.txt \
--db /path/to/database/file.fasta \
--y /path/to/parameter/file.yaml \
--o /path/to/output/directory/
+    -t /path/to/target/file1.txt /path/to/target/file2.txt \
+    -d /path/to/decoy/file1.txt /path/to/decoy/file2.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/parameter/file.yaml \
+    -o /path/to/output/directory/
 ```
 
 
@@ -256,25 +256,25 @@ Input options are the same as the standard protein_inference_cli.py with the add
 You can run the tool as follows:
 ```shell
 protein_inference_heuristic_cli.py \
--t /path/to/target/file.txt \
--d /path/to/decoy/file.txt \
--db /path/to/database/file.fasta \
--y /path/to/parameter/file.yaml \
--o /path/to/output/directory/ \
--r /path/to/pdf/file.pdf \
--m 0.05
+    -t /path/to/target/file.txt \
+    -d /path/to/decoy/file.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/parameter/file.yaml \
+    -o /path/to/output/directory/ \
+    -r /path/to/pdf/file.pdf \
+    -m 0.05
 ```
 
 Running with multiple input target/decoy files:
 ```shell
 protein_inference_heuristic_cli.py \
--t /path/to/target/file1.txt /path/to/target/file2.txt \
--d /path/to/decoy/file1.txt /path/to/decoy/file2.txt \
--db /path/to/database/file.fasta \
--y /path/to/parameter/file.yaml \
--o /path/to/output/directory/ \
--r /path/to/pdf/file.pdf \
--m 0.05
+    -t /path/to/target/file1.txt /path/to/target/file2.txt \
+    -d /path/to/decoy/file1.txt /path/to/decoy/file2.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/parameter/file.yaml \
+    -o /path/to/output/directory/ \
+    -r /path/to/pdf/file.pdf \
+    -m 0.05
 ```
 
 

@@ -353,7 +353,7 @@ class ProteinInferenceParameter(object):
                     self.INFERENCE_TYPE_PARAMETER
                 ]
             except KeyError:
-                logger.warning("inference_Type set to default of {}".format(self.DEFAULT_INFERENCE_TYPE))
+                logger.warning("inference_type set to default of {}".format(self.DEFAULT_INFERENCE_TYPE))
 
             try:
                 self.tag = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.TAG_PARAMETER]

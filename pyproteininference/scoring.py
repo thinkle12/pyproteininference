@@ -219,7 +219,6 @@ class Score(object):
 
         all_scores = []
         logger.info("Scoring Proteins with Multiplicative Log Method")
-        logger.info("Using Generators")
         for protein in self.pre_score_data:
             # We create a generator of val_list...
             val_list = protein.get_psm_scores()

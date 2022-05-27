@@ -383,7 +383,7 @@ class PercolatorReader(Reader):
                 if self.parameter_file_object.inference_type == Inference.FIRST_PROTEIN:
                     poss_proteins = [psm_info[self.PROTEINIDS_INDEX]]
                 else:
-                    poss_proteins = sorted(list(set(psm_info[self.PROTEINIDS_INDEX:])))
+                    poss_proteins = sorted(list(set(psm_info[self.PROTEINIDS_INDEX :])))  # noqa E203
                     poss_proteins = poss_proteins[: self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]
                 combined_psm_result_rows.possible_proteins = poss_proteins  # Restrict to 50 total possible proteins...
                 combined_psm_result_rows.psm_id = psm_info[self.PSMID_INDEX]

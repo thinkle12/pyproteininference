@@ -56,6 +56,8 @@ class Reader(object):
         if None in row.keys():
             try:
                 row["alternative_proteins"] = row.pop(None)
+                # Sort the alternative proteins - when they are read in they become unsorted
+                row["alternative_proteins"] = sorted(row["alternative_proteins"])
             except KeyError:
                 row["alternative_proteins"] = []
         else:
@@ -381,14 +383,8 @@ class PercolatorReader(Reader):
                 if self.parameter_file_object.inference_type == Inference.FIRST_PROTEIN:
                     poss_proteins = [psm_info[self.PROTEINIDS_INDEX]]
                 else:
-                    poss_proteins = list(
-                        set(
-                            psm_info[
-                                self.PROTEINIDS_INDEX : self.PROTEINIDS_INDEX  # noqa E203
-                                + self.MAX_ALLOWED_ALTERNATIVE_PROTEINS
-                            ]
-                        )
-                    )
+                    poss_proteins = sorted(list(set(psm_info[self.PROTEINIDS_INDEX :])))
+                    poss_proteins = poss_proteins[: self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]
                 combined_psm_result_rows.possible_proteins = poss_proteins  # Restrict to 50 total possible proteins...
                 combined_psm_result_rows.psm_id = psm_info[self.PSMID_INDEX]
                 input_poss_prots = copy.copy(poss_proteins)
@@ -404,8 +400,8 @@ class PercolatorReader(Reader):
 
                 # Add the other possible_proteins from insilicodigest here...
                 try:
-                    current_alt_proteins = list(
-                        peptide_to_protein_dictionary[current_peptide]
+                    current_alt_proteins = sorted(
+                        list(peptide_to_protein_dictionary[current_peptide])
                     )  # This peptide needs to be scrubbed of Mods...
                 except KeyError:
                     current_alt_proteins = []
@@ -572,8 +568,8 @@ class ProteologicPostSearchReader(Reader):
 
                 # Add the other possible_proteins from insilicodigest here...
                 try:
-                    current_alt_proteins = list(
-                        peptide_to_protein_dictionary[current_peptide]
+                    current_alt_proteins = sorted(
+                        list(peptide_to_protein_dictionary[current_peptide])
                     )  # This peptide needs to be scrubbed of Mods...
                 except KeyError:
                     current_alt_proteins = []
@@ -920,7 +916,7 @@ class GenericReader(Reader):
                 psm.possible_proteins = psm.possible_proteins + [x for x in psm_info[self.ALTERNATIVE_PROTEINS] if x]
                 # Remove potential Repeats
                 if self.parameter_file_object.inference_type != Inference.FIRST_PROTEIN:
-                    psm.possible_proteins = list(set(psm.possible_proteins))
+                    psm.possible_proteins = sorted(list(set(psm.possible_proteins)))
 
                 input_poss_prots = copy.copy(psm.possible_proteins)
 
@@ -937,7 +933,7 @@ class GenericReader(Reader):
                     current_peptide = stripped_peptide
                 # Add the other possible_proteins from insilicodigest here...
                 try:
-                    current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
+                    current_alt_proteins = sorted(list(peptide_to_protein_dictionary[current_peptide]))
                 except KeyError:
                     current_alt_proteins = []
                     logger.debug(

@@ -6,23 +6,6 @@ LABEL description="This container contains a an installation of PyProteinInferen
 LABEL maintainer="Trent Hinkle <hinklet@gene.com>"
 LABEL version="$VERSION"
 
-# Install glpk
-RUN mkdir /opt/glpk
-
-WORKDIR /opt/glpk
-
-RUN wget ftp://ftp.gnu.org/gnu/glpk/glpk-4.65.tar.gz \
-    && tar -xzvf glpk-4.65.tar.gz
-WORKDIR /opt/glpk/glpk-4.65
-RUN chmod +x ./configure \
-   && ./configure \
-   && make uninstall \
-   && make install
-
-# Install libglpk-dev to get glpsol to work properly
-RUN apt-get update \
-    && apt-get install -y libglpk-dev
-    
 WORKDIR /
 
 # Install Py Protein Inference
@@ -33,7 +16,6 @@ RUN mkdir /pyproteininference
 COPY . /pyproteininference
 
 WORKDIR /pyproteininference/
-RUN mkdir /glpkinout
 
 RUN pip install -r requirements.txt
 

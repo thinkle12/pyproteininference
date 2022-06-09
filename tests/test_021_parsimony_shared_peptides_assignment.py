@@ -11,15 +11,13 @@ from pyproteininference.parameters import ProteinInferenceParameter
 TEST_DATABASE = resource_filename("pyproteininference", "../tests/data/test_database.fasta")
 TARGET_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_target.txt")
 DECOY_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_decoy.txt")
-PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_parsimony_glpk.yaml")
+PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_parsimony_pulp.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('pyproteininference', '../tests/output/')
 for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
     if not os.path.exists(os.path.join(OUTPUT_DIR, sub_dir)):
         os.makedirs(os.path.join(OUTPUT_DIR, sub_dir))
 
-GLPKINOUT_PATH = resource_filename("pyproteininference", "../tests/glpkinout/")
-SKIP_RUNNING_GLPK = True
 
 IDENTIFIER_INDEX = 0
 SCORE_INDEX = 1
@@ -28,8 +26,8 @@ GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
 
 
-class TestLoadParsimonyGlpkWorkflowSharedPeptideReassignment(TestCase):
-    def test_workflow_parsimony_glpk_shared_peptides_best(self):
+class TestLoadParsimonyPulpWorkflowSharedPeptideReassignment(TestCase):
+    def test_workflow_parsimony_pulp_shared_peptides_best(self):
 
         # STEP 1: Load parameter file #
         # STEP 1: Load parameter file #
@@ -109,10 +107,9 @@ class TestLoadParsimonyGlpkWorkflowSharedPeptideReassignment(TestCase):
         # STEP 10: Apply Inference
         inference_type = protein_inference_parameters.inference_type
 
-        # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == pyproteininference.inference.Inference.PARSIMONY:
             group = pyproteininference.inference.Parsimony(data=data, digest=digest)
-            group.infer_proteins(glpkinout_directory=GLPKINOUT_PATH, skip_running_glpk=SKIP_RUNNING_GLPK)
+            group.infer_proteins()
 
         if inference_type == pyproteininference.inference.Inference.INCLUSION:
             group = pyproteininference.inference.Inclusion(data=data, digest=digest)
@@ -133,7 +130,7 @@ class TestLoadParsimonyGlpkWorkflowSharedPeptideReassignment(TestCase):
         # Make sure the there are no duplicate psms in our lead proteins
         self.assertEqual(len(psm_id_list), len(set(psm_id_list)))
 
-    def test_workflow_parsimony_glpk_shared_peptides_all(self):
+    def test_workflow_parsimony_pulp_shared_peptides_all(self):
 
         # Do the same analysis but put shared peptides everywhere
 
@@ -215,10 +212,9 @@ class TestLoadParsimonyGlpkWorkflowSharedPeptideReassignment(TestCase):
         # STEP 10: Apply Inference
         inference_type = protein_inference_parameters_all.inference_type
 
-        # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == pyproteininference.inference.Inference.PARSIMONY:
             group = pyproteininference.inference.Parsimony(data=data_all, digest=digest_all)
-            group.infer_proteins(glpkinout_directory=GLPKINOUT_PATH, skip_running_glpk=SKIP_RUNNING_GLPK)
+            group.infer_proteins()
 
         if inference_type == pyproteininference.inference.Inference.INCLUSION:
             group = pyproteininference.inference.Inclusion(data=data_all, digest=digest_all)

@@ -130,10 +130,9 @@ class TestAdditiveWorkflow(TestCase):
         # STEP 10: Apply Inference
         inference_type = protein_inference_parameters.inference_type
 
-        # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == pyproteininference.inference.Inference.PARSIMONY:
             group = pyproteininference.inference.Parsimony(data=data, digest=digest)
-            group.infer_proteins(glpkinout_directory=None, skip_running_glpk=None)
+            group.infer_proteins()
 
         if inference_type == pyproteininference.inference.Inference.INCLUSION:
             group = pyproteininference.inference.Inclusion(data=data, digest=digest)

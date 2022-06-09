@@ -9,11 +9,9 @@ import pyproteininference
 TEST_DATABASE = resource_filename("pyproteininference", "../tests/data/test_database.fasta")
 TARGET_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_target.txt")
 DECOY_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_decoy.txt")
-PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_parsimony_glpk.yaml")
+PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_parsimony_pulp.yaml")
 OUTPUT_DIR = tempfile.gettempdir()
 # OUTPUT_DIR = resource_filename('pyproteininference', '../tests/output/')
-GLPKINOUT_PATH = resource_filename("pyproteininference", "../tests/glpkinout/")
-SKIP_RUNNING_GLPK = True
 
 
 class TestExportTypes(TestCase):
@@ -29,7 +27,6 @@ class TestExportTypes(TestCase):
         self.assertEqual(protein_inference_parameters.digest_type, "trypsin")
         self.assertEqual(protein_inference_parameters.export, "q_value")
         self.assertEqual(protein_inference_parameters.fdr, 0.01)
-        self.assertEqual(protein_inference_parameters.glpk_path, "glpsol")
         self.assertEqual(protein_inference_parameters.missed_cleavages, 3)
         self.assertEqual(protein_inference_parameters.picker, True)
         self.assertEqual(protein_inference_parameters.restrict_pep, 0.9)
@@ -45,7 +42,7 @@ class TestExportTypes(TestCase):
         self.assertEqual(protein_inference_parameters.tag, "test_parsimony")
         self.assertEqual(protein_inference_parameters.grouping_type, "shared_peptides")
         self.assertEqual(protein_inference_parameters.max_identifiers_peptide_centric, 5)
-        self.assertEqual(protein_inference_parameters.lp_solver, "glpk")
+        self.assertEqual(protein_inference_parameters.lp_solver, "pulp")
 
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
@@ -117,10 +114,9 @@ class TestExportTypes(TestCase):
         # STEP 10: Apply Inference
         inference_type = protein_inference_parameters.inference_type
 
-        # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == pyproteininference.inference.Inference.PARSIMONY:
             group = pyproteininference.inference.Parsimony(data=data, digest=digest)
-            group.infer_proteins(glpkinout_directory=GLPKINOUT_PATH, skip_running_glpk=SKIP_RUNNING_GLPK)
+            group.infer_proteins()
 
         if inference_type == pyproteininference.inference.Inference.INCLUSION:
             group = pyproteininference.inference.Inclusion(data=data, digest=digest)

@@ -27,7 +27,6 @@ PEPTIDES_INDEX = 6
 
 
 class TestLoadParsimonyPulpWorkflowSharedPeptideReassignment(TestCase):
-
     def test_workflow_parsimony_pulp_shared_peptides_best(self):
 
         # STEP 1: Load parameter file #

@@ -1098,7 +1098,7 @@ class Parsimony(Inference):
         unique_prots_sorted = [x for x in identifiers_sorted if x in unique_prots]
 
         # Define the protein variables with a lower bound of 0 and catgeory Integer
-        prots = pulp.LpVariable.dicts("prot", indexs=unique_prots_sorted, lowBound=0, cat="Integer")
+        prots = pulp.LpVariable.dicts("prot", indices=unique_prots_sorted, lowBound=0, cat="Integer")
 
         # Define our Lp Problem which is to Minimize our objective function
         prob = pulp.LpProblem("Parsimony_Problem", pulp.LpMinimize)

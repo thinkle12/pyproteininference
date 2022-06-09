@@ -36,22 +36,6 @@ This method allows shared peptides to map to more than one protein. Assuming tha
 
 ![img/parsimony.png](img/parsimony.png)
 
-##### Parsimony Dependencies 
-Parsimony currently has potential external dependencies depending on the __lp_solver__ that is selected in the parameter file by default this is 'pulp'.
-
- 1. For __Pulp__:
-	 Pulp _should_ automatically install the LP Solver CBC by default.
-	 However, For troubleshooting please see [Pulp](https://pypi.org/project/PuLP/) documentation.
-	 If Pulp is not working it is likely due to the linear program [CBC](https://github.com/coin-or/Cbc) not being installed.
-	 Please follow the instructions for installing [CBC](https://github.com/coin-or/Cbc).
- 2. For __Glpk__:
-	 Mac: `brew install glpk` - Try to install with [Homebrew](https://brew.sh/).
-	 Windows: Check [here](http://winglpk.sourceforge.net/).
-	 Linux: Check [here](https://en.wikibooks.org/wiki/GLPK/Linux_packages).
-	 Other: Check the main [GLPK website](https://www.gnu.org/software/glpk/).
-	 Anaconda: [Anaconda](https://anaconda.org/conda-forge/glpk) also offers an installation.
-
-
 #### Exclusion
 
 Exclusion maps all peptides to all possible proteins but removes any peptide from the search that is not distinguishing. This means that if a peptide maps to more than one protein it will be removed. With this inference model the database selection is very important. Ideally the database selected for searches should have limited redundancy.

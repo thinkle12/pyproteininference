@@ -90,7 +90,7 @@ PEPTIDES_INDEX = 6
 
 
 class TestLoadParsimonyPulpWorkflow(TestCase):
-    # @unittest.skip("Skipping Pulp Test, No CBC executable in build env")
+
     def test_workflow_parsimony_pulp(self):
 
         # STEP 1: Load parameter file #
@@ -101,7 +101,6 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.digest_type, "trypsin")
         self.assertEqual(protein_inference_parameters.export, "q_value")
         self.assertEqual(protein_inference_parameters.fdr, 0.01)
-        self.assertEqual(protein_inference_parameters.glpk_path, None)
         self.assertEqual(protein_inference_parameters.missed_cleavages, 3)
         self.assertEqual(protein_inference_parameters.picker, True)
         self.assertEqual(protein_inference_parameters.restrict_pep, 0.9)
@@ -189,10 +188,9 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         # STEP 10: Apply Inference
         inference_type = protein_inference_parameters.inference_type
 
-        # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == pyproteininference.inference.Inference.PARSIMONY:
             group = pyproteininference.inference.Parsimony(data=data, digest=digest)
-            group.infer_proteins(glpkinout_directory=None, skip_running_glpk=None)
+            group.infer_proteins()
 
         if inference_type == pyproteininference.inference.Inference.INCLUSION:
             group = pyproteininference.inference.Inclusion(data=data, digest=digest)
@@ -380,8 +378,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
                 set(psm_id_output[i][PEPTIDES_INDEX:]),
             )
 
-    # @unittest.skip("Skipping Pulp Subset Peptides Test, No CBC executable in build env")
-    def test_workflow_parsimony_glpk_subset_peptides(self):
+    def test_workflow_parsimony_pulp_subset_peptides(self):
 
         # STEP 1: Load parameter file #
         # STEP 1: Load parameter file #
@@ -460,10 +457,9 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         # STEP 10: Apply Inference
         inference_type = protein_inference_parameters.inference_type
 
-        # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == pyproteininference.inference.Inference.PARSIMONY:
             group = pyproteininference.inference.Parsimony(data=data, digest=digest)
-            group.infer_proteins(glpkinout_directory=None, skip_running_glpk=None)
+            group.infer_proteins()
 
         if inference_type == pyproteininference.inference.Inference.INCLUSION:
             group = pyproteininference.inference.Inclusion(data=data, digest=digest)
@@ -650,8 +646,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
                 set(psm_id_output[i][PEPTIDES_INDEX:]),
             )
 
-    # @unittest.skip("Skipping Pulp No Grouping Test, No CBC executable in build env")
-    def test_workflow_parsimony_glpk_no_grouping(self):
+    def test_workflow_parsimony_pulp_no_grouping(self):
         # NOW RUN WITH NO GROUPING
 
         # STEP 1: Load parameter file #
@@ -731,10 +726,9 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
         # STEP 10: Apply Inference
         inference_type = protein_inference_parameters.inference_type
 
-        # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == pyproteininference.inference.Inference.PARSIMONY:
             group = pyproteininference.inference.Parsimony(data=data, digest=digest)
-            group.infer_proteins(glpkinout_directory=None, skip_running_glpk=None)
+            group.infer_proteins()
 
         if inference_type == pyproteininference.inference.Inference.INCLUSION:
             group = pyproteininference.inference.Inclusion(data=data, digest=digest)

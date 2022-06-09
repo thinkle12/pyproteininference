@@ -29,7 +29,6 @@ class ProteinInferenceParameter(object):
         export (str): String to indicate the export type for [Export object][pyproteininference.export.Export].
             Typically this is "psms", "peptides", or "psm_ids".
         fdr (float): Float to indicate FDR filtering.
-        glpk_path (str): Path to local installation of glpsol if inference_type="parsimony" and lp_solver="glpk".
         missed_cleavages (int): Integer to determine the number of missed cleavages in the database digestion
             [Digest object][pyproteininference.in_silico_digest.Digest].
         picker (bool): True/False on whether or not to run
@@ -145,12 +144,10 @@ class ProteinInferenceParameter(object):
     DIGEST_SUB_KEYS = {DIGEST_TYPE_PARAMETER, MISSED_CLEAV_PARAMETER}
 
     LP_SOLVER_PARAMETER = "lp_solver"
-    GLPK_PATH_PARAMETER = "glpk_path"
     SHARED_PEPTIDES_PARAMETER = "shared_peptides"
 
     PARSIMONY_SUB_KEYS = {
         LP_SOLVER_PARAMETER,
-        GLPK_PATH_PARAMETER,
         SHARED_PEPTIDES_PARAMETER,
     }
 
@@ -161,7 +158,6 @@ class ProteinInferenceParameter(object):
     DEFAULT_DIGEST_TYPE = "trypsin"
     DEFAULT_EXPORT = "peptides"
     DEFAULT_FDR = 0.01
-    DEFAULT_GLPK_PATH = "glpsol"
     DEFAULT_MISSED_CLEAVAGES = 3
     DEFAULT_PICKER = True
     DEFAULT_RESTRICT_PEP = 0.9
@@ -202,7 +198,6 @@ class ProteinInferenceParameter(object):
         self.digest_type = self.DEFAULT_DIGEST_TYPE
         self.export = self.DEFAULT_EXPORT
         self.fdr = self.DEFAULT_FDR
-        self.glpk_path = self.DEFAULT_GLPK_PATH
         self.missed_cleavages = self.DEFAULT_MISSED_CLEAVAGES
         self.picker = self.DEFAULT_PICKER
         self.restrict_pep = self.DEFAULT_RESTRICT_PEP
@@ -263,12 +258,6 @@ class ProteinInferenceParameter(object):
                 self.fdr = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.FDR_PARAMETER]
             except KeyError:
                 logger.warning("fdr set to default of {}".format(self.DEFAULT_FDR))
-            try:
-                self.glpk_path = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][
-                    self.GLPK_PATH_PARAMETER
-                ]
-            except KeyError:
-                logger.warning("glpk_path set to default of {}".format(self.DEFAULT_GLPK_PATH))
             try:
                 self.missed_cleavages = yaml_params[self.PARENT_PARAMETER_KEY][self.DIGEST_PARAMETER_KEY][
                     self.MISSED_CLEAV_PARAMETER
@@ -658,7 +647,7 @@ class ProteinInferenceParameter(object):
         """
         Internal ProteinInferenceParameter method to validate the lp solver.
         """
-        # Check if its pulp, glpk, or None
+        # Check if its pulp or None
         if self.lp_solver in Inference.LP_SOLVERS:
             logger.info("Using LP Solver '{}'".format(self.lp_solver))
         else:
@@ -933,7 +922,6 @@ class ProteinInferenceParameter(object):
         """
 
         self._fix_grouping_type()
-        self._fix_glpk_path()
         self._fix_lp_solver()
         self._fix_shared_peptides()
 
@@ -943,13 +931,6 @@ class ProteinInferenceParameter(object):
         """
         if self.grouping_type in ["None", "none", None]:
             self.grouping_type = None
-
-    def _fix_glpk_path(self):
-        """
-        Internal ProteinInferenceParameter method to override glpk_path for None value.
-        """
-        if self.glpk_path in ["None", "none", None]:
-            self.glpk_path = None
 
     def _fix_lp_solver(self):
         """

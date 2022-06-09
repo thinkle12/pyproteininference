@@ -19,9 +19,6 @@ for sub_dir in ["leads", "all", "peptides", "psms", "psm_ids"]:
     if not os.path.exists(os.path.join(OUTPUT_DIR, sub_dir)):
         os.makedirs(os.path.join(OUTPUT_DIR, sub_dir))
 
-GLPKINOUT_PATH = resource_filename("pyproteininference", "../tests/glpkinout/")
-SKIP_RUNNING_GLPK = True
-
 LEAD_OUTPUT_FILE_NONE = resource_filename(
     "pyproteininference",
     "../tests/output/leads/test_parsimony_no_grouping_q_value_leads_ml_posterior_error_prob.csv",
@@ -50,9 +47,9 @@ GROUP_ID_INDEX = 5
 PEPTIDES_INDEX = 6
 
 
-class TestLoadParsimonyGlpkNoneTypeParamsWorkflow(TestCase):
+class TestLoadParsimonyPulpNoneTypeParamsWorkflow(TestCase):
     # @unittest.skip("Skipping Pulp Test, No CBC executable in build env")
-    def test_workflow_parsimony_glpk_none_type(self):
+    def test_workflow_parsimony_pulp_none_type(self):
 
         # STEP 1: Load parameter file #
         # STEP 1: Load parameter file #
@@ -62,7 +59,6 @@ class TestLoadParsimonyGlpkNoneTypeParamsWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.digest_type, "trypsin")
         self.assertEqual(protein_inference_parameters.export, "q_value")
         self.assertEqual(protein_inference_parameters.fdr, 0.01)
-        self.assertEqual(protein_inference_parameters.glpk_path, None)
         self.assertEqual(protein_inference_parameters.missed_cleavages, 3)
         self.assertEqual(protein_inference_parameters.picker, True)
         self.assertEqual(protein_inference_parameters.restrict_pep, 0.9)
@@ -150,10 +146,9 @@ class TestLoadParsimonyGlpkNoneTypeParamsWorkflow(TestCase):
         # STEP 10: Apply Inference
         inference_type = protein_inference_parameters.inference_type
 
-        # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == pyproteininference.inference.Inference.PARSIMONY:
             group = pyproteininference.inference.Parsimony(data=data, digest=digest)
-            group.infer_proteins(glpkinout_directory=GLPKINOUT_PATH, skip_running_glpk=SKIP_RUNNING_GLPK)
+            group.infer_proteins()
 
         if inference_type == pyproteininference.inference.Inference.INCLUSION:
             group = pyproteininference.inference.Inclusion(data=data, digest=digest)

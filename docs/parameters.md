@@ -57,8 +57,7 @@ These parameters are only used if __parsimony__ is selected as __inference_type_
 
 | Parameter | Description |Type|
 |---|---|---|
-| lp_solver | This can be one of: __pulp__, __glpk__, __None__. This determines which linear program solver is used. Please see [here](supplementary.md#parsimony-dependencies) for more information on lp solvers. Both options have external dependency requirements. Input __None__ if not running __parsimony__. | String |
-| glpk_path | If glpk is selected as __lp_solver__ input the path to the commandline tool __glpsol__. This is typically just __glpsol__. | String |
+| lp_solver | This can be one of: __pulp__ or __None__. This determines which linear program solver is used. Please see [here](supplementary.md#parsimony-dependencies) for more information on lp solvers. Input __None__ if not running __parsimony__. If running __parsimony__ this needs to be set to __pulp__. | String |
 | shared_peptides | How to assign shared peptides for parsimony. Can be one of: __all__ or __best__. __all__ assigns shared peptides to all possible proteins in the output. __best__ assigns shared peptides to the best scoring protein which is a "winner take all" approach. This is specific to the Parsimony Inference type. | String |
 
 
@@ -99,7 +98,6 @@ parameters:
     missed_cleavages: 3
   parsimony:
     lp_solver: pulp
-    glpk_path: glpsol
     shared_peptides: all
   peptide_centric:
     max_identifiers: 5

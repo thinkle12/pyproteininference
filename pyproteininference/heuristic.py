@@ -48,10 +48,11 @@ class HeuristicPipeline(ProteinInferencePipeline):
         inference_method_list (list): List of inference methods used in heuristic determination.
         datastore_dict (dict): Dictionary of [DataStore][pyproteininference.datastore.DataStore]
             objects generated in heuristic determination with the inference method as the key of each entry.
-        selected_method (str): String representation of the selected inference method based on the heuristic.
-        heuristic (float): Heuristic Value as determined from the data.
-        selected_datastore (DataStore):
-            The [DataStore object][pyproteininference.datastore.DataStore] as selected by the heuristic.
+        selected_methods (list): a list of String representations of the selected inference methods based on the
+            heuristic.
+        selected_datastores (dict):
+            a Dictionary of [DataStore object][pyproteininference.datastore.DataStore] objects as selected by the
+            heuristic.
         output_type (str): How to output results. Can either be "all" or "optimal". Will either output all results
             or will only output the optimal results.
 
@@ -154,9 +155,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
             Inference.PEPTIDE_CENTRIC,
         ]
         self.datastore_dict = {}
-        self.heuristic = None
-        self.selected_method = None
-        self.selected_datastore = None
+        self.selected_methods = None
+        self.selected_datastores = {}
 
         self._validate_input()
 
@@ -267,10 +267,10 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
             self.datastore_dict[inference_method] = data
 
-        self.selected_method = self.determine_optimal_inference_method(
+        self.selected_methods = self.determine_optimal_inference_method(
             false_discovery_rate_threshold=fdr_threshold, pdf_filename=self.pdf_filename
         )
-        self.selected_datastore = self.datastore_dict[self.selected_method]
+        self.selected_datastores = {x: self.datastore_dict[x] for x in self.selected_methods}
 
         if self.output_type == "all":
             self._write_all_results(parameters=method_specific_parameters)
@@ -298,7 +298,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
             target_hits = [x[1] for x in fdr_vs_target_hits]
             plt.plot(fdrs, target_hits, '-', label=inference_method.replace("_", " "))
             target_fdr = self.datastore_dict[inference_method].parameter_file_object.fdr
-            if inference_method == self.selected_method:
+            if inference_method in self.selected_methods:
                 best_value = min(fdrs, key=lambda x: abs(x - target_fdr))
                 best_index = fdrs.index(best_value)
                 best_target_hit_value = target_hits[best_index]  # noqa F841
@@ -320,7 +320,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
         Internal method that loops over all results and writes them out.
         """
         for method in list(self.datastore_dict.keys()):
-            if method == self.selected_method:
+            datastore = self.datastore_dict[method]
+            if method in self.selected_methods:
                 inference_method_string = "{}_{}".format(method, "optimal_method")
             else:
                 inference_method_string = method
@@ -328,7 +329,14 @@ class HeuristicPipeline(ProteinInferencePipeline):
                 # If a filename is not provided then construct one using output_directory
                 # Note: output_directory will always get set even if its set as None - gets set to cwd
                 inference_filename = os.path.join(
-                    self.output_directory, "{}_{}".format(inference_method_string, "protein_inference_results.csv")
+                    self.output_directory,
+                    "{}_{}_{}_{}_{}".format(
+                        inference_method_string,
+                        parameters.tag,
+                        datastore.short_protein_score,
+                        datastore.psm_score,
+                        "protein_inference_results.csv",
+                    ),
                 )
             if self.output_filename:
                 # If the user specified an output filename then split it apart and insert the inference method
@@ -349,26 +357,35 @@ class HeuristicPipeline(ProteinInferencePipeline):
         Internal method that writes out the optimized results.
         """
 
-        inference_method_string = "{}_{}".format(self.selected_method, "optimal_method")
-        if not self.output_filename and self.output_directory:
-            # If a filename is not provided then construct one using output_directory
-            # Note: output_directory will always get set even if its set as None - gets set to cwd
-            inference_filename = os.path.join(
-                self.output_directory, "{}_{}".format(inference_method_string, "protein_inference_results.csv")
+        for method in self.selected_methods:
+            datastore = self.datastore_dict[method]
+            inference_method_string = "{}_{}".format(method, "optimal_method")
+            if not self.output_filename and self.output_directory:
+                # If a filename is not provided then construct one using output_directory
+                # Note: output_directory will always get set even if its set as None - gets set to cwd
+                inference_filename = os.path.join(
+                    self.output_directory,
+                    "{}_{}_{}_{}_{}".format(
+                        inference_method_string,
+                        parameters.tag,
+                        datastore.short_protein_score,
+                        datastore.psm_score,
+                        "protein_inference_results.csv",
+                    ),
+                )
+            if self.output_filename:
+                # If the user specified an output filename then split it apart and insert the inference method
+                # Then reconstruct the file
+                split = os.path.split(self.output_filename)
+                path = split[0]
+                filename = split[1]
+                inference_filename = os.path.join(path, "{}_{}".format(inference_method_string, filename))
+            export = pyproteininference.export.Export(data=self.selected_datastores[method])
+            export.export_to_csv(
+                output_filename=inference_filename,
+                directory=self.output_directory,
+                export_type=parameters.export,
             )
-        if self.output_filename:
-            # If the user specified an output filename then split it apart and insert the inference method
-            # Then reconstruct the file
-            split = os.path.split(self.output_filename)
-            path = split[0]
-            filename = split[1]
-            inference_filename = os.path.join(path, "{}_{}".format(inference_method_string, filename))
-        export = pyproteininference.export.Export(data=self.selected_datastore)
-        export.export_to_csv(
-            output_filename=inference_filename,
-            directory=self.output_directory,
-            export_type=parameters.export,
-        )
 
     def determine_optimal_inference_method(
         self,
@@ -391,7 +408,7 @@ class HeuristicPipeline(ProteinInferencePipeline):
 
 
         Returns:
-            str: String representation of the selected inference method.
+            list: List of string representations of the recommended inference methods.
 
         """
 
@@ -431,7 +448,17 @@ class HeuristicPipeline(ProteinInferencePipeline):
                 Inference.PEPTIDE_CENTRIC: heuristic_scores[Inference.PEPTIDE_CENTRIC],
             }
 
-            selected_method = min(sub_dict, key=sub_dict.get)
+            if (
+                heuristic_scores[Inference.PARSIMONY] <= lower_empirical_threshold
+                and heuristic_scores[Inference.PEPTIDE_CENTRIC] <= lower_empirical_threshold
+            ):
+                # If both are under the threshold return both
+                selected_methods = [Inference.PARSIMONY, Inference.PEPTIDE_CENTRIC]
+
+            else:
+                selected_methods = [min(sub_dict, key=sub_dict.get)]
+
+        # If the above condition does not apply
         elif (
             heuristic_scores[Inference.EXCLUSION] <= upper_empirical_threshold
             or heuristic_scores[Inference.INCLUSION] <= upper_empirical_threshold
@@ -451,16 +478,24 @@ class HeuristicPipeline(ProteinInferencePipeline):
                 Inference.INCLUSION: heuristic_scores[Inference.INCLUSION],
             }
 
-            selected_method = min(sub_dict, key=sub_dict.get)
+            if (
+                heuristic_scores[Inference.EXCLUSION] <= upper_empirical_threshold
+                and heuristic_scores[Inference.INCLUSION] <= upper_empirical_threshold
+            ):
+                # If both are under the threshold return both
+                selected_methods = [Inference.INCLUSION, Inference.EXCLUSION]
+
+            else:
+                selected_methods = [min(sub_dict, key=sub_dict.get)]
 
         else:
             # If we have no conditional scenarios...
             # Select the best method
             logger.info("No methods pass empirical thresholds, selecting the best method")
-            selected_method = min(heuristic_scores, key=heuristic_scores.get)
+            selected_methods = [min(heuristic_scores, key=heuristic_scores.get)]
 
-        logger.info("Method {} selected with the heuristic algorithm".format(selected_method))
-        return selected_method
+        logger.info("Method(s) {} selected with the heuristic algorithm".format(", ".join(selected_methods)))
+        return selected_methods
 
     def generate_density_plot(self, number_stdevs_from_mean, pdf_filename=None):
         """

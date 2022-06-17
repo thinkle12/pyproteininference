@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Quick Start - Py Protein Inference</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Quick Start";
+        var mkdocs_page_input_path = "quickstart.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Py Protein Inference
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Quick Start</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../parameters/">Parameters</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../input_format/">Input Formats</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../advanced/">Advanced Usage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../supplementary/">Supplementary Information</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Code Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../pyproteininference_reference/">PyProteinInference</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Py Protein Inference</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>Quick Start</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="requirements">Requirements</h1>
+<ol>
+<li><strong>Python 3.7</strong> or greater. This package was created using <strong>Python 3.7</strong></li>
+<li><strong>Python Packages</strong>:
+   <strong>numpy</strong>, <strong>pyteomics</strong>, <strong>pulp</strong>, <strong>PyYAML</strong>, <strong>matplotlib</strong>. These should be installed automatically during installation.</li>
+</ol>
+<h1 id="quick-start-guide">Quick Start Guide</h1>
+<ol>
+<li>
+<p>Install the package using pip:</p>
+<pre><code>pip install pyproteininference
+</code></pre>
+</li>
+<li>
+<p>Run the Heuristic method with tab delimited results directly from percolator to generate results for peptide centric, parsimony, inclusion, and exclusion:</p>
+<pre><code>protein_inference_heuristic_cli.py \
+    -t /path/to/target/file1.txt \
+    -d /path/to/decoy/file1.txt \
+    -db /path/to/database/file.fasta
+</code></pre>
+</li>
+<li>
+<p>Run the standard commandline tool with tab delimited results directly from percolator to run a particular inference method. By default, peptide centric inference is selected if a parameter file is not specified:</p>
+<pre><code>protein_inference_cli.py \
+    -t /path/to/target/file.txt \
+    -d /path/to/decoy/file.txt \
+    -db /path/to/database/file.fasta
+</code></pre>
+</li>
+<li>
+<p>Specifying Parameters. 
+The two most common parameters to change are the inference type, and the decoy symbol (for identifying decoy proteins vs target proteins).
+The parameters can be quickly altered by creating a file called params.yaml as follows:</p>
+<pre><code>parameters:
+  inference:
+    inference_type: parsimony
+  identifiers:
+    decoy_symbol: "decoy_"
+</code></pre>
+<p>The inference type can be one of: <code>parsimony</code>, <code>peptide_centric</code>, <code>inclusion</code>, <code>exclusion</code>, or <code>first_protein</code>.
+All parameters are optional, so you only need to define the ones you want to alter. Parameters that are not defined are set to default values.
+See <a href="../parameters/#default-parameters">here</a> for the default parameters.</p>
+</li>
+<li>
+<p>Run the standard commandline tool again, this time specifying the parameters as above:</p>
+<pre><code>protein_inference_cli.py \
+    -t /path/to/target/file.txt \
+    -d /path/to/decoy/file.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/params.yaml
+</code></pre>
+</li>
+<li>
+<p>Running with docker</p>
+<ul>
+<li>Either Pull the image from docker hub:<ul>
+<li><code>docker pull pyproteininference:latest</code></li>
+</ul>
+</li>
+<li>Or Build the image with the following command (After having cloned the repository):<ul>
+<li><code>git clone REPOSITORY_URL</code></li>
+<li><code>cd pyproteininference</code></li>
+<li><code>docker build -t pyproteininference:latest .</code></li>
+</ul>
+</li>
+<li>Run the tool, making sure to volume mount in the directory with your input data and parameters. In the case below, that local directory would be <code>/path/to/local/directory</code> and the path in the container is <code>/data</code><pre><code>docker run -v /path/to/local/directory/:/data \
+    -it pyproteininference:latest \
+    python /usr/local/bin/protein_inference_cli.py \
+    -f /data/input_file.txt \
+    -db /data/database.fasta \
+    -y /data/parameters.yaml \
+    -o /data/
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../parameters/" class="btn btn-neutral float-right" title="Parameters">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../parameters/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

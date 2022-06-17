@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Advanced Usage - Py Protein Inference</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Advanced Usage";
+        var mkdocs_page_input_path = "advanced.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Py Protein Inference
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quick Start</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../parameters/">Parameters</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../input_format/">Input Formats</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Advanced Usage</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#running-the-main-py-protein-inference-method">Running the Main Py Protein Inference Method</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#running-via-command-line">Running Via Command Line</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#running-within-python">Running Within Python</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#running-the-heuristic-method">Running the Heuristic Method</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#running-the-heuristic-method-via-the-command-line">Running the Heuristic Method via the Command Line</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#running-the-heuristic-method-via-python">Running the Heuristic Method via Python</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#heuristic-output-example">Heuristic Output Example</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#console-output">Console Output</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#heuristic-density-plot-output">Heuristic Density Plot Output</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../supplementary/">Supplementary Information</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Code Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../pyproteininference_reference/">PyProteinInference</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Py Protein Inference</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>Advanced Usage</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="running-py-protein-inference">Running Py Protein Inference</h2>
+<ol>
+<li><a href="#running-the-main-py-protein-inference-method"><strong>Main Inference Method</strong></a></li>
+<li><a href="#running-the-heuristic-method"><strong>Heuristic</strong></a></li>
+</ol>
+<h3 id="running-the-main-py-protein-inference-method">Running the Main Py Protein Inference Method</h3>
+<h4 id="running-via-command-line">Running Via Command Line</h4>
+<p>Upon proper installation of the package, the command line tool should be installed and <em>should</em> be available from any location on the system.
+The command line tool can be called as follows:</p>
+<pre><code class="language-shell">protein_inference_cli.py --help
+</code></pre>
+<p>This will return the help prompt for the tool.
+If this does not work download <code>protein_inference_cli.py</code> from our repository and write the full path to the script while also calling <code>python</code>:</p>
+<pre><code class="language-shell">python /path/to/directory/pyproteininference/scripts/protein_inference_cli.py --help
+</code></pre>
+<p>Command line options are as follows:</p>
+<pre><code>cli$ python protein_inference_cli.py --help
+usage: protein_inference_cli.py [-h] [-t FILE [FILE ...]] [-d FILE [FILE ...]]
+                                [-f FILE [FILE ...]] [-o DIR] [-l FILE]
+                                [-a DIR] [-b DIR] [-c DIR] [-db FILE]
+                                [-y FILE] [-p] [-i]
+
+Protein Inference
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t FILE [FILE ...], --target FILE [FILE ...]
+                        Input target psm output from percolator. Can either
+                        input one file or a list of files.
+  -d FILE [FILE ...], --decoy FILE [FILE ...]
+                        Input decoy psm output from percolator. Can either
+                        input one file or a list of files.
+  -f FILE [FILE ...], --combined_files FILE [FILE ...]
+                        Input combined psm output from percolator. This should
+                        contain Target and Decoy PSMS. Can either input one
+                        file or a list of files.
+  -o DIR, --output DIR  Result Directory to write to - the name of file will
+                        be determined by parameters selected and tag
+                        parameter. If this option is not set, will write
+                        results to current working directory.
+  -l FILE, --output_filename FILE
+                        Filename to write results to. Can be left blank. If
+                        this flag is left blank the filename will be
+                        automatically generated. If set this flag will
+                        override -o.
+  -a DIR, --target_directory DIR
+                        Directory that contains either .txt or .tsv input
+                        target psm data. Make sure the directory ONLY contains
+                        result files.
+  -b DIR, --decoy_directory DIR
+                        Directory that contains either .txt or .tsv input
+                        decoy psm data. Make sure the directory ONLY contains
+                        result files.
+  -c DIR, --combined_directory DIR
+                        Directory that contains either .txt or .tsv input data
+                        with targets/decoys combined. Make sure the directory
+                        ONLY contains result files.
+  -db FILE, --database FILE
+                        Path to the fasta formatted database used in the MS
+                        search. This is optional. If not set, will use the
+                        proteins only in the input files.
+  -y FILE, --yaml_params FILE
+                        Path to a Protein Inference Yaml Parameter File. If
+                        this is not set, default parameters will be used.
+  -p, --skip_append_alt
+                        Advanced usage only. If this flag is set, will skip
+                        adding alternative proteins to each PSM from the
+                        database digest. If this flag is not set, the
+                        peptide/protein mapping will be taken from database
+                        digest and appended to the mapping present in the
+                        input files.
+  -i, --id_splitting    Advanced usage only. If set this flag will split
+                        protein identifiers.If not set, this flag will not
+                        split protein identifiers.Sometimes the fasta database
+                        protein IDs are formatted as: 'sp|ARAF_HUMAN|P10398'.
+                        While protein IDs in the input files are formatted as
+                        'ARAF_HUMAN|P10398'. Setting This flag will split off
+                        the front 'sp|' or 'tr|' from the database protein
+                        identifiers.
+
+</code></pre>
+<p>The following combinations of input are allowed and at least one combination is required:</p>
+<ol>
+<li><code>-t -d</code> Path to input target (<code>-t</code>) and decoy (<code>-d</code>) files. This can be one target and one decoy file or multiple files separated by spaces (" "). See <a href="../input_format/#standard-percolator-output">here</a> for information on target/decoy input files.</li>
+<li><code>-a -b</code> Path to input target (<code>-a</code>) and decoy (<code>-b</code>) directories that contain target and decoy files. This is one directory each and all .txt and .tsv files will be read in as input.</li>
+<li><code>-f</code> Path to input combined target/decoy (<code>-f</code>) files. This can be one file or multiple files separated by spaces (" ").</li>
+<li><code>-c</code> Path to input combined target/decoy (<code>-c</code>) directory that contain combined target/decoy files. This is one directory each and all .txt and .tsv files will be read in as input.</li>
+</ol>
+<p>Any other combinations will result in an Error raised.</p>
+<p>Optional flags</p>
+<ol>
+<li><code>-db</code> Path to Fasta Database file.</li>
+<li><code>-y</code> Path to Protein Inference Yaml Parameter file. (If this is not supplied default parameters will be used).</li>
+<li><code>-o</code> Path to the output directory, if this is left blank files will be written to the current working directory.</li>
+<li><code>-l</code> Path to the output filename, if this is left blank a filename will be automatically generated and will be written to directory as set in <code>-o</code>. Will override <code>-o</code> flag if set.</li>
+</ol>
+<p>Advanced usage flags</p>
+<ol>
+<li><code>-p</code> This flag is a True/False on whether to skip appending alternative proteins from the Fasta database digestion. If this flag is left blank, it will not skip appending alternative proteins (recommended). </li>
+<li><code>-i</code> True/False on whether to split the IDs in the Fasta database file. If this is left blank, it will not split IDs in the Fasta database file (recommended).</li>
+</ol>
+<p>You can run the tool as follows:</p>
+<pre><code class="language-shell">protein_inference_cli.py \
+    -t /path/to/target/file.txt \
+    -d /path/to/decoy/file.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/parameter/file.yaml \
+    -o /path/to/output/directory/
+</code></pre>
+<p>Running with multiple input target/decoy files:</p>
+<pre><code class="language-shell">protein_inference_cli.py \
+    -t /path/to/target/file1.txt /path/to/target/file2.txt \
+    -d /path/to/decoy/file1.txt /path/to/decoy/file2.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/parameter/file.yaml \
+    -o /path/to/output/directory/
+</code></pre>
+<h4 id="running-within-python">Running Within Python</h4>
+<p>To run within a python console please see the following example:</p>
+<pre><code class="language-python">from pyproteininference.pipeline import ProteinInferencePipeline
+
+yaml_params = &quot;/path/to/yaml/params.yaml&quot;
+database = &quot;/path/to/database/file.fasta&quot;
+### target_files can either be a list of files or one file
+target_files = [&quot;/path/to/target1.txt&quot;,&quot;/path/to/target2.txt&quot;]
+### decoy_files can either be a list of files or one file
+decoy_files = [&quot;/path/to/decoy1.txt&quot;,&quot;/path/to/decoy2.txt&quot;]
+output_directory_name = &quot;/path/to/output/directory/&quot;
+
+pipeline = ProteinInferencePipeline(parameter_file=yaml_params,
+                                    database_file=database,  
+                                    target_files=target_files,  
+                                    decoy_files=decoy_files,  
+                                    combined_files=None,  
+                                    output_directory=output_directory_name)  
+# Calling .execute() will initiate the pipeline with the given data                                                               
+pipeline.execute()
+</code></pre>
+<h3 id="running-the-heuristic-method">Running the Heuristic Method</h3>
+<p>Py Protein Inference also has a built-in Heuristic that runs through four inference methods (Inclusion, Exclusion, Parsimony, and Peptide Centric) and selects a recommended method for your given dataset. 
+By default, all four result files will be written, and the optimal method will be highlighted to the user.
+The Heuristic method also outputs a density plot that showcases all the inference methods compared to one another to gain further insight. For more information on the Heuristic Method see the <a href="../supplementary/#heuristic-algorithm"><strong>Heuristic algorithm</strong></a> section.</p>
+<h4 id="running-the-heuristic-method-via-the-command-line">Running the Heuristic Method via the Command Line</h4>
+<pre><code class="language-shell">python protein_inference_heuristic_cli.py --help
+</code></pre>
+<p>This will return the help prompt for the tool.
+If this does not work download <code>protein_inference_heuristic_cli.py</code> from the repository and write the full path to the script while also calling <code>python</code>.</p>
+<pre><code class="language-shell">python /path/to/directory/pyproteininference/scripts/protein_inference_heuristic_cli.py --help
+</code></pre>
+<p>Command line options are as follows:</p>
+<pre><code>cli$ python protein_inference_heuristic_cli.py --help
+usage: protein_inference_heuristic_cli.py [-h] [-t FILE [FILE ...]]
+                                          [-d FILE [FILE ...]]
+                                          [-f FILE [FILE ...]] [-o DIR]
+                                          [-l FILE] [-a DIR] [-b DIR] [-c DIR]
+                                          [-db FILE] [-y FILE] [-p] [-i]
+                                          [-r FILE] [-m FLOAT] [-u STR]
+
+Protein Inference Heuristic
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t FILE [FILE ...], --target FILE [FILE ...]
+                        Input target psm output from percolator. Can either
+                        input one file or a list of files.
+  -d FILE [FILE ...], --decoy FILE [FILE ...]
+                        Input decoy psm output from percolator. Can either
+                        input one file or a list of files.
+  -f FILE [FILE ...], --combined_files FILE [FILE ...]
+                        Input combined psm output from percolator. This should
+                        contain Target and Decoy PSMS. Can either input one
+                        file or a list of files.
+  -o DIR, --output DIR  Result Directory to write to - the name of file will
+                        be determined by parameters selected and tag
+                        parameter. If this option is not set, will write
+                        results to current working directory.
+  -l FILE, --output_filename FILE
+                        Filename to write results to. Can be left blank. If
+                        this flag is left blank the filename will be
+                        automatically generated. If set this flag will
+                        override -o.
+  -a DIR, --target_directory DIR
+                        Directory that contains either .txt or .tsv input
+                        target psm data. Make sure the directory ONLY contains
+                        result files.
+  -b DIR, --decoy_directory DIR
+                        Directory that contains either .txt or .tsv input
+                        decoy psm data. Make sure the directory ONLY contains.
+                        result files.
+  -c DIR, --combined_directory DIR
+                        Directory that contains either .txt or .tsv input data
+                        with targets/decoys combined. Make sure the directory
+                        ONLY contains result files.
+  -db FILE, --database FILE
+                        Path to the fasta formatted database used in the MS
+                        search. This is optional. If not set, will use the
+                        proteins only in the input files.
+  -y FILE, --yaml_params FILE
+                        Path to a Protein Inference Yaml Parameter File. If
+                        this is not set, default parameters will be used.
+  -p, --skip_append_alt
+                        Advanced usage only. If this flag is set, will skip
+                        adding alternative proteins to each PSM from the
+                        database digest. If this flag is not set, the
+                        peptide/protein mapping will be taken from database
+                        digest and appended to the mapping present in the
+                        input files.
+  -i, --id_splitting    Advanced usage only. If set this flag will split
+                        protein identifiers.If not set, this flag will not
+                        split protein identifiers.Sometimes the fasta database
+                        protein IDs are formatted as: 'sp|ARAF_HUMAN|P10398'.
+                        While protein IDs in the input files are formatted as
+                        'ARAF_HUMAN|P10398'. Setting This flag will split off
+                        the front 'sp|' or 'tr|' from the database protein
+                        identifiers.
+  -r FILE, --pdf_filename FILE
+                        PDF Filepath to write the Heuristic plot to after
+                        Heuristic Scoring. If not set, writes the file with
+                        filename heuristic_plot.pdf to directory set in -o. If -o is
+                        not set, will write the file to current working
+                        directory.
+  -m FLOAT, --fdr_threshold FLOAT
+                        The FDR threshold to use in the Heuristic Method.
+                        Defaults to 0.05 if not set.
+  -u STR, --output_type STR
+                        The type of output to be written. Can either be 'all'
+                        or 'optimal'. If set to 'all' will output all
+                        inference results. If set to 'optimal' will output
+                        only the result selected by the heuristic method. If
+                        left blank this will default to 'all'.
+</code></pre>
+<p>Input options are the same as the standard protein_inference_cli.py with the addition of three optional inputs:
+1. <code>-r</code> This is a filepath that will have a density plot written to it after the heuristic method has been run. If this is left blank, it will write the plot into the standard output directory with the name heuristic_plot.pdf
+2. <code>-m</code> The FDR threshold to use in the Heuristic Method. The method will use values from 0 to the FDR threshold. If this value is left blank, it will be set to 0.05
+3. <code>-u</code> This is the type of output to be written after the heuristic method is complete. Will either output all results or the optimal results. If all is selected, the optimal results will have the string "optimal_method" spliced into the filename.</p>
+<p>You can run the tool as follows:</p>
+<pre><code class="language-shell">protein_inference_heuristic_cli.py \
+    -t /path/to/target/file.txt \
+    -d /path/to/decoy/file.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/parameter/file.yaml \
+    -o /path/to/output/directory/ \
+    -r /path/to/pdf/file.pdf \
+    -m 0.05
+</code></pre>
+<p>Running with multiple input target/decoy files:</p>
+<pre><code class="language-shell">protein_inference_heuristic_cli.py \
+    -t /path/to/target/file1.txt /path/to/target/file2.txt \
+    -d /path/to/decoy/file1.txt /path/to/decoy/file2.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/parameter/file.yaml \
+    -o /path/to/output/directory/ \
+    -r /path/to/pdf/file.pdf \
+    -m 0.05
+</code></pre>
+<h4 id="running-the-heuristic-method-via-python">Running the Heuristic Method via Python</h4>
+<p>To run within a python console please see the following example:</p>
+<pre><code class="language-python">from pyproteininference.heuristic import HeuristicPipeline
+
+yaml_params = &quot;/path/to/yaml/params.yaml&quot;
+database = &quot;/path/to/database/file.fasta&quot;
+### target_files can either be a list of files or one file
+target_files = [&quot;/path/to/target1.txt&quot;,&quot;/path/to/target2.txt&quot;]
+### decoy_files can either be a list of files or one file
+decoy_files = [&quot;/path/to/decoy1.txt&quot;,&quot;/path/to/decoy2.txt&quot;]
+output_directory_name = &quot;/path/to/output/directory/&quot;
+pdf_filename = &quot;/path/to/output/directory/heuristic_plot.pdf&quot;
+
+hp = HeuristicPipeline(parameter_file=yaml_params,
+                             database_file=database,  
+                             target_files=target_files,  
+                             decoy_files=decoy_files,  
+                             combined_files=None,  
+                             output_directory=output_directory_name,
+                             pdf_filename=pdf_filename,
+                             output_type=&quot;all&quot;)  
+# Calling .execute() will initiate the heuristic pipeline with the given data 
+# The suggested method will be output in the console and the suggested method results will be written into the output_directory
+hp.execute(fdr_threshold=0.05)
+
+# The optimal inference method and density plot can be generated separately as well with the following to specify thresholds directly:
+hp.determine_optimal_inference_method(false_discovery_rate_threshold=0.05,
+                                       upper_empirical_threshold=1,
+                                       lower_empirical_threshold=.5,
+                                       pdf_filename=None)
+
+</code></pre>
+<h4 id="heuristic-output-example">Heuristic Output Example</h4>
+<h5 id="console-output">Console Output</h5>
+<p>Console Output is as follows and indicates the recommended method at the end:</p>
+<pre><code class="language-shell">2022-05-12 17:28:38,413 - pyproteininference.heuristic - INFO - Heuristic Scores
+2022-05-12 17:28:38,413 - pyproteininference.heuristic - INFO - {'inclusion': 1.2145313335009247, 'exclusion': 1.053616485888155, 'parsimony': 0.5416878942666304, 'peptide_centric': 0.24465822235367252}
+2022-05-12 17:28:38,413 - pyproteininference.heuristic - INFO - Either parsimony 0.5416878942666304 or peptide centric 0.24465822235367252 pass empirical threshold 0.5. Selecting the best method of the two.
+2022-05-12 17:28:38,413 - pyproteininference.heuristic - INFO - Method peptide_centric selected with the heuristic algorithm
+</code></pre>
+<h5 id="heuristic-density-plot-output">Heuristic Density Plot Output</h5>
+<p>Below is an example of a Heuristic Density plot. The plot indicates the distribution of the number of standard deviations 
+from the mean (of identified proteins at a specified FDR) for each inference method for a range of FDRs from 0 to the false discovery rate threshold (100 fdrs are incrementally selected in the range [0, fdr threshold])
+In general, the closer that the peak of a distribution is to 0 the more likely the associated method is to be selected as the recommended method.
+For more information on the specifics of the Heuristic Algorithm see <a href="../supplementary/#heuristic-algorithm-description"><strong>Heuristic Algorithm Description</strong></a></p>
+<p><img alt="density" src="../img/swissprot_example_density.png" /></p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../input_format/" class="btn btn-neutral float-left" title="Input Formats"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../supplementary/" class="btn btn-neutral float-right" title="Supplementary Information">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../input_format/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../supplementary/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

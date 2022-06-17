@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Parameters - Py Protein Inference</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Parameters";
+        var mkdocs_page_input_path = "parameters.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Py Protein Inference
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quick Start</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Parameters</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#general">General</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#data-restriction">Data Restriction</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#score">Score</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#extra-score-information">Extra Score information</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#identifiers">Identifiers</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#extra-identifier-information">Extra Identifier information</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#inference">Inference</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#digest">Digest</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#parsimony">Parsimony</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#peptide-centric">Peptide Centric</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#default-parameters">Default Parameters</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../input_format/">Input Formats</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../advanced/">Advanced Usage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../supplementary/">Supplementary Information</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Code Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../pyproteininference_reference/">PyProteinInference</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Py Protein Inference</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>Parameters</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="yaml-parameter-file-outline">Yaml Parameter File Outline</h1>
+<p>The Yaml Parameter File is the central location for all configurations for a given Protein Inference run and are summarized below:
+Note: These parameters are all optional. Please see the section <a href="#default-parameters">Default Parameters</a> for more information on defaults.</p>
+<h2 id="general">General</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>export</td>
+<td>Export Type can be one of: <strong>peptides</strong>, <strong>psms</strong>, <strong>psm_ids</strong>, <strong>long</strong>, <strong>q_value</strong>, <strong>q_value_all</strong>, <strong>q_value_comma_sep</strong>, <strong>leads</strong>, <strong>all</strong>, <strong>comma_sep</strong>. Suggested types are <strong>peptides</strong>, <strong>psms</strong>, and <strong>psm_ids</strong> as these produce square output. If there are multiple proteins per group the three mentioned types will report the leads only. Other types report on the peptide level with slightly different formats and whether or not to include leads only or all proteins. See <a href="../supplementary/#export-types">here</a> for an in-depth explanation of Export Types.</td>
+<td>String</td>
+</tr>
+<tr>
+<td>fdr</td>
+<td>False Discovery Rate to be marked as significant. Ex. <strong>0.01</strong> for 1% FDR.</td>
+<td>Numeric</td>
+</tr>
+<tr>
+<td>picker</td>
+<td><strong>True</strong>/<strong>False</strong> on whether to run the Protein Picker algorithm. For more info click <a href="../supplementary/#protein-picker">here</a>.</td>
+<td>Bool</td>
+</tr>
+<tr>
+<td>tag</td>
+<td>A String tag that will be written into the result files. Ex. <strong>example_tag</strong>.</td>
+<td>String</td>
+</tr>
+</tbody>
+</table>
+<h2 id="data-restriction">Data Restriction</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pep_restriction</td>
+<td>Posterior Error Probability values to filter (i.e. <strong>0.9</strong>). In this case PSMs with PEP values greater than <strong>0.9</strong> would be removed from the input. If PEP values are not in input please use <strong>None</strong>.</td>
+<td>Numeric</td>
+</tr>
+<tr>
+<td>peptide_length_restriction</td>
+<td>Peptide Length to filter on. (i.e. <strong>7</strong>). If no filter is wanted please use <strong>None</strong>.</td>
+<td>Int</td>
+</tr>
+<tr>
+<td>q_value_restriction</td>
+<td>Q Values to filter. (i.e. <strong>0.2</strong>). In this case PSMs with Q Values greater than <strong>0.2</strong> would be removed from the input. If Q Values are not in input please use <strong>None</strong> .</td>
+<td>Numeric</td>
+</tr>
+<tr>
+<td>custom_restriction</td>
+<td>Custom Value to filter. (i.e. <strong>5</strong>). In this case PSMs with Custom value greater than / less than <strong>5</strong> would be removed from the input. If Not using a custom score please use <strong>None</strong>. <strong>NOTE</strong>: If a higher score is "better" for your score please set <strong>psm_score_type</strong> to <strong>additive</strong>. If a lower score is "better" please set <strong>psm_score_type</strong> parameter to <strong>multiplicative</strong>.</td>
+<td>Numeric</td>
+</tr>
+</tbody>
+</table>
+<h2 id="score">Score</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>protein_score</td>
+<td>One of any of the following: <strong>multiplicative_log</strong>, <strong>best_peptide_per_protein</strong>, <strong>top_two_combined</strong>, <strong>additive</strong>, <strong>iterative_downweighted_log</strong>, <strong>downweighted_multiplicative_log</strong>, <strong>geometric_mean</strong>. Recommended: <strong>multiplicative_log</strong>.</td>
+<td>String</td>
+</tr>
+<tr>
+<td>psm_score</td>
+<td>PSM score to use for Protein Scoring. If using Percolator output as input this would either be <strong>posterior_error_prob</strong> or <strong>q-value</strong>. The string typed here should match the column in your input files <strong>EXACTLY</strong>. If using a custom score it will be filtered accordingly with the value in <a href="#data-restriction"><strong>custom_restriction</strong></a>.</td>
+<td>String</td>
+</tr>
+<tr>
+<td>psm_score_type</td>
+<td>The Type of score that <strong>psm_score</strong> parameter is. Either <strong>multiplicative</strong> or <strong>additive</strong>. If a larger psm score is "better" than input additive (i.e. Mascot Ion Score, Xcorr, Percolator Score). If a smaller psm score is "better" than input multiplicative (i.e. Q Value, Posterior Error Probability). See <a href="#extra-score-information">below</a> for more information.</td>
+<td>String</td>
+</tr>
+</tbody>
+</table>
+<h4 id="extra-score-information">Extra Score information</h4>
+<ol>
+<li>The <strong>protein_score</strong>, <strong>psm_score</strong>, and <strong>psm_score_type</strong> methods must be compatible.</li>
+<li>If using a PSM score (<strong>psm_score</strong> parameter) where the lower the score the better (i.e. <strong>posterior_error_prob</strong> or <strong>q-value</strong>) then any  <strong>protein_score</strong> can be used except <strong>additive</strong>. <strong>psm_score_type</strong> must also be set to <strong>multiplicative</strong>.</li>
+<li>If using a PSM score (<strong>psm_score</strong> parameter) where the higher the score the better (i.e. Percolator Score, Mascot Ion Score, Xcorr) (Percolator Score is called <strong>psm_score</strong> - column name) in the tab delimited percolator output. Then <strong>protein_score</strong> and <strong>psm_score_type</strong> must both be <strong>additive</strong>.</li>
+</ol>
+<h2 id="identifiers">Identifiers</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>decoy_symbol</td>
+<td>Symbol within Decoy Identifiers to distinguish between targets. (i.e "<strong>##</strong>" or "__decoy___"). This is important for <a href="../supplementary/#protein-picker">Protein Picker</a> and FDR calculation.</td>
+<td>String</td>
+</tr>
+<tr>
+<td>isoform_symbol</td>
+<td>Symbol that is present in isoform proteins only. (i.e. "<strong>-</strong>"). See <a href="#extra-identifier-information">below</a> for more information.</td>
+<td>String</td>
+</tr>
+<tr>
+<td>reviewed_identifier_symbol</td>
+<td>Identifier to determine a reviewed vs unreviewed identifier. (i.e. "<strong>sp|</strong>"). See <a href="#extra-identifier-information">below</a> for more information.</td>
+<td>String</td>
+</tr>
+</tbody>
+</table>
+<h4 id="extra-identifier-information">Extra Identifier information</h4>
+<ol>
+<li>For the <strong>decoy_symbol</strong> an example of a target protein -&gt; <strong>ex|protein</strong> and its decoy counterpart could be any of the following: <strong>##ex|##protein</strong>, <strong>##ex|protein</strong>, <strong>decoy_ex|protein</strong>. The decoy symbol just needs to be present within the string to be determined a decoy.</li>
+<li>For <strong>isoform_symbol</strong> and <strong>reviewed_identifier_symbol</strong>, these are used to assign priority in certain algorithms such as parsimony. For example, if we have canonical proteins, isoform proteins, and reviewed/unreviewed proteins in a given analysis; the priority would be established as follows: Reviewed Canonical, Reviewed Isoform, Unreviewed. This means that if two proteins map to the same peptides, the algorithm has to make a decision on which to pick. It would use the previous mentioned priority to pick the protein lead to report. </li>
+</ol>
+<h2 id="inference">Inference</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>inference_type</td>
+<td>The Inference procedure to apply to the analysis. This can be <strong>parsimony</strong>, <strong>inclusion</strong>, <strong>exclusion</strong>, <strong>peptide_centric</strong>, or <strong>first_protein</strong>. Please see <a href="../supplementary/#inference-types">here</a> for more information on the inference types.</td>
+<td>String</td>
+</tr>
+<tr>
+<td>grouping_type</td>
+<td>How to group proteins for a given <strong>inference_type</strong>. This can be <strong>subset_peptides</strong>,  <strong>shared_peptides</strong>, or <strong>None</strong>. Typically <strong>subset_peptides</strong> is used. This parameter only effects grouped proteins and has no impact on protein leads.</td>
+<td>String</td>
+</tr>
+</tbody>
+</table>
+<h2 id="digest">Digest</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>digest_type</td>
+<td>The enzyme used for digestion for the MS searches. (i.e. <strong>trypsin</strong>). For reference, the database digestion is handled with pyteomics. Can be any expasy rule as defined <a href="https://pyteomics.readthedocs.io/en/latest/_modules/pyteomics/parser.html">here</a> other common examples include: <strong>trypsin</strong>, <strong>chymotrypsin high specificity</strong>, <strong>chymotrypsin low specificity</strong>, <strong>lysc</strong>.</td>
+<td>String</td>
+</tr>
+<tr>
+<td>missed_cleavages</td>
+<td>The number of missed cleavages allowed for the MS searches. (i.e. <strong>2</strong>)</td>
+<td>Int</td>
+</tr>
+</tbody>
+</table>
+<h2 id="parsimony">Parsimony</h2>
+<p>These parameters are only used if <strong>parsimony</strong> is selected as <strong>inference_type</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lp_solver</td>
+<td>This can be one of: <strong>pulp</strong> or <strong>None</strong>. This determines which linear program solver is used. Please see <a href="../supplementary/#parsimony-dependencies">here</a> for more information on lp solvers. Input <strong>None</strong> if not running <strong>parsimony</strong>. If running <strong>parsimony</strong> this needs to be set to <strong>pulp</strong>.</td>
+<td>String</td>
+</tr>
+<tr>
+<td>shared_peptides</td>
+<td>How to assign shared peptides for parsimony. Can be one of: <strong>all</strong> or <strong>best</strong>. <strong>all</strong> assigns shared peptides to all possible proteins in the output. <strong>best</strong> assigns shared peptides to the best scoring protein which is a "winner take all" approach. This is specific to the Parsimony Inference type.</td>
+<td>String</td>
+</tr>
+</tbody>
+</table>
+<h2 id="peptide-centric">Peptide Centric</h2>
+<p>These parameters are only used if <strong>peptide_centric</strong> is selected as  <strong>inference_type</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>max_identifiers</td>
+<td>The maximum number of proteins a peptide is allowed to map to. (i.e. <strong>5</strong>). This serves to limit the number of protein groups that can be created due to highly homologous peptides.</td>
+<td>Int</td>
+</tr>
+</tbody>
+</table>
+<h2 id="default-parameters">Default Parameters</h2>
+<pre><code class="language-yaml">parameters:
+  general:
+    export: peptides
+    fdr: 0.01
+    picker: True
+    tag: py_protein_inference
+  data_restriction:
+    pep_restriction: 0.9
+    peptide_length_restriction: 7
+    q_value_restriction: 0.005
+    custom_restriction: None
+  score:
+    protein_score: multiplicative_log
+    psm_score: posterior_error_prob
+    psm_score_type: multiplicative
+  identifiers:
+    decoy_symbol: &quot;##&quot;
+    isoform_symbol: &quot;-&quot;
+    reviewed_identifier_symbol: &quot;sp|&quot;
+  inference:
+    inference_type: peptide_centric
+    grouping_type: shared_peptides
+  digest:
+    digest_type: trypsin
+    missed_cleavages: 3
+  parsimony:
+    lp_solver: pulp
+    shared_peptides: all
+  peptide_centric:
+    max_identifiers: 5
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../quickstart/" class="btn btn-neutral float-left" title="Quick Start"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../input_format/" class="btn btn-neutral float-right" title="Input Formats">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../quickstart/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../input_format/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

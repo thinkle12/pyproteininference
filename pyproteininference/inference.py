@@ -1196,7 +1196,7 @@ class Parsimony(Inference):
         These are both variables of the [DataStore object][pyproteininference.datastore.DataStore] and are
         lists of [Protein][pyproteininference.physical.Protein] objects
         and [ProteinGroup][pyproteininference.physical.ProteinGroup] objects.
-        
+
         """
 
         if self.parameter_file_object.lp_solver == self.PULP:

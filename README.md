@@ -69,4 +69,5 @@ protein_inference_cli.py \
 			-o /data/
 	  ```
 
-For more information please see the full package documentation.
+# Documentation
+For more information please see the full package documentation (https://thinkle12.github.io/pyproteininference/).

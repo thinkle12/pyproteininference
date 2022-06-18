@@ -30,5 +30,8 @@ jobs:
       - name: Test with tox/pytest
         run: |
           tox -e test
-      - name: Build package with tox
-        run: tox -e build-dist
+      - name: Build package
+        run: |
+          VER=$(python setup.py --version)
+          echo $VER
+          python setup.py sdist

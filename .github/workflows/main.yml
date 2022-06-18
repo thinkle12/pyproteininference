@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest black tox build
+          pip install flake8 pytest black tox
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Lint with tox/flake8
         run: |
@@ -30,9 +30,9 @@ jobs:
       - name: Test with tox/pytest
         run: |
           tox -e test
-      - name: Install the package locally
+      - name: Install dependencies
         run: |
-          python -m pip install .
+          python -m pip install --upgrade pip
+          pip install build
       - name: Build package
-        run: |
-          python -m build
+        run: python -m build

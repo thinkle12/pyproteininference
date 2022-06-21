@@ -25,7 +25,6 @@ parameters:
     missed_cleavages: 3
   parsimony:
     lp_solver: None
-    glpk_path: None
     shared_peptides: None
   peptide_centric:
     max_identifiers: 5

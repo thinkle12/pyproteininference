@@ -18,27 +18,28 @@ logging.basicConfig(
 class Score(object):
     """
     Score class that contains methods to do a variety of scoring methods on the
-    :py:class:`pyproteininference.physical.Psm` objects
-    contained inside of :py:class:`pyproteininference.physical.Protein` objects
+    [Psm][pyproteininference.physical.Psm] objects
+    contained inside of [Protein][pyproteininference.physical.Protein] objects.
 
     Methods in the class loop over each Protein object and creates a protein "score" variable using the Psm object
     scores.
 
-    Methods score all proteins from :attr:`scoring_input` from :py:class:`pyproteininference.datastore.DataStore`.
+    Methods score all proteins from `scoring_input` from [DataStore object][pyproteininference.datastore.DataStore].
     The PSM score that is used is determined from
-    :py:meth:`pyproteininference.datastore.DataStore.create_scoring_input`
+    [create_scoring_input][pyproteininference.datastore.DataStore.create_scoring_input].
 
-    Each scoring method will set the following attributes for :py:class:`pyproteininference.datastore.DataStore`
+    Each scoring method will set the following attributes for
+    the [DataStore object][pyproteininference.datastore.DataStore].
 
-    1. attr:`score_method`; This is the full name of the score method
-    2. attr:`short_score_method`; This is the short name of the score method
-    3. attr:`scored_proteins`; This is a list of :py:class:`pyproteininference.physical.Protein` objects
-    that have been scored
+    1. `score_method`; This is the full name of the score method.
+    2. `short_score_method`; This is the short name of the score method.
+    3. `scored_proteins`; This is a list of [Protein][pyproteininference.physical.Protein] objects
+    that have been scored.
 
     Attributes:
-        pre_score_data (list): This is a list of :py:class:`pyproteininference.physical.Protein` objects that
-        contain :py:class:`pyproteininference.physical.Psm` objects
-        data (pyproteininference.datastore.DataStore): Data Object
+        pre_score_data (list): This is a list of [Protein][pyproteininference.physical.Protein] objects
+            that contain [Psm][pyproteininference.physical.Psm] objects.
+        data (DataStore): [DataStore][pyproteininference.datastore.DataStore] object.
 
     """
 
@@ -89,14 +90,14 @@ class Score(object):
 
     def __init__(self, data):
         """
-        Initialization method for the Score class
+        Initialization method for the Score class.
 
         Args:
-            data (pyproteininference.datastore.DataStore): Data class object
+            data (DataStore): [DataStore][pyproteininference.datastore.DataStore] object.
 
         Raises:
-            ValueError: If the variable :attr:`scoring_input` for :py:class:`pyproteininference.datastore.DataStore`
-            is Empty "[]" or does not exist "None"
+            ValueError: If the variable `scoring_input` for the [DataStore][pyproteininference.datastore.DataStore]
+                object is Empty "[]" or does not exist "None".
 
         Examples:
             >>> score = pyproteininference.scoring.Score(data=data)
@@ -112,14 +113,14 @@ class Score(object):
 
     def score_psms(self, score_method="multiplicative_log"):
         """
-        This method dispatches to the actual scoring method given a string input that is defined in
-        :py:class:`pyproteininference.parameters.ProteinInferenceParameter`
+        This method dispatches to the actual scoring method given a string input that is defined in the
+        [ProteinInferenceParameter][pyproteininference.parameters.ProteinInferenceParameter] object.
 
         Args:
             score_method (str): This is a string that represents which scoring method to call.
 
         Raises:
-            ValueError: Will Error out if the score_method is not present in the constant :attr:`SCORE_METHODS`
+            ValueError: Will Error out if the score_method is not present in the constant `SCORE_METHODS`.
 
         Examples:
             >>> score = pyproteininference.scoring.Score(data=data)
@@ -153,7 +154,7 @@ class Score(object):
     def best_peptide_per_protein(self):
         """
         This method uses a best peptide per protein scoring scheme.
-        The top scoring Psm for each protein is selected as the overall Protein object score
+        The top scoring Psm for each protein is selected as the overall Protein object score.
 
         Examples:
             >>> score = pyproteininference.scoring.Score(data=data)
@@ -180,7 +181,7 @@ class Score(object):
 
     def fishers_method(self):
         """
-        This method uses a fishers method scoring scheme
+        This method uses a fishers method scoring scheme.
 \
         Examples:
             >>> score = pyproteininference.scoring.Score(data=data)
@@ -207,7 +208,7 @@ class Score(object):
         """
         This method uses a Multiplicative Log scoring scheme.
         The selected Psm score from all the peptides per protein are multiplied together and we take -Log(X)
-        of the multiplied Peptide scores
+        of the multiplied Peptide scores.
 
         Examples:
             >>> score = pyproteininference.scoring.Score(data=data)
@@ -218,7 +219,6 @@ class Score(object):
 
         all_scores = []
         logger.info("Scoring Proteins with Multiplicative Log Method")
-        logger.info("Using Generators")
         for protein in self.pre_score_data:
             # We create a generator of val_list...
             val_list = protein.get_psm_scores()
@@ -243,7 +243,7 @@ class Score(object):
         This method uses a Multiplicative Log scoring scheme.
         The selected PSM score from all the peptides per protein are multiplied together and
         then this number is divided by the set PSM scores mean raised to the number of peptides for that protein
-        then we take -Log(X) of the following value
+        then we take -Log(X) of the following value.
 
         Examples:
             >>> score = pyproteininference.scoring.Score(data=data)
@@ -282,7 +282,7 @@ class Score(object):
         """
         This method uses a Top Two scoring scheme.
         The top two scores for each protein are multiplied together and we take -Log(X) of the multiplied value.
-        If a protein only has 1 score/peptide, then we only do -Log(X) of the 1 peptide score
+        If a protein only has 1 score/peptide, then we only do -Log(X) of the 1 peptide score.
 
         Examples:
             >>> score = pyproteininference.scoring.Score(data=data)
@@ -317,10 +317,10 @@ class Score(object):
         This method uses a Downweighted Multiplicative Log scoring scheme.
         Each peptide is iteratively downweighted by raising the peptide QValue or PepValue to the
         following power (1/(1+index_number)).
-        Where index_number is the peptide number per protein...
-        Each score for a protein provides less and less weight iteratively
+        Where index_number is the peptide number per protein.
+        Each score for a protein provides less and less weight iteratively.
 
-        We also take -Log(X) of the final score here
+        We also take -Log(X) of the final score here.
 
         Examples:
             >>> score = pyproteininference.scoring.Score(data=data)
@@ -353,11 +353,11 @@ class Score(object):
         """
         This method uses a Downweighted Multiplicative Log scoring scheme.
         Each peptide is iteratively downweighted by multiplying the peptide QValue or PepValue to
-        the following  (1+index_number).
-        Where index_number is the peptide number per protein...
-        Each score for a protein provides less and less weight iteratively
+        the following (1+index_number).
+        Where index_number is the peptide number per protein.
+        Each score for a protein provides less and less weight iteratively.
 
-        We also take -Log(X) of the final score here
+        We also take -Log(X) of the final score here.
 
         Examples:
             >>> score = pyproteininference.scoring.Score(data=data)
@@ -394,7 +394,7 @@ class Score(object):
         """
         This method uses a Geometric Mean scoring scheme.
 
-        We also take -Log(X) of the final score here
+        We also take -Log(X) of the final score here.
 
         Examples:
             >>> score = pyproteininference.scoring.Score(data=data)
@@ -427,7 +427,7 @@ class Score(object):
     def iterative_down_weighted_v2(self):
         """
         The following method is an experimental method essentially used for future development of potential scoring
-        schemes
+        schemes.
         """
 
         all_scores = []

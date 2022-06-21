@@ -1,7 +1,4 @@
-import collections
 import logging
-import os
-import subprocess
 import sys
 from collections import OrderedDict
 
@@ -26,8 +23,8 @@ class Inference(object):
     The base Inference class contains several methods that are shared across the Inference sub-classes.
 
     Attributes:
-        data (pyproteininference.datastore.DataStore): Data Class
-        digest (pyproteininference.in_silico_digest.Digest): Digest Class
+        data (DataStore): [DataStore object][pyproteininference.datastore.DataStore].
+        digest (Digest): [Digest object][pyproteininference.in_silico_digest.Digest].
     """
 
     PARSIMONY = "parsimony"
@@ -44,6 +41,14 @@ class Inference(object):
         PEPTIDE_CENTRIC,
     ]
 
+    INFERENCE_NAME_MAP = {
+        PARSIMONY: "Parsimony",
+        INCLUSION: "Inclusion",
+        EXCLUSION: "Exclusion",
+        FIRST_PROTEIN: "First Protein",
+        PEPTIDE_CENTRIC: "Peptide Centric",
+    }
+
     SUBSET_PEPTIDES = "subset_peptides"
     SHARED_PEPTIDES = "shared_peptides"
     NONE_GROUPING = None
@@ -51,8 +56,7 @@ class Inference(object):
     GROUPING_TYPES = [SUBSET_PEPTIDES, SHARED_PEPTIDES, NONE_GROUPING]
 
     PULP = "pulp"
-    GLPK = "glpk"
-    LP_SOLVERS = [PULP, GLPK]
+    LP_SOLVERS = [PULP]
 
     ALL_SHARED_PEPTIDES = "all"
     BEST_SHARED_PEPTIDES = "best"
@@ -65,11 +69,11 @@ class Inference(object):
 
     def __init__(self, data, digest):
         """
-        Initialization method of Inference object
+        Initialization method of Inference object.
 
         Args:
-            data (pyproteininference.datastore.DataStore): Data Class
-            digest (pyproteininference.in_silico_digest.Digest): Digest Class
+            data (DataStore): [DataStore object][pyproteininference.datastore.DataStore].
+            digest (Digest): [Digest object][pyproteininference.in_silico_digest.Digest].
 
         """
         self.data = data
@@ -80,9 +84,13 @@ class Inference(object):
     def run_inference(cls, data, digest):
         """
         This class method dispatches to one of the five different inference classes/models
-        based on input from the protein inference parameter object
-            :py:class:`pyproteininference.parameters.ProteinInferenceParameter`.
-        The methods are "parsimony", "inclusion", "exclusion", "peptide_centric", and "first_protein"
+        based on input from the [ProteinInferenceParameter][pyproteininference.parameters.ProteinInferenceParameter]
+        object.
+        The methods are "parsimony", "inclusion", "exclusion", "peptide_centric", and "first_protein".
+
+        Args:
+            data (DataStore): [DataStore object][pyproteininference.datastore.DataStore].
+            digest (Digest): [Digest object][pyproteininference.in_silico_digest.Digest].
 
         Example:
             >>> pyproteininference.inference.Inference.run_inference(data=data,digest=digest)
@@ -93,7 +101,6 @@ class Inference(object):
 
         logger.info("Running Inference with Inference Type: {}".format(inference_type))
 
-        # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == Inference.PARSIMONY:
             group = Parsimony(data=data, digest=digest)
             group.infer_proteins()
@@ -116,13 +123,13 @@ class Inference(object):
 
     def _create_protein_groups(self, scored_proteins):
         """
-        This method sets up protein groups for inference methods that do not need grouping
+        This method sets up protein groups for inference methods that do not need grouping.
 
         Args:
-            scored_proteins (list): List of scored :py:class:`pyproteininference.physical.Protein` objects
+            scored_proteins (list): List of scored [Protein][pyproteininference.physical.Protein] objects.
 
         Returns:
-            list: List of lists of scored :py:class:`pyproteininference.physical.Protein` objects
+            list: List of lists of scored [Protein][pyproteininference.physical.Protein] objects.
 
         """
         scored_proteins = sorted(
@@ -151,15 +158,15 @@ class Inference(object):
     def _apply_protein_group_ids(self, grouped_protein_objects):
         """
         This method creates the ProteinGroup objects from the output of
-            :py:meth:`pyproteininference.inference.Inference_create_protein_groups`
+            [_create_protein_groups][`pyproteininference.inference.Inference._create_protein_groups].
 
         Args:
-            grouped_protein_objects (list): list of grouped :py:class:`pyproteininference.physical.Protein` objects
+            grouped_protein_objects (list): list of grouped [Protein][pyproteininference.physical.Protein] objects.
 
         Returns:
-            dict: a Dictionary that contains a list of :py:class:`pyproteininference.physical.ProteinGroup`
-                objects (key:"group_objects") and a list of grouped :py:class:`pyproteininference.physical.Protein`
-                objects (key:"grouped_protein_objects")
+            dict: a Dictionary that contains a list of [ProteinGroup][pyproteininference.physical.ProteinGroup]
+                objects (key:"group_objects") and a list of grouped [Protein][pyproteininference.physical.Protein]
+                objects (key:"grouped_protein_objects").
 
 
         """
@@ -205,22 +212,22 @@ class Inference(object):
 class Inclusion(Inference):
     """
     Inclusion Inference class. This class contains methods that support the initialization of an
-    Inclusion inference method
+    Inclusion inference method.
 
     Attributes:
-        data (pyproteininference.datastore.DataStore): Data Object
-        digest (pyproteininference.in_silico_digest.Digest): Digest Object
-        scored_data (list): a List of scored Protein objects :py:class:`pyproteininference.physical.Protein`
+        data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
+        digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
+        scored_data (list): a List of scored [Protein][pyproteininference.physical.Protein] objects.
 
     """
 
     def __init__(self, data, digest):
         """
-        Initialization method of the Inclusion Inference method
+        Initialization method of the Inclusion Inference method.
 
         Args:
-            data (pyproteininference.datastore.DataStore): Data Object
-            digest (pyproteininference.in_silico_digest.Digest): Digest Object
+            data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
+            digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
         """
 
         self.data = data
@@ -233,12 +240,12 @@ class Inclusion(Inference):
         This method performs the grouping for Inclusion.
 
         Inclusion actually does not do grouping as all peptides get assigned to all possible proteins
-        and groups are not created
+        and groups are not created.
 
-        This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
-        lists of :py:class:`pyproteininference.physical.Protein` and
-        :py:class:`pyproteininference.physical.ProteinGroup`
+        This method assigns the variables: `grouped_scored_proteins` and `protein_group_objects`.
+        These are both variables of the [DataStore Object][pyproteininference.datastore.DataStore] and are
+        lists of [Protein][pyproteininference.physical.Protein] objects
+        and [ProteinGroup][pyproteininference.physical.ProteinGroup] objects.
         """
 
         grouped_proteins = self._create_protein_groups(scored_proteins=self.scored_data)
@@ -268,15 +275,15 @@ class Inclusion(Inference):
     def _apply_protein_group_ids(self, grouped_protein_objects):
         """
         This method creates the ProteinGroup objects for the inclusion inference type using protein groups from
-        :py:meth:`pyproteininference.inference.Inference_create_protein_groups`
+         [_create_protein_groups][`pyproteininference.inference.Inference._create_protein_groups].
 
         Args:
-            grouped_protein_objects (list): list of grouped :py:class:`pyproteininference.physical.Protein` objects
+            grouped_protein_objects (list): list of grouped [Protein][pyproteininference.physical.Protein] objects.
 
         Returns:
-            dict: a Dictionary that contains a list of :py:class:`pyproteininference.physical.ProteinGroup`
-                objects (key:"group_objects") and a list of grouped :py:class:`pyproteininference.physical.Protein`
-                objects (key:"grouped_protein_objects")
+            dict: a Dictionary that contains a list of [ProteinGroup][pyproteininference.physical.ProteinGroup]
+                objects (key:"group_objects") and a list of
+                grouped [Protein][pyproteininference.physical.Protein] objects (key:"grouped_protein_objects").
 
         """
 
@@ -321,22 +328,22 @@ class Inclusion(Inference):
 class Exclusion(Inference):
     """
     Exclusion Inference class. This class contains methods that support the initialization of an
-    Exclusion inference method
+    Exclusion inference method.
 
     Attributes:
-        data (pyproteininference.datastore.DataStore): Data Object
-        digest (pyproteininference.in_silico_digest.Digest): Digest Object
-        scored_data (list): a List of scored Protein objects :py:class:`pyproteininference.physical.Protein`
+        data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
+        digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
+        scored_data (list): a List of scored [Protein][pyproteininference.physical.Protein] objects.
 
     """
 
     def __init__(self, data, digest):
         """
-        Initialization method of the Exclusion Class
+        Initialization method of the Exclusion Class.
 
         Args:
-            data (pyproteininference.datastore.DataStore): Data Object
-            digest (pyproteininference.in_silico_digest.Digest): Digest Object
+            data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
+            digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
 
         """
         self.data = data
@@ -350,12 +357,12 @@ class Exclusion(Inference):
         """
         This method performs the Exclusion inference/grouping method.
 
-        For the exclusion inference method groups cannot be created because all shared peptides are removed
+        For the exclusion inference method groups cannot be created because all shared peptides are removed.
 
-        This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
-        lists of :py:class:`pyproteininference.physical.Protein` and
-        :py:class:`pyproteininference.physical.ProteinGroup`
+        This method assigns the variables: `grouped_scored_proteins` and `protein_group_objects`.
+        These are both variables of the [DataStore Object][pyproteininference.datastore.DataStore] and are
+        lists of [Protein][pyproteininference.physical.Protein] objects
+        and [ProteinGroup][pyproteininference.physical.ProteinGroup] objects.
 
         """
 
@@ -386,23 +393,23 @@ class Exclusion(Inference):
 class Parsimony(Inference):
     """
     Parsimony Inference class. This class contains methods that support the initialization of a
-    Parsimony inference method
+    Parsimony inference method.
 
     Attributes:
-        data (pyproteininference.datastore.DataStore): Data Object
-        digest (pyproteininference.in_silico_digest.Digest): Digest Object
-        scored_data (list): a List of scored Protein objects :py:class:`pyproteininference.physical.Protein`
-        lead_protein_set (set): Set of protein strings that are classified as leads from the LP solver
+        data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
+        digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
+        scored_data (list): a List of scored [Protein][pyproteininference.physical.Protein] objects.
+        lead_protein_set (set): Set of protein strings that are classified as leads from the LP solver.
 
     """
 
     def __init__(self, data, digest):
         """
-        Initialization method of the Parsimony object
+        Initialization method of the Parsimony object.
 
         Args:
-            data (pyproteininference.datastore.DataStore): Data Object
-            digest (pyproteininference.in_silico_digest.Digest): Digest Object
+            data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
+            digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
         """
         self.data = data
         self.digest = digest
@@ -418,18 +425,18 @@ class Parsimony(Inference):
         grouping_type="shared_peptides",
     ):
         """
-        Internal method that creates a list of lists of :py:class:`pyproteininference.physical.Protein`
-        objects for the Parsimony inference object
-        These list of lists are "groups" and the proteins get grouped them according to grouping_type variable
+        Internal method that creates a list of lists of [Protein][pyproteininference.physical.Protein]
+        objects for the Parsimony inference object.
+        These list of lists are "groups" and the proteins get grouped them according to grouping_type variable.
 
         Args:
-            all_scored_proteins (list): list of :py:class:`pyproteininference.physical.Protein` objects
-            lead_protein_objects (list): list of :py:class:`pyproteininference.physical.Protein` objects.
-                Only needed if inference_type=parsimony
-            grouping_type: (str): One of :attr:`GROUPING_TYPES`
+            all_scored_proteins (list): list of [Protein][pyproteininference.physical.Protein] objects.
+            lead_protein_objects (list): list of [Protein][pyproteininference.physical.Protein] objects
+                Only needed if inference_type=parsimony.
+            grouping_type: (str): One of `GROUPING_TYPES`.
 
         Returns:
-            list: list of lists of :py:class:`pyproteininference.physical.Protein` objects
+            list: list of lists of [Protein][pyproteininference.physical.Protein] objects.
 
         """
 
@@ -458,7 +465,7 @@ class Parsimony(Inference):
         try:
             picked_removed = set([x.identifier for x in self.data.picked_proteins_removed])
         except TypeError:
-            picked_removed = set([])
+            picked_removed = set()
 
         missing_proteins = set()
         in_silico_peptides_to_proteins = self.digest.peptide_to_protein_dictionary
@@ -564,19 +571,19 @@ class Parsimony(Inference):
         """
         This internal method creates and reorders protein groups based on criteria such as Reviewed/Unreviewed
         Identifiers as well as Canonincal/Isoform Identifiers.
-        This method is only used with parsimony inference type
+        This method is only used with parsimony inference type.
 
         Args:
-            scored_data (list): list of scored :py:class:`pyproteininference.physical.Protein` objects
-            grouped_proteins:  list of grouped :py:class:`pyproteininference.physical.Protein` objects
+            scored_data (list): list of scored [Protein][pyproteininference.physical.Protein] objects.
+            grouped_proteins:  list of grouped [Protein][pyproteininference.physical.Protein] objects.
             override_type (str): "soft" or "hard" to indicate Reviewed/Unreviewed override. "soft" is preferred and
                 default.
-            isoform_override (bool): True/False on whether to favor canonical forms vs isoforms as group leads
+            isoform_override (bool): True/False on whether to favor canonical forms vs isoforms as group leads.
 
         Returns:
-            dict: a Dictionary that contains a list of :py:class:`pyproteininference.physical.ProteinGroup` objects
-            (key:"group_objects") and a list of grouped :py:class:`pyproteininference.physical.Protein`
-            objects (key:"grouped_protein_objects")
+            dict: a Dictionary that contains a list of [ProteinGroup][pyproteininference.physical.ProteinGroup] objects
+            (key:"group_objects") and a list of grouped [Protein][pyproteininference.physical.Protein]
+            objects (key:"grouped_protein_objects").
 
 
         """
@@ -671,21 +678,21 @@ class Parsimony(Inference):
     def _swissprot_override(self, protein_list, leads, grouped_protein_objects, override_type):
         """
         This method re-assigns protein group leads if the lead is an unreviewed protein and if the protein group
-         contains a reviewed protein that contains the exact same set of peptides as the unreviewed lead
-        This method is here to provide consistency to the output
+         contains a reviewed protein that contains the exact same set of peptides as the unreviewed lead.
+        This method is here to provide consistency to the output.
 
         Args:
-            protein_list (list): List of grouped :py:class:`pyproteininference.physical.Protein` objects
-            leads (set): Set of string protien identifiers that have been identified as a lead
-            grouped_protein_objects (list): List of protein_list lists
-            override_type (str): "soft" or "hard" on how to override non reviewed identifiers. "soft" is preferred
+            protein_list (list): List of grouped [Protein][pyproteininference.physical.Protein] objects.
+            leads (set): Set of string protein identifiers that have been identified as a lead.
+            grouped_protein_objects (list): List of protein_list lists.
+            override_type (str): "soft" or "hard" on how to override non reviewed identifiers. "soft" is preferred.
 
         Returns:
-            dict: leads (set): Set of string protien identifiers that have been identified as a lead.
-             Updated to reflect lead changes
-            grouped_protein_objects (list): List of protein_list lists. Updated to reflect lead changes
-            protein_list (list): List of grouped :py:class:`pyproteininference.physical.Protein` objects.
-                Updated to reflect lead changes
+            dict: leads (set): Set of string protein identifiers that have been identified as a lead.
+             Updated to reflect lead changes.
+            grouped_protein_objects (list): List of protein_list lists. Updated to reflect lead changes.
+            protein_list (list): List of grouped [Protein][pyproteininference.physical.Protein] objects.
+                Updated to reflect lead changes.
 
         """
 
@@ -783,50 +790,49 @@ class Parsimony(Inference):
         """
         This method re-assigns protein group leads if the lead is an isoform protein and if the protein group contains
         a canonical protein that contains the exact same set of peptides as the isoform lead.
-        This method is here to provide consistency to the output
+        This method is here to provide consistency to the output.
 
         Args:
-            protein_list (list): List of grouped :py:class:`pyproteininference.physical.Protein` objects
-            leads (set): Set of string protien identifiers that have been identified as a lead
-            grouped_protein_objects (list): List of protein_list lists
+            protein_list (list): List of grouped [Protein][pyproteininference.physical.Protein] objects.
+            leads (set): Set of string protein identifiers that have been identified as a lead.
+            grouped_protein_objects (list): List of protein_list lists.
 
         Returns:
-            dict: leads (set): Set of string protien identifiers that have been identified as a lead. Updated to
-                reflect lead changes
-            grouped_protein_objects (list): List of protein_list lists. Updated to reflect lead changes
-            protein_list (list): List of grouped :py:class:`pyproteininference.physical.Protein` objects.
-                Updated to reflect lead changes
+            dict: leads (set): Set of string protein identifiers that have been identified as a lead. Updated to
+                reflect lead changes.
+            grouped_protein_objects (list): List of protein_list lists. Updated to reflect lead changes.
+            protein_list (list): List of grouped [Protein][pyproteininference.physical.Protein] objects.
+                Updated to reflect lead changes.
 
 
         """
 
-        if protein_list[0].reviewed:
-            if self.data.parameter_file_object.isoform_symbol in protein_list[0].identifier:
-                pure_id = protein_list[0].identifier.split(self.data.parameter_file_object.isoform_symbol)[0]
-                # Start to loop through protein_list which is the current group...
-                for potential_replacement in protein_list[1:]:
-                    isoform_override = potential_replacement
-                    if (
-                        isoform_override.identifier == pure_id
-                        and isoform_override.identifier not in leads
-                        and set(protein_list[0].peptides).issubset(set(isoform_override.peptides))
-                    ):
-                        isoform_override_index = grouped_protein_objects[-1].index(isoform_override)
-                        cur_iso_lead = grouped_protein_objects[-1][0]
-                        # Re-assigning the value within the index will also reassign the value in protein_list...
-                        # This is because grouped_protein_objects[-1] equals protein_list
-                        # So we do not have to reassign values in protein_list
-                        (grouped_protein_objects[-1][0], grouped_protein_objects[-1][isoform_override_index],) = (
-                            grouped_protein_objects[-1][isoform_override_index],
-                            grouped_protein_objects[-1][0],
-                        )
-                        grouped_protein_objects[-1][isoform_override_index], grouped_protein_objects[-1][0]
+        if self.data.parameter_file_object.isoform_symbol in protein_list[0].identifier:
+            pure_id = protein_list[0].identifier.split(self.data.parameter_file_object.isoform_symbol)[0]
+            # Start to loop through protein_list which is the current group...
+            for potential_replacement in protein_list[1:]:
+                isoform_override = potential_replacement
+                if (
+                    isoform_override.identifier == pure_id
+                    and isoform_override.identifier not in leads
+                    and set(protein_list[0].peptides).issubset(set(isoform_override.peptides))
+                ):
+                    isoform_override_index = grouped_protein_objects[-1].index(isoform_override)
+                    cur_iso_lead = grouped_protein_objects[-1][0]
+                    # Re-assigning the value within the index will also reassign the value in protein_list...
+                    # This is because grouped_protein_objects[-1] equals protein_list
+                    # So we do not have to reassign values in protein_list
+                    (grouped_protein_objects[-1][0], grouped_protein_objects[-1][isoform_override_index],) = (
+                        grouped_protein_objects[-1][isoform_override_index],
+                        grouped_protein_objects[-1][0],
+                    )
+                    grouped_protein_objects[-1][isoform_override_index], grouped_protein_objects[-1][0]
 
-                        new_iso_lead = grouped_protein_objects[-1][0]
-                        logger.info(
-                            "Overriding Isoform {} with {}".format(cur_iso_lead.identifier, new_iso_lead.identifier)
-                        )
-                        leads.add(protein_list[0].identifier)
+                    new_iso_lead = grouped_protein_objects[-1][0]
+                    logger.info(
+                        "Overriding Isoform {} with {}".format(cur_iso_lead.identifier, new_iso_lead.identifier)
+                    )
+                    leads.add(protein_list[0].identifier)
 
         return_dict = {
             "leads": leads,
@@ -839,14 +845,14 @@ class Parsimony(Inference):
     def _reassign_protein_group_leads(self, protein_group_objects):
         """
         This internal method corrects leads that are improperly assigned in the parsimony inference method.
-        This method acts on the protein group objects
+        This method acts on the protein group objects.
 
         Args:
-            protein_group_objects (list): List of :py:class:`pyproteininference.physical.ProteinGroup` objects
+            protein_group_objects (list): List of [ProteinGroup][pyproteininference.physical.ProteinGroup] objects.
 
         Returns:
-            list: List of :py:class:`pyproteininference.physical.ProteinGroup` objects where leads have been
-                reassigned properly
+            protein_group_objects (list): List of [ProteinGroup][pyproteininference.physical.ProteinGroup] objects
+            where leads have been reassigned properly.
 
 
         """
@@ -863,7 +869,7 @@ class Parsimony(Inference):
         # protein c maps to a bunch of peptides and peptide 3
         # Therefore, in the model proteins a and b are equivalent in that they map to 2 peptides together - 1 and 2.
         # peptide 3 maps to a but also to c...
-        # Sometimes the model (glpk) will spit out protein b as the lead... we wish to swap protein b as the lead with
+        # Sometimes the model (pulp) will spit out protein b as the lead... we wish to swap protein b as the lead with
         # protein a because it will likely have a better score...
         logger.info("Potentially Reassigning Protein Group leads...")
         lead_protein_set = set([x.proteins[0].identifier for x in protein_group_objects])
@@ -897,7 +903,6 @@ class Parsimony(Inference):
                             protein_group_objects[i].proteins[0],
                             protein_group_objects[i].proteins[j],
                         ) = (new_lead, old_lead)
-                        logger.info(j)
                         break
 
                 if higher_or_lower == datastore.DataStore.LOWER_PSM_SCORE:
@@ -931,14 +936,14 @@ class Parsimony(Inference):
     def _reassign_protein_list_leads(self, grouped_protein_objects):
         """
         This internal method corrects leads that are improperly assigned in the parsimony inference method.
-        This method acts on the grouped protein objects
+        This method acts on the grouped protein objects.
 
         Args:
-            grouped_protein_objects (list): List of :py:class:`pyproteininference.physical.Protein` objects
+            grouped_protein_objects (list): List of [Protein][pyproteininference.physical.Protein] objects.
 
         Returns:
-            list: List of :py:class:`pyproteininference.physical.Protein` objects where leads have been
-                reassigned properly
+            list: List of [Protein][pyproteininference.physical.Protein] objects where leads have been
+                reassigned properly.
 
 
         """
@@ -955,7 +960,7 @@ class Parsimony(Inference):
         # protein c maps to a bunch of peptides and peptide 3
         # Therefore, in the model proteins a and b are equivalent in that they map to 2 peptides together - 1 and 2.
         # peptide 3 maps to a but also to c...
-        # Sometimes the model (glpk) will spit out protein b as the lead... we wish to swap protein b as the lead with
+        # Sometimes the model (pulp) will spit out protein b as the lead... we wish to swap protein b as the lead with
         # protein a because it will likely have a better score...
         logger.info("Potentially Reassigning Proteoin List leads...")
         lead_protein_set = set([x[0].identifier for x in grouped_protein_objects])
@@ -989,7 +994,6 @@ class Parsimony(Inference):
                             grouped_protein_objects[i][0],
                             grouped_protein_objects[i][j],
                         ) = (new_lead, old_lead)
-                        logger.info(j)
                         break
 
                 if higher_or_lower == datastore.DataStore.LOWER_PSM_SCORE:
@@ -1020,349 +1024,15 @@ class Parsimony(Inference):
 
         return grouped_protein_objects
 
-    def _setup_glpk(self, glpkin_filename="glpkin.mod"):
-        """
-        This internal method is used to setup the glpk file for lp analysis.
-
-        The Bulk of the glpk input file looks as follows:
-        s.t. c1: y[5658] >=1;
-        s.t. c2: y[14145]+y[4857]+y[4858]+y[10143]+y[2966] >=1;
-        s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1
-
-        Where each new line is a peptide and each y[x] is a protein that maps to said peptide
-
-        Args:
-            glpkin_filename (str): path to the filename to be used by glpsol
-
-        Returns:
-            None:
-        """
-
-        # Here we get the peptide to protein dictionary
-        pep_prot_dict = self.data.peptide_to_protein_dictionary()
-
-        # Here we get the protein to peptide dictionary...
-        self.data.protein_to_peptide_dictionary()
-
-        identifiers_sorted = self.data.get_sorted_identifiers(scored=True)
-
-        # Get all the proteins that we scored and the ones picked if picker was ran...
-        data_proteins = sorted([x for x in self.data.protein_peptide_dictionary.keys() if x in identifiers_sorted])
-        # Get the set of peptides for each protein...
-        data_peptides = [set(self.data.protein_peptide_dictionary[x]) for x in data_proteins]
-        flat_peptides_in_data = set([item for sublist in data_peptides for item in sublist])
-        peptide_sets = []
-        # Loop over the list of peptides...
-        for k in range(len(data_peptides)):
-            raw_peptides = data_peptides[k]
-            peptide_set = set()
-            # Loop over each individual peptide per protein...
-            for peps in raw_peptides:
-                # Remove mods...
-                new_peptide = Psm.remove_peptide_mods(peps)
-                # Add it to a temporary set...
-                peptide_set.add(new_peptide)
-            # Append this set to a new list...
-            peptide_sets.append(peptide_set)
-            # Set that proteins peptides to be the unmodified ones...
-            data_peptides[k] = peptide_set
-
-        # Get them all...
-        all_peptides = [x for x in data_peptides]
-        # Remove redundant sets...
-        non_redundant_peptide_sets = [set(i) for i in OrderedDict.fromkeys(frozenset(item) for item in peptide_sets)]
-
-        # Loop over the restricted list of peptides...
-        ind_list = []
-        for peptide_set in non_redundant_peptide_sets:
-            # Get its index in terms of the overall list...
-            ind_list.append(all_peptides.index(peptide_set))
-
-        # Get the protein based on the index
-        restricted_proteins = [data_proteins[x] for x in range(len(data_peptides)) if x in ind_list]
-
-        # Here we get the list of all proteins
-        plist = []
-        for peps in pep_prot_dict.keys():
-            for prots in list(pep_prot_dict[peps]):
-                if prots in restricted_proteins and peps in flat_peptides_in_data:
-                    plist.append(prots)
-
-        # Here we get the unique proteins
-        unique_prots = list(set(plist).union())
-        unique_protein_set = set(unique_prots)
-
-        unique_prots_sorted = [x for x in identifiers_sorted if x in unique_prots]
-
-        if len(unique_prots) != len(unique_prots_sorted):
-            raise ValueError("Sorted proteins length is not equal to unsorted length...")
-
-        # Setup default dictionaries
-        dd_num = collections.defaultdict(list)
-        dd_prot_nums = collections.defaultdict(list)
-
-        # For all the unique proteins from the search create a number to protein dictionary and a protein to
-        # number dictionary
-        # Here we essentially assign a number to each protein
-        # This is important as the glpk analysis just treats proteins as numbers...
-        for peptide_set in range(len(unique_prots_sorted)):
-            dd_num[unique_prots_sorted[peptide_set]].append(peptide_set)
-            dd_prot_nums[peptide_set].append(unique_prots_sorted[peptide_set])
-
-        # Store this data as glpk_number_protein_dictionary
-        # The numbers are important as they are used in the GLPK input and we need to know what number in the GLPK
-        # output corresponds with which protein from the search
-        self.glpk_number_protein_dictionary = dd_prot_nums
-        # Create the GLPK input file
-        fileout = open(glpkin_filename, "w")
-
-        # Not sure if this header string is correct or if it needs to be here...
-        fileout.write("/* sets */" + "\n" + "set PROTEINS;" + "\n" + "\n" + "\n")
-        fileout.write("/* decision variables: yi, i in {1,..,5}. yi = 1 -> protein i is selected */" + "\n")
-        fileout.write("var y {i in PROTEINS} binary >=0;" + "\n")
-        fileout.write("/* objective function */" + "\n")
-        fileout.write("minimize z: sum{i in PROTEINS} y[i];" + "\n" + "\n")
-        fileout.write("/* Constraints */" + "\n")
-
-        # Here we create the bulk of the input file which needs to look as follows:
-        # s.t. c1: y[5658] >=1;
-        # s.t. c2: y[14145]+y[4857]+y[4858]+y[10143]+y[2966] >=1;
-        # s.t. c3: y[320]+y[4893]+y[4209]+y[911]+y[2767]+y[2296]+y[10678]+y[3545] >=1;
-        # Each of the lines (constants, c1,c2,c3) is a peptide and each of the y[x] is a protein
-        total_sorted_peptides = sorted(list(set(flat_peptides_in_data)))  # Sort peptides alphabetically first...
-        for j in range(len(total_sorted_peptides)):
-            peptides_glpsol_format = [
-                "y[{}]".format(dd_num[x][0])
-                for x in sorted(pep_prot_dict[total_sorted_peptides[j]])
-                if x in unique_protein_set
-            ]
-            fileout.write("s.t. c" + str(j + 1) + ": " + "+".join(peptides_glpsol_format) + " >=1;" + "\n")
-
-        # Finish writing the rest of the file and close it
-        fileout.write("\n")
-        fileout.write("data;" + "\n")
-        numlist = [str(dd_num[x][0]) for x in sorted(unique_prots)]
-        strlist = " ".join(numlist)
-        # End the file with listing the entire set of proteins... (as its number identifier)
-        fileout.write("set PROTEINS := " + strlist + " ;" + "\n" + "\n")
-
-        fileout.write("end;")
-        fileout.close()
-
-    def _glpk_runner(
-        self,
-        path_to_glpsol="glpsol",
-        glpkin="glpkin.mod",
-        glpkout="glpkout.sol",
-        skip_running=False,
-    ):
-        """
-        This internal method handles running glpsol on the commandline to solve the linear programming problem for
-        parsimony
-
-        Args:
-            path_to_glpsol (str): Path to glpsol on the system
-            glpkin (str): Path to the input file for glpsol
-            glpkout (str): Path to the output file for glpsol to write
-            skip_running (bool): True/False on skipping running glpsol
-
-        Returns:
-            None
-        """
-
-        # If there is no file_override (mainly for offline testing)
-        # Run GLPK with the following command
-        if not skip_running:
-            p = subprocess.Popen(
-                "{} -m {} -o {}".format(path_to_glpsol, glpkin, glpkout),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                shell=True,
-            )
-            output = p.communicate()
-
-            logger.debug("Start Command line Stdout")
-            logger.debug(output[0])
-            logger.debug("End Command line Stdout")
-            logger.debug("Start Command line Stderr")
-            logger.debug(output[1])
-            logger.debug("End Command line Stderr")
-
-            if output[0] == "":
-                raise ValueError("Glpk did not produce any output... See potential error output above")
-        else:
-            logger.info("Not running GLPK, File {} will be used downstream in grouping".format(glpkout))
-
-        # Define indicies better and make this code more readable...
-        # Define indicies in init and show commented examples of how the data looks...
-
-    def _glpk_grouper(
-        self,
-        swissprot_override="soft",
-        glpksolution_filename="glpkout.sol",
-    ):
-        """
-        This internal functions takes the output from glpsol and translates that into lead protein strings and then
-        finally lead protein objects.
-
-        This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
-        lists of :py:class:`pyproteininference.physical.Protein` and
-        :py:class:`pyproteininference.physical.ProteinGroup`
-
-        The subsequent lead proteins then have proteins assigned to them through grouping
-
-        Finally, swissprot_override is ran. swissprot override is a lead protein override for naming convention which
-        can have 2 options: "soft", or "hard".
-
-        selecting "soft" will cycle through all protein leads and groups. If a protein lead is an unreviewed hit
-        (trembl) then all proteins in the lead proteins group are inspected.
-        If any of these intra group proteins are a reviewed hit (swissprot) and the lead trembl proteins peptides
-        are a complete subset of the swissprot proteins peptides, then we select
-        to swap the trembl and swissprot hits so that the swissprot is now the new lead protein.
-
-        We opt to use this soft override scheme as default because given the redundancy of our databases.
-        Out of GLPK we see a lot of unreviewed hits being called lead proteins.
-        If proteins share the same peptides or share a very similar set of peptides we are unsure how GLPK selects
-        which protein to supply as the lead.
-        As such, we get many reviewed and unreviewed proteins as lead proteins.
-        Performing this "soft" override switches many of these lead trembl hits to reviewed swissprot hits.
-        This is important as group members are used to seeing swissprot identifiers as opposed to trembl identifiers
-
-        selecting "hard" will perform the same swapping as the "soft" override. However,
-        the "hard" override will swap a trembl lead with the swissprot protein with the highest number of peptides in
-        its group (so long as its already not a lead protein itself)
-        even if the unreviewed has a unique peptide relative to the peptides of all proteins in its group.
-        This setting is not recommended given that you can potentially lose out on Unique peptides
-
-        Args:
-            swissprot_override (str): "soft" or "hard". Should be kept as "soft" but see the docs for an explanation
-            glpksolution_filename(str): Path to the output of glpsol
-
-        """
-
-        scored_data = self.data.get_protein_data()
-
-        glpk_out = open(glpksolution_filename, "r")
-
-        # Get the number protein dictionary from glpk_setup
-        dd_prot_nums = self.glpk_number_protein_dictionary
-
-        glpk_out = glpk_out.read()
-        glpk_out = glpk_out.split("\n")
-
-        # Cant find a better way to do this... there are modules out there that work with glpk...
-        start = glpk_out.index("   No. Column name       Activity     Lower bound   Upper bound")
-
-        restricted_glpk_out = []
-        # Fix this -13 and +2... not really sure how
-        # Based on the output file we should start two lines after the start index and stop 13 before the end of the
-        # file...
-        for lines in range(start + 2, len(glpk_out) - 13):
-            split_lines = [x.strip() for x in glpk_out[lines].split(" ")]
-            restricted_content = []
-            for content in split_lines:
-                if content != "":
-                    restricted_content.append(content)
-            restricted_glpk_out.append(restricted_content)
-
-        # Use 1 here as 1 is the location in the line of the protein number
-        # 3 is the location of the binary (which indicates whether or not the protein number has a unique peptide
-        # making it a lead protein)
-        numbers = [x[1].split("]")[0].split("[")[-1] for x in restricted_glpk_out]
-        binary = [x[3] for x in restricted_glpk_out]
-
-        self.numbers = numbers
-
-        # Here we extract out the lead proteins...
-        lead_proteins = []
-        for k in range(len(numbers)):
-            if binary[k] == "1":
-                try:
-                    passing_protein_number = int(numbers[k])
-                    lead_proteins.append(dd_prot_nums[passing_protein_number][0])
-                except IndexError:
-                    logger.warning("No Protein for Protein Number {}".format(passing_protein_number))
-
-        lead_protein_set = set(lead_proteins)
-        self.lead_protein_set = lead_protein_set
-
-        logger.info("Number of lead proteins = {}".format(len(lead_proteins)))
-
-        scored_proteins = list(scored_data)
-        protein_finder = [x.identifier for x in scored_proteins]
-
-        lead_protein_objects = []
-        lead_protein_identifiers = []
-        for proteins in lead_proteins:
-            if proteins in protein_finder:
-                p_ind = protein_finder.index(proteins)
-                protein_object = scored_proteins[p_ind]
-                lead_protein_objects.append(protein_object)
-                lead_protein_identifiers.append(protein_object.identifier)
-            else:
-                # Why are some proteins not being found when we run exclusion???
-                logger.warning("Protein {} not found with protein finder...".format(proteins))
-
-        self.lead_protein_objects = lead_protein_objects
-
-        # Now we have the lead Proteins so we need to get the peptides for each lead protein
-        # Then we find all proteins that share at least 1 peptide with each lead protein
-        # If they share at least 1 peptide then assign that protein to the group...
-
-        grouped_proteins = self._create_protein_groups(
-            all_scored_proteins=scored_data,
-            lead_protein_objects=self.lead_protein_objects,
-            grouping_type=self.data.parameter_file_object.grouping_type,
-        )
-
-        regrouped_proteins = self._swissprot_and_isoform_override(
-            scored_data=scored_data,
-            grouped_proteins=grouped_proteins,
-            override_type=swissprot_override,
-            isoform_override=True,
-        )
-
-        grouped_protein_objects = regrouped_proteins["grouped_protein_objects"]
-        protein_group_objects = regrouped_proteins["group_objects"]
-
-        hl = self.data.higher_or_lower()
-
-        logger.info("Sorting Results based on lead Protein Score")
-        grouped_protein_objects = datastore.DataStore.sort_protein_objects(
-            grouped_protein_objects=grouped_protein_objects, higher_or_lower=hl
-        )
-        protein_group_objects = datastore.DataStore.sort_protein_group_objects(
-            protein_group_objects=protein_group_objects, higher_or_lower=hl
-        )
-
-        # Run lead reassignment for the group objets and protein objects
-        protein_group_objects = self._reassign_protein_group_leads(
-            protein_group_objects=protein_group_objects,
-        )
-
-        grouped_protein_objects = self._reassign_protein_list_leads(grouped_protein_objects=grouped_protein_objects)
-
-        logger.info("Re Sorting Results based on lead Protein Score")
-        grouped_protein_objects = datastore.DataStore.sort_protein_objects(
-            grouped_protein_objects=grouped_protein_objects, higher_or_lower=hl
-        )
-        protein_group_objects = datastore.DataStore.sort_protein_group_objects(
-            protein_group_objects=protein_group_objects, higher_or_lower=hl
-        )
-
-        self.data.grouped_scored_proteins = grouped_protein_objects
-        self.data.protein_group_objects = protein_group_objects
-
     def _pulp_grouper(self):
         """
         This internal function uses pulp to solve the lp problem for parsimony then performs protein grouping with the
-         various internal grouping functions
+         various internal grouping functions.
 
-        This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
-        lists of :py:class:`pyproteininference.physical.Protein`
-        and :py:class:`pyproteininference.physical.ProteinGroup`
+        This method assigns the variables: `grouped_scored_proteins` and `protein_group_objects`.
+        These are both variables of the [DataStore object][pyproteininference.datastore.DataStore] and are
+        lists of [Protein][pyproteininference.physical.Protein] objects
+        and [ProteinGroup][pyproteininference.physical.ProteinGroup] objects.
 
         """
 
@@ -1425,7 +1095,7 @@ class Parsimony(Inference):
         unique_prots_sorted = [x for x in identifiers_sorted if x in unique_prots]
 
         # Define the protein variables with a lower bound of 0 and catgeory Integer
-        prots = pulp.LpVariable.dicts("prot", indexs=unique_prots_sorted, lowBound=0, cat="Integer")
+        prots = pulp.LpVariable.dicts("prot", indices=unique_prots_sorted, lowBound=0, cat="Integer")
 
         # Define our Lp Problem which is to Minimize our objective function
         prob = pulp.LpProblem("Parsimony_Problem", pulp.LpMinimize)
@@ -1518,62 +1188,20 @@ class Parsimony(Inference):
         self.data.grouped_scored_proteins = grouped_protein_objects
         self.data.protein_group_objects = protein_group_objects
 
-    def infer_proteins(self, glpkinout_directory="glpkinout", skip_running_glpk=False):
+    def infer_proteins(self):
         """
-        This method performs the Parsimony inference method and either uses pulp or glpk based on the
-        :py:class:`pyproteininference.parameters.ProteinInferenceParameter` object
+        This method performs the Parsimony inference method and uses pulp for the LP solver.
 
-        This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
-        lists of :py:class:`pyproteininference.physical.Protein` and
-        :py:class:`pyproteininference.physical.ProteinGroup`
+        This method assigns the variables: `grouped_scored_proteins` and `protein_group_objects`.
+        These are both variables of the [DataStore object][pyproteininference.datastore.DataStore] and are
+        lists of [Protein][pyproteininference.physical.Protein] objects
+        and [ProteinGroup][pyproteininference.physical.ProteinGroup] objects.
 
-        Args:
-            glpkinout_directory (str): Directory to use for writing glpsol files. Only used if lp_solver is glpk
-            skip_running_glpk (bool): True/False for skipping the running of glpk. Only used if lp_solver is glpk
-
-        Returns:
-            None:
         """
 
         if self.parameter_file_object.lp_solver == self.PULP:
 
             self._pulp_grouper()
-
-        elif self.parameter_file_object.lp_solver == self.GLPK:
-
-            try:
-                os.mkdir(glpkinout_directory)
-            except OSError:
-                logger.warning("Directory {} cannot be created or already exists".format(glpkinout_directory))
-
-            self._setup_glpk(
-                glpkin_filename=os.path.join(
-                    glpkinout_directory,
-                    "glpkin_{}.mod".format(self.parameter_file_object.tag),
-                )
-            )
-
-            self._glpk_runner(
-                path_to_glpsol=self.parameter_file_object.glpk_path,
-                glpkin=os.path.join(
-                    glpkinout_directory,
-                    "glpkin_{}.mod".format(self.parameter_file_object.tag),
-                ),
-                glpkout=os.path.join(
-                    glpkinout_directory,
-                    "glpkout_{}.sol".format(self.parameter_file_object.tag),
-                ),
-                skip_running=skip_running_glpk,
-            )
-
-            self._glpk_grouper(
-                swissprot_override="soft",
-                glpksolution_filename=os.path.join(
-                    glpkinout_directory,
-                    "glpkout_{}.sol".format(self.parameter_file_object.tag),
-                ),
-            )
 
         else:
             raise ValueError(
@@ -1647,21 +1275,21 @@ class Parsimony(Inference):
 class FirstProtein(Inference):
     """
     FirstProtein Inference class. This class contains methods that support the initialization of a
-    FirstProtein inference method
+    FirstProtein inference method.
 
     Attributes:
-        data (pyproteininference.datastore.DataStore): Data Object
-        digest (pyproteininference.in_silico_digest.Digest): Digest Object
+        data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
+        digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
 
     """
 
     def __init__(self, data, digest):
         """
-        FirstProtein Inference initialization method
+        FirstProtein Inference initialization method.
 
         Args:
-            data (pyproteininference.datastore.DataStore): Data Object
-            digest (pyproteininference.in_silico_digest.Digest): Digest Object
+            data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
+            digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
 
         Returns:
             object:
@@ -1674,12 +1302,12 @@ class FirstProtein(Inference):
 
     def infer_proteins(self):
         """
-        This method performs the First Protein inference method
+        This method performs the First Protein inference method.
 
-        This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
-        lists of :py:class:`pyproteininference.physical.Protein` and
-        :py:class:`pyproteininference.physical.ProteinGroup`
+        This method assigns the variables: `grouped_scored_proteins` and `protein_group_objects`.
+        These are both variables of the [DataStore object][pyproteininference.datastore.DataStore] and are
+        lists of [Protein][pyproteininference.physical.Protein] objects
+        and [ProteinGroup][pyproteininference.physical.ProteinGroup] objects.
 
         """
 
@@ -1711,21 +1339,21 @@ class FirstProtein(Inference):
 class PeptideCentric(Inference):
     """
     PeptideCentric Inference class. This class contains methods that support the initialization of a
-    PeptideCentric inference method
+    PeptideCentric inference method.
 
     Attributes:
-        data (pyproteininference.datastore.DataStore): Data Object
-        digest (pyproteininference.in_silico_digest.Digest): Digest Object
+        data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
+        digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
 
     """
 
     def __init__(self, data, digest):
         """
-        PeptideCentric Inference initialization method
+        PeptideCentric Inference initialization method.
 
         Args:
-            data (pyproteininference.datastore.DataStore): Data Object
-            digest (pyproteininference.in_silico_digest.Digest): Digest Object
+            data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
+            digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
 
         Returns:
             object:
@@ -1737,15 +1365,15 @@ class PeptideCentric(Inference):
 
     def infer_proteins(self):
         """
-        This method performs the Peptide Centric inference method
+        This method performs the Peptide Centric inference method.
 
-        This method assigns the variables: :attr:`grouped_scored_proteins` and :attr:`protein_group_objects`
-        These are both variables of the :py:class:`pyproteininference.datastore.DataStore` and are
-        lists of :py:class:`pyproteininference.physical.Protein` and
-         :py:class:`pyproteininference.physical.ProteinGroup`
+        This method assigns the variables: `grouped_scored_proteins` and `protein_group_objects`.
+        These are both variables of the [DataStore object][pyproteininference.datastore.DataStore] and are
+        lists of [Protein][pyproteininference.physical.Protein] objects
+        and [ProteinGroup][pyproteininference.physical.ProteinGroup] objects.
 
         Returns:
-            None
+            None:
 
         """
 
@@ -1772,12 +1400,12 @@ class PeptideCentric(Inference):
     def _apply_protein_group_ids(self):
         """
         This method creates the ProteinGroup objects for the peptide_centric inference based on protein groups
-        from :py:meth:`pyproteininference.inference.Inference_create_protein_groups`
+        from [._create_protein_groups][pyproteininference.inference.Inference._create_protein_groups].
 
         Returns:
-            dict: a Dictionary that contains a list of :py:class:`pyproteininference.physical.ProteinGroup`
-            objects (key:"group_objects") and a list of grouped :py:class:`pyproteininference.physical.Protein`
-            objects (key:"grouped_protein_objects")
+            dict: a Dictionary that contains a list of [ProteinGroup]]pyproteininference.physical.ProteinGroup]
+            objects (key:"group_objects") and a list of grouped [Protein]]pyproteininference.physical.Protein]
+            objects (key:"grouped_protein_objects").
 
         """
 

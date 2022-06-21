@@ -3,7 +3,7 @@ parameters:
     export: q_value
     fdr: 0.01
     picker: True
-    tag: test_parsimony
+    tag: test_heuristic
   data_restriction:
     pep_restriction: .9
     peptide_length_restriction: 7
@@ -24,8 +24,7 @@ parameters:
     digest_type: trypsin
     missed_cleavages: 3
   parsimony:
-    lp_solver: glpk
-    glpk_path: glpsol
+    lp_solver: pulp
     shared_peptides: all
   peptide_centric:
     max_identifiers: 5

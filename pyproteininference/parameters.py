@@ -20,50 +20,50 @@ logging.basicConfig(
 
 class ProteinInferenceParameter(object):
     """
-    Class that handles data retrieval, storage, and validation of Protein Inference Parameters
+    Class that handles data retrieval, storage, and validation of Protein Inference Parameters.
 
     Attributes:
-        yaml_param_filepath (str): path to properly formatted parameter file specific to Protein Inference
-        digest_type (str): String that determines that type of in silico digestion for
-            :py:class:`pyproteininference.in_silico_digest.Digest`. Typically "trypsin"
-        export (str): String to indicate the export type for :py:class:`pyproteininference.export.Export`.
-            Typically this is "psms", "peptides", or "psm_ids"
-        fdr (float): Float to indicate FDR filtering
-        glpk_path (str): Path to local installation of glpsol if inference_type="parsimony" and lp_solver="glpk"
+        yaml_param_filepath (str): path to properly formatted parameter file specific to Protein Inference.
+        digest_type (str): String that determines that type of digestion in silico digestion for
+            [Digest object][pyproteininference.in_silico_digest.Digest]. Typically "trypsin".
+        export (str): String to indicate the export type for [Export object][pyproteininference.export.Export].
+            Typically this is "psms", "peptides", or "psm_ids".
+        fdr (float): Float to indicate FDR filtering.
         missed_cleavages (int): Integer to determine the number of missed cleavages in the database digestion
-            :py:class:`pyproteininference.in_silico_digest.Digest`
-        picker (bool): True/False on whether or not to run the protein picker algorithm
-            :py:meth:pyproteininference.datastore.DataStore.protein_picker`
+            [Digest object][pyproteininference.in_silico_digest.Digest].
+        picker (bool): True/False on whether or not to run
+            the [protein picker][pyproteininference.datastore.DataStore.protein_picker] algorithm.
         restrict_pep (float/None): Float to restrict the posterior error probability values by in the PSM input.
-            Used in :py:meth:pyproteininference.datastore.DataStore.restrict_psm_data`
+            Used in [restrict_psm_data][pyproteininference.datastore.DataStore.restrict_psm_data].
         restrict_peptide_length (int/None): Float to restrict the peptide length values by in the PSM input.
-            Used in :py:meth:pyproteininference.datastore.DataStore.restrict_psm_data`
+            Used in [restrict_psm_data][pyproteininference.datastore.DataStore.restrict_psm_data].
         restrict_q (float/None): Float to restrict the q values by in the PSM input.
-            Used in :py:meth:pyproteininference.datastore.DataStore.restrict_psm_data`
+            Used in [restrict_psm_data][pyproteininference.datastore.DataStore.restrict_psm_data].
         restrict_custom (float/None): Float to restrict the custom values by in the PSM input.
-            Used in :py:meth:pyproteininference.datastore.DataStore.restrict_psm_data`.
+            Used in [restrict_psm_data][pyproteininference.datastore.DataStore.restrict_psm_data].
             Filtering depends on score_type variable. If score_type is multiplicative then values that are less than
             restrict_custom are kept. If score_type is additive then values that are more than restrict_custom are kept.
         protein_score (str): String to determine the way in which Proteins are scored can be any of the SCORE_METHODS
-            in :py:class:`pyproteininference.scoring.Score`
+            in [Score object][pyproteininference.scoring.Score].
         psm_score_type (str): String to determine the type of score that the PSM scores are
-            (Additive or Multiplicative) can be any of the SCORE_TYPES in :py:class:`pyproteininference.scoring.Score`
-        decoy_symbol (str): String to denote decoy proteins from target proteins. IE "##"
-        isoform_symbol (str): String to denote isoforms from regular proteins. IE "-". Can also be None
+            (Additive or Multiplicative) can be any of the SCORE_TYPES
+            in [Score object][pyproteininference.scoring.Score].
+        decoy_symbol (str): String to denote decoy proteins from target proteins. IE "##".
+        isoform_symbol (str): String to denote isoforms from regular proteins. IE "-". Can also be None.
         reviewed_identifier_symbol (str): String to denote a "Reviewed" Protein. Typically this is: "sp|"
-            if using Uniprot Fasta database
+            if using Uniprot Fasta database.
         inference_type (str): String to determine the inference procedure. Can be any value of INFERENCE_TYPES
-            of :py:class:`pyproteininference.inference.Inference` object
-        tag (str): String to be added to output files
+            of [Inference object][pyproteininference.inference.Inference].
+        tag (str): String to be added to output files.
         psm_score (str): String that indicates the PSM input score. The value should match the string in the
             input data of the score you want to use for PSM score. This score will be used in scoring methods
-                here: :py:class:`pyproteininference.scoring.Score`
+                here: [Score object][pyproteininference.scoring.Score].
         grouping_type (str/None): String to determine the grouping procedure. Can be any value of
-            GROUPING_TYPES of :py:class:`pyproteininference.inference.Inference` object
+            GROUPING_TYPES of [Inference object][pyproteininference.inference.Inference].
         max_identifiers_peptide_centric (int): Maximum number of identifiers to assign to a group when
             running peptide_centric inference. Typically this is 10 or 5.
         lp_solver (str/None): The LP solver to use if inference_type="Parsimony".
-            Can be any value in LP_SOLVERS in the :py:class:`pyproteininference.inference.Inference` object
+            Can be any value in LP_SOLVERS in the [Inference object][pyproteininference.inference.Inference].
 
     """
 
@@ -144,12 +144,10 @@ class ProteinInferenceParameter(object):
     DIGEST_SUB_KEYS = {DIGEST_TYPE_PARAMETER, MISSED_CLEAV_PARAMETER}
 
     LP_SOLVER_PARAMETER = "lp_solver"
-    GLPK_PATH_PARAMETER = "glpk_path"
     SHARED_PEPTIDES_PARAMETER = "shared_peptides"
 
     PARSIMONY_SUB_KEYS = {
         LP_SOLVER_PARAMETER,
-        GLPK_PATH_PARAMETER,
         SHARED_PEPTIDES_PARAMETER,
     }
 
@@ -160,7 +158,6 @@ class ProteinInferenceParameter(object):
     DEFAULT_DIGEST_TYPE = "trypsin"
     DEFAULT_EXPORT = "peptides"
     DEFAULT_FDR = 0.01
-    DEFAULT_GLPK_PATH = "glpsol"
     DEFAULT_MISSED_CLEAVAGES = 3
     DEFAULT_PICKER = True
     DEFAULT_RESTRICT_PEP = 0.9
@@ -181,14 +178,14 @@ class ProteinInferenceParameter(object):
     DEFAULT_SHARED_PEPTIDES = "all"
 
     def __init__(self, yaml_param_filepath, validate=True):
-        """Class to store Protein Inference parameter information as an object
+        """Class to store Protein Inference parameter information as an object.
 
         Args:
-            yaml_param_filepath (str): path to properly formatted parameter file specific to Protein Inference
-            validate (bool): True/False on whether to validate the parameter file of interest
+            yaml_param_filepath (str): path to properly formatted parameter file specific to Protein Inference.
+            validate (bool): True/False on whether to validate the parameter file of interest.
 
         Returns:
-            None
+            None:
 
         Example:
             >>> pyproteininference.parameters.ProteinInferenceParameter(
@@ -201,7 +198,6 @@ class ProteinInferenceParameter(object):
         self.digest_type = self.DEFAULT_DIGEST_TYPE
         self.export = self.DEFAULT_EXPORT
         self.fdr = self.DEFAULT_FDR
-        self.glpk_path = self.DEFAULT_GLPK_PATH
         self.missed_cleavages = self.DEFAULT_MISSED_CLEAVAGES
         self.picker = self.DEFAULT_PICKER
         self.restrict_pep = self.DEFAULT_RESTRICT_PEP
@@ -232,17 +228,14 @@ class ProteinInferenceParameter(object):
     def convert_to_object(self):
         """
         Function that takes a Protein Inference parameter file and converts it into a ProteinInferenceParameter object
-        by assigning all Attributes of the ProteinInferenceParameter object
+        by assigning all Attributes of the ProteinInferenceParameter object.
 
-        If no parameter filepath is supplied the parameter object will be loaded with default params
+        If no parameter filepath is supplied the parameter object will be loaded with default params.
 
-        This function gets ran in the initilization of the ProteinInferenceParameter object
-
-        Args:
-            None
+        This function gets ran in the initialization of the ProteinInferenceParameter object.
 
         Returns:
-            None
+            None:
 
         """
         if self.yaml_param_filepath:
@@ -265,12 +258,6 @@ class ProteinInferenceParameter(object):
                 self.fdr = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.FDR_PARAMETER]
             except KeyError:
                 logger.warning("fdr set to default of {}".format(self.DEFAULT_FDR))
-            try:
-                self.glpk_path = yaml_params[self.PARENT_PARAMETER_KEY][self.PARSIMONY_PARAMETER_KEY][
-                    self.GLPK_PATH_PARAMETER
-                ]
-            except KeyError:
-                logger.warning("glpk_path set to default of {}".format(self.DEFAULT_GLPK_PATH))
             try:
                 self.missed_cleavages = yaml_params[self.PARENT_PARAMETER_KEY][self.DIGEST_PARAMETER_KEY][
                     self.MISSED_CLEAV_PARAMETER
@@ -355,7 +342,7 @@ class ProteinInferenceParameter(object):
                     self.INFERENCE_TYPE_PARAMETER
                 ]
             except KeyError:
-                logger.warning("inference_Type set to default of {}".format(self.DEFAULT_INFERENCE_TYPE))
+                logger.warning("inference_type set to default of {}".format(self.DEFAULT_INFERENCE_TYPE))
 
             try:
                 self.tag = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][self.TAG_PARAMETER]
@@ -406,10 +393,10 @@ class ProteinInferenceParameter(object):
 
     def validate_parameters(self):
         """
-        Class method to validate all parameters
+        Class method to validate all parameters.
 
         Returns:
-            None
+            None:
 
         """
         # Run all of the parameter validations
@@ -429,7 +416,7 @@ class ProteinInferenceParameter(object):
 
     def _validate_digest_type(self):
         """
-        Internal ProteinInferenceParameter method to validate the digest type
+        Internal ProteinInferenceParameter method to validate the digest type.
         """
         # Make sure we have a valid digest type
         if self.digest_type in PyteomicsDigest.LIST_OF_DIGEST_TYPES:
@@ -443,7 +430,7 @@ class ProteinInferenceParameter(object):
 
     def _validate_export_type(self):
         """
-        Internal ProteinInferenceParameter method to validate the export type
+        Internal ProteinInferenceParameter method to validate the export type.
         """
         # Make sure we have a valid export type
         if self.export in Export.EXPORT_TYPES:
@@ -458,7 +445,7 @@ class ProteinInferenceParameter(object):
 
     def _validate_floats(self):
         """
-        Internal ProteinInferenceParameter method to validate floats
+        Internal ProteinInferenceParameter method to validate floats.
         """
         # Validate that FDR, cleavages, and restrict values are all floats and or ints if they need to be
 
@@ -534,7 +521,7 @@ class ProteinInferenceParameter(object):
 
     def _validate_bools(self):
         """
-        Internal ProteinInferenceParameter method to validate the bools
+        Internal ProteinInferenceParameter method to validate the bools.
         """
         # Make sure picker is a bool
         if type(self.picker) == bool:
@@ -549,7 +536,7 @@ class ProteinInferenceParameter(object):
 
     def _validate_score_method(self):
         """
-        Internal ProteinInferenceParameter method to validate the score method
+        Internal ProteinInferenceParameter method to validate the score method.
         """
         # Make sure we have the score method defined in code to use...
         if self.protein_score in Score.SCORE_METHODS:
@@ -564,7 +551,7 @@ class ProteinInferenceParameter(object):
 
     def _validate_score_type(self):
         """
-        Internal ProteinInferenceParameter method to validate the score type
+        Internal ProteinInferenceParameter method to validate the score type.
         """
         # Make sure score type is multiplicative or additive
         if self.psm_score_type in Score.SCORE_TYPES:
@@ -579,7 +566,7 @@ class ProteinInferenceParameter(object):
 
     def _validate_score_combination(self):
         """
-        Internal ProteinInferenceParameter method to validate combination of score method and score type
+        Internal ProteinInferenceParameter method to validate combination of score method and score type.
         """
         # Check to see if combination of score (column), method(multiplicative log, additive),
         # and score type (multiplicative/additive) is possible...
@@ -608,7 +595,7 @@ class ProteinInferenceParameter(object):
 
     def _validate_inference_type(self):
         """
-        Internal ProteinInferenceParameter method to validate the inference type
+        Internal ProteinInferenceParameter method to validate the inference type.
         """
         # Check if its parsimony, exclusion, inclusion, none
         if self.inference_type in Inference.INFERENCE_TYPES:
@@ -622,7 +609,7 @@ class ProteinInferenceParameter(object):
 
     def _validate_grouping_type(self):
         """
-        Internal ProteinInferenceParameter method to validate the grouping type
+        Internal ProteinInferenceParameter method to validate the grouping type.
         """
         # Check if its parsimony, exclusion, inclusion, none
         if self.grouping_type in Inference.GROUPING_TYPES:
@@ -641,7 +628,7 @@ class ProteinInferenceParameter(object):
 
     def _validate_max_id(self):
         """
-        Internal ProteinInferenceParameter method to validate the max peptide centric id
+        Internal ProteinInferenceParameter method to validate the max peptide centric id.
         """
         # Check if max_identifiers_peptide_centric param is an INT
         if type(self.max_identifiers_peptide_centric) == int:
@@ -658,9 +645,9 @@ class ProteinInferenceParameter(object):
 
     def _validate_lp_solver(self):
         """
-        Internal ProteinInferenceParameter method to validate the lp solver
+        Internal ProteinInferenceParameter method to validate the lp solver.
         """
-        # Check if its pulp, glpk, or None
+        # Check if its pulp or None
         if self.lp_solver in Inference.LP_SOLVERS:
             logger.info("Using LP Solver '{}'".format(self.lp_solver))
         else:
@@ -676,7 +663,7 @@ class ProteinInferenceParameter(object):
 
     def _validate_parsimony_shared_peptides(self):
         """
-        Internal ProteinInferenceParameter method to validate the shared peptides parameter
+        Internal ProteinInferenceParameter method to validate the shared peptides parameter.
         """
         # Check if its all, best, or none
         if self.shared_peptides in Inference.SHARED_PEPTIDE_TYPES:
@@ -694,7 +681,7 @@ class ProteinInferenceParameter(object):
     def _validate_identifiers(self):
         """
         Internal ProteinInferenceParameter method to validate the decoy symbol, isoform symbol,
-        and reviewed identifier symbol
+        and reviewed identifier symbol.
 
         """
         if type(self.decoy_symbol) == str:
@@ -731,7 +718,7 @@ class ProteinInferenceParameter(object):
     def _validate_parameter_shape(self, yaml_params):
         """
         Internal ProteinInferenceParameter method to validate shape of the parameter file by checking to make sure
-         that all necessary main parameter fields are defined
+         that all necessary main parameter fields are defined.
         """
         if self.PARENT_PARAMETER_KEY in yaml_params.keys():
             logger.info("Main Parameter Key is Present")
@@ -866,7 +853,7 @@ class ProteinInferenceParameter(object):
         ProteinInferenceParameter method to override restrict_q if the input data does not contain q values.
 
         Args:
-            data (pyproteininference.datastore.DataStore): Data Object
+            data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
 
         """
         data_has_q = data.input_has_q()
@@ -882,7 +869,7 @@ class ProteinInferenceParameter(object):
         ProteinInferenceParameter method to override restrict_pep if the input data does not contain pep values.
 
         Args:
-            data (pyproteininference.datastore.DataStore): Data Object
+            data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
 
         """
         data_has_pep = data.input_has_pep()
@@ -901,7 +888,7 @@ class ProteinInferenceParameter(object):
         the input data does not contain custom score values.
 
         Args:
-            data (pyproteininference.datastore.DataStore): Data Object
+            data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
 
         """
         data_has_custom = data.input_has_custom()
@@ -917,10 +904,10 @@ class ProteinInferenceParameter(object):
     def fix_parameters_from_datastore(self, data):
         """
         ProteinInferenceParameter method to override restriction values in the
-        parameter file if those scores do not exist in the input files
+        parameter file if those scores do not exist in the input files.
 
         Args:
-            data (pyproteininference.datastore.DataStore): Data Object
+            data (DataStore): [DataStore Object][pyproteininference.datastore.DataStore].
 
         """
 
@@ -930,39 +917,31 @@ class ProteinInferenceParameter(object):
 
     def _fix_none_parameters(self):
         """
-        Internal ProteinInferenceParameter method to fix parameters that have been defined as None
-        These get read in as strings with YAML reader and need to be converted to None type
+        Internal ProteinInferenceParameter method to fix parameters that have been defined as None.
+        These get read in as strings with YAML reader and need to be converted to None type.
         """
 
         self._fix_grouping_type()
-        self._fix_glpk_path()
         self._fix_lp_solver()
         self._fix_shared_peptides()
 
     def _fix_grouping_type(self):
         """
-        Internal ProteinInferenceParameter method to override grouping type for None value
+        Internal ProteinInferenceParameter method to override grouping type for None value.
         """
         if self.grouping_type in ["None", "none", None]:
             self.grouping_type = None
 
-    def _fix_glpk_path(self):
-        """
-        Internal ProteinInferenceParameter method to override glpk_path for None value
-        """
-        if self.glpk_path in ["None", "none", None]:
-            self.glpk_path = None
-
     def _fix_lp_solver(self):
         """
-        Internal ProteinInferenceParameter method to override lp_solver for None value
+        Internal ProteinInferenceParameter method to override lp_solver for None value.
         """
         if self.lp_solver in ["None", "none", None]:
             self.lp_solver = None
 
     def _fix_shared_peptides(self):
         """
-        Internal ProteinInferenceParameter method to override shared_peptides for None value
+        Internal ProteinInferenceParameter method to override shared_peptides for None value.
         """
         if self.shared_peptides in ["None", "none", None]:
             self.shared_peptides = None

@@ -1,0 +1,39 @@
+name: Py Protein Inference
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest black tox
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Lint with tox/flake8
+        run: |
+          tox -e lint
+      - name: Check format with tox/black
+        run: |
+          tox -e format
+      - name: Test with tox/pytest
+        run: |
+          tox -e test
+      - name: Build package
+        run: |
+          VER=$(python setup.py --version)
+          echo $VER
+          python setup.py sdist

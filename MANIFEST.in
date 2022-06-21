@@ -1,0 +1,3 @@
+exclude site
+exclude images
+exclude build

@@ -16,30 +16,30 @@ logging.basicConfig(
 
 class Digest(object):
     """
-    The following class handles data storage of in silico digest data from a fasta formatted sequence database
+    The following class handles data storage of in silico digest data from a fasta formatted sequence database.
 
     Attributes:
-        peptide_to_protein_dictionary (dict): Dictionary of peptides (keys) to protein sets (values)
-        protein_to_peptide_dictionary (dict): Dictionary of proteins (keys) to peptide sets (values)
+        peptide_to_protein_dictionary (dict): Dictionary of peptides (keys) to protein sets (values).
+        protein_to_peptide_dictionary (dict): Dictionary of proteins (keys) to peptide sets (values).
         swiss_prot_protein_set (set): Set of reviewed proteins if they are able to be distinguished from unreviewed
-            proteins
-        database_path (str): Path to fasta database file to digest
-        missed_cleavages (int): The number of missed cleavages to allow
+            proteins.
+        database_path (str): Path to fasta database file to digest.
+        missed_cleavages (int): The number of missed cleavages to allow.
         id_splitting (bool): True/False on whether or not to split a given regex off identifiers.
             This is used to split of "sp|" and "tr|"
             from the database protein strings as sometimes the database will contain those strings while
             the input data will have the strings split already.
-            Keep as False unless you know what you are doing
+            Advanced usage only.
         reviewed_identifier_symbol (str/None): Identifier that distinguishes reviewed from unreviewed proteins.
-            Typically this is "sp|". Can also be None type
-        digest_type (str): can be any value in :attr:`LIST_OF_DIGEST_TYPES`
+            Typically this is "sp|". Can also be None type.
+        digest_type (str): can be any value in `LIST_OF_DIGEST_TYPES`.
         max_peptide_length (int): Max peptide length to keep for analysis.
 
     """
 
     TRYPSIN = "trypsin"
     LYSC = "lysc"
-    LIST_OF_DIGEST_TYPES = [TRYPSIN, LYSC]
+    LIST_OF_DIGEST_TYPES = set(parser.expasy_rules.keys())
 
     AA_LIST = [
         "A",
@@ -75,7 +75,7 @@ class Digest(object):
 
 class PyteomicsDigest(Digest):
     """
-    This class represents a pyteomics implementation of an in silico digest
+    This class represents a pyteomics implementation of an in silico digest.
     """
 
     def __init__(
@@ -92,24 +92,22 @@ class PyteomicsDigest(Digest):
 
         The input is a fasta database, a protein inference parameter object, and whether or not to split IDs.
 
-        Further digestion types need to be added in the future other than just trypsin/lysc
-
-        This class sets important attributes for the Digest object such as: :attr:`peptide_to_protein_dictionary`,
-        :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
+        This class sets important attributes for the Digest object such as: `peptide_to_protein_dictionary`,
+        `protein_to_peptide_dictionary`, and `swiss_prot_protein_set`.
 
         Args:
-            database_path (str): Path to fasta database file to digest
-            digest_type (str): Must be a value in :attr:`LIST_OF_DIGEST_TYPES`
+            database_path (str): Path to fasta database file to digest.
+            digest_type (str): Must be a value in `LIST_OF_DIGEST_TYPES`.
             missed_cleavages (int): Integer that indicates the maximum number of allowable missed cleavages from
-                the ms search
+                the ms search.
             reviewed_identifier_symbol (str/None): Symbol that indicates a reviewed identifier.
-                If using Uniprot this is typically 'sp|'
-            max_peptide_length (int): The maximum length of peptides to keep for the analysis
+                If using Uniprot this is typically 'sp|'.
+            max_peptide_length (int): The maximum length of peptides to keep for the analysis.
             id_splitting (bool): True/False on whether or not to split a given regex off identifiers.
                 This is used to split of "sp|" and "tr|"
                 from the database protein strings as sometimes the database will contain those
                 strings while the input data will have the strings split already.
-                Keep as False unless you know what you are doing
+                Advanced usage only.
 
         Example:
             >>> digest = pyproteininference.in_silico_digest.PyteomicsDigest(
@@ -139,11 +137,11 @@ class PyteomicsDigest(Digest):
     def digest_fasta_database(self):
         """
         This method reads in and prepares the fasta database for database digestion and assigns
-        the several attributes for the Digest object: :attr:`peptide_to_protein_dictionary`,
-        :attr:`protein_to_peptide_dictionary`, and :attr:`swiss_prot_protein_set`
+        the several attributes for the Digest object: `peptide_to_protein_dictionary`,
+        `protein_to_peptide_dictionary`, and `swiss_prot_protein_set`.
 
         Returns:
-            None
+            None:
 
         Example:
             >>> digest = pyproteininference.in_silico_digest.PyteomicsDigest(
@@ -177,7 +175,7 @@ class PyteomicsDigest(Digest):
             # Handle ID Splitting...
             if self.id_splitting:
                 identifier_stripped = self.UNIPROT_STR_REGEX.sub("", identifier)
-            if not self.id_splitting:
+            else:
                 identifier_stripped = identifier
 
             # If reviewed add to sp_set

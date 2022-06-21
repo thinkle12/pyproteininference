@@ -21,13 +21,13 @@ logging.basicConfig(
 
 class Reader(object):
     """
-    Main Reader Class which is parent to all reader subclasses
+    Main Reader Class which is parent to all reader subclasses.
 
     Attributes:
-        target_file (str/list): Path to Target PSM result files
-        decoy_file (str/list): Path to Decoy PSM result files
-        combined_files (str/list): Path to Combined PSM result files
-        directory (str): Path to directory containing combined PSM result files
+        target_file (str/list): Path to Target PSM result files.
+        decoy_file (str/list): Path to Decoy PSM result files.
+        combined_files (str/list): Path to Combined PSM result files.
+        directory (str): Path to directory containing combined PSM result files.
 
     """
 
@@ -37,10 +37,10 @@ class Reader(object):
         """
 
         Args:
-            target_file (str/list): Path to Target PSM result files
-            decoy_file (str/list): Path to Decoy PSM result files
-            combined_files (str/list): Path to Combined PSM result files
-            directory (str): Path to directory containing combined PSM result files
+            target_file (str/list): Path to Target PSM result files.
+            decoy_file (str/list): Path to Decoy PSM result files.
+            combined_files (str/list): Path to Combined PSM result files.
+            directory (str): Path to directory containing combined PSM result files.
 
         """
         self.target_file = target_file
@@ -50,22 +50,23 @@ class Reader(object):
 
     def get_alternative_proteins_from_input(self, row):
         """
-        Method to get the alternative proteins from the input files
+        Method to get the alternative proteins from the input files.
 
         """
         if None in row.keys():
             try:
                 row["alternative_proteins"] = row.pop(None)
+                # Sort the alternative proteins - when they are read in they become unsorted
+                row["alternative_proteins"] = sorted(row["alternative_proteins"])
             except KeyError:
                 row["alternative_proteins"] = []
         else:
-            logger.warning("Alternative Proteins not found in the input files. Make sure format is proper.")
             row["alternative_proteins"] = []
         return row
 
     def _validate_input(self):
         """
-        Internal method to validate the input to Reader
+        Internal method to validate the input to Reader.
 
         """
         if self.target_file and self.decoy_file and not self.combined_files and not self.directory:
@@ -93,20 +94,20 @@ class Reader(object):
     ):
         """
         Internal method to fix the alternative proteins variable for a given
-         :py:class:`pyproteininference.physical.Psm` object
+         [Psm][pyproteininference.physical.Psm] object.
 
         Args:
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that are
-                not in the input files
-            identifiers_sorted (list): List of sorted Protein Strings for the given Psm
-            max_proteins (int): Maximum number of proteins that a :py:class:`pyproteininference.physical.Psm`
-                is allowed to map to
-            psm: (pyproteininference.physical.Psm): Psm object of interest
-            parameter_file_object: (pyproteininference.parameters.ProteinInferenceParameter):
-                Protein Inference Parameter Object
+                not in the input files.
+            identifiers_sorted (list): List of sorted Protein Strings for the given Psm.
+            max_proteins (int): Maximum number of proteins that a [Psm][pyproteininference.physical.Psm]
+                is allowed to map to.
+            psm: (Psm): [Psm][pyproteininference.physical.Psm] object of interest.
+            parameter_file_object: (ProteinInferenceParameter):
+                [ProteinInferenceParameter][pyproteininference.parameters.ProteinInferenceParameter].
 
         Returns:
-            pyproteininference.physical.Psm: Psm with alternative proteins fixed
+            pyproteininference.physical.Psm: [Psm][pyproteininference.physical.Psm] with alternative proteins fixed.
 
         """
         # If we are appending alternative proteins from the db
@@ -133,7 +134,7 @@ class Reader(object):
     def _check_initial_database_overlap(self, initial_possible_proteins, initial_protein_peptide_map):
         """
         Internal method that checks to make sure there is at least some overlap between proteins in the input files
-        And the proteins in the database digestion
+        And the proteins in the database digestion.
         """
 
         if len(initial_protein_peptide_map.keys()) > 0:
@@ -165,27 +166,28 @@ class Reader(object):
 class PercolatorReader(Reader):
     """
     The following class takes a percolator target file and a percolator decoy file
-    or combined files/directory and creates standard :py:class:`pyproteininference.physical.Psm` objects.
-    This reader class is used as input for :py:class:`pyproteininference.datastore.DataStore`
+    or combined files/directory and creates standard [Psm][pyproteininference.physical.Psm] objects.
+    This reader class is used as input for [DataStore object][pyproteininference.datastore.DataStore].
 
     Percolator Output is formatted as follows:
-    with each entry being tabbed delimited (Comma separated showed below)
-    PSMId   score   q-value posterior_error_prob    peptide proteinIds
-    116108.15139.15139.6.dta    3.44016 0.000479928 7.60258e-10 K.MVVSMTLGLHPWIANIDDTQYLAAK.R   CNDP1_HUMAN|Q96KN2
-    B4E180_HUMAN|B4E180 A8K1K1_HUMAN|A8K1K1 J3KRP0_HUMAN|J3KRP0
+    with each entry being tab delimited.
+
+    | PSMId                         | score    |  q-value    | posterior_error_prob  |  peptide                       | proteinIds          |                      |                      |                         | # noqa E501 W605
+    |-------------------------------|----------|-------------|-----------------------|--------------------------------|---------------------|----------------------|----------------------|-------------------------| # noqa E501 W605
+    |     116108.15139.15139.6.dta  |  3.44016 | 0.000479928 | 7.60258e-10           | K.MVVSMTLGLHPWIANIDDTQYLAAK.R  | CNDP1_HUMAN\|Q96KN2 | B4E180_HUMAN\|B4E180 | A8K1K1_HUMAN\|A8K1K1 | J3KRP0_HUMAN\|J3KRP0    | # noqa E501 W605
 
     Attributes:
-        target_file (str/list): Path to Target PSM result files
-        decoy_file (str/list): Path to Decoy PSM result files
-        combined_files (str/list): Path to Combined PSM result files
-        directory (str): Path to directory containing combined PSM result files
-        psmid_index (int): Index of the PSMId from the input files
-        perc_score_index (int): Index of the Percolator score from the input files
-        q_value_index (int): Index of the q-value from the input files
-        posterior_error_prob_index (int): Index of the posterior error probability from the input files
-        peptide_index (int): Index of the peptides from the input files
-        proteinIDs_index (int): Index of the proteins from the input files
-        psms (list): List of :py:class:`pyproteininference.physical.Psm` objects
+        target_file (str/list): Path to Target PSM result files.
+        decoy_file (str/list): Path to Decoy PSM result files.
+        combined_files (str/list): Path to Combined PSM result files.
+        directory (str): Path to directory containing combined PSM result files.
+        PSMID_INDEX (int): Index of the PSMId from the input files.
+        PERC_SCORE_INDEX (int): Index of the Percolator score from the input files.
+        Q_VALUE_INDEX (int): Index of the q-value from the input files.
+        POSTERIOR_ERROR_PROB_INDEX (int): Index of the posterior error probability from the input files.
+        PEPTIDE_INDEX (int): Index of the peptides from the input files.
+        PROTEINIDS_INDEX (int): Index of the proteins from the input files.
+        psms (list): List of [Psm][pyproteininference.physical.Psm] objects.
 
     """
 
@@ -209,17 +211,18 @@ class PercolatorReader(Reader):
         """
 
         Args:
-            digest (pyproteininference.in_silico_digest.Digest):
-            parameter_file_object (pyproteininference.parameters.ProteinInferenceParameter):
+            digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
+            parameter_file_object (ProteinInferenceParameter):
+                [ProteinInferenceParameter][pyproteininference.parameters.ProteinInferenceParameter].
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that
-                are not in the input files
-            target_file (str/list): Path to Target PSM result files
-            decoy_file (str/list): Path to Decoy PSM result files
-            combined_files (str/list): Path to Combined PSM result files
-            directory (str): Path to directory containing combined PSM result files
+                are not in the input files.
+            target_file (str/list): Path to Target PSM result files.
+            decoy_file (str/list): Path to Decoy PSM result files.
+            combined_files (str/list): Path to Combined PSM result files.
+            directory (str): Path to directory containing combined PSM result files.
 
         Returns:
-            object:
+            Reader: [Reader][pyproteininference.reader.Reader] object.
 
         Example:
             >>> pyproteininference.reader.PercolatorReader(target_file = "example_target.txt",
@@ -244,11 +247,11 @@ class PercolatorReader(Reader):
     def read_psms(self):
         """
         Method to read psms from the input files and to transform them into a list of
-        :py:class:`pyproteininference.physical.Psm` objects
+        [Psm][pyproteininference.physical.Psm] objects.
 
-        This method sets the :attr:`psms` variable. Which is a list of Psm objets
+        This method sets the `psms` variable. Which is a list of Psm objets.
 
-        This method must be ran before initializing :py:class:`pyproteininference.datastore.DataStore`
+        This method must be ran before initializing [DataStore object][pyproteininference.datastore.DataStore].
 
         Example:
             >>> reader = pyproteininference.reader.PercolatorReader(target_file = "example_target.txt",
@@ -380,14 +383,8 @@ class PercolatorReader(Reader):
                 if self.parameter_file_object.inference_type == Inference.FIRST_PROTEIN:
                     poss_proteins = [psm_info[self.PROTEINIDS_INDEX]]
                 else:
-                    poss_proteins = list(
-                        set(
-                            psm_info[
-                                self.PROTEINIDS_INDEX : self.PROTEINIDS_INDEX  # noqa E203
-                                + self.MAX_ALLOWED_ALTERNATIVE_PROTEINS
-                            ]
-                        )
-                    )
+                    poss_proteins = sorted(list(set(psm_info[self.PROTEINIDS_INDEX :])))  # noqa E203
+                    poss_proteins = poss_proteins[: self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]
                 combined_psm_result_rows.possible_proteins = poss_proteins  # Restrict to 50 total possible proteins...
                 combined_psm_result_rows.psm_id = psm_info[self.PSMID_INDEX]
                 input_poss_prots = copy.copy(poss_proteins)
@@ -403,8 +400,8 @@ class PercolatorReader(Reader):
 
                 # Add the other possible_proteins from insilicodigest here...
                 try:
-                    current_alt_proteins = list(
-                        peptide_to_protein_dictionary[current_peptide]
+                    current_alt_proteins = sorted(
+                        list(peptide_to_protein_dictionary[current_peptide])
                     )  # This peptide needs to be scrubbed of Mods...
                 except KeyError:
                     current_alt_proteins = []
@@ -460,16 +457,17 @@ class PercolatorReader(Reader):
 
 class ProteologicPostSearchReader(Reader):
     """
-    This class is used to read from post processing proteologic logical object
+    This class is used to read from post processing proteologic logical object.
 
     Attributes:
-        proteologic_object (list): List of proteologic post search objects
-        search_id (int): Search ID or Search IDs associated with the data
-        postsearch_id: PostSearch ID or PostSearch IDs associated with the data
-        digest (pyproteininference.in_silico_digest.Digest):
-        parameter_file_object (pyproteininference.parameters.ProteinInferenceParameter):
+        proteologic_object (list): List of proteologic post search objects.
+        search_id (int): Search ID or Search IDs associated with the data.
+        postsearch_id (int): PostSearch ID or PostSearch IDs associated with the data.
+        digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
+        parameter_file_object (ProteinInferenceParameter):
+            [ProteinInferenceParameter][pyproteininference.parameters.ProteinInferenceParameter] object.
         append_alt_from_db (bool): Whether or not to append alternative proteins found in the database
-            that are not in the input files
+            that are not in the input files.
 
     """
 
@@ -485,13 +483,14 @@ class ProteologicPostSearchReader(Reader):
         """
 
         Args:
-            proteologic_object (list): List of proteologic post search objects
-            search_id (int): Search ID or Search IDs associated with the data
-            postsearch_id: PostSearch ID or PostSearch IDs associated with the data
-            digest (pyproteininference.in_silico_digest.Digest):
-            parameter_file_object (pyproteininference.parameters.ProteinInferenceParameter):
+            proteologic_object (list): List of proteologic post search objects.
+            search_id (int): Search ID or Search IDs associated with the data.
+            postsearch_id: PostSearch ID or PostSearch IDs associated with the data.
+            digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
+            parameter_file_object (ProteinInferenceParameter):
+                [ProteinInferenceParameter][pyproteininference.parameters.ProteinInferenceParameter] object.
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database
-                that are not in the input files
+                that are not in the input files.
 
 
         Returns:
@@ -511,11 +510,11 @@ class ProteologicPostSearchReader(Reader):
     def read_psms(self):
         """
         Method to read psms from the input files and to transform them into a list of
-        :py:class:`pyproteininference.physical.Psm` objects
+        [Psm][pyproteininference.physical.Psm] objects.
 
-        This method sets the :attr:`psms` variable. Which is a list of Psm objets
+        This method sets the `psms` variable. Which is a list of Psm objets.
 
-        This method must be ran before initializing :py:class:`pyproteininference.datastore.DataStore`
+        This method must be ran before initializing [DataStore object][pyproteininference.datastore.DataStore].
 
         """
         logger.info("Reading in data from Proteologic...")
@@ -569,8 +568,8 @@ class ProteologicPostSearchReader(Reader):
 
                 # Add the other possible_proteins from insilicodigest here...
                 try:
-                    current_alt_proteins = list(
-                        peptide_to_protein_dictionary[current_peptide]
+                    current_alt_proteins = sorted(
+                        list(peptide_to_protein_dictionary[current_peptide])
                     )  # This peptide needs to be scrubbed of Mods...
                 except KeyError:
                     current_alt_proteins = []
@@ -619,28 +618,30 @@ class ProteologicPostSearchReader(Reader):
 class GenericReader(Reader):
     """
     The following class takes a percolator like target file and a percolator like decoy file
-    and creates standard :py:class:`pyproteininference.physical.Psm` objects.
+    and creates standard [Psm][pyproteininference.physical.Psm] objects.
 
     Percolator Like Output is formatted as follows:
-    with each entry being tabbed delimited (Comma separated showed below)
-    PSMId   score    q-value   posterior_error_prob peptide    proteinIds
-    116108.15139.15139.6.dta    3.44016   0.000479928  7.60258e-10 K.MVVSMTLGLHPWIANIDDTQYLAAK.R  CNDP1_HUMAN|Q96KN2
-    B4E180_HUMAN|B4E180 A8K1K1_HUMAN|A8K1K1    J3KRP0_HUMAN|J3KRP0
+    with each entry being tab delimited.
 
-    Custom columns can be added and used as scoring input. Please see README.md for more information
+    | PSMId                         | score    |  q-value    | posterior_error_prob  |  peptide                       | proteinIds          |                      |                      |                         | # noqa E501 W605
+    |-------------------------------|----------|-------------|-----------------------|--------------------------------|---------------------|----------------------|----------------------|-------------------------| # noqa E501 W605
+    |     116108.15139.15139.6.dta  |  3.44016 | 0.000479928 | 7.60258e-10           | K.MVVSMTLGLHPWIANIDDTQYLAAK.R  | CNDP1_HUMAN\|Q96KN2 | B4E180_HUMAN\|B4E180 | A8K1K1_HUMAN\|A8K1K1 | J3KRP0_HUMAN\|J3KRP0    | # noqa E501 W605
+
+    Custom columns can be added and used as scoring input. Please see package documentation for more information.
 
     Attributes:
-        target_file (str/list): Path to Target PSM result files
-        decoy_file (str/list): Path to Decoy PSM result files
-        combined_files (str/list): Path to Combined PSM result files
-        directory (str): Path to directory containing combined PSM result files
-        psms (list): List of :py:class:`pyproteininference.physical.Psm` objects
-        load_custom_score (bool): True/False on whether or not to load a custom score. Depends on scoring_variable
-        scoring_variable (str): String to indicate which column in the input file is to be used as the scoring input
-        digest (pyproteininference.in_silico_digest.Digest):
-        parameter_file_object (pyproteininference.parameters.ProteinInferenceParameter):
+        target_file (str/list): Path to Target PSM result files.
+        decoy_file (str/list): Path to Decoy PSM result files.
+        combined_files (str/list): Path to Combined PSM result files.
+        directory (str): Path to directory containing combined PSM result files.
+        psms (list): List of [Psm][pyproteininference.physical.Psm] objects.
+        load_custom_score (bool): True/False on whether or not to load a custom score. Depends on scoring_variable.
+        scoring_variable (str): String to indicate which column in the input file is to be used as the scoring input.
+        digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
+        parameter_file_object (ProteinInferenceParameter):
+            [ProteinInferenceParameter][pyproteininference.parameters.ProteinInferenceParameter] object
         append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that
-            are not in the input files
+            are not in the input files.
 
 
 
@@ -667,17 +668,18 @@ class GenericReader(Reader):
         """
 
         Args:
-            digest (pyproteininference.in_silico_digest.Digest):
-            parameter_file_object (pyproteininference.parameters.ProteinInferenceParameter):
+            digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
+            parameter_file_object (ProteinInferenceParameter):
+                [ProteinInferenceParameter][pyproteininference.parameters.ProteinInferenceParameter] object.
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that
-                are not in the input files
-            target_file (str/list): Path to Target PSM result files
-            decoy_file (str/list): Path to Decoy PSM result files
-            combined_files (str/list): Path to Combined PSM result files
-            directory (str): Path to directory containing combined PSM result files
+                are not in the input files.
+            target_file (str/list): Path to Target PSM result files.
+            decoy_file (str/list): Path to Decoy PSM result files.
+            combined_files (str/list): Path to Combined PSM result files.
+            directory (str): Path to directory containing combined PSM result files.
 
         Returns:
-            object:
+            Reader: [Reader][pyproteininference.reader.Reader] object.
 
         Example:
             >>> pyproteininference.reader.GenericReader(target_file = "example_target.txt",
@@ -724,11 +726,11 @@ class GenericReader(Reader):
     def read_psms(self):
         """
         Method to read psms from the input files and to transform them into a list of
-        :py:class:`pyproteininference.physical.Psm` objects
+        [Psm][pyproteininference.physical.Psm] objects.
 
-        This method sets the :attr:`psms` variable. Which is a list of Psm objets
+        This method sets the `psms` variable. Which is a list of Psm objets.
 
-        This method must be ran before initializing :py:class:`pyproteininference.datastore.DataStore`
+        This method must be ran before initializing [DataStore object][pyproteininference.datastore.DataStore].
 
         Example:
             >>> reader = pyproteininference.reader.GenericReader(target_file = "example_target.txt",
@@ -873,7 +875,19 @@ class GenericReader(Reader):
         peptide_to_protein_dictionary = self.digest.peptide_to_protein_dictionary
 
         initial_poss_prots = []
-        logger.info("Length of PSM Data: {}".format(len(all_psms)))
+        logger.info("Number of PSMs in the input data: {}".format(len(all_psms)))
+        psms_with_alternative_proteins = self._find_psms_with_alternative_proteins(raw_psms=all_psms)
+        logger.info(
+            "Number of PSMs that have alternative proteins in the input data {}".format(
+                len(psms_with_alternative_proteins)
+            )
+        )
+        if len(psms_with_alternative_proteins) == 0:
+            logger.warning(
+                "No PSMs in the input have alternative proteins. "
+                "Make sure your input is properly formatted. "
+                "Alternative Proteins will be retrieved from the fasta database"
+            )
         for psm_info in all_psms:
             current_peptide = psm_info[self.PEPTIDE]
             # Define the Psm...
@@ -902,7 +916,7 @@ class GenericReader(Reader):
                 psm.possible_proteins = psm.possible_proteins + [x for x in psm_info[self.ALTERNATIVE_PROTEINS] if x]
                 # Remove potential Repeats
                 if self.parameter_file_object.inference_type != Inference.FIRST_PROTEIN:
-                    psm.possible_proteins = list(set(psm.possible_proteins))
+                    psm.possible_proteins = sorted(list(set(psm.possible_proteins)))
 
                 input_poss_prots = copy.copy(psm.possible_proteins)
 
@@ -919,7 +933,7 @@ class GenericReader(Reader):
                     current_peptide = stripped_peptide
                 # Add the other possible_proteins from insilicodigest here...
                 try:
-                    current_alt_proteins = list(peptide_to_protein_dictionary[current_peptide])
+                    current_alt_proteins = sorted(list(peptide_to_protein_dictionary[current_peptide]))
                 except KeyError:
                     current_alt_proteins = []
                     logger.debug(
@@ -964,3 +978,9 @@ class GenericReader(Reader):
         logger.info("Length of PSM Data: {}".format(len(self.psms)))
 
         logger.info("Finished GenericReader.read_psms...")
+
+    def _find_psms_with_alternative_proteins(self, raw_psms):
+
+        psms_with_alternative_proteins = [x for x in raw_psms if x["alternative_proteins"]]
+
+        return psms_with_alternative_proteins

@@ -9,6 +9,7 @@ from pyproteininference.parameters import ProteinInferenceParameter
 TARGET_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_target.txt")
 DECOY_FILE = resource_filename("pyproteininference", "../tests/data/test_perc_data_decoy.txt")
 PARAMETER_FILE = resource_filename("pyproteininference", "../tests/data/test_params_inclusion.yaml")
+COMBINED_FILE = resource_filename("pyproteininference", "../tests/data/test_data_many_alternative_proteins.txt")
 
 
 class TestAltProteinFomInput(TestCase):
@@ -77,3 +78,173 @@ class TestAltProteinFomInput(TestCase):
             self.assertSetEqual(set(reader.psms[i].possible_proteins), set(expected_result[i]))
 
         self.assertEqual(len(reader.psms), 27)
+
+    def test_read_alt_proteins_over_maximum(self):
+
+        protein_inference_parameters = ProteinInferenceParameter(yaml_param_filepath=PARAMETER_FILE)
+
+        digest = in_silico_digest.PyteomicsDigest(
+            database_path=None,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
+            id_splitting=True,
+        )
+
+        # Try with generic reader
+
+        reader = pyproteininference.reader.GenericReader(
+            combined_files=COMBINED_FILE,
+            parameter_file_object=protein_inference_parameters,
+            digest=digest,
+            append_alt_from_db=True,
+        )
+        reader.read_psms()
+
+        self.assertEqual(reader.MAX_ALLOWED_ALTERNATIVE_PROTEINS, 50)
+
+        protein_list1 = [
+            'Protein1',
+            'Protein10',
+            'Protein11',
+            'Protein12',
+            'Protein13',
+            'Protein14',
+            'Protein15',
+            'Protein16',
+            'Protein17',
+            'Protein18',
+            'Protein19',
+            'Protein2',
+            'Protein20',
+            'Protein21',
+            'Protein22',
+            'Protein23',
+            'Protein24',
+            'Protein25',
+            'Protein26',
+            'Protein27',
+            'Protein28',
+            'Protein29',
+            'Protein3',
+            'Protein30',
+            'Protein31',
+            'Protein32',
+            'Protein33',
+            'Protein34',
+            'Protein35',
+            'Protein36',
+            'Protein37',
+            'Protein38',
+            'Protein39',
+            'Protein4',
+            'Protein40',
+            'Protein41',
+            'Protein42',
+            'Protein43',
+            'Protein44',
+            'Protein45',
+            'Protein46',
+            'Protein47',
+            'Protein48',
+            'Protein49',
+            'Protein5',
+            'Protein50',
+            'Protein51',
+            'Protein52',
+            'Protein53',
+            'Protein54',
+        ]
+
+        protein_list2 = [
+            '##Protein1',
+            '##Protein10',
+            '##Protein11',
+            '##Protein12',
+            '##Protein13',
+            '##Protein14',
+            '##Protein15',
+            '##Protein16',
+            '##Protein17',
+            '##Protein18',
+            '##Protein19',
+            '##Protein2',
+            '##Protein20',
+            '##Protein21',
+            '##Protein22',
+            '##Protein23',
+            '##Protein24',
+            '##Protein25',
+            '##Protein26',
+            '##Protein27',
+            '##Protein28',
+            '##Protein29',
+            '##Protein3',
+            '##Protein30',
+            '##Protein31',
+            '##Protein32',
+            '##Protein33',
+            '##Protein34',
+            '##Protein35',
+            '##Protein36',
+            '##Protein37',
+            '##Protein38',
+            '##Protein39',
+            '##Protein4',
+            '##Protein40',
+            '##Protein41',
+            '##Protein42',
+            '##Protein43',
+            '##Protein44',
+            '##Protein45',
+            '##Protein46',
+            '##Protein47',
+            '##Protein48',
+            '##Protein49',
+            '##Protein5',
+            '##Protein50',
+            '##Protein51',
+            '##Protein52',
+            '##Protein53',
+            '##Protein54',
+        ]
+
+        self.assertListEqual(
+            reader.psms[0].possible_proteins,
+            protein_list1,
+        )
+        self.assertListEqual(
+            reader.psms[1].possible_proteins,
+            protein_list2,
+        )
+
+        percdigest = in_silico_digest.PyteomicsDigest(
+            database_path=None,
+            digest_type=protein_inference_parameters.digest_type,
+            missed_cleavages=protein_inference_parameters.missed_cleavages,
+            reviewed_identifier_symbol=protein_inference_parameters.reviewed_identifier_symbol,
+            max_peptide_length=protein_inference_parameters.restrict_peptide_length,
+            id_splitting=True,
+        )
+
+        # Try with percolator reader
+        percreader = pyproteininference.reader.PercolatorReader(
+            combined_files=COMBINED_FILE,
+            parameter_file_object=protein_inference_parameters,
+            digest=percdigest,
+            append_alt_from_db=True,
+        )
+
+        percreader.read_psms()
+
+        self.assertEqual(percreader.MAX_ALLOWED_ALTERNATIVE_PROTEINS, 50)
+
+        self.assertListEqual(
+            percreader.psms[0].possible_proteins,
+            protein_list1,
+        )
+        self.assertListEqual(
+            percreader.psms[1].possible_proteins,
+            protein_list2,
+        )

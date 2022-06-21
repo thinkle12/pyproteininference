@@ -58,7 +58,6 @@ class TestLoadExclusionWorkflow(TestCase):
         self.assertEqual(protein_inference_parameters.digest_type, "trypsin")
         self.assertEqual(protein_inference_parameters.export, "q_value")
         self.assertEqual(protein_inference_parameters.fdr, 0.01)
-        self.assertEqual(protein_inference_parameters.glpk_path, None)
         self.assertEqual(protein_inference_parameters.missed_cleavages, 3)
         self.assertEqual(protein_inference_parameters.picker, True)
         self.assertEqual(protein_inference_parameters.restrict_pep, 0.9)
@@ -146,7 +145,6 @@ class TestLoadExclusionWorkflow(TestCase):
         # STEP 10: Apply Inference
         inference_type = protein_inference_parameters.inference_type
 
-        # For parsimony... Run GLPK setup, runner, grouper...
         if inference_type == pyproteininference.inference.Inference.PARSIMONY:
             group = pyproteininference.inference.Parsimony(data=data, digest=digest)
             group.infer_proteins()

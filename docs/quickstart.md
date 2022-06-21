@@ -48,7 +48,7 @@ The parameters can be quickly altered by creating a file called params.yaml as f
 6. Running with docker
 	
 	- Either Pull the image from docker hub:
-		- `docker pull pyproteininference:latest`
+		- `docker pull hinklet/pyproteininference:latest`
 	- Or Build the image with the following command (After having cloned the repository):
 	  	- `git clone REPOSITORY_URL`
 	  	- `cd pyproteininference`
@@ -56,7 +56,7 @@ The parameters can be quickly altered by creating a file called params.yaml as f
 	- Run the tool, making sure to volume mount in the directory with your input data and parameters. In the case below, that local directory would be `/path/to/local/directory` and the path in the container is `/data`
 
 			docker run -v /path/to/local/directory/:/data \
-				-it pyproteininference:latest \
+				-it hinklet/pyproteininference:latest \
 				python /usr/local/bin/protein_inference_cli.py \
 				-f /data/input_file.txt \
 				-db /data/database.fasta \

@@ -151,7 +151,7 @@ See <a href="../parameters/#default-parameters">here</a> for the default paramet
 <p>Running with docker</p>
 <ul>
 <li>Either Pull the image from docker hub:<ul>
-<li><code>docker pull pyproteininference:latest</code></li>
+<li><code>docker pull hinklet/pyproteininference:latest</code></li>
 </ul>
 </li>
 <li>Or Build the image with the following command (After having cloned the repository):<ul>
@@ -161,7 +161,7 @@ See <a href="../parameters/#default-parameters">here</a> for the default paramet
 </ul>
 </li>
 <li>Run the tool, making sure to volume mount in the directory with your input data and parameters. In the case below, that local directory would be <code>/path/to/local/directory</code> and the path in the container is <code>/data</code><pre><code>docker run -v /path/to/local/directory/:/data \
-    -it pyproteininference:latest \
+    -it hinklet/pyproteininference:latest \
     python /usr/local/bin/protein_inference_cli.py \
     -f /data/input_file.txt \
     -db /data/database.fasta \

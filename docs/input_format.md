@@ -49,3 +49,6 @@ MPDPAKSAPAPKKGSKKAVTKVQKKDGKKRKRSRKESYSVYVYKVLKQVHPDTGISSKAM
 GIMNSFVNDIFERIAGEASRLAHYNKRSTITSREIQTAVRLLLPGELAKHAVSEGTKAVT
 KYTSSK
 ```
+
+### Other Supported Formats
+The tool also supports many standard proteomics search results file formats such as __idXML__, __mzIdentML__, and __pepXML__.

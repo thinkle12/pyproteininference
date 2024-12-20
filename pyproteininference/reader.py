@@ -1190,9 +1190,11 @@ class IdXMLReader(Reader):
                 peptide_hits, self.POSTERIOR_ERROR_PROB, self.scoring_variable
             )
             best_hit = sorted_hits[0]
-            current_peptide = (f"{best_hit.get('aa_before',['-'])[0]}"
-                               f".{best_hit.get('sequence','')}."
-                               f"{best_hit.get('aa_after',['-'])[0]}")
+            current_peptide = (
+                f"{best_hit.get('aa_before',['-'])[0]}"
+                f".{best_hit.get('sequence','')}."
+                f"{best_hit.get('aa_after',['-'])[0]}"
+            )
             # Define the Psm...
             if current_peptide not in peptide_tracker:
                 psm = Psm(identifier=current_peptide)
@@ -1323,8 +1325,12 @@ class IdXMLReader(Reader):
             # presort by target / decoy to maintain deterministic parity in how percolator generic results are handled
             # (with a preference for targets over decoys there)
             # @todo check that target_decoy is created for all instances (e.g. pepxml)
-            sorted_hits = sorted(hits, key=lambda x: 1 if x.getMetaValue('target_decoy') == "decoy" else 0, reverse=False)
-            return sorted(sorted_hits, key=lambda x: float(x.getMetaValue(sorting_key)), reverse=sorting_direction_reversed)
+            sorted_hits = sorted(
+                hits, key=lambda x: 1 if x.getMetaValue('target_decoy') == "decoy" else 0, reverse=False
+            )
+            return sorted(
+                sorted_hits, key=lambda x: float(x.getMetaValue(sorting_key)), reverse=sorting_direction_reversed
+            )
 
         list_of_psm_objects = []
         peptide_tracker = set()
@@ -1372,16 +1378,22 @@ class IdXMLReader(Reader):
                 elif aa_after == "C_TERMINAL_AA":
                     aa_after = "-"
 
-                current_peptide = (f"{aa_before}"
-                                   f".{best_hit.getSequence().toString()}."
-                                   f"{aa_after}")
+                current_peptide = f"{aa_before}" f".{best_hit.getSequence().toString()}." f"{aa_after}"
                 # Define the Psm...
                 if current_peptide not in peptide_tracker:
                     psm = Psm(identifier=current_peptide)
                     # Attempt to add variables from PSM info...
                     # If they do not exist in the psm info then we skip...
-                    psm.percscore = float(best_hit.getMetaValue(self.SCORE)) if best_hit.getMetaValue(self.SCORE) is not None else None
-                    psm.qvalue = float(best_hit.getMetaValue(self.Q_VALUE)) if best_hit.getMetaValue(self.Q_VALUE) is not None else None
+                    psm.percscore = (
+                        float(best_hit.getMetaValue(self.SCORE))
+                        if best_hit.getMetaValue(self.SCORE) is not None
+                        else None
+                    )
+                    psm.qvalue = (
+                        float(best_hit.getMetaValue(self.Q_VALUE))
+                        if best_hit.getMetaValue(self.Q_VALUE) is not None
+                        else None
+                    )
                     psm.pepvalue = (
                         float(best_hit.getMetaValue(self.POSTERIOR_ERROR_PROB))
                         if best_hit.getMetaValue(self.POSTERIOR_ERROR_PROB) is not None
@@ -1426,7 +1438,9 @@ class IdXMLReader(Reader):
                             self.digest.peptide_to_protein_dictionary.setdefault(current_peptide, set()).add(poss_prot)
                             self.digest.protein_to_peptide_dictionary.setdefault(poss_prot, set()).add(current_peptide)
                             logger.debug(
-                                "Adding Peptide {} and Protein {} to Digest dictionaries".format(current_peptide, poss_prot)
+                                "Adding Peptide {} and Protein {} to Digest dictionaries".format(
+                                    current_peptide, poss_prot
+                                )
                             )
 
                     # Sort Alt Proteins by Swissprot then Trembl...

@@ -1,4 +1,5 @@
 import logging
+
 _logger = logging.getLogger(__name__)
 
 from pyproteininference import datastore  # noqa F401

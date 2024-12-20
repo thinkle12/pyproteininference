@@ -108,7 +108,7 @@ class ProteinInferenceParameter(object):
         PEPTIDE_LENGTH_RESTRICT_PARAMETER,
         Q_VALUE_RESTRICT_PARAMETER,
         CUSTOM_RESTRICT_PARAMETER,
-        MAX_ALLOWED_ALTERNATIVE_PROTEINS_PARAMETER
+        MAX_ALLOWED_ALTERNATIVE_PROTEINS_PARAMETER,
     }
 
     PROTEIN_SCORE_PARAMETER = "protein_score"
@@ -314,7 +314,9 @@ class ProteinInferenceParameter(object):
                 ][self.MAX_ALLOWED_ALTERNATIVE_PROTEINS_PARAMETER]
             except KeyError:
                 logger.warning(
-                    "max_allowed_alternative_proteins set to default of {}".format(self.DEFAULT_MAX_ALLOWED_ALTERNATIVE_PROTEINS)
+                    "max_allowed_alternative_proteins set to default of {}".format(
+                        self.DEFAULT_MAX_ALLOWED_ALTERNATIVE_PROTEINS
+                    )
                 )
 
             try:

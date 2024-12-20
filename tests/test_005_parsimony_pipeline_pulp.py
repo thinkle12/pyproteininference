@@ -938,6 +938,7 @@ class TestLoadParsimonyPulpWorkflow(TestCase):
                 set(psm_id_output_new[i][PEPTIDES_INDEX:]),
                 set(psm_id_output[i][PEPTIDES_INDEX:]),
             )
+
     def test_workflow_parsimony_pulp_no_grouping(self):
         # NOW RUN WITH NO GROUPING
 

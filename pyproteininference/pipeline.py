@@ -119,7 +119,7 @@ class ProteinInferencePipeline(object):
             combined_files=list(config.input_files),
             output_filename=config.output_file,
             id_splitting=config.identifier_splitting,
-            append_alt_from_db=config.use_alt_proteins
+            append_alt_from_db=config.use_alt_proteins,
         )
         pipeline.gui_status_queue = queue
         return pipeline
@@ -207,11 +207,11 @@ class ProteinInferencePipeline(object):
         input_files = (
             _as_list(self.target_files)
             if self.target_files
-            else _as_list(self.decoy_files)
-            if self.decoy_files
-            else _as_list(self.combined_files)
-            if self.combined_files
-            else list()
+            else (
+                _as_list(self.decoy_files)
+                if self.decoy_files
+                else _as_list(self.combined_files) if self.combined_files else list()
+            )
         )
         extensions = set([os.path.splitext(x)[1].lower() for x in input_files])
         if len(extensions) > 1:

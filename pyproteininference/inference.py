@@ -821,7 +821,10 @@ class Parsimony(Inference):
                     # Re-assigning the value within the index will also reassign the value in protein_list...
                     # This is because grouped_protein_objects[-1] equals protein_list
                     # So we do not have to reassign values in protein_list
-                    (grouped_protein_objects[-1][0], grouped_protein_objects[-1][isoform_override_index],) = (
+                    (
+                        grouped_protein_objects[-1][0],
+                        grouped_protein_objects[-1][isoform_override_index],
+                    ) = (
                         grouped_protein_objects[-1][isoform_override_index],
                         grouped_protein_objects[-1][0],
                     )

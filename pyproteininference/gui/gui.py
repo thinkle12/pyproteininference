@@ -1,5 +1,6 @@
 # macOS packaging support
 from multiprocessing import freeze_support  # noqa
+
 freeze_support()  # noqa
 
 import logging
@@ -74,7 +75,6 @@ def index():
             progress_spinner.visible = False
             ui.separator()
 
-
         with ui.tab_panel(execute):
             with ui.grid(columns=3):
 
@@ -146,13 +146,15 @@ def index():
 
                 ui.label('Use Protein Picker')
                 ui.switch().bind_value(config, 'picker')
-                ui.markdown('Protein Picker is an algorithm that treats target and decoy proteins as pairs when '
-                            'analyzed as separate target / decoy searches (as opposed to using a joint, concatenated '
-                            'target/decoy database for a single analysis. '
-                            'If both the target and decoy proteins are identified from the searches when protein '
-                            'picker is run, then the target and decoy scores are compared with one another. The '
-                            'one with the better score is kept to continue on in the analysis while the one with '
-                            'the worse score gets filtered out of the analysis.')
+                ui.markdown(
+                    'Protein Picker is an algorithm that treats target and decoy proteins as pairs when '
+                    'analyzed as separate target / decoy searches (as opposed to using a joint, concatenated '
+                    'target/decoy database for a single analysis. '
+                    'If both the target and decoy proteins are identified from the searches when protein '
+                    'picker is run, then the target and decoy scores are compared with one another. The '
+                    'one with the better score is kept to continue on in the analysis while the one with '
+                    'the worse score gets filtered out of the analysis.'
+                )
 
                 ui.label('Use FASTA for Protein Information')
                 ui.switch().bind_value(config, 'use_alt_proteins')

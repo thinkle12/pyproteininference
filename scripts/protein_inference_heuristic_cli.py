@@ -10,6 +10,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
+
 def main():
     """
     Script function for running the execute method of the ProteinInference HeuristicPipeline class.

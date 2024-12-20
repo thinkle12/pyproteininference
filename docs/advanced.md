@@ -35,9 +35,9 @@ optional arguments:
                         Input decoy psm output from percolator. Can either
                         input one file or a list of files.
   -f FILE [FILE ...], --combined_files FILE [FILE ...]
-                        Input combined psm output from percolator. This should
-                        contain Target and Decoy PSMS. Can either input one
-                        file or a list of files.
+                        Input combined psm search results in idXML, mzIdentML, pepXML, or 
+                        tab delimited format. This should contain Target and Decoy PSMS. "
+                        Can either input one file or a list of files.
   -o DIR, --output DIR  Result Directory to write to - the name of file will
                         be determined by parameters selected and tag
                         parameter. If this option is not set, will write
@@ -88,7 +88,7 @@ The following combinations of input are allowed and at least one combination is 
 
 1. `-t -d` Path to input target (`-t`) and decoy (`-d`) files. This can be one target and one decoy file or multiple files separated by spaces (" "). See [here](input_format.md#standard-percolator-output) for information on target/decoy input files.
 2. `-a -b` Path to input target (`-a`) and decoy (`-b`) directories that contain target and decoy files. This is one directory each and all .txt and .tsv files will be read in as input.
-3. `-f` Path to input combined target/decoy (`-f`) files. This can be one file or multiple files separated by spaces (" ").
+3. `-f` Path to input combined target/decoy (`-f`) files. This can be one file or multiple files separated by spaces (" "). Use this option if your input is .mzIdentML, idXML, or pepXML.
 4. `-c` Path to input combined target/decoy (`-c`) directory that contain combined target/decoy files. This is one directory each and all .txt and .tsv files will be read in as input.
 
 Any other combinations will result in an Error raised.

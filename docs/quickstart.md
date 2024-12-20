@@ -9,21 +9,35 @@
    
 		pip install pyproteininference
    
-2. Run the Heuristic method with tab delimited results directly from percolator to generate results for peptide centric, parsimony, inclusion, and exclusion:
+2. Run the standard commandline from an idXML file 
 
-		protein_inference_heuristic_cli.py \
-			-t /path/to/target/file1.txt \
-			-d /path/to/decoy/file1.txt \
-			-db /path/to/database/file.fasta 
+		protein_inference_cli.py \
+			-f /path/to/target/file1.idXML \
+			-db /path/to/database/file.fasta \
+			-y /path/to/params.yaml
 
-3. Run the standard commandline tool with tab delimited results directly from percolator to run a particular inference method. By default, peptide centric inference is selected if a parameter file is not specified:
+3. Run the standard commandline from a mzid file 
+
+		protein_inference_cli.py \
+			-f /path/to/target/file1.mzid \
+			-db /path/to/database/file.fasta \
+			-y /path/to/params.yaml
+
+4. Run the standard commandline from a pep.xml file 
+
+		protein_inference_cli.py \
+			-f /path/to/target/file1.pep.xml \
+			-db /path/to/database/file.fasta \
+			-y /path/to/params.yaml
+
+5. Run the standard commandline tool with tab delimited results directly from percolator to run a particular inference method. By default, peptide centric inference is selected if a parameter file is not specified:
 
 		protein_inference_cli.py \
 			-t /path/to/target/file.txt \
 			-d /path/to/decoy/file.txt \
 			-db /path/to/database/file.fasta 
 
-4. Specifying Parameters. 
+6. Specifying Parameters. 
 The two most common parameters to change are the inference type, and the decoy symbol (for identifying decoy proteins vs target proteins).
 The parameters can be quickly altered by creating a file called params.yaml as follows:
 
@@ -37,7 +51,7 @@ The parameters can be quickly altered by creating a file called params.yaml as f
 	All parameters are optional, so you only need to define the ones you want to alter. Parameters that are not defined are set to default values.
 	See [here](parameters.md#default-parameters) for the default parameters.
 
-5. Run the standard commandline tool again, this time specifying the parameters as above:
+7. Run the standard commandline tool again, this time specifying the parameters as above:
 		
 		protein_inference_cli.py \
 			-t /path/to/target/file.txt \
@@ -45,7 +59,7 @@ The parameters can be quickly altered by creating a file called params.yaml as f
 			-db /path/to/database/file.fasta \
 			-y /path/to/params.yaml
 
-6. Running with docker
+8. Running with docker
 	
 	- Either Pull the image from docker hub:
 		- `docker pull hinklet/pyproteininference:latest`

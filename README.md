@@ -1,26 +1,63 @@
 ﻿# Py Protein Inference
 
-# Requirements
+**PyProteinInference** is a Python package for running various protein inference algorithms on tandem mass spectrometry search results and generating protein to peptide mappings with protein level false discovery rates..  
+
+## Key Features
+
+* **Protein Inference and Scoring**:
+    * Maps peptides to proteins.  
+    * Generates protein scores from provided PSMs.  
+    * Calculates set-based protein-level false discovery rates for MS data filtering.  
+* **Supported Input Formats**:
+    * Search Result File Types: __idXML__, __mzIdentML__, or __pepXML__.  
+    * PSM files from [Percolator](https://github.com/percolator/percolator).
+    * Custom tab-delimited files.  
+* **Output**:
+    * User-friendly CSV file containing Proteins, Peptides, q-values, and Protein Scores.  
+
+* **Supported Inference Procedures**:
+    * Parsimony - Returns the Minimal set of proteins based on the input peptides.
+    * Exclusion - Removes all non-distinguishing peptides on the protein level.
+    * Inclusion - Returns all possible proteins.
+    * Peptide Centric - Returns protein groups based on peptide assignments.
+
+## Requirements
 
  1. __Python 3.9__ or greater. 
  2. __Python Packages__:
-	__numpy__, __pyteomics__, __pulp__, __PyYAML__, __matplotlib__. These should be installed automatically during installation.
+	__numpy__, __pyteomics__, __pulp__, __PyYAML__, __matplotlib__, __pyopenms__, __lxml__, __tqdm__, __pywebview__, __nicegui__. These should be installed automatically during installation.
 		
-# Quick Start Guide
+## Quick Start Guide
 1. Install the package using pip:
 ```shell
 pip install pyproteininference
 ```
    
-2. Run the Heuristic method with tab delimited results directly from percolator to generate results for peptide centric, parsimony, inclusion, and exclusion:
+2. Run the standard commandline from an idXML file 
 ```shell
-protein_inference_heuristic_cli.py \
--t /path/to/target/file1.txt \
--d /path/to/decoy/file1.txt \
--db /path/to/database/file.fasta 
+protein_inference_cli.py \
+-f /path/to/target/file.idXML \
+-db /path/to/database/file.fasta \
+-y /path/to/params.yaml
+```
+   
+3. Run the standard commandline from an mzIdentML file 
+```shell
+protein_inference_cli.py \
+-f /path/to/target/file.mzid \
+-db /path/to/database/file.fasta \
+-y /path/to/params.yaml
+```
+   
+4. Run the standard commandline from a pepXML file 
+```shell
+protein_inference_cli.py \
+-f /path/to/target/file.pep.xml \
+-db /path/to/database/file.fasta \
+-y /path/to/params.yaml
 ```
 
-3. Run the standard commandline tool with tab delimited results directly from percolator to run a particular inference method. By default, peptide centric inference is selected if a parameter file is not specified:
+5. Run the standard commandline tool with tab delimited results directly from percolator to run a particular inference method. By default, peptide centric inference is selected if a parameter file is not specified:
 ```shell
 protein_inference_cli.py \
 -t /path/to/target/file.txt \
@@ -28,7 +65,7 @@ protein_inference_cli.py \
 -db /path/to/database/file.fasta 
 ```
 
-4. Specifying Parameters. 
+6. Specifying Parameters. 
 The two most common parameters to change are the inference type, and the decoy symbol (for identifying decoy proteins vs target proteins).
 The parameters can be quickly altered by creating a file called params.yaml as follows:
 ```yaml
@@ -42,7 +79,7 @@ The inference type can be one of: `parsimony`, `peptide_centric`, `inclusion`, `
 All parameters are optional, so you only need to define the ones you want to alter. Parameters that are not defined are set to default values.
 See the package documentation for the default parameters.
 
-5. Run the standard commandline tool again, this time specifying the parameters as above:
+7. Run the standard commandline tool again, this time specifying the parameters as above:
 ```shell
 protein_inference_cli.py \
 -t /path/to/target/file.txt \
@@ -51,7 +88,7 @@ protein_inference_cli.py \
 -y /path/to/params.yaml
 ```
 
-6. Running with docker
+8. Running with docker
 	- Either Pull the image from docker hub:
 		- `docker pull hinklet/pyproteininference:latest`
 	- Or Build the image with the following command (After having cloned the repository):
@@ -69,5 +106,5 @@ protein_inference_cli.py \
 			-o /data/
 	  ```
 
-# Documentation
+## Documentation
 For more information please see the full package documentation (https://thinkle12.github.io/pyproteininference/).

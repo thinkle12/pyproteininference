@@ -217,7 +217,7 @@ class ProteinInferencePipeline(object):
         if len(extensions) > 1:
             raise ValueError("All input files must be of the same type and have the same file extension.")
         logger.info("File(s) have extensions: {}".format(extensions))
-        if ".idxml" in extensions or ".mzid" in extensions or ".pep.xml" in extensions or ".xml" in extensions:
+        if ".idxml" in extensions or ".mzid" in extensions or ".pep.xml" in extensions or ".xml" or "pepxml" in extensions:
             reader = pyproteininference.reader.IdXMLReader(
                 target_file=self.target_files,
                 decoy_file=self.decoy_files,

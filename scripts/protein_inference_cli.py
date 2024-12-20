@@ -41,7 +41,7 @@ def main():
         "--combined_files",
         dest="combined_files",
         required=False,
-        help="Input combined psm output from percolator. This should contain Target and Decoy PSMS. "
+        help="Input combined psm search results in idXML, mzIdentML, pepXML, or tab delimited format. This should contain Target and Decoy PSMS. "
         "Can either input one file or a list of files.",
         metavar="FILE",
         nargs="+",

@@ -1313,12 +1313,12 @@ class IdXMLReader(Reader):
             sorting_key = score_key
             sorting_direction_reversed = False
             if not all([hit.metaValueExists(score_key) for hit in hits]):
-                if not all([hit.fallback_score_key(score_key) for hit in hits]):
+                if not all([hit.metaValueExists(fallback_score_key) for hit in hits]):
                     raise ValueError(
                         f"Score key {score_key} not found in all hits: "
                         f"{[x.getSequence().toString() for x in hits if not x.metaValueExists(score_key)]}"
                     )
-                sorting_key = score_key
+                sorting_key = fallback_score_key
                 # if additive score type, reverse the sorting (multiplicative score type still is normal sort)
                 if self.parameter_file_object.psm_score_type == Score.ADDITIVE_SCORE_TYPE:
                     sorting_direction_reversed = True
@@ -1353,7 +1353,7 @@ class IdXMLReader(Reader):
                 pyopenms.MzIdentMLFile().load(input_file, protein_ids, peptide_ids)
             elif file_extension in (".pepxml", ".pep.xml", ".xml"):
                 logger.info(f"Reading input as pepXML")
-                pyopenms.MzIdentMLFile().load(input_file, protein_ids, peptide_ids)
+                pyopenms.PepXMLFile().load(input_file, protein_ids, peptide_ids)
             else:
                 logger.info(f"Reading input as idXML")
                 pyopenms.IdXMLFile().load(input_file, protein_ids, peptide_ids)

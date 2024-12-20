@@ -433,7 +433,6 @@ class ProteinInferenceParameter(object):
         self.digest_type = configuration.digest_type
         self.export = self.DEFAULT_EXPORT
         self.fdr = configuration.false_discovery_rate
-        self.glpk_path = self.DEFAULT_GLPK_PATH
         self.missed_cleavages = configuration.missed_cleavages
         self.picker = configuration.picker
         self.restrict_pep = configuration.pep_restriction

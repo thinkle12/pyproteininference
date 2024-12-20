@@ -9,7 +9,7 @@ setup(
     pbr=True,
     scripts=glob.glob("scripts/*.py"),
     name="pyproteininference",
-    version="1.0.1",
+    version="1.1.0",
     url="https://github.com/thinkle12/pyproteininference",
     license="Apache-2",
     author="Trent Hinkle",

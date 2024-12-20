@@ -76,14 +76,16 @@ parameters:
     export: peptides
     fdr: 0.01
     picker: True
-    tag: py_protein_inference
+    tag: example_tag
+    xml_parser: openms
   data_restriction:
     pep_restriction: 0.9
     peptide_length_restriction: 7
-    q_value_restriction: 0.005
+    q_value_restriction: .9
     custom_restriction: None
+    max_allowed_alternative_proteins: 50
   score:
-    protein_score: multiplicative_log
+    protein_score: best_peptide_per_protein
     psm_score: posterior_error_prob
     psm_score_type: multiplicative
   identifiers:
@@ -91,8 +93,8 @@ parameters:
     isoform_symbol: "-"
     reviewed_identifier_symbol: "sp|"
   inference:
-    inference_type: peptide_centric
-    grouping_type: shared_peptides
+    inference_type: inclusion
+    grouping_type: subset_peptides
   digest:
     digest_type: trypsin
     missed_cleavages: 3

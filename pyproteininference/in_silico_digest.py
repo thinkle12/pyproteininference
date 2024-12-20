@@ -2,16 +2,10 @@ import logging
 import re
 import sys
 
+import tqdm
 from pyteomics import fasta, parser
 
 logger = logging.getLogger(__name__)
-
-# set up our logger
-logging.basicConfig(
-    stream=sys.stderr,
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
 
 
 class Digest(object):
@@ -160,7 +154,7 @@ class PyteomicsDigest(Digest):
         prot_dict = {}
         sp_set = set()
 
-        for description, sequence in fasta.read(self.database_path):
+        for description, sequence in tqdm.tqdm(fasta.read(self.database_path), unit=" entries"):
             new_peptides = parser.cleave(
                 sequence,
                 parser.expasy_rules[self.digest_type],

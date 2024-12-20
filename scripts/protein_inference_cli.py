@@ -1,8 +1,13 @@
-#!/usr/bin/python
-
 import argparse
+import logging, sys
 
 import pyproteininference
+
+logging.basicConfig(
+    stream=sys.stderr,
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 
 
 def main():

@@ -4,18 +4,12 @@ import sys
 import yaml
 
 from pyproteininference.export import Export
+from pyproteininference.gui.configuration import Configuration
 from pyproteininference.in_silico_digest import PyteomicsDigest
 from pyproteininference.inference import Inference
 from pyproteininference.scoring import Score
 
 logger = logging.getLogger(__name__)
-
-# set up our logger
-logging.basicConfig(
-    stream=sys.stderr,
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
 
 
 class ProteinInferenceParameter(object):
@@ -78,6 +72,8 @@ class ProteinInferenceParameter(object):
     PARSIMONY_PARAMETER_KEY = "parsimony"
     PEPTIDE_CENTRIC_PARAMETER_KEY = "peptide_centric"
 
+    XML_INPUT_PARSER_PARAMETER_KEY = "xml_parser"
+
     PARAMETER_MAIN_KEYS = {
         GENERAL_PARAMETER_KEY,
         DATA_RESTRICTION_PARAMETER_KEY,
@@ -105,12 +101,14 @@ class ProteinInferenceParameter(object):
     PEPTIDE_LENGTH_RESTRICT_PARAMETER = "peptide_length_restriction"
     Q_VALUE_RESTRICT_PARAMETER = "q_value_restriction"
     CUSTOM_RESTRICT_PARAMETER = "custom_restriction"
+    MAX_ALLOWED_ALTERNATIVE_PROTEINS_PARAMETER = "max_allowed_alternative_proteins"
 
     DATA_RESTRICTION_PARAMETER_SUB_KEYS = {
         PEP_RESTRICT_PARAMETER,
         PEPTIDE_LENGTH_RESTRICT_PARAMETER,
         Q_VALUE_RESTRICT_PARAMETER,
         CUSTOM_RESTRICT_PARAMETER,
+        MAX_ALLOWED_ALTERNATIVE_PROTEINS_PARAMETER
     }
 
     PROTEIN_SCORE_PARAMETER = "protein_score"
@@ -155,6 +153,9 @@ class ProteinInferenceParameter(object):
 
     PEPTIDE_CENTRIC_SUB_KEYS = {MAX_IDENTIFIERS_PARAMETER}
 
+    PARSER_OPENMS = "openms"
+    PARSER_PYTEOMICS = "pyteomics"
+
     DEFAULT_DIGEST_TYPE = "trypsin"
     DEFAULT_EXPORT = "peptides"
     DEFAULT_FDR = 0.01
@@ -163,6 +164,7 @@ class ProteinInferenceParameter(object):
     DEFAULT_RESTRICT_PEP = 0.9
     DEFAULT_RESTRICT_PEPTIDE_LENGTH = 7
     DEFAULT_RESTRICT_Q = 0.005
+    DEFAULT_MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
     DEFAULT_RESTRICT_CUSTOM = "None"
     DEFAULT_PROTEIN_SCORE = "multiplicative_log"
     DEFAULT_PSM_SCORE = "posterior_error_prob"
@@ -172,12 +174,13 @@ class ProteinInferenceParameter(object):
     DEFAULT_INFERENCE_TYPE = "peptide_centric"
     DEFAULT_TAG = "py_protein_inference"
     DEFAULT_PSM_SCORE_TYPE = "multiplicative"
-    DEFAULT_GROUPING_TYPE = "shared_peptides"
+    DEFAULT_GROUPING_TYPE = "parsimonious_grouping"
     DEFAULT_MAX_IDENTIFIERS_PEPTIDE_CENTRIC = 5
     DEFAULT_LP_SOLVER = "pulp"
     DEFAULT_SHARED_PEPTIDES = "all"
+    DEFAULT_XML_INPUT_PARSER = PARSER_OPENMS
 
-    def __init__(self, yaml_param_filepath, validate=True):
+    def __init__(self, yaml_param_filepath, configuration=None, validate=True):
         """Class to store Protein Inference parameter information as an object.
 
         Args:
@@ -217,8 +220,13 @@ class ProteinInferenceParameter(object):
         self.lp_solver = self.DEFAULT_LP_SOLVER
         self.shared_peptides = self.DEFAULT_SHARED_PEPTIDES
         self.validate = validate
+        self.xml_input_parser = self.DEFAULT_XML_INPUT_PARSER
+        self.max_allowed_alternative_proteins = self.DEFAULT_MAX_ALLOWED_ALTERNATIVE_PROTEINS
 
-        self.convert_to_object()
+        if configuration is not None:
+            self.convert_from_gui_configuration(configuration)
+        else:
+            self.convert_to_object()
 
         if validate:
             self.validate_parameters()
@@ -301,6 +309,15 @@ class ProteinInferenceParameter(object):
                 logger.warning("restrict_custom set to default of {}".format(self.DEFAULT_RESTRICT_CUSTOM))
 
             try:
+                self.max_allowed_alternative_proteins = yaml_params[self.PARENT_PARAMETER_KEY][
+                    self.DATA_RESTRICTION_PARAMETER_KEY
+                ][self.MAX_ALLOWED_ALTERNATIVE_PROTEINS_PARAMETER]
+            except KeyError:
+                logger.warning(
+                    "max_allowed_alternative_proteins set to default of {}".format(self.DEFAULT_MAX_ALLOWED_ALTERNATIVE_PROTEINS)
+                )
+
+            try:
                 self.protein_score = yaml_params[self.PARENT_PARAMETER_KEY][self.SCORE_PARAMETER_KEY][
                     self.PROTEIN_SCORE_PARAMETER
                 ]
@@ -364,6 +381,13 @@ class ProteinInferenceParameter(object):
                 logger.warning("grouping_type set to default of {}".format(self.DEFAULT_GROUPING_TYPE))
 
             try:
+                self.xml_input_parser = yaml_params[self.PARENT_PARAMETER_KEY][self.GENERAL_PARAMETER_KEY][
+                    self.XML_INPUT_PARSER_PARAMETER_KEY
+                ]
+            except KeyError:
+                logger.warning("xml_input_parser set to default of {}".format(self.DEFAULT_XML_INPUT_PARSER))
+
+            try:
                 self.max_identifiers_peptide_centric = yaml_params[self.PARENT_PARAMETER_KEY][
                     self.PEPTIDE_CENTRIC_PARAMETER_KEY
                 ][self.MAX_IDENTIFIERS_PARAMETER]
@@ -390,6 +414,44 @@ class ProteinInferenceParameter(object):
 
         else:
             logger.warning("Yaml parameter file not found, all parameters set to default")
+
+    def convert_from_gui_configuration(self, configuration: Configuration):
+        """
+        Function that takes a Protein Inference GUI configuration object and converts it into a ProteinInferenceParameter object
+        by assigning all Attributes of the ProteinInferenceParameter object.
+
+        If no parameter filepath is supplied the parameter object will be loaded with default params.
+
+        This function gets ran in the initialization of the ProteinInferenceParameter object.
+
+        Returns:
+            None:
+
+        """
+        self.digest_type = configuration.digest_type
+        self.export = self.DEFAULT_EXPORT
+        self.fdr = configuration.false_discovery_rate
+        self.glpk_path = self.DEFAULT_GLPK_PATH
+        self.missed_cleavages = configuration.missed_cleavages
+        self.picker = configuration.picker
+        self.restrict_pep = configuration.pep_restriction
+        self.restrict_peptide_length = configuration.peptide_length_restriction
+        self.restrict_q = configuration.q_value_restriction
+        self.restrict_custom = self.DEFAULT_RESTRICT_CUSTOM
+        self.protein_score = configuration.protein_score
+        self.psm_score_type = configuration.psm_score_type
+        self.decoy_symbol = configuration.decoy_symbol
+        self.isoform_symbol = configuration.isoform_symbol
+        self.reviewed_identifier_symbol = configuration.reviewed_identifier_symbol
+        self.inference_type = configuration.inference_type
+        self.tag = self.DEFAULT_TAG
+        self.psm_score = configuration.psm_score
+        self.grouping_type = configuration.grouping_type
+        self.max_identifiers_peptide_centric = configuration.max_identifiers
+        self.lp_solver = self.DEFAULT_LP_SOLVER
+        self.shared_peptides = configuration.shared_peptides
+        self.xml_input_parser = configuration.xml_input_parser
+        self.max_allowed_alternative_proteins = configuration.max_allowed_alternative_proteins
 
     def validate_parameters(self):
         """

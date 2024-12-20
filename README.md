@@ -2,7 +2,7 @@
 
 # Requirements
 
- 1. __Python 3.7__ or greater. This package was created using __Python 3.7__
+ 1. __Python 3.9__ or greater. 
  2. __Python Packages__:
 	__numpy__, __pyteomics__, __pulp__, __PyYAML__, __matplotlib__. These should be installed automatically during installation.
 		

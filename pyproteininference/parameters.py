@@ -446,7 +446,10 @@ class ProteinInferenceParameter(object):
         self.reviewed_identifier_symbol = configuration.reviewed_identifier_symbol
         self.inference_type = configuration.inference_type
         self.tag = self.DEFAULT_TAG
-        self.psm_score = configuration.psm_score
+        if configuration.psm_score == "custom":
+            self.psm_score = configuration.psm_score_custom
+        else:
+            self.psm_score = configuration.psm_score
         self.grouping_type = configuration.grouping_type
         self.max_identifiers_peptide_centric = configuration.max_identifiers
         self.lp_solver = self.DEFAULT_LP_SOLVER

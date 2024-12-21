@@ -115,7 +115,7 @@ class ProteinInferencePipeline(object):
         """Creates the ProteinInferencePipeline from a Config object passed from the graphical user interface."""
         pipeline = cls(
             parameter_file=config,
-            database_file=config.fasta_file[0],
+            database_file=config.fasta_file[0] if isinstance(config.fasta_file, list) else None,
             combined_files=list(config.input_files),
             output_filename=config.output_file,
             id_splitting=config.identifier_splitting,
@@ -210,7 +210,9 @@ class ProteinInferencePipeline(object):
             else (
                 _as_list(self.decoy_files)
                 if self.decoy_files
-                else _as_list(self.combined_files) if self.combined_files else list()
+                else _as_list(self.combined_files)
+                if self.combined_files
+                else list()
             )
         )
         extensions = set([os.path.splitext(x)[1].lower() for x in input_files])

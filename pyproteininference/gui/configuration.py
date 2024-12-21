@@ -14,6 +14,7 @@ class Configuration:
     peptide_length_restriction: int = 0
     protein_score: str = 'multiplicative_log'
     psm_score: str = 'posterior_error_prob'
+    psm_score_custom: str = ''
     psm_score_type: str = 'multiplicative'
     decoy_symbol: str = 'DECOY_'
     isoform_symbol: str = '-'

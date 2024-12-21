@@ -83,7 +83,9 @@ def index():
                     config.input_files = result
 
                 ui.label('Input result files:')
-                ui.label('').bind_text_from(config, 'input_files')
+                ui.label('').bind_text_from(
+                    config, 'input_files', backward=lambda files: " ".join([file.split('/')[-1] for file in files])
+                )
                 ui.button('Choose result file(s)', on_click=pick_input_files, icon='folder')
 
                 async def pick_fasta_file() -> None:
@@ -91,7 +93,9 @@ def index():
                     config.fasta_file = result
 
                 ui.label('Fasta Database:')
-                ui.label('').bind_text_from(config, 'fasta_file')
+                ui.label('').bind_text_from(
+                    config, 'fasta_file', backward=lambda file: "" if file == "" else file[0].split('/')[-1]
+                )
                 ui.button('Choose fasta file', on_click=pick_fasta_file, icon='file')
 
                 async def pick_output_file() -> None:
@@ -101,7 +105,9 @@ def index():
                     config.output_file = result
 
                 ui.label('Output file:')
-                ui.label('').bind_text_from(config, 'output_file')
+                ui.label('').bind_text_from(
+                    config, 'output_file', backward=lambda file: "" if file == "" else file.split('/')[-1]
+                )
                 ui.button('Set output file', on_click=pick_output_file, icon='save')
 
                 async def start_computation():
@@ -284,6 +290,7 @@ def index():
                         "posterior_error_prob": "Posterior Error Probability",
                         "q-value": "q-value",
                         "score": "Peptide Filter Score (e.g. Percolator Score)",
+                        "custom": "Custom (Enter Below)",
                     },
                     label="PSM Scoring Method",
                 ).bind_value(config, 'psm_score')
@@ -291,6 +298,14 @@ def index():
                     "Select which PSM score is used when generating protein scores. The recommended PSM Score "
                     "method is 'Posterior Error Probability'. If you choose 'Additive' as the protein score, "
                     "please choose 'Peptide Filter Score' here."
+                )
+
+                ui.label('Custom PSM Score')
+                ui.input(label="Custom PSM Score").bind_value(config, 'psm_score_custom')
+                ui.markdown(
+                    '_Enter the column name (for tabular input) or XML attribute (for idXML/mzID/pepXML) of the '
+                    'custom score to be used, and set "PSM Scoring Method" above to "Custom".  If you are using '
+                    'one of the pre-selected scores above, leave this blank._'
                 )
 
                 ui.label('PSM Score Type')
@@ -434,7 +449,7 @@ def index():
             ui.markdown(
                 r"""
             # pyProteinInference
-            Version 1.0.0
+            Version 1.1.0
             
             Trent Hinkle and Corey Bakalarski
             

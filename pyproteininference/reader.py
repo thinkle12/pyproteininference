@@ -1046,6 +1046,12 @@ class IdXMLReader(Reader):
     PROTEIN_IDS = "proteinIds"
     ALTERNATIVE_PROTEINS = "alternative_proteins"
 
+    PSM_SCORE_MAPPING = {
+        "posterior_error_prob": POSTERIOR_ERROR_PROB,
+        "q-value": Q_VALUE,
+        "score": SCORE,
+    }
+
     def __init__(
         self,
         digest,
@@ -1094,7 +1100,11 @@ class IdXMLReader(Reader):
         self.append_alt_from_db = append_alt_from_db
 
         self.parameter_file_object = parameter_file_object
-        self.scoring_variable = parameter_file_object.psm_score
+        # map the common scoring variables (posterior_error_prob, q-value, score) to the PSI MS CV terms,
+        # or use the custom term as-is if not present in the mapping
+        self.scoring_variable = self.PSM_SCORE_MAPPING.get(
+            parameter_file_object.psm_score, parameter_file_object.psm_score
+        )
 
         self._validate_input()
 
@@ -1187,7 +1197,7 @@ class IdXMLReader(Reader):
                 continue
 
             sorted_hits = _sort_protein_hits_by_selected_score(
-                peptide_hits, self.POSTERIOR_ERROR_PROB, self.scoring_variable
+                peptide_hits, self.scoring_variable, self.POSTERIOR_ERROR_PROB
             )
             best_hit = sorted_hits[0]
             current_peptide = (
@@ -1364,7 +1374,7 @@ class IdXMLReader(Reader):
                     continue
 
                 sorted_hits = _sort_protein_hits_by_selected_score(
-                    peptide_hits, self.POSTERIOR_ERROR_PROB, self.scoring_variable
+                    peptide_hits, self.scoring_variable, self.POSTERIOR_ERROR_PROB
                 )
                 best_hit = sorted_hits[0]
                 aa_before = best_hit.getPeptideEvidences()[0].getAABefore()

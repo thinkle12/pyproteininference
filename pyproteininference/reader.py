@@ -1111,13 +1111,13 @@ class IdXMLReader(Reader):
         if self.scoring_variable != self.Q_VALUE and self.scoring_variable != self.POSTERIOR_ERROR_PROB:
             self.load_custom_score = True
             logger.info(
-                "Pulling custom column based on parameter file input for score, Column: {}".format(
+                "Pulling custom column based on parameter file input for score, Attribute: {}".format(
                     self.scoring_variable
                 )
             )
         else:
             logger.info(
-                "Pulling no custom columns based on parameter file input for score, using standard Column: {}".format(
+                "Pulling no custom columns based on parameter file input for score, using standard Attribute: {}".format(
                     self.scoring_variable
                 )
             )

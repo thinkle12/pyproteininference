@@ -120,6 +120,8 @@ class Score(object):
             >>> score.score_psms(score_method="best_peptide_per_protein")
         """
 
+        self._validate_scoring_input()
+
         if score_method not in self.SCORE_METHODS:
             raise ValueError(
                 "score method '{}' is not a proper method. Score method must be one of the following: '{}'".format(
@@ -472,3 +474,18 @@ class Score(object):
         self.data.protein_score = self.ADDITIVE
         self.data.short_protein_score = self.SHORT_ADDITIVE
         self.data.scored_proteins = all_scores
+
+    def _validate_scoring_input(self):
+        validated_psm_scores = all(x.main_score is not None for x in self.data.get_psm_data())
+        if validated_psm_scores:
+            logger.info(
+                "PSM scores validated. Score: {} read from file correctly for all PSMs".format(
+                    self.data.parameter_file_object.psm_score
+                )
+            )
+        else:
+            raise ValueError(
+                "PSM scores not validated. Score: {} not read from file correctly for all PSMs".format(
+                    self.data.parameter_file_object.psm_score
+                )
+            )

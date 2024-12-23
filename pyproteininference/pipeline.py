@@ -210,9 +210,7 @@ class ProteinInferencePipeline(object):
             else (
                 _as_list(self.decoy_files)
                 if self.decoy_files
-                else _as_list(self.combined_files)
-                if self.combined_files
-                else list()
+                else _as_list(self.combined_files) if self.combined_files else list()
             )
         )
         extensions = set([os.path.splitext(x)[1].lower() for x in input_files])

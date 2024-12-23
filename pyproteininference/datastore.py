@@ -62,6 +62,8 @@ class DataStore(object):
         "q-value": "qvalue",
         "posterior_error_prob": "pepvalue",
         "posterior_error_probability": "pepvalue",
+        "MS:1001493": "pepvalue",  # Added to make sure custom input for pep/qval accession gets mapped to pep/qval
+        "MS:1001491": "qvalue",
     }
 
     CUSTOM_SCORE_KEY = "custom_score"
@@ -1179,6 +1181,12 @@ class DataStore(object):
         decoys = [
             x for x in self.digest.protein_to_peptide_dictionary.keys() if self.parameter_file_object.decoy_symbol in x
         ]
+        if len(decoys) == 0:
+            raise ValueError(
+                "No decoy proteins found in digest file with decoy symbol: {}. Please double check your decoy symbol and make sure decoy proteins are present in your input file(s).".format(
+                    self.parameter_file_object.decoy_symbol
+                )
+            )
         ratio = float(len(targets)) / float(len(decoys))
         logger.info("Number of Target Proteins in Digest: {}".format(len(targets)))
         logger.info("Number of Decoy Proteins in Digest: {}".format(len(decoys)))

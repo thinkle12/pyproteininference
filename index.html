@@ -8,7 +8,7 @@
     <title>Py Protein Inference</title>
     <link rel="stylesheet" href="css/theme.css" />
     <link rel="stylesheet" href="css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="assets/_mkdocstrings.css" rel="stylesheet" />
     
       <script>
@@ -18,12 +18,11 @@
         var mkdocs_page_url = null;
       </script>
     
-    <script src="js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -35,14 +34,14 @@
           <a href="." class="icon icon-home"> Py Protein Inference
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href=".">Home</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Home</a>
     <ul class="current">
     </ul>
                 </li>
@@ -85,31 +84,50 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>Home</li>
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Home</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
                 <h2 id="introduction">Introduction</h2>
+<p><strong>PyProteinInference</strong> is a Python package for running various protein inference algorithms on tandem mass spectrometry search results and generating protein to peptide mappings with protein level false discovery rates.  </p>
 <p>For a quick start guide please click <a href="quickstart/">here</a>.</p>
-<p>Py Protein Inference is a Python package that has the ability to run various protein inference algorithms on tandem mass spectrometry search results. 
-In addition to performing protein inference, which maps peptides to proteins, this algorithm creates protein scores based on the supplied psms and is able to calculate set based protein level false discovery rates for MS data filtering purposes.
-Py Protein Inference typically takes as input the output PSM files from the <a href="https://github.com/percolator/percolator">Percolator algorithm</a>. 
-However, Py Protein Inference can also take custom tab delimited files as input. Please see the <a href="input_format/">input formats</a> section for more information.
-As for output, Py Protein Inference generates a user-friendly csv format file that includes the Proteins, Peptides, q-values, and Protein Scores.  Please see the <a href="supplementary/#export-types">supplementary</a> section for more information on output formats. 
-Py Protein Infernece also has a heuristic method to help the user select a recommended inference method for a given dataset. Please see the <a href="supplementary/#heuristic-algorithm">supplementary</a> section for more information on the heuristic method.</p>
-<p>Py Protein Inference has the ability to run any of the following inference procedures from literature:</p>
-<ol>
+<p><strong>Key Features</strong> <br></p>
+<ul>
+<li><strong>Protein Inference and Scoring</strong>:<ul>
+<li>Maps peptides to proteins.  </li>
+<li>Generates protein scores from provided PSMs.  </li>
+<li>Calculates set-based protein-level false discovery rates for MS data filtering.  </li>
+</ul>
+</li>
+<li><strong>Supported Input Formats</strong>:<ul>
+<li>Search Result File Types: <a href="input_format/#idxml">idXML</a>, <a href="input_format/#mzidentml">mzIdentML</a>, or <a href="input_format/#pepxml">pepXML</a>.  </li>
+<li>PSM files from <a href="https://github.com/percolator/percolator">Percolator</a>.</li>
+<li>Custom tab-delimited <a href="input_format/#custom-input">files</a>.  </li>
+</ul>
+</li>
+<li>
+<p><strong>Output</strong>:</p>
+<ul>
+<li>User-friendly CSV file containing Proteins, Peptides, q-values, and Protein Scores.  </li>
+<li>Details on output formats: <a href="supplementary/#export-types">supplementary</a>.  </li>
+</ul>
+</li>
+<li>
+<p><strong>Supported Inference Procedures</strong>:</p>
+<ul>
 <li><a href="supplementary/#parsimony">Parsimony</a></li>
 <li><a href="supplementary/#exclusion">Exclusion</a></li>
 <li><a href="supplementary/#inclusion">Inclusion</a></li>
 <li><a href="supplementary/#peptide-centric">Peptide Centric</a> (Protein Group Level)</li>
-</ol>
+</ul>
+</li>
+</ul>
 <p>Please see the <a href="supplementary/#inference-types"><strong>Inference Types</strong></a> section for more information on Inference Types.</p>
 <p>In Addition to these inference types Py Protein Inference can also score proteins with a variety of methods:</p>
 <ol>
@@ -129,8 +147,12 @@ Py Protein Infernece also has a heuristic method to help the user select a recom
 <li>Adds each PSM score per protein (larger psm scores must be better i.e. Xcorr, Mascot Ion Score, Percolator Score).</li>
 </ul>
 </li>
-<li>Downweighted Multiplicative Log <ul>
+<li>Down Weighted Multiplicative Log <ul>
 <li>Multiplicative Log but with a normalization against the number of PSMs.</li>
+</ul>
+</li>
+<li>Iterative Down Weighted Log <ul>
+<li>Multiplicative Log but with an iterative normalization against the number of PSMs.</li>
 </ul>
 </li>
 <li>Geometric Mean <ul>
@@ -142,8 +164,8 @@ Py Protein Infernece also has a heuristic method to help the user select a recom
 <h2 id="using-py-protein-inference">Using Py Protein Inference</h2>
 <ol>
 <li><a href="parameters/#yaml-parameter-file-outline">Yaml Parameter File</a></li>
-<li><a href="input_format/#input-file-examples">Input PSM files</a> (Tab Delimited)</li>
-<li><a href="input_format/#fasta-file-example">Fasta Database</a></li>
+<li><a href="input_format/#input-file-examples">Input File Examples</a> (idXML, mzIdentML, pepXML, Tab Delimited)</li>
+<li><a href="input_format/#fasta-file">Fasta Database</a></li>
 <li><a href="advanced/#running-py-protein-inference">Running Py Protein Inference</a></li>
 </ol>
               
@@ -178,20 +200,21 @@ Py Protein Infernece also has a heuristic method to help the user select a recom
     
   </span>
 </div>
-    <script>var base_url = '.';</script>
-    <script src="js/theme_extra.js" defer></script>
-    <script src="js/theme.js" defer></script>
-      <script src="search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>
 </html>
 
 <!--
-MkDocs version : 1.3.0
-Build Date UTC : 2022-06-22 00:13:23.378769+00:00
+MkDocs version : 1.6.1
+Build Date UTC : 2024-12-28 22:18:48.848199+00:00
 -->

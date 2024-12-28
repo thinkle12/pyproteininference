@@ -8,7 +8,7 @@
     <title>Advanced Usage - Py Protein Inference</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
     
       <script>
@@ -18,12 +18,11 @@
         var mkdocs_page_url = null;
       </script>
     
-    <script src="../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -35,7 +34,7 @@
           <a href=".." class="icon icon-home"> Py Protein Inference
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -58,7 +57,7 @@
                 </li>
               </ul>
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="./">Advanced Usage</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Advanced Usage</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#running-the-main-py-protein-inference-method">Running the Main Py Protein Inference Method</a>
         <ul>
@@ -109,13 +108,13 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>Advanced Usage</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Advanced Usage</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
@@ -152,9 +151,9 @@ optional arguments:
                         Input decoy psm output from percolator. Can either
                         input one file or a list of files.
   -f FILE [FILE ...], --combined_files FILE [FILE ...]
-                        Input combined psm output from percolator. This should
-                        contain Target and Decoy PSMS. Can either input one
-                        file or a list of files.
+                        Input combined psm search results in idXML, mzIdentML, pepXML, or 
+                        tab delimited format. This should contain Target and Decoy PSMS. &quot;
+                        Can either input one file or a list of files.
   -o DIR, --output DIR  Result Directory to write to - the name of file will
                         be determined by parameters selected and tag
                         parameter. If this option is not set, will write
@@ -204,7 +203,7 @@ optional arguments:
 <ol>
 <li><code>-t -d</code> Path to input target (<code>-t</code>) and decoy (<code>-d</code>) files. This can be one target and one decoy file or multiple files separated by spaces (" "). See <a href="../input_format/#standard-percolator-output">here</a> for information on target/decoy input files.</li>
 <li><code>-a -b</code> Path to input target (<code>-a</code>) and decoy (<code>-b</code>) directories that contain target and decoy files. This is one directory each and all .txt and .tsv files will be read in as input.</li>
-<li><code>-f</code> Path to input combined target/decoy (<code>-f</code>) files. This can be one file or multiple files separated by spaces (" ").</li>
+<li><code>-f</code> Path to input combined target/decoy (<code>-f</code>) files. This can be one file or multiple files separated by spaces (" "). Use this option if your input is .mzIdentML, idXML, or pepXML.</li>
 <li><code>-c</code> Path to input combined target/decoy (<code>-c</code>) directory that contain combined target/decoy files. This is one directory each and all .txt and .tsv files will be read in as input.</li>
 </ol>
 <p>Any other combinations will result in an Error raised.</p>
@@ -220,10 +219,17 @@ optional arguments:
 <li><code>-p</code> This flag is a True/False on whether to skip appending alternative proteins from the Fasta database digestion. If this flag is left blank, it will not skip appending alternative proteins (recommended). </li>
 <li><code>-i</code> True/False on whether to split the IDs in the Fasta database file. If this is left blank, it will not split IDs in the Fasta database file (recommended).</li>
 </ol>
-<p>You can run the tool as follows:</p>
+<p>You can run the tool as follows with separate target and decoy files:</p>
 <pre><code class="language-shell">protein_inference_cli.py \
     -t /path/to/target/file.txt \
     -d /path/to/decoy/file.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/parameter/file.yaml \
+    -o /path/to/output/directory/
+</code></pre>
+<p>Or from combined files like an mzIdentML file:</p>
+<pre><code class="language-shell">protein_inference_cli.py \
+    -f /path/to/target/file.mzid \
     -db /path/to/database/file.fasta \
     -y /path/to/parameter/file.yaml \
     -o /path/to/output/directory/
@@ -232,6 +238,13 @@ optional arguments:
 <pre><code class="language-shell">protein_inference_cli.py \
     -t /path/to/target/file1.txt /path/to/target/file2.txt \
     -d /path/to/decoy/file1.txt /path/to/decoy/file2.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/parameter/file.yaml \
+    -o /path/to/output/directory/
+</code></pre>
+<p>Or from multiple mzIdentML / idXML / pepXML files:</p>
+<pre><code class="language-shell">protein_inference_cli.py \
+    -f /path/to/target/file1.mzid /path/to/target/file2.mzid \
     -db /path/to/database/file.fasta \
     -y /path/to/parameter/file.yaml \
     -o /path/to/output/directory/
@@ -257,8 +270,28 @@ pipeline = ProteinInferencePipeline(parameter_file=yaml_params,
 # Calling .execute() will initiate the pipeline with the given data                                                               
 pipeline.execute()
 </code></pre>
+<p>Or running mzIdentML files within python:</p>
+<pre><code class="language-python">from pyproteininference.pipeline import ProteinInferencePipeline
+
+yaml_params = &quot;/path/to/yaml/params.yaml&quot;
+database = &quot;/path/to/database/file.fasta&quot;
+### target_files can either be a list of files or one file
+mzid_files = [&quot;/path/to/file1.mzid&quot;,&quot;/path/to/file2.mzid&quot;]
+### decoy_files can either be a list of files or one file
+output_directory_name = &quot;/path/to/output/directory/&quot;
+
+pipeline = ProteinInferencePipeline(parameter_file=yaml_params,
+                                    database_file=database,  
+                                    target_files=None,  
+                                    decoy_files=None,  
+                                    combined_files=mzid_files,  
+                                    output_directory=output_directory_name)  
+# Calling .execute() will initiate the pipeline with the given data                                                               
+pipeline.execute()
+</code></pre>
 <h3 id="running-the-heuristic-method">Running the Heuristic Method</h3>
-<p>Py Protein Inference also has a built-in Heuristic that runs through four inference methods (Inclusion, Exclusion, Parsimony, and Peptide Centric) and selects a recommended method for your given dataset. 
+<p><strong>NOTE: The Heuristic Method is experimental and has not be extensively tested on multiple datasets yet. Check back for updates on this tool.</strong> <br> <br>
+Py Protein Inference also has a built-in Heuristic that runs through four inference methods (Inclusion, Exclusion, Parsimony, and Peptide Centric) and selects a recommended method for your given dataset. 
 By default, all four result files will be written, and the optimal method will be highlighted to the user.
 The Heuristic method also outputs a density plot that showcases all the inference methods compared to one another to gain further insight. For more information on the Heuristic Method see the <a href="../supplementary/#heuristic-algorithm"><strong>Heuristic algorithm</strong></a> section.</p>
 <h4 id="running-the-heuristic-method-via-the-command-line">Running the Heuristic Method via the Command Line</h4>
@@ -418,7 +451,7 @@ hp.determine_optimal_inference_method(false_discovery_rate_threshold=0.05,
 <p>Below is an example of a Heuristic Density plot. The plot indicates the distribution of the number of standard deviations 
 from the mean (of identified proteins at a specified FDR) for each inference method for a range of FDRs from 0 to the false discovery rate threshold (100 fdrs are incrementally selected in the range [0, fdr threshold])
 In general, the closer that the peak of a distribution is to 0 the more likely the associated method is to be selected as the recommended method.
-For more information on the specifics of the Heuristic Algorithm see <a href="../supplementary/#heuristic-algorithm-description"><strong>Heuristic Algorithm Description</strong></a></p>
+For more information on the specifics of the Heuristic Algorithm see <a href="../supplementary/#heuristic-algorithm"><strong>Heuristic Algorithm Description</strong></a></p>
 <p><img alt="density" src="../img/swissprot_example_density.png" /></p>
               
             </div>
@@ -455,14 +488,15 @@ For more information on the specifics of the Heuristic Algorithm see <a href="..
     
   </span>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme_extra.js" defer></script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

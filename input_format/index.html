@@ -8,7 +8,7 @@
     <title>Input Formats - Py Protein Inference</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
     
       <script>
@@ -18,12 +18,11 @@
         var mkdocs_page_url = null;
       </script>
     
-    <script src="../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -35,7 +34,7 @@
           <a href=".." class="icon icon-home"> Py Protein Inference
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -54,8 +53,16 @@
                 </li>
               </ul>
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="./">Input Formats</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Input Formats</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#usage-with-idxml-mzidentml-pepxml-or-percolator-output">Usage with idXML, mzIdentML, pepXML, or Percolator Output</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#idxml">idXML</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#mzidentml">mzIdentML</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#pepxml">pepXML</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#standard-percolator-output">Standard Percolator Output</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#target-output">Target Output</a>
@@ -97,18 +104,127 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>Input Formats</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Input Formats</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
                 <h2 id="input-file-examples">Input File Examples</h2>
-<p>The standard input filetype is the tab delimited output from the percolator algorithm. Please see below for examples of input files:</p>
+<h3 id="usage-with-idxml-mzidentml-pepxml-or-percolator-output">Usage with idXML, mzIdentML, pepXML, or Percolator Output</h3>
+<p>See below for specific assistance in running pyProteinInference from either an idXML, mzIdentML, pepXML, or Percolator File. <br></p>
+<h3 id="idxml">idXML</h3>
+<p>First, lets take a look at an idXML file from the popular OpenMS framework</p>
+<p>When inspecting an idXML you might see the following:</p>
+<pre><code class="language-xml">&lt;PeptideHit score=&quot;6.1267e-05&quot; sequence=&quot;KDVDDDGEEK&quot; charge=&quot;2&quot; aa_before=&quot;K&quot; aa_after=&quot;E&quot; start=&quot;85&quot; end=&quot;94&quot; protein_refs=&quot;PH_23231&quot; &gt;
+    &lt;UserParam type=&quot;string&quot; name=&quot;target_decoy&quot; value=&quot;target&quot;/&gt;
+    &lt;UserParam type=&quot;string&quot; name=&quot;MS:1002258&quot; value=&quot;16&quot;/&gt;
+    &lt;UserParam type=&quot;string&quot; name=&quot;MS:1002259&quot; value=&quot;18&quot;/&gt;
+    &lt;UserParam type=&quot;string&quot; name=&quot;num_matched_peptides&quot; value=&quot;514&quot;/&gt;
+    &lt;UserParam type=&quot;int&quot; name=&quot;isotope_error&quot; value=&quot;0&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;MS:1002252&quot; value=&quot;2.0533&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;COMET:xcorr&quot; value=&quot;2.0533&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;MS:1002253&quot; value=&quot;0.5447&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;COMET:deltaCn&quot; value=&quot;0.5447&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;MS:1002255&quot; value=&quot;825.899999999999977&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;COMET:spscore&quot; value=&quot;825.899999999999977&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;MS:1002256&quot; value=&quot;1.0&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;COMET:sprank&quot; value=&quot;1.0&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;MS:1002257&quot; value=&quot;3.3e-05&quot;/&gt;
+    &lt;UserParam type=&quot;string&quot; name=&quot;protein_references&quot; value=&quot;unique&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;COMET:deltaLCn&quot; value=&quot;0.0&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;COMET:lnExpect&quot; value=&quot;-10.319002996497794&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;COMET:lnNumSP&quot; value=&quot;6.242223265455165&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;COMET:lnRankSP&quot; value=&quot;0.0&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;COMET:IonFrac&quot; value=&quot;0.888888888888889&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;expect&quot; value=&quot;3.3e-05&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;MS:1001492&quot; value=&quot;0.647488&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;MS:1001491&quot; value=&quot;6.1267e-05&quot;/&gt;
+    &lt;UserParam type=&quot;float&quot; name=&quot;MS:1001493&quot; value=&quot;9.83689e-05&quot;/&gt;
+&lt;/PeptideHit&gt;
+</code></pre>
+<p>In this case we see that a Comet search was performed. <br>
+For selecting an input PSM score for rolling up to the protein level, you insert one of these selected UserParam names into the pyProteinInference parameter file in the score section. <br></p>
+<p>For example, lets say you wanted to use the <code>Comet:xcorr</code> value (for Comet Xcorr a higher score is better). So your score section might look like this:</p>
+<pre><code class="language-yaml">  score:
+    protein_score: additive
+    psm_score: Comet:xcorr
+    psm_score_type: additive
+</code></pre>
+<p>One of the Accession values can also be used. For example, <code>MS:1001493</code> actually means <code>Posterior Error Probability</code>. <br>
+You would simply enter in <code>MS:1001493</code> to utilize that output PSM score.</p>
+<p>So to use that value as the PSM score you might have this as your score section for your parameter file:</p>
+<pre><code class="language-yaml">  score:
+    protein_score: multiplicative_log
+    psm_score: MS:1001493
+    psm_score_type: multiplicative
+</code></pre>
+<p>Remember, <code>MS:1001493</code> actually means <code>Posterior Error Probability</code>. Please refer to your specific search algorithms documentation to learn more about what each accession means.</p>
+<h3 id="mzidentml">mzIdentML</h3>
+<p>Lets inspect a standard MSGF+ based mzIdentML file for assistance in running pyProteinInference from a a mzIdentML file. <br></p>
+<p>When inspecting a file you might see a spectrum identification as such:</p>
+<pre><code class="language-xml">&lt;SpectrumIdentificationItem chargeState=&quot;3&quot; experimentalMassToCharge=&quot;907.1316528320312&quot; calculatedMassToCharge=&quot;907.1220092773438&quot; peptide_ref=&quot;Pep_RAVITSITATFNAGNHDRLVSCCR&quot; rank=&quot;1&quot; passThreshold=&quot;true&quot; id=&quot;SII_45025_1&quot;&gt;
+  &lt;PeptideEvidenceRef peptideEvidence_ref=&quot;PepEv_4633556_RAVITSITATFNAGNHDRLVSCCR_113&quot;/&gt;
+  &lt;cvParam cvRef=&quot;PSI-MS&quot; accession=&quot;MS:1002049&quot; name=&quot;MS-GF:RawScore&quot; value=&quot;48&quot;/&gt;
+  &lt;cvParam cvRef=&quot;PSI-MS&quot; accession=&quot;MS:1002050&quot; name=&quot;MS-GF:DeNovoScore&quot; value=&quot;182&quot;/&gt;
+  &lt;cvParam cvRef=&quot;PSI-MS&quot; accession=&quot;MS:1002052&quot; name=&quot;MS-GF:SpecEValue&quot; value=&quot;5.9486466E-10&quot;/&gt;
+  &lt;cvParam cvRef=&quot;PSI-MS&quot; accession=&quot;MS:1002053&quot; name=&quot;MS-GF:EValue&quot; value=&quot;0.005017754&quot;/&gt;
+  &lt;cvParam cvRef=&quot;PSI-MS&quot; accession=&quot;MS:1002054&quot; name=&quot;MS-GF:QValue&quot; value=&quot;8.469932E-4&quot;/&gt;
+  &lt;cvParam cvRef=&quot;PSI-MS&quot; accession=&quot;MS:1002055&quot; name=&quot;MS-GF:PepQValue&quot; value=&quot;0.001055835&quot;/&gt;
+  &lt;userParam name=&quot;IsotopeError&quot; value=&quot;0&quot;/&gt;
+  &lt;userParam name=&quot;AssumedDissociationMethod&quot; value=&quot;HCD&quot;/&gt;
+  &lt;userParam name=&quot;ExplainedIonCurrentRatio&quot; value=&quot;0.009252999&quot;/&gt;
+  &lt;userParam name=&quot;NTermIonCurrentRatio&quot; value=&quot;2.9709993E-4&quot;/&gt;
+  &lt;userParam name=&quot;CTermIonCurrentRatio&quot; value=&quot;0.008955899&quot;/&gt;
+  &lt;userParam name=&quot;MS2IonCurrent&quot; value=&quot;4877230.5&quot;/&gt;
+  &lt;userParam name=&quot;NumMatchedMainIons&quot; value=&quot;2&quot;/&gt;
+  &lt;userParam name=&quot;MeanErrorAll&quot; value=&quot;0.383495&quot;/&gt;
+  &lt;userParam name=&quot;StdevErrorAll&quot; value=&quot;0.29636142&quot;/&gt;
+  &lt;userParam name=&quot;MeanErrorTop7&quot; value=&quot;0.383495&quot;/&gt;
+  &lt;userParam name=&quot;StdevErrorTop7&quot; value=&quot;0.29636142&quot;/&gt;
+  &lt;userParam name=&quot;MeanRelErrorAll&quot; value=&quot;0.383495&quot;/&gt;
+  &lt;userParam name=&quot;StdevRelErrorAll&quot; value=&quot;0.29636142&quot;/&gt;
+  &lt;userParam name=&quot;MeanRelErrorTop7&quot; value=&quot;0.383495&quot;/&gt;
+  &lt;userParam name=&quot;StdevRelErrorTop7&quot; value=&quot;0.29636142&quot;/&gt;
+&lt;/SpectrumIdentificationItem&gt;
+</code></pre>
+<p>When selecting custom scores to use from your mzIdentML file you can select any of the <code>cvParam</code> options under SpectrumIdentificationItem. For example, we might want to use the <code>MS-GF:PepQValue</code> (<code>MS:1002055</code>). <br>
+An important note when selecting custom scores from mzIdentML files is that you will actually input the <code>accession</code> listed above instead of the <code>name</code>. <br>
+So, for selecting <code>MS-GF:PepQValue</code>, you would actually input <code>MS:1002055</code> into the parameter file (See below). <br>
+Also, given that <code>MS:1002055</code> scores are better if they are lower we would insert it as a multiplicative score. <br>
+The <code>score</code> section of the parameter file in this case might look like this:</p>
+<pre><code class="language-yaml">  score:
+    protein_score: multiplicative_log
+    psm_score: MS:1002055
+    psm_score_type: multiplicative
+</code></pre>
+<p>Remember, you can use any <code>cvParam</code> accession from your mzIdentML file. Make sure to note if the selected score is better when lower or higher to calculate protein scores correctly.</p>
+<h3 id="pepxml">pepXML</h3>
+<p>Lets next inspect a standard MSFragger Version 4.0 based pepXML file for assistance in running pyProteinInference from a pepXML file
+See the following search_hit that comes from the above mentioned pepXML</p>
+<pre><code class="language-xml">&lt;search_hit peptide=&quot;NVPSVWRSARR&quot; massdiff=&quot;-0.0230712890625&quot; calc_neutral_pep_mass=&quot;1555.8896&quot; peptide_next_aa=&quot;K&quot; num_missed_cleavages=&quot;2&quot; num_tol_term=&quot;2&quot; protein_descr=&quot;Transcription initiation factor TFIID subunit 1 OS=Mus musculus OX=10090 GN=Taf1 PE=1 SV=2&quot; num_tot_proteins=&quot;1&quot; tot_num_ions=&quot;20&quot; hit_rank=&quot;1&quot; num_matched_ions=&quot;8&quot; protein=&quot;sp|Q80UV9|TAF1_MOUSE&quot; peptide_prev_aa=&quot;K&quot; is_rejected=&quot;0&quot;&gt;
+    &lt;modification_info modified_peptide=&quot;n[230]NVPSVWRSARR&quot; mod_nterm_mass=&quot;230.17073&quot;&gt;
+    &lt;/modification_info&gt;
+    &lt;search_score name=&quot;hyperscore&quot; value=&quot;15.64&quot;/&gt;
+    &lt;search_score name=&quot;nextscore&quot; value=&quot;14.77&quot;/&gt;
+    &lt;search_score name=&quot;expect&quot; value=&quot;1.563721e+00&quot;/&gt;
+&lt;/search_hit&gt;
+</code></pre>
+<p>When selecting custom scores from a pepXML file you would use full string names for selecting a score to use as the PSM score to roll up to the protein level.
+For example, in the case above the user could select either "hyperscore", "nextscore", or "expect" score.</p>
+<p>Also, keep in mind that if a higher score is better one should select additive scoring while if a lower score is better one should select multiplicative scoring and a corresponding multiplicative scoring method.</p>
+<p>In this case lets say we select hyperscore. The <code>score</code> section of the parameter file might look like this:</p>
+<pre><code class="language-yaml">  score:
+    protein_score: additive
+    psm_score: hyperscore
+    psm_score_type: additive
+</code></pre>
+<p>Other parameters to keep in mind for your specific idXML, mzIdentML, or pepXML searches would be the decoy symbol, inference type, etc.</p>
+<p><strong>NOTE:</strong> Loading from either idXML, mzIdentML, or pepXML uses either pyOpenMS or pyteomics to read in the PSMs. As such, your search result files must be compatible with their standard readers.</p>
 <h3 id="standard-percolator-output">Standard Percolator Output</h3>
 <h4 id="target-output">Target Output</h4>
 <table>
@@ -277,14 +393,15 @@ KYTSSK
     
   </span>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme_extra.js" defer></script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

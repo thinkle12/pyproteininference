@@ -8,7 +8,7 @@
     <title>Parameters - Py Protein Inference</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
     
       <script>
@@ -18,12 +18,11 @@
         var mkdocs_page_url = null;
       </script>
     
-    <script src="../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -35,7 +34,7 @@
           <a href=".." class="icon icon-home"> Py Protein Inference
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -50,7 +49,7 @@
                 </li>
               </ul>
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="./">Parameters</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Parameters</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#general">General</a>
     </li>
@@ -111,13 +110,13 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>Parameters</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Parameters</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
@@ -136,7 +135,7 @@ Note: These parameters are all optional. Please see the section <a href="#defaul
 <tbody>
 <tr>
 <td>export</td>
-<td>Export Type can be one of: <strong>peptides</strong>, <strong>psms</strong>, <strong>psm_ids</strong>, <strong>long</strong>, <strong>q_value</strong>, <strong>q_value_all</strong>, <strong>q_value_comma_sep</strong>, <strong>leads</strong>, <strong>all</strong>, <strong>comma_sep</strong>. Suggested types are <strong>peptides</strong>, <strong>psms</strong>, and <strong>psm_ids</strong> as these produce square output. If there are multiple proteins per group the three mentioned types will report the leads only. Other types report on the peptide level with slightly different formats and whether or not to include leads only or all proteins. See <a href="../supplementary/#export-types">here</a> for an in-depth explanation of Export Types.</td>
+<td>Export Type can be one of: <strong>peptides</strong>, <strong>psms</strong>, <strong>psm_ids</strong>, <strong>long</strong>, <strong>q_value</strong>, <strong>q_value_all</strong>, <strong>q_value_comma_sep</strong>, <strong>leads</strong>, <strong>all</strong>, <strong>comma_sep</strong>. Suggested types are <strong>peptides</strong>, <strong>psms</strong>, and <strong>psm_ids</strong> as these produce square output. If there are multiple proteins per group the three mentioned types will report the leads only unless <strong>inference_type</strong> is <strong>peptide_centric</strong> which will output a ; separated list of proteins in the group OR if <strong>inference_type</strong> is <strong>parsimony</strong> and <strong>grouping_type</strong> is <strong>parsimonious_grouping</strong> which will also return a ; separated list of proteins in the parsimony group. Other types report on the peptide level with slightly different formats and whether or not to include leads only or all proteins. See <a href="../supplementary/#export-types">here</a> for an in-depth explanation of Export Types.</td>
 <td>String</td>
 </tr>
 <tr>
@@ -152,6 +151,11 @@ Note: These parameters are all optional. Please see the section <a href="#defaul
 <tr>
 <td>tag</td>
 <td>A String tag that will be written into the result files. Ex. <strong>example_tag</strong>.</td>
+<td>String</td>
+</tr>
+<tr>
+<td>xml_parser</td>
+<td>The library to read idXML, mzID, or pepXML files from. Can be either <strong>openms</strong> or <strong>pyteomics</strong>. Default: <strong>openms</strong>.</td>
 <td>String</td>
 </tr>
 </tbody>
@@ -186,6 +190,11 @@ Note: These parameters are all optional. Please see the section <a href="#defaul
 <td>Custom Value to filter. (i.e. <strong>5</strong>). In this case PSMs with Custom value greater than / less than <strong>5</strong> would be removed from the input. If Not using a custom score please use <strong>None</strong>. <strong>NOTE</strong>: If a higher score is "better" for your score please set <strong>psm_score_type</strong> to <strong>additive</strong>. If a lower score is "better" please set <strong>psm_score_type</strong> parameter to <strong>multiplicative</strong>.</td>
 <td>Numeric</td>
 </tr>
+<tr>
+<td>max_allowed_alternative_proteins</td>
+<td>The maximum number of proteins a peptide is allowed to map to. Default: <strong>50</strong>.</td>
+<td>Int</td>
+</tr>
 </tbody>
 </table>
 <h2 id="score">Score</h2>
@@ -205,12 +214,12 @@ Note: These parameters are all optional. Please see the section <a href="#defaul
 </tr>
 <tr>
 <td>psm_score</td>
-<td>PSM score to use for Protein Scoring. If using Percolator output as input this would either be <strong>posterior_error_prob</strong> or <strong>q-value</strong>. The string typed here should match the column in your input files <strong>EXACTLY</strong>. If using a custom score it will be filtered accordingly with the value in <a href="#data-restriction"><strong>custom_restriction</strong></a>.</td>
+<td>PSM score to use for Protein Scoring. If using Percolator output as input this would either be <strong>posterior_error_prob</strong> or <strong>q-value</strong>. The string typed here should match the column/attribute in your input files <strong>EXACTLY</strong>. For more info on selecting PSM scores from your input files please see <a href="../input_format/#input-file-examples">input file examples</a></td>
 <td>String</td>
 </tr>
 <tr>
 <td>psm_score_type</td>
-<td>The Type of score that <strong>psm_score</strong> parameter is. Either <strong>multiplicative</strong> or <strong>additive</strong>. If a larger psm score is "better" than input additive (i.e. Mascot Ion Score, Xcorr, Percolator Score). If a smaller psm score is "better" than input multiplicative (i.e. Q Value, Posterior Error Probability). See <a href="#extra-score-information">below</a> for more information.</td>
+<td>The type of score that <strong>psm_score</strong> parameter is. Either <strong>multiplicative</strong> or <strong>additive</strong>. If a larger psm score is "better" than input additive (i.e. Mascot Ion Score, Xcorr, Percolator Score). If a smaller psm score is "better" than input multiplicative (i.e. Q Value, Posterior Error Probability). See <a href="#extra-score-information">below</a> for more information.</td>
 <td>String</td>
 </tr>
 </tbody>
@@ -233,7 +242,7 @@ Note: These parameters are all optional. Please see the section <a href="#defaul
 <tbody>
 <tr>
 <td>decoy_symbol</td>
-<td>Symbol within Decoy Identifiers to distinguish between targets. (i.e "<strong>##</strong>" or "__decoy___"). This is important for <a href="../supplementary/#protein-picker">Protein Picker</a> and FDR calculation.</td>
+<td>Symbol within Decoy Identifiers to distinguish between targets. (i.e "##", "decoy_", "rev_", "DECOY_"). This is important for <a href="../supplementary/#protein-picker">Protein Picker</a> and FDR calculation.</td>
 <td>String</td>
 </tr>
 <tr>
@@ -270,7 +279,7 @@ Note: These parameters are all optional. Please see the section <a href="#defaul
 </tr>
 <tr>
 <td>grouping_type</td>
-<td>How to group proteins for a given <strong>inference_type</strong>. This can be <strong>subset_peptides</strong>,  <strong>shared_peptides</strong>, or <strong>None</strong>. Typically <strong>subset_peptides</strong> is used. This parameter only effects grouped proteins and has no impact on protein leads.</td>
+<td>How to group proteins for a given <strong>inference_type</strong>. This can be <strong>subset_peptides</strong>,  <strong>shared_peptides</strong>, <strong>parsimonious_grouping</strong>, or <strong>None</strong>. Typically <strong>subset_peptides</strong> or <strong>parsimonious_grouping</strong> is used. This parameter only effects grouped proteins and has no impact on protein leads. Suggested to use <strong>parsimonious_grouping</strong> if parsimony groups are wanted to be seen in the output when running parsimony.</td>
 <td>String</td>
 </tr>
 </tbody>
@@ -310,7 +319,7 @@ Note: These parameters are all optional. Please see the section <a href="#defaul
 <tbody>
 <tr>
 <td>lp_solver</td>
-<td>This can be one of: <strong>pulp</strong> or <strong>None</strong>. This determines which linear program solver is used. Please see <a href="../supplementary/#parsimony-dependencies">here</a> for more information on lp solvers. Input <strong>None</strong> if not running <strong>parsimony</strong>. If running <strong>parsimony</strong> this needs to be set to <strong>pulp</strong>.</td>
+<td>This can be one of: <strong>pulp</strong> or <strong>None</strong>. This determines which linear program solver is used. Input <strong>None</strong> if not running <strong>parsimony</strong>. If running <strong>parsimony</strong> this needs to be set to <strong>pulp</strong>.</td>
 <td>String</td>
 </tr>
 <tr>
@@ -344,14 +353,16 @@ Note: These parameters are all optional. Please see the section <a href="#defaul
     export: peptides
     fdr: 0.01
     picker: True
-    tag: py_protein_inference
+    tag: example_tag
+    xml_parser: openms
   data_restriction:
     pep_restriction: 0.9
     peptide_length_restriction: 7
-    q_value_restriction: 0.005
+    q_value_restriction: .9
     custom_restriction: None
+    max_allowed_alternative_proteins: 50
   score:
-    protein_score: multiplicative_log
+    protein_score: best_peptide_per_protein
     psm_score: posterior_error_prob
     psm_score_type: multiplicative
   identifiers:
@@ -359,8 +370,8 @@ Note: These parameters are all optional. Please see the section <a href="#defaul
     isoform_symbol: &quot;-&quot;
     reviewed_identifier_symbol: &quot;sp|&quot;
   inference:
-    inference_type: peptide_centric
-    grouping_type: shared_peptides
+    inference_type: parsimony
+    grouping_type: parsimonious_grouping
   digest:
     digest_type: trypsin
     missed_cleavages: 3
@@ -405,14 +416,15 @@ Note: These parameters are all optional. Please see the section <a href="#defaul
     
   </span>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme_extra.js" defer></script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

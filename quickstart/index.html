@@ -8,7 +8,7 @@
     <title>Quick Start - Py Protein Inference</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
     
       <script>
@@ -18,12 +18,11 @@
         var mkdocs_page_url = null;
       </script>
     
-    <script src="../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -35,7 +34,7 @@
           <a href=".." class="icon icon-home"> Py Protein Inference
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -46,7 +45,7 @@
                 </li>
               </ul>
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="./">Quick Start</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Quick Start</a>
     <ul class="current">
     </ul>
                 </li>
@@ -85,21 +84,21 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li><li>Quick Start</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Quick Start</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
                 <h1 id="requirements">Requirements</h1>
 <ol>
-<li><strong>Python 3.7</strong> or greater. This package was created using <strong>Python 3.7</strong></li>
+<li><strong>Python 3.9</strong> or greater.</li>
 <li><strong>Python Packages</strong>:
-   <strong>numpy</strong>, <strong>pyteomics</strong>, <strong>pulp</strong>, <strong>PyYAML</strong>, <strong>matplotlib</strong>. These should be installed automatically during installation.</li>
+   <strong>numpy</strong>, <strong>pyteomics</strong>, <strong>pyopenms</strong>, <strong>pulp</strong>, <strong>PyYAML</strong>, <strong>matplotlib</strong>, <strong>lxml</strong>, <strong>nicegui</strong>, <strong>pywebview</strong>, <strong>tqdm</strong>. These should be installed automatically during installation.</li>
 </ol>
 <h1 id="quick-start-guide">Quick Start Guide</h1>
 <ol>
@@ -109,19 +108,36 @@
 </code></pre>
 </li>
 <li>
-<p>Run the Heuristic method with tab delimited results directly from percolator to generate results for peptide centric, parsimony, inclusion, and exclusion:</p>
-<pre><code>protein_inference_heuristic_cli.py \
-    -t /path/to/target/file1.txt \
-    -d /path/to/decoy/file1.txt \
-    -db /path/to/database/file.fasta
+<p>Run the standard commandline from an idXML file </p>
+<pre><code>protein_inference_cli.py \
+    -f /path/to/target/file1.idXML \
+    -db /path/to/database/file.fasta \
+    -y /path/to/params.yaml
 </code></pre>
 </li>
 <li>
-<p>Run the standard commandline tool with tab delimited results directly from percolator to run a particular inference method. By default, peptide centric inference is selected if a parameter file is not specified:</p>
+<p>Run the standard commandline from a mzIdentML file </p>
+<pre><code>protein_inference_cli.py \
+    -f /path/to/target/file1.mzid \
+    -db /path/to/database/file.fasta \
+    -y /path/to/params.yaml
+</code></pre>
+</li>
+<li>
+<p>Run the standard commandline from a pepXML file </p>
+<pre><code>protein_inference_cli.py \
+    -f /path/to/target/file1.pepXML \
+    -db /path/to/database/file.fasta \
+    -y /path/to/params.yaml
+</code></pre>
+</li>
+<li>
+<p>Run the standard commandline tool with tab delimited results directly from percolator</p>
 <pre><code>protein_inference_cli.py \
     -t /path/to/target/file.txt \
     -d /path/to/decoy/file.txt \
-    -db /path/to/database/file.fasta
+    -db /path/to/database/file.fasta \ 
+    -y /path/to/params.yaml
 </code></pre>
 </li>
 <li>
@@ -139,6 +155,48 @@ All parameters are optional, so you only need to define the ones you want to alt
 See <a href="../parameters/#default-parameters">here</a> for the default parameters.</p>
 </li>
 <li>
+<p>Full Parameter Specifications
+See below for a full standard parameter file:</p>
+</li>
+</ol>
+<h2 id="default-parameters">Default Parameters</h2>
+<pre><code class="language-yaml">parameters:
+  general:
+    export: peptides
+    fdr: 0.01
+    picker: True
+    tag: example_tag
+    xml_parser: openms
+  data_restriction:
+    pep_restriction: 0.9
+    peptide_length_restriction: 7
+    q_value_restriction: .9
+    custom_restriction: None
+    max_allowed_alternative_proteins: 50
+  score:
+    protein_score: best_peptide_per_protein
+    psm_score: posterior_error_prob
+    psm_score_type: multiplicative
+  identifiers:
+    decoy_symbol: &quot;##&quot;
+    isoform_symbol: &quot;-&quot;
+    reviewed_identifier_symbol: &quot;sp|&quot;
+  inference:
+    inference_type: parsimony
+    grouping_type: parsimonious_grouping
+  digest:
+    digest_type: trypsin
+    missed_cleavages: 3
+  parsimony:
+    lp_solver: pulp
+    shared_peptides: all
+  peptide_centric:
+    max_identifiers: 5
+</code></pre>
+<p>These parameter options are just a suggestion. Please alter these for your specifications. 
+For full description of each parameter and all options see the in depth <a href="../parameters/#yaml-parameter-file-outline">parameter file description</a></p>
+<ol>
+<li>
 <p>Run the standard commandline tool again, this time specifying the parameters as above:</p>
 <pre><code>protein_inference_cli.py \
     -t /path/to/target/file.txt \
@@ -151,7 +209,7 @@ See <a href="../parameters/#default-parameters">here</a> for the default paramet
 <p>Running with docker</p>
 <ul>
 <li>Either Pull the image from docker hub:<ul>
-<li><code>docker pull hinklet/pyproteininference:latest</code></li>
+<li><code>docker pull thinkle12/pyproteininference:latest</code></li>
 </ul>
 </li>
 <li>Or Build the image with the following command (After having cloned the repository):<ul>
@@ -160,13 +218,21 @@ See <a href="../parameters/#default-parameters">here</a> for the default paramet
 <li><code>docker build -t pyproteininference:latest .</code></li>
 </ul>
 </li>
-<li>Run the tool, making sure to volume mount in the directory with your input data and parameters. In the case below, that local directory would be <code>/path/to/local/directory</code> and the path in the container is <code>/data</code><pre><code>docker run -v /path/to/local/directory/:/data \
+<li>
+<p>Run the tool, making sure to volume mount in the directory with your input data and parameters. In the case below, that local directory would be <code>/path/to/local/directory</code> and the path in the container is <code>/data</code></p>
+<pre><code>docker run -v /path/to/local/directory/:/data \
     -it hinklet/pyproteininference:latest \
     python /usr/local/bin/protein_inference_cli.py \
     -f /data/input_file.txt \
     -db /data/database.fasta \
     -y /data/parameters.yaml \
     -o /data/
+</code></pre>
+</li>
+<li>
+<p>Get the commandline help via docker</p>
+<pre><code>docker run thinkle12/pyproteininference:latest \
+python /usr/local/bin/protein_inference_cli.py --help
 </code></pre>
 </li>
 </ul>
@@ -207,14 +273,15 @@ See <a href="../parameters/#default-parameters">here</a> for the default paramet
     
   </span>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme_extra.js" defer></script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

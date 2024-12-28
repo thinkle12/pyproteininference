@@ -50,16 +50,18 @@ For example, lets say you wanted to use the `Comet:xcorr` value (for Comet Xcorr
 ```
 
 One of the Accession values can also be used. For example, `MS:1001493` actually means `Posterior Error Probability`. <br>
-Since this is the Posterior Error Probability from percolator, the input psm_score would actually be posterior_error_prob. This will be changed in a future release to be the accession `MS:1001493` instead. <br>
+You would simply enter in `MS:1001493` to utilize that output PSM score.
 
 So to use that value as the PSM score you might have this as your score section for your parameter file:
 
 ```yaml
   score:
     protein_score: multiplicative_log
-    psm_score: posterior_error_prob
+    psm_score: MS:1001493
     psm_score_type: multiplicative
 ```
+
+Remember, `MS:1001493` actually means `Posterior Error Probability`. Please refer to your specific search algorithms documentation to learn more about what each accession means.
 
 ### mzIdentML
 Lets inspect a standard MSGF+ based mzIdentML file for assistance in running pyProteinInference from a a mzIdentML file. <br>
@@ -93,8 +95,8 @@ When inspecting a file you might see a spectrum identification as such:
 </SpectrumIdentificationItem>
 ```
 
-When selecting custom scores to use from your mzIdentML file you can select any of the cvParam options under SpectrumIdentificationItem. For example, we might want to use the MS-GF:PepQValue (MS:1002055). <br>
-However, when selecting custom scores from mzIdentML files you will actually input the `accession` listed above instead of the `name`. <br>
+When selecting custom scores to use from your mzIdentML file you can select any of the `cvParam` options under SpectrumIdentificationItem. For example, we might want to use the `MS-GF:PepQValue` (`MS:1002055`). <br>
+An important note when selecting custom scores from mzIdentML files is that you will actually input the `accession` listed above instead of the `name`. <br>
 So, for selecting `MS-GF:PepQValue`, you would actually input `MS:1002055` into the parameter file (See below). <br>
 Also, given that `MS:1002055` scores are better if they are lower we would insert it as a multiplicative score. <br>
 The `score` section of the parameter file in this case might look like this:
@@ -105,6 +107,8 @@ The `score` section of the parameter file in this case might look like this:
     psm_score: MS:1002055
     psm_score_type: multiplicative
 ```
+
+Remember, you can use any `cvParam` accession from your mzIdentML file. Make sure to note if the selected score is better when lower or higher to calculate protein scores correctly.
 
 ### pepXML
 

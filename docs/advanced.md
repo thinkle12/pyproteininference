@@ -105,11 +105,20 @@ Advanced usage flags
 1. `-p` This flag is a True/False on whether to skip appending alternative proteins from the Fasta database digestion. If this flag is left blank, it will not skip appending alternative proteins (recommended). 
 2. `-i` True/False on whether to split the IDs in the Fasta database file. If this is left blank, it will not split IDs in the Fasta database file (recommended).
 
-You can run the tool as follows:
+You can run the tool as follows with separate target and decoy files:
 ```shell
 protein_inference_cli.py \
     -t /path/to/target/file.txt \
     -d /path/to/decoy/file.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/parameter/file.yaml \
+    -o /path/to/output/directory/
+```
+
+Or from combined files like an mzIdentML file:
+```shell
+protein_inference_cli.py \
+    -f /path/to/target/file.mzid \
     -db /path/to/database/file.fasta \
     -y /path/to/parameter/file.yaml \
     -o /path/to/output/directory/
@@ -120,6 +129,15 @@ Running with multiple input target/decoy files:
 protein_inference_cli.py \
     -t /path/to/target/file1.txt /path/to/target/file2.txt \
     -d /path/to/decoy/file1.txt /path/to/decoy/file2.txt \
+    -db /path/to/database/file.fasta \
+    -y /path/to/parameter/file.yaml \
+    -o /path/to/output/directory/
+```
+
+Or from multiple mzIdentML / idXML / pepXML files:
+```shell
+protein_inference_cli.py \
+    -f /path/to/target/file1.mzid /path/to/target/file2.mzid \
     -db /path/to/database/file.fasta \
     -y /path/to/parameter/file.yaml \
     -o /path/to/output/directory/
@@ -149,7 +167,29 @@ pipeline = ProteinInferencePipeline(parameter_file=yaml_params,
 pipeline.execute()
 ```
 
+Or running mzIdentML files within python:
+```python
+from pyproteininference.pipeline import ProteinInferencePipeline
+
+yaml_params = "/path/to/yaml/params.yaml"
+database = "/path/to/database/file.fasta"
+### target_files can either be a list of files or one file
+mzid_files = ["/path/to/file1.mzid","/path/to/file2.mzid"]
+### decoy_files can either be a list of files or one file
+output_directory_name = "/path/to/output/directory/"
+
+pipeline = ProteinInferencePipeline(parameter_file=yaml_params,
+									database_file=database,  
+                                    target_files=None,  
+                                    decoy_files=None,  
+                                    combined_files=mzid_files,  
+                                    output_directory=output_directory_name)  
+# Calling .execute() will initiate the pipeline with the given data                                                               
+pipeline.execute()
+```
+
 ### Running the Heuristic Method
+**NOTE: The Heuristic Method is experimental and has not be extensively tested on multiple datasets yet. Check back for updates on this tool.** <br> <br>
 Py Protein Inference also has a built-in Heuristic that runs through four inference methods (Inclusion, Exclusion, Parsimony, and Peptide Centric) and selects a recommended method for your given dataset. 
 By default, all four result files will be written, and the optimal method will be highlighted to the user.
 The Heuristic method also outputs a density plot that showcases all the inference methods compared to one another to gain further insight. For more information on the Heuristic Method see the [__Heuristic algorithm__](supplementary.md#heuristic-algorithm) section.
@@ -327,6 +367,6 @@ Console Output is as follows and indicates the recommended method at the end:
 Below is an example of a Heuristic Density plot. The plot indicates the distribution of the number of standard deviations 
 from the mean (of identified proteins at a specified FDR) for each inference method for a range of FDRs from 0 to the false discovery rate threshold (100 fdrs are incrementally selected in the range [0, fdr threshold])
 In general, the closer that the peak of a distribution is to 0 the more likely the associated method is to be selected as the recommended method.
-For more information on the specifics of the Heuristic Algorithm see [__Heuristic Algorithm Description__](supplementary.md#heuristic-algorithm-description)
+For more information on the specifics of the Heuristic Algorithm see [__Heuristic Algorithm Description__](supplementary.md#heuristic-algorithm)
 
 ![density](img/swissprot_example_density.png)

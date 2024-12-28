@@ -1,9 +1,8 @@
 ## Introduction
 
+**PyProteinInference** is a Python package for running various protein inference algorithms on tandem mass spectrometry search results and generating protein to peptide mappings with protein level false discovery rates.  
 
 For a quick start guide please click [here](quickstart.md).
-
-**PyProteinInference** is a Python package for running various protein inference algorithms on tandem mass spectrometry search results and generating protein to peptide mappings with protein level false discovery rates..  
 
 **Key Features** <br>
 
@@ -14,7 +13,7 @@ For a quick start guide please click [here](quickstart.md).
 * **Supported Input Formats**:
     * Search Result File Types: [idXML](input_format.md#idxml), [mzIdentML](input_format.md#mzidentml), or [pepXML](input_format.md#pepxml).  
     * PSM files from [Percolator](https://github.com/percolator/percolator).
-    * Custom tab-delimited files (see [input formats](input_format.md#custom-input)).  
+    * Custom tab-delimited [files](input_format.md#custom-input).  
 * **Output**:
     * User-friendly CSV file containing Proteins, Peptides, q-values, and Protein Scores.  
     * Details on output formats: [supplementary](supplementary.md#export-types).  
@@ -49,5 +48,5 @@ Please see the [__Protein Score Types__](supplementary.md#protein-score-types) s
 ## Using Py Protein Inference
  1. [Yaml Parameter File](parameters.md#yaml-parameter-file-outline)
  2. [Input File Examples](input_format.md#input-file-examples) (idXML, mzIdentML, pepXML, Tab Delimited)
- 3. [Fasta Database](input_format.md#fasta-file-example)
+ 3. [Fasta Database](input_format.md#fasta-file)
  4. [Running Py Protein Inference](advanced.md#running-py-protein-inference)

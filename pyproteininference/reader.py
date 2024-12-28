@@ -38,6 +38,7 @@ class Reader(object):
             decoy_file (str/list): Path to Decoy PSM result files.
             combined_files (str/list): Path to Combined PSM result files.
             directory (str): Path to directory containing combined PSM result files.
+            top_hit_per_psm_only (bool): If True, only include top hit for each PSM.
 
         """
         self.target_file = target_file
@@ -219,6 +220,7 @@ class PercolatorReader(Reader):
             decoy_file (str/list): Path to Decoy PSM result files.
             combined_files (str/list): Path to Combined PSM result files.
             directory (str): Path to directory containing combined PSM result files.
+            top_hit_per_psm_only (bool): If True, only include top hit for each PSM.
 
         Returns:
             Reader: [Reader][pyproteininference.reader.Reader] object.
@@ -505,6 +507,7 @@ class ProteologicPostSearchReader(Reader):
                 [ProteinInferenceParameter][pyproteininference.parameters.ProteinInferenceParameter] object.
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database
                 that are not in the input files.
+            top_hit_per_psm_only (bool): If True, only include top hit for each PSM.
 
 
         Returns:
@@ -694,6 +697,7 @@ class GenericReader(Reader):
             decoy_file (str/list): Path to Decoy PSM result files.
             combined_files (str/list): Path to Combined PSM result files.
             directory (str): Path to directory containing combined PSM result files.
+            top_hit_per_psm_only (bool): If True, only include top hit for each PSM.
 
         Returns:
             Reader: [Reader][pyproteininference.reader.Reader] object.
@@ -1017,7 +1021,7 @@ class GenericReader(Reader):
 
 class IdXMLReader(Reader):
     """
-    The following class takes a idXML like target file and a idXML like decoy file
+    The following class takes a idXML like file
     and creates standard [Psm][pyproteininference.physical.Psm] objects.
 
     Attributes:
@@ -1075,13 +1079,13 @@ class IdXMLReader(Reader):
             decoy_file (str/list): Path to Decoy PSM result files.
             combined_files (str/list): Path to Combined PSM result files.
             directory (str): Path to directory containing combined PSM result files.
+            top_hit_per_psm_only (bool): If True, only include top hit for each PSM.
 
         Returns:
             Reader: [Reader][pyproteininference.reader.Reader] object.
 
         Example:
-            >>> pyproteininference.reader.IdXMLReader(target_file = "example_target.txt",
-            >>>     decoy_file = "example_decoy.txt",
+            >>> pyproteininference.reader.IdXMLReader(combined_file = "example_file.idXML",
             >>>     digest=digest, parameter_file_object=pi_params)
         """
         self.target_file = target_file
@@ -1143,8 +1147,7 @@ class IdXMLReader(Reader):
         This method must be ran before initializing [DataStore object][pyproteininference.datastore.DataStore].
 
         Example:
-            >>> reader = pyproteininference.reader.GenericReader(target_file = "example_target.txt",
-            >>>     decoy_file = "example_decoy.txt",
+            >>> reader = pyproteininference.reader.IdXMLReader(combined_file = "example_file.idXML",
             >>>     digest=digest, parameter_file_object=pi_params)
             >>> reader.read_psms()
 
@@ -1300,8 +1303,7 @@ class IdXMLReader(Reader):
         This method must be ran before initializing [DataStore object][pyproteininference.datastore.DataStore].
 
         Example:
-            >>> reader = pyproteininference.reader.GenericReader(target_file = "example_target.txt",
-            >>>     decoy_file = "example_decoy.txt",
+            >>> reader = pyproteininference.reader.IdXMLReader(combined_file = "example_file.idXML",
             >>>     digest=digest, parameter_file_object=pi_params)
             >>> reader.read_psms()
 

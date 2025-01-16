@@ -4,11 +4,13 @@ parameters:
     fdr: 0.01
     picker: True
     tag: test_heuristic
+    xml_parser: openms
   data_restriction:
     pep_restriction: .9
     peptide_length_restriction: 7
     q_value_restriction: .9
     custom_restriction: None
+    max_allowed_alternative_proteins: 50
   score:
     protein_score: multiplicative_log
     psm_score: posterior_error_prob

@@ -1,4 +1,4 @@
-FROM python:3.7-buster
+FROM python:3.9.0-buster
 
 ARG VERSION
 
@@ -20,5 +20,8 @@ WORKDIR /pyproteininference/
 RUN pip install -r requirements.txt
 
 RUN python setup.py install
+
+RUN chmod +x /usr/local/bin/protein_inference_cli.py
+RUN chmod +x /usr/local/bin/protein_inference_heuristic_cli.py
 
 WORKDIR /

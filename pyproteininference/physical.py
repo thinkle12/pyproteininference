@@ -330,6 +330,7 @@ class Psm(object):
         if score not in self.SCORE_ATTRIBUTE_NAMES:
             raise ValueError("Scores must either be one of: '{}'".format(", ".join(self.SCORE_ATTRIBUTE_NAMES)))
         else:
+            score_attribute = getattr(self, score)
             self.main_score = getattr(self, score)
 
 

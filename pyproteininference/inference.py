@@ -1,3 +1,4 @@
+import collections
 import logging
 import sys
 from collections import OrderedDict
@@ -8,13 +9,6 @@ from pyproteininference import datastore
 from pyproteininference.physical import ProteinGroup, Psm
 
 logger = logging.getLogger(__name__)
-
-# set up our logger
-logging.basicConfig(
-    stream=sys.stderr,
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
 
 
 class Inference(object):
@@ -51,9 +45,10 @@ class Inference(object):
 
     SUBSET_PEPTIDES = "subset_peptides"
     SHARED_PEPTIDES = "shared_peptides"
+    PARSIMONIOUS_GROUPING = "parsimonious_grouping"
     NONE_GROUPING = None
 
-    GROUPING_TYPES = [SUBSET_PEPTIDES, SHARED_PEPTIDES, NONE_GROUPING]
+    GROUPING_TYPES = [SUBSET_PEPTIDES, SHARED_PEPTIDES, NONE_GROUPING, PARSIMONIOUS_GROUPING]
 
     PULP = "pulp"
     LP_SOLVERS = [PULP]
@@ -536,6 +531,10 @@ class Parsimony(Inference):
                                                 protein_tracker.add(current_protein_object)
                                             else:
                                                 pass
+                                        elif grouping_type == self.PARSIMONIOUS_GROUPING:
+                                            if protein_objects.peptides == current_protein_object.peptides:
+                                                current_grouped_proteins.add(current_protein_object)
+                                                protein_tracker.add(current_protein_object)
                                         else:
                                             pass
                                     except ValueError:
@@ -822,7 +821,10 @@ class Parsimony(Inference):
                     # Re-assigning the value within the index will also reassign the value in protein_list...
                     # This is because grouped_protein_objects[-1] equals protein_list
                     # So we do not have to reassign values in protein_list
-                    (grouped_protein_objects[-1][0], grouped_protein_objects[-1][isoform_override_index],) = (
+                    (
+                        grouped_protein_objects[-1][0],
+                        grouped_protein_objects[-1][isoform_override_index],
+                    ) = (
                         grouped_protein_objects[-1][isoform_override_index],
                         grouped_protein_objects[-1][0],
                     )

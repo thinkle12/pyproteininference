@@ -85,6 +85,31 @@ class TestReader(TestCase):
             self.assertEqual(cur_generic.qvalue, cur_perc.qvalue)
 
         # Test to see if we can read a list of files
+        # as we're just loading the same file twice, we'll need to try it with and without the top_psm filter
+
+        # now with the top hit filter
+        pep_and_prot_data_perc = pyproteininference.reader.PercolatorReader(
+            target_file=[TARGET_FILE, TARGET_FILE],
+            decoy_file=[DECOY_FILE, DECOY_FILE],
+            parameter_file_object=protein_inference_parameters,
+            digest=digest,
+            top_hit_per_psm_only=True,
+        )
+        pep_and_prot_data_perc.read_psms()
+
+        self.assertEqual(len(pep_and_prot_data_perc.psms), 27)
+
+        pep_and_prot_data = pyproteininference.reader.GenericReader(
+            target_file=[TARGET_FILE, TARGET_FILE],
+            decoy_file=[DECOY_FILE, DECOY_FILE],
+            parameter_file_object=protein_inference_parameters,
+            digest=digest,
+            top_hit_per_psm_only=True,
+        )
+        pep_and_prot_data.read_psms()
+
+        self.assertEqual(len(pep_and_prot_data.psms), 27)
+
         pep_and_prot_data = pyproteininference.reader.GenericReader(
             target_file=[TARGET_FILE, TARGET_FILE],
             decoy_file=[DECOY_FILE, DECOY_FILE],
@@ -93,6 +118,7 @@ class TestReader(TestCase):
         )
         pep_and_prot_data.read_psms()
 
+        # ...and without the top hit filter
         self.assertEqual(len(pep_and_prot_data.psms), 54)
 
         pep_and_prot_data_perc = pyproteininference.reader.PercolatorReader(

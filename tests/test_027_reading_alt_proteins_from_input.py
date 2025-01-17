@@ -102,7 +102,7 @@ class TestAltProteinFomInput(TestCase):
         )
         reader.read_psms()
 
-        self.assertEqual(reader.MAX_ALLOWED_ALTERNATIVE_PROTEINS, 50)
+        self.assertEqual(reader.parameter_file_object.max_allowed_alternative_proteins, 50)
 
         protein_list1 = [
             'Protein1',
@@ -237,8 +237,6 @@ class TestAltProteinFomInput(TestCase):
         )
 
         percreader.read_psms()
-
-        self.assertEqual(percreader.MAX_ALLOWED_ALTERNATIVE_PROTEINS, 50)
 
         self.assertListEqual(
             percreader.psms[0].possible_proteins,

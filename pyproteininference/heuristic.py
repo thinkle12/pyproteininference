@@ -14,13 +14,6 @@ from pyproteininference.pipeline import ProteinInferencePipeline
 
 logger = logging.getLogger(__name__)
 
-# set up our logger
-logging.basicConfig(
-    stream=sys.stderr,
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-
 
 class HeuristicPipeline(ProteinInferencePipeline):
     """

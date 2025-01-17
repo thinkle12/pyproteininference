@@ -1,16 +1,12 @@
+import copy
 import csv
 import logging
 import os
 import sys
 
-logger = logging.getLogger(__name__)
+from pyproteininference.inference import Inference
 
-# set up our logger
-logging.basicConfig(
-    stream=sys.stderr,
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
+logger = logging.getLogger(__name__)
 
 
 class Export(object):
@@ -289,6 +285,27 @@ class Export(object):
             writer = csv.writer(f)
             writer.writerows(protein_export_list)
 
+    def _format_lead_protein(self, groups):
+        lead_protein = copy.copy(groups.proteins[0])
+        if (
+            self.data.parameter_file_object.inference_type == Inference.PARSIMONY
+            and self.data.parameter_file_object.grouping_type == Inference.PARSIMONIOUS_GROUPING
+        ):
+            # take all protein identifiers from groups.proteins
+            # then sort them first by whether they are a part of the set in self.data.digest.swiss_prot_protein_set and then alphabetically
+            # then join them with a semicolon
+            lead_protein.identifier = ";".join(
+                [
+                    x.identifier
+                    for x in sorted(
+                        groups.proteins,
+                        key=lambda x: (x.identifier not in self.data.digest.swiss_prot_protein_set, x.identifier),
+                    )
+                ]
+            )
+
+        return lead_protein
+
     def csv_export_q_value_leads(self, filename_out):
         """
         Method that outputs all lead proteins with Q values.
@@ -311,7 +328,7 @@ class Export(object):
             ]
         ]
         for groups in self.data.protein_group_objects:
-            lead_protein = groups.proteins[0]
+            lead_protein = self._format_lead_protein(groups)
             protein_export_list.append([lead_protein.identifier])
             protein_export_list[-1].append(lead_protein.score)
             protein_export_list[-1].append(groups.q_value)
@@ -352,7 +369,7 @@ class Export(object):
             ]
         ]
         for groups in self.data.protein_group_objects:
-            lead_protein = groups.proteins[0]
+            lead_protein = self._format_lead_protein(groups)
             protein_export_list.append([lead_protein.identifier])
             protein_export_list[-1].append(lead_protein.score)
             protein_export_list[-1].append(groups.q_value)
@@ -462,7 +479,7 @@ class Export(object):
             ]
         ]
         for groups in self.data.protein_group_objects:
-            lead_protein = groups.proteins[0]
+            lead_protein = self._format_lead_protein(groups)
             for peps in sorted(lead_protein.peptides):
                 protein_export_list.append([lead_protein.identifier])
                 protein_export_list[-1].append(lead_protein.score)
@@ -502,7 +519,7 @@ class Export(object):
             ]
         ]
         for groups in self.data.protein_group_objects:
-            lead_protein = groups.proteins[0]
+            lead_protein = self._format_lead_protein(groups)
             protein_export_list.append([lead_protein.identifier])
             protein_export_list[-1].append(lead_protein.score)
             protein_export_list[-1].append(groups.q_value)
@@ -542,7 +559,7 @@ class Export(object):
             ]
         ]
         for groups in self.data.protein_group_objects:
-            lead_protein = groups.proteins[0]
+            lead_protein = self._format_lead_protein(groups)
             protein_export_list.append([lead_protein.identifier])
             protein_export_list[-1].append(lead_protein.score)
             protein_export_list[-1].append(groups.q_value)
@@ -582,7 +599,7 @@ class Export(object):
             ]
         ]
         for groups in self.data.protein_group_objects:
-            lead_protein = groups.proteins[0]
+            lead_protein = self._format_lead_protein(groups)
             protein_export_list.append([lead_protein.identifier])
             protein_export_list[-1].append(lead_protein.score)
             protein_export_list[-1].append(groups.q_value)

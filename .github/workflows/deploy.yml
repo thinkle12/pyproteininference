@@ -5,16 +5,16 @@ on: [push]
 jobs:
   build-n-publish:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: Set up Python 3.7
+    - name: Set up Python 3.9
       uses: actions/setup-python@v3
       with:
-        python-version: 3.7
+        python-version: 3.9
     - name: Install wheel
       run: >-
         pip install wheel

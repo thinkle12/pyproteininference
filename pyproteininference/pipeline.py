@@ -1,18 +1,14 @@
 import logging
 import os
 import sys
+from multiprocessing import Queue
+from typing import Union, List
 
 import pyproteininference
+from pyproteininference.gui.configuration import Configuration
 from pyproteininference.inference import Inference
 
 logger = logging.getLogger(__name__)
-
-# set up our logger
-logging.basicConfig(
-    stream=sys.stderr,
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
 
 
 class ProteinInferencePipeline(object):
@@ -57,7 +53,7 @@ class ProteinInferencePipeline(object):
         """
 
         Args:
-            parameter_file (str): Path to Protein Inference Yaml Parameter File.
+            parameter_file (str/Configuration): Path to Protein Inference Yaml Parameter File.
             database_file (str): Path to Fasta database used in proteomics search.
             target_files (str/list): Path to Target Psm File (Or a list of files).
             decoy_files (str/list): Path to Decoy Psm File (Or a list of files).
@@ -104,6 +100,7 @@ class ProteinInferencePipeline(object):
         self.append_alt_from_db = append_alt_from_db
         self.data = None
         self.digest = None
+        self.gui_status_queue = None
 
         self._validate_input()
 
@@ -112,6 +109,20 @@ class ProteinInferencePipeline(object):
         self._log_append_alt_from_db()
 
         self._log_id_splitting()
+
+    @classmethod
+    def create_from_gui_config(cls, queue: Queue, config: Configuration):
+        """Creates the ProteinInferencePipeline from a Config object passed from the graphical user interface."""
+        pipeline = cls(
+            parameter_file=config,
+            database_file=config.fasta_file[0] if isinstance(config.fasta_file, list) else None,
+            combined_files=list(config.input_files),
+            output_filename=config.output_file,
+            id_splitting=config.identifier_splitting,
+            append_alt_from_db=config.use_alt_proteins,
+        )
+        pipeline.gui_status_queue = queue
+        return pipeline
 
     def execute(self):
         """
@@ -154,13 +165,20 @@ class ProteinInferencePipeline(object):
         # STEP 1: Load parameter file #
         # STEP 1: Load parameter file #
         # STEP 1: Load parameter file #
-        pyproteininference_parameters = pyproteininference.parameters.ProteinInferenceParameter(
-            yaml_param_filepath=self.parameter_file
-        )
+        self._update_status(0, "Configuring analysis")
+        if isinstance(self.parameter_file, Configuration):
+            pyproteininference_parameters = pyproteininference.parameters.ProteinInferenceParameter(
+                None, configuration=self.parameter_file
+            )
+        else:
+            pyproteininference_parameters = pyproteininference.parameters.ProteinInferenceParameter(
+                yaml_param_filepath=self.parameter_file
+            )
 
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
         # STEP 2: Start with running an In Silico Digestion #
+        self._update_status(0.05, "Running In Silico Digestion")
         digest = pyproteininference.in_silico_digest.PyteomicsDigest(
             database_path=self.database_file,
             digest_type=pyproteininference_parameters.digest_type,
@@ -181,14 +199,48 @@ class ProteinInferencePipeline(object):
         # STEP 3: Read PSM Data #
         # STEP 3: Read PSM Data #
         # STEP 3: Read PSM Data #
-        reader = pyproteininference.reader.GenericReader(
-            target_file=self.target_files,
-            decoy_file=self.decoy_files,
-            combined_files=self.combined_files,
-            parameter_file_object=pyproteininference_parameters,
-            digest=digest,
-            append_alt_from_db=self.append_alt_from_db,
+        self._update_status(0.25, "Reading PSM Data")
+
+        def _as_list(x: Union[str, List[str]]) -> List[str]:
+            return [x] if isinstance(x, str) else x
+
+        input_files = (
+            _as_list(self.target_files)
+            if self.target_files
+            else (
+                _as_list(self.decoy_files)
+                if self.decoy_files
+                else _as_list(self.combined_files) if self.combined_files else list()
+            )
         )
+        extensions = set([os.path.splitext(x)[1].lower() for x in input_files])
+        if len(extensions) > 1:
+            raise ValueError("All input files must be of the same type and have the same file extension.")
+        logger.info("File(s) have extensions: {}".format(extensions))
+        if (
+            ".idxml" in extensions
+            or ".mzid" in extensions
+            or ".pep.xml" in extensions
+            or ".xml" in extensions
+            or ".pepxml" in extensions
+        ):
+            reader = pyproteininference.reader.IdXMLReader(
+                target_file=self.target_files,
+                decoy_file=self.decoy_files,
+                combined_files=self.combined_files,
+                parameter_file_object=pyproteininference_parameters,
+                digest=digest,
+                append_alt_from_db=self.append_alt_from_db,
+            )
+        else:
+            reader = pyproteininference.reader.GenericReader(
+                target_file=self.target_files,
+                decoy_file=self.decoy_files,
+                combined_files=self.combined_files,
+                parameter_file_object=pyproteininference_parameters,
+                digest=digest,
+                append_alt_from_db=self.append_alt_from_db,
+            )
         reader.read_psms()
 
         # STEP 4: Initiate the datastore object #
@@ -199,12 +251,14 @@ class ProteinInferencePipeline(object):
         # Step 5: Restrict the PSM data
         # Step 5: Restrict the PSM data
         # Step 5: Restrict the PSM data
+        self._update_status(0.50, "Filtering PSM Data")
         data.restrict_psm_data()
 
         data.recover_mapping()
         # Step 6: Generate protein scoring input
         # Step 6: Generate protein scoring input
         # Step 6: Generate protein scoring input
+        self._update_status(0.60, "Calculating Scores")
         data.create_scoring_input()
 
         # Step 7: Remove non unique peptides if running exclusion
@@ -223,6 +277,7 @@ class ProteinInferencePipeline(object):
         # STEP 9: Run protein picker on the data
         # STEP 9: Run protein picker on the data
         # STEP 9: Run protein picker on the data
+        self._update_status(0.65, "Selecting Proteins")
         if pyproteininference_parameters.picker:
             data.protein_picker()
         else:
@@ -231,16 +286,19 @@ class ProteinInferencePipeline(object):
         # STEP 10: Apply Inference
         # STEP 10: Apply Inference
         # STEP 10: Apply Inference
+        self._update_status(0.75, "Performing Inference")
         pyproteininference.inference.Inference.run_inference(data=data, digest=digest)
 
         # STEP 11: Q value Calculations
         # STEP 11: Q value Calculations
         # STEP 11: Q value Calculations
+        self._update_status(0.90, "Calculating Q Values")
         data.calculate_q_values()
 
         # STEP 12: Export to CSV
         # STEP 12: Export to CSV
         # STEP 12: Export to CSV
+        self._update_status(0.95, "Saving Results")
         export = pyproteininference.export.Export(data=data)
         export.export_to_csv(
             output_filename=self.output_filename,
@@ -252,6 +310,18 @@ class ProteinInferencePipeline(object):
         self.digest = digest
 
         logger.info("Protein Inference Finished")
+        self._update_status(1, "Protein Inference Finished")
+
+    def _update_status(self, percentage: float, message: str):
+        """
+        Internal method for updating the status of the pipeline in the GUI.
+
+        Args:
+            percentage (float): The percentage of the pipeline that has been completed.
+            message (str): The message to display to the user.
+        """
+        if self.gui_status_queue:
+            self.gui_status_queue.put_nowait((percentage, message))
 
     def _validate_input(self):
         """

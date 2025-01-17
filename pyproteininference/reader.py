@@ -4,19 +4,16 @@ import logging
 import os
 import sys
 
+import pyopenms
+import tqdm
+from pyteomics.openms import idxml
+
 from pyproteininference.datastore import DataStore
 from pyproteininference.inference import Inference
 from pyproteininference.physical import Psm
 from pyproteininference.scoring import Score
 
 logger = logging.getLogger(__name__)
-
-# set up our logger
-logging.basicConfig(
-    stream=sys.stderr,
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
 
 
 class Reader(object):
@@ -31,9 +28,9 @@ class Reader(object):
 
     """
 
-    MAX_ALLOWED_ALTERNATIVE_PROTEINS = 50
-
-    def __init__(self, target_file=None, decoy_file=None, combined_files=None, directory=None):
+    def __init__(
+        self, target_file=None, decoy_file=None, combined_files=None, directory=None, top_hit_per_psm_only=False
+    ):
         """
 
         Args:
@@ -41,12 +38,14 @@ class Reader(object):
             decoy_file (str/list): Path to Decoy PSM result files.
             combined_files (str/list): Path to Combined PSM result files.
             directory (str): Path to directory containing combined PSM result files.
+            top_hit_per_psm_only (bool): If True, only include top hit for each PSM.
 
         """
         self.target_file = target_file
         self.decoy_file = decoy_file
         self.combined_files = combined_files
         self.directory = directory
+        self.top_hit_per_psm_only = top_hit_per_psm_only
 
     def get_alternative_proteins_from_input(self, row):
         """
@@ -207,6 +206,7 @@ class PercolatorReader(Reader):
         decoy_file=None,
         combined_files=None,
         directory=None,
+        top_hit_per_psm_only=False,
     ):
         """
 
@@ -220,6 +220,7 @@ class PercolatorReader(Reader):
             decoy_file (str/list): Path to Decoy PSM result files.
             combined_files (str/list): Path to Combined PSM result files.
             directory (str): Path to directory containing combined PSM result files.
+            top_hit_per_psm_only (bool): If True, only include top hit for each PSM.
 
         Returns:
             Reader: [Reader][pyproteininference.reader.Reader] object.
@@ -233,6 +234,8 @@ class PercolatorReader(Reader):
         self.combined_files = combined_files
         self.directory = directory
         # Define Indicies based on input
+
+        self.top_hit_per_psm_only = top_hit_per_psm_only
 
         self.psms = None
         self.search_id = None
@@ -363,6 +366,18 @@ class PercolatorReader(Reader):
             reverse=False,
         )
 
+        logger.info("Number of PSMs in the input data: {}".format(len(perc_all)))
+        if self.top_hit_per_psm_only:
+            logger.info("Filtering to only top hit per PSM")
+            psm_ids = set()
+            all_psms_filtered = []
+            for psm in perc_all:
+                if psm[self.PSMID_INDEX] not in psm_ids:
+                    psm_ids.add(psm[self.PSMID_INDEX])
+                    all_psms_filtered.append(psm)
+            perc_all = all_psms_filtered
+            logger.info("Number of PSMs after filtering to top hit per PSM: {}".format(len(perc_all)))
+
         list_of_psm_objects = []
         peptide_tracker = set()
         all_sp_proteins = set(self.digest.swiss_prot_protein_set)
@@ -384,7 +399,7 @@ class PercolatorReader(Reader):
                     poss_proteins = [psm_info[self.PROTEINIDS_INDEX]]
                 else:
                     poss_proteins = sorted(list(set(psm_info[self.PROTEINIDS_INDEX :])))  # noqa E203
-                    poss_proteins = poss_proteins[: self.MAX_ALLOWED_ALTERNATIVE_PROTEINS]
+                    poss_proteins = poss_proteins[: self.parameter_file_object.max_allowed_alternative_proteins]
                 combined_psm_result_rows.possible_proteins = poss_proteins  # Restrict to 50 total possible proteins...
                 combined_psm_result_rows.psm_id = psm_info[self.PSMID_INDEX]
                 input_poss_prots = copy.copy(poss_proteins)
@@ -429,7 +444,7 @@ class PercolatorReader(Reader):
                 combined_psm_result_rows = self._fix_alternative_proteins(
                     append_alt_from_db=self.append_alt_from_db,
                     identifiers_sorted=identifiers_sorted,
-                    max_proteins=self.MAX_ALLOWED_ALTERNATIVE_PROTEINS,
+                    max_proteins=self.parameter_file_object.max_allowed_alternative_proteins,
                     psm=combined_psm_result_rows,
                     parameter_file_object=self.parameter_file_object,
                 )
@@ -479,6 +494,7 @@ class ProteologicPostSearchReader(Reader):
         digest,
         parameter_file_object,
         append_alt_from_db=True,
+        top_hit_per_psm_only=False,
     ):
         """
 
@@ -491,6 +507,7 @@ class ProteologicPostSearchReader(Reader):
                 [ProteinInferenceParameter][pyproteininference.parameters.ProteinInferenceParameter] object.
             append_alt_from_db (bool): Whether or not to append alternative proteins found in the database
                 that are not in the input files.
+            top_hit_per_psm_only (bool): If True, only include top hit for each PSM.
 
 
         Returns:
@@ -504,6 +521,8 @@ class ProteologicPostSearchReader(Reader):
         self.digest = digest
         self.initial_protein_peptide_map = copy.copy(self.digest.protein_to_peptide_dictionary)
         self.append_alt_from_db = append_alt_from_db
+
+        self.top_hit_per_psm_only = top_hit_per_psm_only
 
         self.parameter_file_object = parameter_file_object
 
@@ -596,7 +615,7 @@ class ProteologicPostSearchReader(Reader):
                 p = self._fix_alternative_proteins(
                     append_alt_from_db=self.append_alt_from_db,
                     identifiers_sorted=identifiers_sorted,
-                    max_proteins=self.MAX_ALLOWED_ALTERNATIVE_PROTEINS,
+                    max_proteins=self.parameter_file_object.max_allowed_alternative_proteins,
                     psm=p,
                     parameter_file_object=self.parameter_file_object,
                 )
@@ -664,6 +683,7 @@ class GenericReader(Reader):
         decoy_file=None,
         combined_files=None,
         directory=None,
+        top_hit_per_psm_only=False,
     ):
         """
 
@@ -677,6 +697,7 @@ class GenericReader(Reader):
             decoy_file (str/list): Path to Decoy PSM result files.
             combined_files (str/list): Path to Combined PSM result files.
             directory (str): Path to directory containing combined PSM result files.
+            top_hit_per_psm_only (bool): If True, only include top hit for each PSM.
 
         Returns:
             Reader: [Reader][pyproteininference.reader.Reader] object.
@@ -686,16 +707,15 @@ class GenericReader(Reader):
             >>>     decoy_file = "example_decoy.txt",
             >>>     digest=digest, parameter_file_object=pi_params)
         """
-        self.target_file = target_file
-        self.decoy_file = decoy_file
-        self.combined_files = combined_files
-        self.directory = directory
+        super().__init__(target_file, decoy_file, combined_files, directory)
 
         self.psms = None
         self.search_id = None
         self.digest = digest
         self.initial_protein_peptide_map = copy.copy(self.digest.protein_to_peptide_dictionary)
         self.load_custom_score = False
+
+        self.top_hit_per_psm_only = top_hit_per_psm_only
 
         self.append_alt_from_db = append_alt_from_db
 
@@ -721,7 +741,7 @@ class GenericReader(Reader):
         # If we select to not run inference at all
         if self.parameter_file_object.inference_type == Inference.FIRST_PROTEIN:
             # Only allow 1 Protein per PSM
-            self.MAX_ALLOWED_ALTERNATIVE_PROTEINS = 1
+            self.parameter_file_object.max_allowed_alternative_proteins = 1
 
     def read_psms(self):
         """
@@ -740,6 +760,7 @@ class GenericReader(Reader):
 
         """
         logger.info("Reading in Input Files using Generic Reader...")
+        all_psms = None
         # Read in and split by line
         # If target_file is a list... read them all in and concatenate...
         if self.target_file and self.decoy_file:
@@ -866,6 +887,18 @@ class GenericReader(Reader):
                     reverse=False,
                 )
 
+        logger.info("Number of PSMs in the input data: {}".format(len(all_psms)))
+        if self.top_hit_per_psm_only:
+            logger.info("Filtering to only top hit per PSM")
+            psm_ids = set()
+            all_psms_filtered = []
+            for psm in all_psms:
+                if psm[self.PSMID] not in psm_ids:
+                    psm_ids.add(psm[self.PSMID])
+                    all_psms_filtered.append(psm)
+            all_psms = all_psms_filtered
+            logger.info("Number of PSMs after filtering to top hit per PSM: {}".format(len(all_psms)))
+
         list_of_psm_objects = []
         peptide_tracker = set()
         all_sp_proteins = set(self.digest.swiss_prot_protein_set)
@@ -959,7 +992,7 @@ class GenericReader(Reader):
                 psm = self._fix_alternative_proteins(
                     append_alt_from_db=self.append_alt_from_db,
                     identifiers_sorted=identifiers_sorted,
-                    max_proteins=self.MAX_ALLOWED_ALTERNATIVE_PROTEINS,
+                    max_proteins=self.parameter_file_object.max_allowed_alternative_proteins,
                     psm=psm,
                     parameter_file_object=self.parameter_file_object,
                 )
@@ -978,6 +1011,480 @@ class GenericReader(Reader):
         logger.info("Length of PSM Data: {}".format(len(self.psms)))
 
         logger.info("Finished GenericReader.read_psms...")
+
+    def _find_psms_with_alternative_proteins(self, raw_psms):
+
+        psms_with_alternative_proteins = [x for x in raw_psms if x["alternative_proteins"]]
+
+        return psms_with_alternative_proteins
+
+
+class IdXMLReader(Reader):
+    """
+    The following class takes a idXML like file
+    and creates standard [Psm][pyproteininference.physical.Psm] objects.
+
+    Attributes:
+        target_file (str/list): Path to Target PSM result files.
+        decoy_file (str/list): Path to Decoy PSM result files.
+        combined_files (str/list): Path to Combined PSM result files.
+        directory (str): Path to directory containing combined PSM result files.
+        psms (list): List of [Psm][pyproteininference.physical.Psm] objects.
+        load_custom_score (bool): True/False on whether or not to load a custom score. Depends on scoring_variable.
+        scoring_variable (str): String to indicate which column in the input file is to be used as the scoring input.
+        digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
+        parameter_file_object (ProteinInferenceParameter):
+            [ProteinInferenceParameter][pyproteininference.parameters.ProteinInferenceParameter] object
+        append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that
+            are not in the input files.
+
+
+
+    """
+
+    PSMID = "PSMId"
+    SCORE = "MS:1001492"
+    Q_VALUE = "MS:1001491"
+    POSTERIOR_ERROR_PROB = "MS:1001493"
+    PEPTIDE = "peptide"
+    PROTEIN_IDS = "proteinIds"
+    ALTERNATIVE_PROTEINS = "alternative_proteins"
+
+    PSM_SCORE_MAPPING = {
+        "posterior_error_prob": POSTERIOR_ERROR_PROB,
+        "q-value": Q_VALUE,
+        "score": SCORE,
+    }
+
+    def __init__(
+        self,
+        digest,
+        parameter_file_object,
+        append_alt_from_db=True,
+        target_file=None,
+        decoy_file=None,
+        combined_files=None,
+        directory=None,
+        top_hit_per_psm_only=False,
+    ):
+        """
+
+        Args:
+            digest (Digest): [Digest Object][pyproteininference.in_silico_digest.Digest].
+            parameter_file_object (ProteinInferenceParameter):
+                [ProteinInferenceParameter][pyproteininference.parameters.ProteinInferenceParameter] object.
+            append_alt_from_db (bool): Whether or not to append alternative proteins found in the database that
+                are not in the input files.
+            target_file (str/list): Path to Target PSM result files.
+            decoy_file (str/list): Path to Decoy PSM result files.
+            combined_files (str/list): Path to Combined PSM result files.
+            directory (str): Path to directory containing combined PSM result files.
+            top_hit_per_psm_only (bool): If True, only include top hit for each PSM.
+
+        Returns:
+            Reader: [Reader][pyproteininference.reader.Reader] object.
+
+        Example:
+            >>> pyproteininference.reader.IdXMLReader(combined_file = "example_file.idXML",
+            >>>     digest=digest, parameter_file_object=pi_params)
+        """
+        self.target_file = target_file
+        self.decoy_file = decoy_file
+        self.combined_files = combined_files
+        self.directory = directory
+
+        self.top_hit_per_psm_only = top_hit_per_psm_only
+
+        self.psms = None
+        self.search_id = None
+        self.digest = digest
+        self.initial_protein_peptide_map = copy.copy(self.digest.protein_to_peptide_dictionary)
+        self.load_custom_score = False
+
+        self.append_alt_from_db = append_alt_from_db
+
+        self.parameter_file_object = parameter_file_object
+        # map the common scoring variables (posterior_error_prob, q-value, score) to the PSI MS CV terms,
+        # or use the custom term as-is if not present in the mapping
+        self.scoring_variable = self.PSM_SCORE_MAPPING.get(
+            parameter_file_object.psm_score, parameter_file_object.psm_score
+        )
+
+        self._validate_input()
+
+        if self.scoring_variable != self.Q_VALUE and self.scoring_variable != self.POSTERIOR_ERROR_PROB:
+            self.load_custom_score = True
+            logger.info(
+                "Pulling custom column based on parameter file input for score, Attribute: {}".format(
+                    self.scoring_variable
+                )
+            )
+        else:
+            logger.info(
+                "Pulling no custom columns based on parameter file input for score, using standard Attribute: {}".format(
+                    self.scoring_variable
+                )
+            )
+
+        # If we select to not run inference at all
+        if self.parameter_file_object.inference_type == Inference.FIRST_PROTEIN:
+            # Only allow 1 Protein per PSM
+            self.parameter_file_object.max_allowed_alternative_proteins = 1
+
+    def read_psms(self):
+        if self.parameter_file_object.xml_input_parser == "pyteomics":
+            self._read_psms_pyteomics()
+        else:
+            self._read_psms_openms()
+
+    def _read_psms_pyteomics(self):
+        """
+        Method to read psms from the input files and to transform them into a list of
+        [Psm][pyproteininference.physical.Psm] objects.
+
+        This method sets the `psms` variable. Which is a list of Psm objets.
+
+        This method must be ran before initializing [DataStore object][pyproteininference.datastore.DataStore].
+
+        Example:
+            >>> reader = pyproteininference.reader.IdXMLReader(combined_file = "example_file.idXML",
+            >>>     digest=digest, parameter_file_object=pi_params)
+            >>> reader.read_psms()
+
+        """
+        logger.info("Reading in Input Files using IdXML Reader (pyteomics)...")
+
+        input_files = list()
+        for input_filenames in (self.combined_files, self.target_file, self.decoy_file):
+            if input_filenames is not None:
+                if isinstance(input_filenames, str):
+                    input_filenames = [input_filenames]
+                input_files.extend(input_filenames)
+        if len(input_files) == 0:
+            raise ValueError("For idXML files, at least one file must be supplied as target, decoy, or combined input.")
+        logger.info(f"Reading input from {','.join([str(x) for x in self.combined_files])}")
+        input_files = self.combined_files
+        reader = idxml.chain().from_iterable(input_files)
+
+        def _sort_protein_hits_by_selected_score(hits, score_key, fallback_score_key):
+            sorting_key = score_key
+            sorting_direction_reversed = False
+            if not all([score_key in hit for hit in hits]):
+                if not all([fallback_score_key in hit for hit in hits]):
+                    raise ValueError(
+                        f"Score key {score_key} not found in all hits: "
+                        f"{[str(x['sequence'] for x in hits if score_key not in hits)]}"
+                    )
+                sorting_key = score_key
+                # if additive score type, reverse the sorting (multiplicative score type still is normal sort)
+                if self.parameter_file_object.psm_score_type == Score.ADDITIVE_SCORE_TYPE:
+                    sorting_direction_reversed = True
+            # presort by target / decoy to maintain deterministic parity in how percolator generic results are handled
+            # (with a preference for targets over decoys there)
+            sorted_hits = sorted(hits, key=lambda x: 1 if x['target_decoy'] == "decoy" else 0, reverse=False)
+            return sorted(sorted_hits, key=lambda x: float(x[sorting_key]), reverse=sorting_direction_reversed)
+
+        list_of_psm_objects = []
+        peptide_tracker = set()
+        all_sp_proteins = set(self.digest.swiss_prot_protein_set)
+        # We only want to get unique peptides... using all messes up scoring...
+        # Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
+
+        peptide_to_protein_dictionary = self.digest.peptide_to_protein_dictionary
+
+        initial_poss_prots = []
+
+        for psm_info in tqdm.tqdm(reader, desc="Reading PSMs", unit=" PSMs"):
+            peptide_hits = psm_info.get("PeptideHit", None)
+            if len(peptide_hits) < 1:
+                continue
+
+            sorted_hits = _sort_protein_hits_by_selected_score(
+                peptide_hits, self.scoring_variable, self.POSTERIOR_ERROR_PROB
+            )
+            best_hit = sorted_hits[0]
+            current_peptide = (
+                f"{best_hit.get('aa_before',['-'])[0]}"
+                f".{best_hit.get('sequence','')}."
+                f"{best_hit.get('aa_after',['-'])[0]}"
+            )
+            # Define the Psm...
+            if current_peptide not in peptide_tracker:
+                psm = Psm(identifier=current_peptide)
+                # Attempt to add variables from PSM info...
+                # If they do not exist in the psm info then we skip...
+                psm.percscore = float(best_hit.get(self.SCORE)) if best_hit.get(self.SCORE) is not None else None
+                psm.qvalue = float(best_hit.get(self.Q_VALUE)) if best_hit.get(self.Q_VALUE) is not None else None
+                psm.pepvalue = (
+                    float(best_hit.get(self.POSTERIOR_ERROR_PROB))
+                    if best_hit.get(self.POSTERIOR_ERROR_PROB) is not None
+                    else None
+                )
+                if self.load_custom_score:
+                    psm.custom_score = (
+                        float(best_hit.get(self.scoring_variable))
+                        if best_hit.get(self.scoring_variable) is not None
+                        else None
+                    )
+
+                psm.possible_proteins = [prot['accession'] for prot in best_hit['protein']]
+                # Remove potential Repeats
+                if self.parameter_file_object.inference_type != Inference.FIRST_PROTEIN:
+                    psm.possible_proteins = sorted(list(set(psm.possible_proteins)))
+
+                input_poss_prots = copy.copy(psm.possible_proteins)
+
+                # Get PSM ID
+                psm.psm_id = psm_info.get('spectrum_reference')
+
+                # Split peptide if flanking
+                current_peptide = Psm.split_peptide(peptide_string=current_peptide)
+
+                if not current_peptide.isupper() or not current_peptide.isalpha():
+                    # If we have mods remove them...
+                    peptide_string = current_peptide.upper()
+                    stripped_peptide = Psm.remove_peptide_mods(peptide_string)
+                    current_peptide = stripped_peptide
+                # Add the other possible_proteins from insilicodigest here...
+                try:
+                    current_alt_proteins = sorted(list(peptide_to_protein_dictionary[current_peptide]))
+                except KeyError:
+                    current_alt_proteins = []
+                    logger.debug(
+                        "Peptide {} was not found in the supplied DB for Proteins {}".format(
+                            current_peptide, ";".join(psm.possible_proteins)
+                        )
+                    )
+                    for poss_prot in psm.possible_proteins:
+                        self.digest.peptide_to_protein_dictionary.setdefault(current_peptide, set()).add(poss_prot)
+                        self.digest.protein_to_peptide_dictionary.setdefault(poss_prot, set()).add(current_peptide)
+                        logger.debug(
+                            "Adding Peptide {} and Protein {} to Digest dictionaries".format(current_peptide, poss_prot)
+                        )
+
+                # Sort Alt Proteins by Swissprot then Trembl...
+                identifiers_sorted = DataStore.sort_protein_strings(
+                    protein_string_list=current_alt_proteins,
+                    sp_proteins=all_sp_proteins,
+                    decoy_symbol=self.parameter_file_object.decoy_symbol,
+                )
+
+                # Restrict to 50 possible proteins
+                psm = self._fix_alternative_proteins(
+                    append_alt_from_db=self.append_alt_from_db,
+                    identifiers_sorted=identifiers_sorted,
+                    max_proteins=self.parameter_file_object.max_allowed_alternative_proteins,
+                    psm=psm,
+                    parameter_file_object=self.parameter_file_object,
+                )
+
+                list_of_psm_objects.append(psm)
+                peptide_tracker.add(current_peptide)
+
+                initial_poss_prots.append(input_poss_prots)
+
+        self.psms = list_of_psm_objects
+
+        self._check_initial_database_overlap(
+            initial_possible_proteins=initial_poss_prots, initial_protein_peptide_map=self.initial_protein_peptide_map
+        )
+
+        logger.info("Length of PSM Data: {}".format(len(self.psms)))
+
+        logger.info("Finished IdXMLReader.read_psms...")
+
+    def _read_psms_openms(self):
+        """
+        Method to read psms from the input files and to transform them into a list of
+        [Psm][pyproteininference.physical.Psm] objects.
+
+        This method sets the `psms` variable. Which is a list of Psm objets.
+
+        This method must be ran before initializing [DataStore object][pyproteininference.datastore.DataStore].
+
+        Example:
+            >>> reader = pyproteininference.reader.IdXMLReader(combined_file = "example_file.idXML",
+            >>>     digest=digest, parameter_file_object=pi_params)
+            >>> reader.read_psms()
+
+        """
+        logger.info("Reading in Input Files using IdXML Reader (OpenMS)...")
+
+        input_files = list()
+        for input_filenames in (self.combined_files, self.target_file, self.decoy_file):
+            if input_filenames is not None:
+                if isinstance(input_filenames, str):
+                    input_filenames = [input_filenames]
+                input_files.extend(input_filenames)
+        if len(input_files) == 0:
+            raise ValueError("For idXML files, at least one file must be supplied as target, decoy, or combined input.")
+        logger.info(f"Reading input from {','.join([str(x) for x in self.combined_files])}")
+        input_files = self.combined_files
+
+        def _sort_protein_hits_by_selected_score(hits, score_key, fallback_score_key):
+            sorting_key = score_key
+            sorting_direction_reversed = False
+            if not all([hit.metaValueExists(score_key) for hit in hits]):
+                if not all([hit.metaValueExists(fallback_score_key) for hit in hits]):
+                    raise ValueError(
+                        f"Score key {score_key} not found in all hits: "
+                        f"{[x.getSequence().toString() for x in hits if not x.metaValueExists(score_key)]}"
+                    )
+                sorting_key = fallback_score_key
+                # if additive score type, reverse the sorting (multiplicative score type still is normal sort)
+                if self.parameter_file_object.psm_score_type == Score.ADDITIVE_SCORE_TYPE:
+                    sorting_direction_reversed = True
+            # presort by target / decoy to maintain deterministic parity in how percolator generic results are handled
+            # (with a preference for targets over decoys there)
+            # @todo check that target_decoy is created for all instances (e.g. pepxml)
+            sorted_hits = sorted(
+                hits, key=lambda x: 1 if x.getMetaValue('target_decoy') == "decoy" else 0, reverse=False
+            )
+            return sorted(
+                sorted_hits, key=lambda x: float(x.getMetaValue(sorting_key)), reverse=sorting_direction_reversed
+            )
+
+        list_of_psm_objects = []
+        peptide_tracker = set()
+        all_sp_proteins = set(self.digest.swiss_prot_protein_set)
+        # We only want to get unique peptides... using all messes up scoring...
+        # Create Psm objects with the identifier, percscore, qvalue, pepvalue, and possible proteins...
+
+        peptide_to_protein_dictionary = self.digest.peptide_to_protein_dictionary
+
+        initial_poss_prots = []
+
+        for input_file in tqdm.tqdm(input_files, desc="Reading Input files", unit=" files"):
+
+            protein_ids = []
+            peptide_ids = []
+
+            file_extension = os.path.splitext(input_file)[1].lower()
+            if file_extension == ".mzid":
+                logger.info(f"Reading input as mzIdentML")
+                pyopenms.MzIdentMLFile().load(input_file, protein_ids, peptide_ids)
+            elif file_extension in (".pepxml", ".pep.xml", ".xml"):
+                logger.info(f"Reading input as pepXML")
+                pyopenms.PepXMLFile().load(input_file, protein_ids, peptide_ids)
+            else:
+                logger.info(f"Reading input as idXML")
+                pyopenms.IdXMLFile().load(input_file, protein_ids, peptide_ids)
+
+            for peptide_id in tqdm.tqdm(peptide_ids, desc="Reading PSMs", unit=" PSMs"):
+                peptide_hits = peptide_id.getHits()
+                if len(peptide_hits) < 1:
+                    continue
+
+                sorted_hits = _sort_protein_hits_by_selected_score(
+                    peptide_hits, self.scoring_variable, self.POSTERIOR_ERROR_PROB
+                )
+                best_hit = sorted_hits[0]
+                aa_before = best_hit.getPeptideEvidences()[0].getAABefore()
+                aa_after = best_hit.getPeptideEvidences()[0].getAAAfter()
+                if aa_before is None or aa_before == "UNKNOWN_AA":
+                    aa_before = "X"
+                elif aa_before == "N_TERMINAL_AA":
+                    aa_before = "-"
+                if aa_after is None or aa_after == "UNKNOWN_AA":
+                    aa_after = "X"
+                elif aa_after == "C_TERMINAL_AA":
+                    aa_after = "-"
+
+                current_peptide = f"{aa_before}" f".{best_hit.getSequence().toString()}." f"{aa_after}"
+                # Define the Psm...
+                if current_peptide not in peptide_tracker:
+                    psm = Psm(identifier=current_peptide)
+                    # Attempt to add variables from PSM info...
+                    # If they do not exist in the psm info then we skip...
+                    psm.percscore = (
+                        float(best_hit.getMetaValue(self.SCORE))
+                        if best_hit.getMetaValue(self.SCORE) is not None
+                        else None
+                    )
+                    psm.qvalue = (
+                        float(best_hit.getMetaValue(self.Q_VALUE))
+                        if best_hit.getMetaValue(self.Q_VALUE) is not None
+                        else None
+                    )
+                    psm.pepvalue = (
+                        float(best_hit.getMetaValue(self.POSTERIOR_ERROR_PROB))
+                        if best_hit.getMetaValue(self.POSTERIOR_ERROR_PROB) is not None
+                        else None
+                    )
+                    if self.load_custom_score:
+                        psm.custom_score = (
+                            float(best_hit.getMetaValue(self.scoring_variable))
+                            if best_hit.getMetaValue(self.scoring_variable) is not None
+                            else None
+                        )
+
+                    psm.possible_proteins = [x.decode("utf-8") for x in best_hit.extractProteinAccessionsSet()]
+                    # Remove potential Repeats
+                    if self.parameter_file_object.inference_type != Inference.FIRST_PROTEIN:
+                        psm.possible_proteins = sorted(list(set(psm.possible_proteins)))
+
+                    input_poss_prots = copy.copy(psm.possible_proteins)
+
+                    # Get PSM ID
+                    psm.psm_id = peptide_id.getMetaValue("spectrum_reference")
+
+                    # Split peptide if flanking
+                    current_peptide = Psm.split_peptide(peptide_string=current_peptide)
+
+                    if not current_peptide.isupper() or not current_peptide.isalpha():
+                        # If we have mods remove them...
+                        peptide_string = current_peptide.upper()
+                        stripped_peptide = Psm.remove_peptide_mods(peptide_string)
+                        current_peptide = stripped_peptide
+                    # Add the other possible_proteins from insilicodigest here...
+                    try:
+                        current_alt_proteins = sorted(list(peptide_to_protein_dictionary[current_peptide]))
+                    except KeyError:
+                        current_alt_proteins = []
+                        logger.debug(
+                            "Peptide {} was not found in the supplied DB for Proteins {}".format(
+                                current_peptide, ";".join(psm.possible_proteins)
+                            )
+                        )
+                        for poss_prot in psm.possible_proteins:
+                            self.digest.peptide_to_protein_dictionary.setdefault(current_peptide, set()).add(poss_prot)
+                            self.digest.protein_to_peptide_dictionary.setdefault(poss_prot, set()).add(current_peptide)
+                            logger.debug(
+                                "Adding Peptide {} and Protein {} to Digest dictionaries".format(
+                                    current_peptide, poss_prot
+                                )
+                            )
+
+                    # Sort Alt Proteins by Swissprot then Trembl...
+                    identifiers_sorted = DataStore.sort_protein_strings(
+                        protein_string_list=current_alt_proteins,
+                        sp_proteins=all_sp_proteins,
+                        decoy_symbol=self.parameter_file_object.decoy_symbol,
+                    )
+
+                    # Restrict to 50 possible proteins
+                    psm = self._fix_alternative_proteins(
+                        append_alt_from_db=self.append_alt_from_db,
+                        identifiers_sorted=identifiers_sorted,
+                        max_proteins=self.parameter_file_object.max_allowed_alternative_proteins,
+                        psm=psm,
+                        parameter_file_object=self.parameter_file_object,
+                    )
+
+                    list_of_psm_objects.append(psm)
+                    peptide_tracker.add(current_peptide)
+
+                    initial_poss_prots.append(input_poss_prots)
+
+        self.psms = list_of_psm_objects
+
+        self._check_initial_database_overlap(
+            initial_possible_proteins=initial_poss_prots, initial_protein_peptide_map=self.initial_protein_peptide_map
+        )
+
+        logger.info("Length of PSM Data: {}".format(len(self.psms)))
+
+        logger.info("Finished IdXMLReader.read_psms...")
 
     def _find_psms_with_alternative_proteins(self, raw_psms):
 

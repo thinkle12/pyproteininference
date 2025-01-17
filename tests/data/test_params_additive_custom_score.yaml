@@ -4,11 +4,13 @@ parameters:
     fdr: 0.01
     picker: True
     tag: test_additive
+    xml_parser: openms
   data_restriction:
     pep_restriction: None
     peptide_length_restriction: 7
     q_value_restriction: None
     custom_restriction: None
+    max_allowed_alternative_proteins: 50
   score:
     protein_score: additive
     psm_score: example_additive_score

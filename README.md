@@ -106,5 +106,30 @@ protein_inference_cli.py \
 			-o /data/
 	  ```
 
+## Building the Bundled Application Package using PyInstaller
+_Note: This is only necessary if you want to build the application package yourself. The package is already available on
+PyPi and can be installed using pip, or bundled executables can be downloaded from the releases page on 
+GitHub (https://thinkle12.github.io/pyproteininference/)._
+
+1. After cloning the source code repository, create a new Python virtual environment under the project directory:
+```shell
+python -m venv venv
+```
+2. Activate the virtual environment:
+```shell
+source venv/bin/activate
+```
+3. Install the required packages:
+```shell
+pip install -r requirements.txt pyinstaller==6.11.1
+```
+4. Run the PyInstaller command to build the executable:
+```shell
+pyinstaller pyProteinInference.spec
+```
+5. The executable will be located in the `dist` directory.
+
+
+
 ## Documentation
 For more information please see the full package documentation (https://thinkle12.github.io/pyproteininference/).

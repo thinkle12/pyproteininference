@@ -195,7 +195,7 @@ class Psm(object):
     # The regex removes anything between parantheses including parenthases - \([^()]*\)
     # The regex removes anything between brackets including parenthases - \[.*?\]
     # And the regex removes anything that is not an A-Z character [^A-Z]
-    MOD_REGEX = re.compile("\([^()]*\)|\[.*?\]|[^A-Z]")  # noqa W605
+    MOD_REGEX = re.compile(r"\([^()]*\)|\[.*?\]|[^A-Z]")  # noqa W605
 
     FRONT_FLANKING_REGEX = re.compile("^[A-Z|-][.]")
     BACK_FLANKING_REGEX = re.compile("[.][A-Z|-]$")

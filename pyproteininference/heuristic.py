@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 
-import matplotlib.pyplot as plt
+
 import numpy
 import statistics
 
@@ -284,6 +284,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
             None:
 
         """
+        import matplotlib.pyplot as plt
+
         f = plt.figure()
         for inference_method in self.datastore_dict.keys():
             fdr_vs_target_hits = self.datastore_dict[inference_method].generate_fdr_vs_target_hits(fdr_max=fdr_max)
@@ -504,6 +506,8 @@ class HeuristicPipeline(ProteinInferencePipeline):
                 maximum point of the density plot per inference method.
 
         """
+        import matplotlib.pyplot as plt
+
         f = plt.figure()
 
         heuristic_scores = {}

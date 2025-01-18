@@ -57,7 +57,7 @@ class Digest(object):
         "Y",
         "V",
     ]
-    UNIPROT_STRS = "sp\||tr\|"  # noqa W605
+    UNIPROT_STRS = r"sp\||tr\|"  # noqa W605
     UNIPROT_STR_REGEX = re.compile(UNIPROT_STRS)
     SP_STRING = "sp|"
     METHIONINE = "M"

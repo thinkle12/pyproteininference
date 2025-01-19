@@ -28,7 +28,7 @@
 	__numpy__, __pyteomics__, __pulp__, __PyYAML__, __matplotlib__, __pyopenms__, __lxml__, __tqdm__, __pywebview__, __nicegui__. These should be installed automatically during installation.
 		
 ## Quick Start Guide
-### Install the package using pip and running the CLI/GUI:
+### Install the package using pip
 ```shell
 pip install pyproteininference
 ```
@@ -85,7 +85,7 @@ And then call the script while also calling the pyton interpreter as shown above
 
 ### Executables
 
-You can also download standalone executable applications of the GUI for both Windows and MacOS on the releases page on github:
+You can also download a standalone executable version of the GUI for both Windows and macOS from the releases page on GitHub:
 https://github.com/thinkle12/pyproteininference/releases
 
 When launching the GUI's from the executables please wait until for the user interface to pop up. It usually takes a minute or so.

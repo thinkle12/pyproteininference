@@ -163,7 +163,7 @@ class Reader(object):
 
 
 class PercolatorReader(Reader):
-    """
+    r"""
     The following class takes a percolator target file and a percolator decoy file
     or combined files/directory and creates standard [Psm][pyproteininference.physical.Psm] objects.
     This reader class is used as input for [DataStore object][pyproteininference.datastore.DataStore].
@@ -635,7 +635,7 @@ class ProteologicPostSearchReader(Reader):
 
 
 class GenericReader(Reader):
-    """
+    r"""
     The following class takes a percolator like target file and a percolator like decoy file
     and creates standard [Psm][pyproteininference.physical.Psm] objects.
 

@@ -449,13 +449,14 @@ def index():
             ui.markdown(
                 r"""
             # pyProteinInference
-            Version 1.1.0
+            Version 1.1.1
             
             Trent Hinkle and Corey Bakalarski
             
-            &copy; 2024 Genentech, Inc.
+            &copy; 2024-2025 Genentech, Inc.
             """
             )
 
 
-ui.run(native=True, title="pyProteinInference", reload=False, port=native.find_open_port())
+if __name__ == "__main__":
+    ui.run(native=True, title="pyProteinInference", reload=False, port=native.find_open_port())

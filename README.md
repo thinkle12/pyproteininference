@@ -28,12 +28,71 @@
 	__numpy__, __pyteomics__, __pulp__, __PyYAML__, __matplotlib__, __pyopenms__, __lxml__, __tqdm__, __pywebview__, __nicegui__. These should be installed automatically during installation.
 		
 ## Quick Start Guide
-1. Install the package using pip:
+### Install the package using pip
 ```shell
 pip install pyproteininference
 ```
-   
-2. Run the standard commandline from an idXML file 
+
+### Running the command line tool
+
+To run the CLI tool either call `protein_inference_cli.py` like so:
+```shell
+protein_inference_cli.py --help
+```
+
+Or call the script while also calling your python interpreter
+
+First, locate the script that gets installed on installation:
+```shell
+which protein_inference_cli.py
+/path/to/venv/bin/protein_inference_cli.py
+```
+
+Then, call the script while also calling your python interpreter
+```shell
+python /path/to/venv/bin/protein_inference_cli.py --help
+```
+
+Optionally, download the protein_inference_cli.py file from the github repo here:
+https://github.com/thinkle12/pyproteininference/blob/master/scripts/protein_inference_cli.py
+
+And then call the script while also calling the pyton interpreter as shown above
+
+### Running the graphical user interface
+
+To run the GUI tool either call `protein_inference_gui.py` like so:
+```shell
+protein_inference_gui.py
+```
+
+Or again, call the script while also calling your python interpreter
+
+First, locate the script that gets installed on installation:
+```shell
+which protein_inference_gui.py
+/path/to/venv/bin/protein_inference_gui.py
+```
+
+Then, call the script while also calling your python interpreter
+```shell
+python /path/to/venv/bin/protein_inference_gui.py
+```
+
+Again, you can optionally download the protein_inference_gui.py file from the github repo here:
+https://github.com/thinkle12/pyproteininference/blob/master/scripts/protein_inference_gui.py
+
+And then call the script while also calling the pyton interpreter as shown above
+
+### Executables
+
+You can also download a standalone executable version of the GUI for both Windows and macOS from the releases page on GitHub:
+https://github.com/thinkle12/pyproteininference/releases
+
+When launching the GUI's from the executables please wait until for the user interface to pop up. It usually takes a minute or so.
+
+## More Options for calling the CLI
+
+1. Run the standard command line from an idXML file 
 ```shell
 protein_inference_cli.py \
 -f /path/to/target/file.idXML \
@@ -41,7 +100,7 @@ protein_inference_cli.py \
 -y /path/to/params.yaml
 ```
    
-3. Run the standard commandline from an mzIdentML file 
+2. Run the standard command line from an mzIdentML file 
 ```shell
 protein_inference_cli.py \
 -f /path/to/target/file.mzid \
@@ -49,7 +108,7 @@ protein_inference_cli.py \
 -y /path/to/params.yaml
 ```
    
-4. Run the standard commandline from a pepXML file 
+3. Run the standard command line from a pepXML file 
 ```shell
 protein_inference_cli.py \
 -f /path/to/target/file.pep.xml \
@@ -57,7 +116,7 @@ protein_inference_cli.py \
 -y /path/to/params.yaml
 ```
 
-5. Run the standard commandline tool with tab delimited results directly from percolator to run a particular inference method. By default, peptide centric inference is selected if a parameter file is not specified:
+4. Run the standard command line tool with tab delimited results directly from percolator to run a particular inference method. By default, peptide centric inference is selected if a parameter file is not specified:
 ```shell
 protein_inference_cli.py \
 -t /path/to/target/file.txt \
@@ -65,7 +124,7 @@ protein_inference_cli.py \
 -db /path/to/database/file.fasta 
 ```
 
-6. Specifying Parameters. 
+5. Specifying Parameters. 
 The two most common parameters to change are the inference type, and the decoy symbol (for identifying decoy proteins vs target proteins).
 The parameters can be quickly altered by creating a file called params.yaml as follows:
 ```yaml
@@ -79,7 +138,7 @@ The inference type can be one of: `parsimony`, `peptide_centric`, `inclusion`, `
 All parameters are optional, so you only need to define the ones you want to alter. Parameters that are not defined are set to default values.
 See the package documentation for the default parameters.
 
-7. Run the standard commandline tool again, this time specifying the parameters as above:
+6. Run the standard command line tool again, this time specifying the parameters as above:
 ```shell
 protein_inference_cli.py \
 -t /path/to/target/file.txt \
@@ -88,7 +147,7 @@ protein_inference_cli.py \
 -y /path/to/params.yaml
 ```
 
-8. Running with docker
+7. Running with docker
 	- Either Pull the image from docker hub:
 		- `docker pull hinklet/pyproteininference:latest`
 	- Or Build the image with the following command (After having cloned the repository):
@@ -97,14 +156,39 @@ protein_inference_cli.py \
 		- `docker build -t pyproteininference:latest .`
 	- Run the tool, making sure to volume mount in the directory with your input data and parameters. In the case below, that local directory would be `/path/to/local/directory` and the path in the container is `/data`
 	  ```shell
-			docker run -v /path/to/local/directory/:/data \
-			-it hinklet/pyproteininference:latest \
-			python /usr/local/bin/protein_inference_cli.py \
-			-f /data/input_file.txt \
-			-db /data/database.fasta \
-			-y /data/parameters.yaml \
-			-o /data/
+	  docker run -v /path/to/local/directory/:/data \
+	  -it hinklet/pyproteininference:latest \
+	  python /usr/local/bin/protein_inference_cli.py \
+	  -f /data/input_file.txt \
+	  -db /data/database.fasta \
+	  -y /data/parameters.yaml \
+	  -o /data/
 	  ```
+
+## Building the Bundled Application Package using PyInstaller
+_Note: This is only necessary if you want to build the application package yourself. The package is already available on
+PyPi and can be installed using pip, or bundled executables can be downloaded from the releases page on 
+GitHub (https://thinkle12.github.io/pyproteininference/)._
+
+1. After cloning the source code repository, create a new Python virtual environment under the project directory:
+```shell
+python -m venv venv
+```
+2. Activate the virtual environment:
+```shell
+source venv/bin/activate
+```
+3. Install the required packages:
+```shell
+pip install -r requirements.txt pyinstaller==6.11.1
+```
+4. Run the PyInstaller command to build the executable:
+```shell
+pyinstaller pyProteinInference.spec
+```
+5. The executable will be located in the `dist` directory.
+
+
 
 ## Documentation
 For more information please see the full package documentation (https://thinkle12.github.io/pyproteininference/).

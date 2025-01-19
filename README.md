@@ -33,7 +33,7 @@
 pip install pyproteininference
 ```
 
-### Running the commandline tool
+### Running the command line tool
 
 To run the CLI tool either call `protein_inference_cli.py` like so:
 ```shell
@@ -92,7 +92,7 @@ When launching the GUI's from the executables please wait until for the user int
 
 ## More Options for calling the CLI
 
-1. Run the standard commandline from an idXML file 
+1. Run the standard command line from an idXML file 
 ```shell
 protein_inference_cli.py \
 -f /path/to/target/file.idXML \
@@ -100,7 +100,7 @@ protein_inference_cli.py \
 -y /path/to/params.yaml
 ```
    
-2. Run the standard commandline from an mzIdentML file 
+2. Run the standard command line from an mzIdentML file 
 ```shell
 protein_inference_cli.py \
 -f /path/to/target/file.mzid \
@@ -108,7 +108,7 @@ protein_inference_cli.py \
 -y /path/to/params.yaml
 ```
    
-3. Run the standard commandline from a pepXML file 
+3. Run the standard command line from a pepXML file 
 ```shell
 protein_inference_cli.py \
 -f /path/to/target/file.pep.xml \
@@ -116,7 +116,7 @@ protein_inference_cli.py \
 -y /path/to/params.yaml
 ```
 
-4. Run the standard commandline tool with tab delimited results directly from percolator to run a particular inference method. By default, peptide centric inference is selected if a parameter file is not specified:
+4. Run the standard command line tool with tab delimited results directly from percolator to run a particular inference method. By default, peptide centric inference is selected if a parameter file is not specified:
 ```shell
 protein_inference_cli.py \
 -t /path/to/target/file.txt \
@@ -138,7 +138,7 @@ The inference type can be one of: `parsimony`, `peptide_centric`, `inclusion`, `
 All parameters are optional, so you only need to define the ones you want to alter. Parameters that are not defined are set to default values.
 See the package documentation for the default parameters.
 
-6. Run the standard commandline tool again, this time specifying the parameters as above:
+6. Run the standard command line tool again, this time specifying the parameters as above:
 ```shell
 protein_inference_cli.py \
 -t /path/to/target/file.txt \

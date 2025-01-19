@@ -85,7 +85,7 @@ And then call the script while also calling the pyton interpreter as shown above
 
 ### Executables
 
-You can also install executbles for the GUI for both Windows and MacOS on the releases page on github:
+You can also download standalone executable applications of the GUI for both Windows and MacOS on the releases page on github:
 https://github.com/thinkle12/pyproteininference/releases
 
 When launching the GUI's from the executables please wait until for the user interface to pop up. It usually takes a minute or so.

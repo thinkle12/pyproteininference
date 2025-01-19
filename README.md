@@ -90,7 +90,7 @@ https://github.com/thinkle12/pyproteininference/releases
 
 When launching the GUI's from the executables please wait until for the user interface to pop up. It usually takes a minute or so.
 
-## Full Options for calling the CLI
+## More Options for calling the CLI
 
 1. Run the standard commandline from an idXML file 
 ```shell
